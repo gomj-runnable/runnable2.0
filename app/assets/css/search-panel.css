@@ -1,0 +1,268 @@
+/* ── 패널 레이아웃 ── */
+#search-panel {
+  position: absolute;
+  top: var(--header-height);
+  left: 0;
+  width: var(--panel-width);
+  max-width: var(--panel-width);
+  height: calc(100% - var(--header-height));
+  z-index: var(--z-panel);
+  transition: transform var(--transition);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  background-color: var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+#search-panel.collapsed {
+  transform: translateX(calc(-1 * var(--panel-width)));
+}
+
+#search-panel-toggle {
+  position: absolute;
+  top: 80px;
+  right: calc(-1 * var(--toggle-short));
+  width: var(--toggle-short);
+  height: var(--toggle-long);
+  background-color: var(--primary-color);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: none;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#search-panel-toggle::after {
+  content: '◀';
+  color: var(--icon-color);
+  font-size: 10px;
+  transition: transform var(--transition);
+}
+
+#search-panel.collapsed #search-panel-toggle::after {
+  transform: rotate(180deg);
+}
+
+/* ── 헤더 ── */
+.panel-header {
+  flex-shrink: 0;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── 본문 ── */
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-body::-webkit-scrollbar {
+  width: 3px;
+}
+.panel-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.panel-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+/* ── 검색 입력 영역 ── */
+.search-section {
+  padding: 12px 12px 0;
+  flex-shrink: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.filter-group-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.input.sm {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+.input:focus {
+  border-color: var(--btn-primary-bg);
+}
+
+.filter-select {
+  width: 100%;
+  height: 32px;
+  padding: 0 28px 0 10px;
+  box-sizing: border-box;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color var(--transition);
+}
+
+.filter-select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.filter-select:focus {
+  border-color: var(--btn-primary-bg);
+}
+.filter-select:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.filter-select option {
+  background: #1e2530;
+  color: var(--text-primary);
+}
+
+/* ── 버튼 행 ── */
+.action-row {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 12px;
+  flex-shrink: 0;
+}
+
+.btn {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.btn.sm {
+  height: 30px;
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--btn-primary-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-secondary);
+}
+.btn-outline:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* ── 결과 목록 ── */
+.result-list {
+  flex: 1;
+}
+
+/* ── 트리 ── */
+.tree-list {
+  --tree-font-size: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree-list .tree-list {
+  --tree-font-size: calc(var(--tree-font-size) - 0.1rem);
+  padding-left: 16px;
+  border-left: 1px solid var(--border-subtle);
+  margin-left: 8px;
+}
+
+.tree-list li {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tree-list li span[data-node-id] {
+  display: block;
+  padding: 5px 12px;
+  font-size: var(--tree-font-size);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.tree-list li span[data-node-id]:hover {
+  background: var(--surface-hover);
+}
+
+.tree-list details > summary {
+  padding: 5px 12px;
+  font-size: var(--tree-font-size);
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tree-list details > summary::before {
+  content: '▶';
+  font-size: 8px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.tree-list details[open] > summary::before {
+  transform: rotate(90deg);
+}
