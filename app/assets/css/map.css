@@ -1,0 +1,126 @@
+/* =============================================
+   CSS 변수 & 전역 리셋
+   ============================================= */
+:root {
+    --primary-color: rgba(19, 20, 22, 0.8);
+    --secondary-color: rgba(19, 20, 22, 0.3);
+    --header-bg: rgba(30, 33, 36, 1);
+    --icon-color: rgba(0, 0, 0, 0.5);
+
+    --header-height: 48px;
+    --panel-width: 310px;
+    --slider-height: 128px;
+    --toggle-short: 28px;
+    --toggle-long: 56px;
+
+    --z-panel: 10;
+    --z-header: 11;
+
+    --blur: blur(4px);
+    --transition: 0.3s ease;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+
+    /* search panel 색상 (SearchPanel unscoped에서 참조) */
+    --text-primary: #e8ebed;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --surface-hover: rgba(255, 255, 255, 0.05);
+    --surface-active: rgba(255, 255, 255, 0.09);
+    --surface-inset: rgba(0, 0, 0, 0.25);
+    --btn-primary-bg: #3b82f6;
+    --btn-primary-hover: #2563eb;
+    --sub-item-bg: rgba(255, 255, 255, 0.06);
+    --sub-item-hover: rgba(255, 255, 255, 0.12);
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* =============================================
+   헤더
+   ============================================= */
+#info-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    z-index: var(--z-header);
+    background-color: var(--secondary-color);
+}
+
+/* =============================================
+   지도 컨테이너
+   ============================================= */
+#map-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+}
+
+#map {
+    position: absolute;
+    inset: 0;
+}
+
+/* =============================================
+   POI 마커 — Cesium이 DOM에 직접 주입하므로 반드시 전역
+   ============================================= */
+.icon-poi-wrap {
+    font-size: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.poi-label {
+    max-width: 160px;
+    text-align: center;
+    font-weight: 700;
+    color: #fff;
+    -webkit-text-stroke: 1px #000;
+    paint-order: stroke fill;
+    line-height: 1.35;
+    white-space: normal;
+    word-break: keep-all;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+.icon-poi-wrap img {
+    content: url('/static/icons/ico_facility.svg');
+    width: 28px;
+    height: 28px;
+}
+
+.icon-poi-wrap.highlight-poi {
+    display: flex !important;
+    font-size: 14px;
+}
+
+.icon-poi-wrap.highlight-poi img {
+    content: url('/static/icons/ico_facility-active.svg');
+    width: 32px;
+    height: 32px;
+}
+
+.hide-poi {
+    display: none !important;
+}

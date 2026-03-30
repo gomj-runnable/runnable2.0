@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# 의존성
+node_modules
+
+# Nuxt 빌드 산출물
+.nuxt
+.output
+.cache
+
+# 개발 환경 파일
+.env
+.env.*
+!.env.example
+
+# 로그
+logs
+*.log
+
+# 백업
+backups
+
+# 에디터
+.idea
+.vscode
+*.swp
+
+# OS
+.DS_Store
+
+# 테스트
+coverage
+
+# Docker 파일 자체
+Dockerfile*
+docker-compose*
+deploy.sh
+nginx

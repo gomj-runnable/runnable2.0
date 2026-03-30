@@ -1,0 +1,61 @@
+{
+  "name": "yb-church",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "typecheck": "nuxt typecheck",
+    "seed": "tsx server/database/seed.ts"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.87",
+    "@iconify-json/simple-icons": "^1.2.68",
+    "@nuxt/ui": "^4.4.0",
+    "@tiptap/core": "^3.19.0",
+    "@tiptap/extension-image": "^3.19.0",
+    "@tiptap/extension-link": "^3.19.0",
+    "@tiptap/extension-text-align": "^3.19.0",
+    "@tiptap/extension-underline": "^3.19.0",
+    "@tiptap/html": "^3.19.0",
+    "@tiptap/pm": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
+    "@tiptap/vue-3": "^3.19.0",
+    "auth-client": "^0.4.11",
+    "bcryptjs": "^3.0.3",
+    "better-auth": "^1.4.18",
+    "drizzle-orm": "^0.45.1",
+    "lib": "link:@/lib",
+    "nuxt": "^4.3.0",
+    "pg": "^8.18.0",
+    "tailwindcss": "^4.1.18",
+    "vue-dompurify-html": "^5.3.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.13.0",
+    "@nuxt/eslint-config": "^1.13.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^25.2.0",
+    "@types/pg": "^8.16.0",
+    "dotenv": "^17.2.4",
+    "drizzle-kit": "^0.31.8",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.4"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "pnpm": {
+    "onlyBuiltDependencies": ["@parcel/watcher", "esbuild", "unrs-resolver", "vue-demi"]
+  }
+}
