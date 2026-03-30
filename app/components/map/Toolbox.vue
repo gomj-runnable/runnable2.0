@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useMeasure } from '~/composables/useMeasure'
+
 const { activeModal, featureInfo, damagedFacilities } = useMapInteraction()
 const {
   activeTab,
@@ -166,11 +168,7 @@ function toggleModal(name: 'measure' | 'damage' | 'feature') {
                 </div>
               </section>
               <!-- 면적 -->
-              <section
-                class="tab-conts"
-                :class="{ active: activeTab === 'area' }"
-                role="tabpanel"
-              >
+              <section class="tab-conts" :class="{ active: activeTab === 'area' }" role="tabpanel">
                 <h3 class="sr-only">면적</h3>
                 <div class="box-area type3">
                   <div class="box-inner gap-4">
@@ -359,4 +357,3 @@ function toggleModal(name: 'measure' | 'damage' | 'feature') {
     </div>
   </section>
 </template>
-

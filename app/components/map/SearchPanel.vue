@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BaseNode } from '#shared/types/theme-map'
+import { useThemeMap } from '~/composables/useThemeMap'
 
 const emit = defineEmits<{ nodeClick: [node: BaseNode] }>()
 
@@ -35,8 +36,7 @@ const filteredTree = computed(() => {
       children = children.map((f) => ({
         ...f,
         children: (f.children ?? []).filter(
-          (fac) =>
-            fac.name.includes(keyword.value.trim()) || fac.id.includes(keyword.value.trim())
+          (fac) => fac.name.includes(keyword.value.trim()) || fac.id.includes(keyword.value.trim())
         )
       }))
     }
@@ -100,4 +100,3 @@ watch(selectedStation, () => {
     </div>
   </div>
 </template>
-

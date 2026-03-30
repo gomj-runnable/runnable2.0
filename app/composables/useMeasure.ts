@@ -46,12 +46,8 @@ export const useMeasure = () => {
     convertDistance(measureState.value.distance, distanceUnit.value)
   )
   const areaDisplay = computed(() => convertArea(measureState.value.area, areaUnit.value))
-  const heightDisplay = computed(() =>
-    convertDistance(measureState.value.height, heightUnit.value)
-  )
-  const radiusDisplay = computed(() =>
-    convertDistance(measureState.value.radius, radiusUnit.value)
-  )
+  const heightDisplay = computed(() => convertDistance(measureState.value.height, heightUnit.value))
+  const radiusDisplay = computed(() => convertDistance(measureState.value.radius, radiusUnit.value))
 
   function clearMeasure() {
     const entities = window.viewer.entities.values
@@ -60,7 +56,7 @@ export const useMeasure = () => {
     }
     try {
       window.viewer._cancelDrawAction?.()
-    } catch {}
+    } catch { /* empty */ }
     measureState.value = { distance: 0, area: 0, height: 0, radius: 0 }
   }
 
