@@ -62,4 +62,3 @@ onMounted(() => {
     <img v-if="viewerSrc" :src="viewerSrc" alt="" />
   </div>
 </template>
-

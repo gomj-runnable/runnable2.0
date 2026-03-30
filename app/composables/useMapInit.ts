@@ -145,7 +145,7 @@ export const useMapInit = () => {
     const geom = node?.attribute?.geom
     if (!geom || typeof geom === 'string') return
     const coords = (geom as GeoJsonPolygon).coordinates[0]
-    const positions = coords.map(([lon, lat, alt]) =>
+    const positions = coords?.map(([lon, lat, alt]) =>
       window.Cesium.Cartesian3.fromDegrees(lon, lat, alt ?? 0)
     )
     const bs = window.Cesium.BoundingSphere.fromPoints(positions)
