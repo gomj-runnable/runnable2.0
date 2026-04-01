@@ -69,7 +69,7 @@ load_env_var() {
 if [ "$ROLLBACK" = true ]; then
   section "롤백 실행"
 
-  if ! docker image inspect "${IMAGE_NAME}:previous" &>/dev/null; then
+  if ! docker images inspect "${IMAGE_NAME}:previous" &>/dev/null; then
     error "롤백할 이전 이미지(${IMAGE_NAME}:previous)가 없습니다."
   fi
 
@@ -158,7 +158,7 @@ section "이미지 빌드 준비"
 CURRENT_IMAGE=$(docker compose -f "$COMPOSE_FILE" images "$APP_SERVICE" --format json 2>/dev/null \
   | grep -o '"Image":"[^"]*"' | head -1 | cut -d'"' -f4) || true
 
-if [ -n "$CURRENT_IMAGE" ] && docker image inspect "$CURRENT_IMAGE" &>/dev/null 2>&1; then
+if [ -n "$CURRENT_IMAGE" ] && docker images inspect "$CURRENT_IMAGE" &>/dev/null 2>&1; then
   docker tag "$CURRENT_IMAGE" "${IMAGE_NAME}:previous" 2>/dev/null || true
   log "이전 이미지를 '${IMAGE_NAME}:previous' 태그로 보존"
 else
@@ -264,7 +264,7 @@ fi
 section "정리"
 
 # 댕글링 이미지 (태그 없는 이미지) 삭제
-docker image prune -f
+docker images prune -f
 # 빌드 캐시 2GB 초과분 삭제 (25GB NVMe 기준)
 docker builder prune -f --keep-storage 2gb
 log "이미지 및 빌드 캐시 정리 완료"

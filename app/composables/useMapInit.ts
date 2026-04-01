@@ -42,7 +42,7 @@ export const useMapInit = () => {
           credit: 'Arcgis',
           type: 'TMS',
           epsg: 'EPSG:3857',
-          url: '/proxy/MapPrimeServer/map/wmts?layer=Outer_image_BASEMAP_AIREX_WM&tilematrixset=OSM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fwebp&TileMatrix={z}&TileCol={x}&TileRow={y}',
+          url: '/proxy/MapPrimeServer/map/wmts?layer=Outer_image_BASEMAP_AIREX_WM&tilematrixset=OSM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=images%2Fwebp&TileMatrix={z}&TileCol={x}&TileRow={y}',
           format: 'jpeg',
           maximumLevel: 18,
           current: true
