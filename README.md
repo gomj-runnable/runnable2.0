@@ -1,133 +1,96 @@
-# 인천 영복교회 웹사이트 리뉴얼
+# Runnable
 
-인천 영복교회 리뉴얼 프로젝트를 위한 풀스택 개발 환경이다. Nuxt 4와 Drizzle ORM을 기반으로 구축한다.
+러닝 경로 제작 서비스를 위한 풀스택 프로젝트다.
+프론트엔드는 Vue 기반 Nuxt 앱으로 구성되고, 백엔드는 같은 저장소의 Nuxt server 레이어에서 동작한다.
 
-## 📋 사전 요구 사항
+## 목적
 
-프로젝트 실행을 위해 아래 도구가 반드시 설치되어 있어야 한다.
+이 프로젝트는 지도 기반으로 러닝 경로를 설계하고, 경로 제작에 필요한 데이터와 UI를 함께 제공하는 것을 목표로 한다.
+프론트엔드와 백엔드가 같은 저장소에서 협업하며, 공통 도메인 정의는 `shared/`에 모은다.
 
-* **Node.js**: 24.x 이상 버전
-* **Package Manager**: pnpm 10.28.2 (`packageManager` 필드에 고정, **npm/yarn 사용 금지**)
-* **Docker**: 로컬 PostgreSQL 데이터베이스 실행용
+## 디렉터리 구조
 
-## 🛠️ 설치 및 시작 방법
+### Front-end
 
-### 0. pnpm 활성화 (pnpm 없는 경우 최초 1회 실행)
+- `app/` : 프론트엔드 루트
+- `app/assets/css/` : 전역 CSS와 UI 스타일
+- `app/assets/images/` : 이미지 자산
+- `app/assets/icons/` : 아이콘 자산
+- `app/components/` : 컴포넌트 단위 UI 구현
+- `app/components/<page>/` : 페이지별 하위 패키지
+- `app/components/<page>/molecules/` : atomic design 기준의 조합형 컴포넌트
+- `app/components/<page>/templates/` : 페이지 템플릿 단위 컴포넌트
+- `app/composables/` : 상태 관리, 자료 구성, 사이드 이펙트 처리
+- `app/layouts/` : 공통 레이아웃
+- `app/pages/` : 실제 웹 페이지
 
-Node.js에 내장된 `corepack`을 사용하여 별도의 설치 과정 없이 `pnpm`을 활성화한다.
+### Back-end
+
+- `server/` : 백엔드 루트
+- `server/api/` : API 엔드포인트
+- `server/routes/` : Nitro route 핸들러
+- `server/database/` : DB 스키마와 시드
+- `server/utils/` : 인증, DB, 에러 유틸리티
+
+### Shared
+
+- `shared/` : 프론트엔드와 백엔드 공용 코드
+- `shared/constants/` : 상수 정의
+- `shared/data/` : sample-data 함수
+- `shared/schemas/` : 데이터베이스 스키마 정의 (여기서 정의된 값은 type, class로써도 적용된다)
+- `shared/types/` : 도메인 타입 정의
+
+### 기타
+
+- `lib/` : 외부 라이브러리 보관 패키지
+- `public/` : 요구사항 정의서, 참고 이미지 등 정적 자료
+
+## 기술 스택
+
+- Nuxt 4
+- Vue 3
+- TypeScript
+- Tailwind CSS v4
+- Nuxt UI v4
+- Drizzle ORM
+- PostgreSQL
+- better-auth
+
+## 개발 환경
+
+- Node.js 24.x 이상
+- pnpm 10.28.2
+- Docker
+
+## 시작 방법
 
 ```bash
 corepack enable
 corepack prepare pnpm@10.28.2 --activate
-```
-
-### 1. 환경 설정
-
-`.env.example` 파일을 복사하여 `.env` 파일을 생성하고, 필요한 값을 입력한다.
-
-```bash
 cp .env.example .env
-```
-
-`.env`에서 설정해야 할 주요 환경 변수:
-
-| 변수명                | 설명                                   | 예시                                                           |
-|-----------------------|----------------------------------------|----------------------------------------------------------------|
-| `POSTGRES_USER`       | DB 사용자 이름                         | `admin`                                                        |
-| `POSTGRES_PASSWORD`   | DB 비밀번호                            | `church_pass_1234`                                             |
-| `POSTGRES_DB`         | DB 이름                                | `yb_church_db`                                                 |
-| `DATABASE_URL`        | DB 연결 문자열 (로컬: `localhost:6432`) | `postgres://admin:church_pass_1234@localhost:6432/yb_church_db` |
-| `BETTER_AUTH_SECRET`  | 인증 서명용 비밀 키 (32자 이상 권장)   | `ztPmfsX7cVBvWp4afs9Q...`                                      |
-| `BETTER_AUTH_URL`     | 앱의 Base URL                          | `http://localhost:3000`                                        |
-
-### 2. 패키지 설치
-
-```bash
 pnpm install
-```
-
-### 3. 데이터베이스 실행
-
-Docker를 사용하여 PostgreSQL 컨테이너를 백그라운드에서 실행한다.
-
-> 로컬 개발 시에는 `db` 서비스만 실행한다. 포트는 `6432`(호스트) → `5432`(컨테이너)로 매핑된다.
-
-```bash
 docker-compose up -d db
+pnpm dev
 ```
 
-### 4. DB 스키마 동기화
-
-Drizzle 스키마 정의를 실제 데이터베이스 테이블에 즉시 반영한다.
+필요 시 데이터베이스 스키마를 반영한다.
 
 ```bash
 pnpm drizzle-kit push
 ```
 
-### 5. (선택) 시드 데이터 삽입
-
-초기 데이터가 필요한 경우 시드 스크립트를 실행한다.
+시드 데이터가 필요하면 아래 명령을 사용한다.
 
 ```bash
 pnpm seed
 ```
 
-### 6. 개발 서버 실행
+## 주요 스크립트
 
-```bash
-pnpm dev
-```
-
-서버 실행 후 **[http://localhost:3000](http://localhost:3000)**에 접속하여 화면을 확인한다.
-
-## 🐳 프로덕션 배포 (Docker)
-
-프로덕션 환경은 Nuxt 빌드 결과물(`.output`)을 담은 Docker 이미지를 사전에 빌드해야 한다.
-
-### 1. Nuxt 빌드
-
-```bash
-pnpm build
-```
-
-### 2. Docker 이미지 빌드
-
-`Dockerfile`은 `.output` 디렉터리만 복사하여 `node:20-slim` 기반 이미지를 생성한다.
-
-```bash
-docker build -t runnable-app:latest .
-```
-
-### 3. 전체 스택 실행
-
-`app` + `db` 서비스를 함께 구동한다.
-
-```bash
-docker-compose up -d
-```
-
-* DB: `yb_church_db` 컨테이너 (PostgreSQL 17 Alpine, `Asia/Seoul` 타임존)
-* App: `runnable_app` 컨테이너 (포트 `3000` 노출)
-* 업로드 파일: `./uploads` 볼륨으로 호스트에 마운트
-
-## 🔍 데이터 확인
-
-### Drizzle Studio (GUI)
-
-데이터베이스 내부 데이터를 브라우저에서 시각적으로 관리하려면 아래 명령어를 사용한다.
-
-```bash
-pnpm drizzle-kit studio
-```
-
-## 🛠 주요 기술 스택
-
-* **Framework**: Nuxt 4
-* **Build Tool**: Vite
-* **Styling**: Tailwind CSS v4
-* **UI Library**: Nuxt UI v4
-* **Language**: TypeScript
-* **ORM**: Drizzle ORM
-* **Database**: PostgreSQL 17 (Docker)
-* **Auth**: better-auth v1
-* **Editor**: Tiptap v3
+- `pnpm dev` : 개발 서버 실행
+- `pnpm build` : 프로덕션 빌드
+- `pnpm preview` : 빌드 결과 미리보기
+- `pnpm lint` : ESLint 실행
+- `pnpm lint:fix` : ESLint 자동 수정
+- `pnpm typecheck` : Nuxt 타입 검사
+- `pnpm seed` : 시드 데이터 입력
