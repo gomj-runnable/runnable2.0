@@ -11,3 +11,10 @@ export const createUserSchema = z.object({
 })
 
 export type CreateUserSchema = z.infer<typeof createUserSchema>
+/** BetterAuth additionalFields 외 러너 도메인 추가 필드 */
+export const userRunnerFieldsSchema = z.object({
+    age: z.number().int().nonnegative().optional(),
+    runnerSince: z.iso.datetime().optional(),
+    paceAverage: z.number().int().nonnegative().optional(),
+    isDeleted: z.enum(['Y', 'N']).default('N')
+})
