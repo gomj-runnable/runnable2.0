@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# deploy.sh — 영복교회 웹사이트 운영 배포 스크립트
+# deploy.sh — Runnable 운영 배포 스크립트
 #
 # 사용법:
 #   ./deploy.sh              # 전체 배포 (기본)
@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # --- 동시 배포 방지 ---
-LOCK_FILE="/tmp/yb_church_deploy.lock"
+LOCK_FILE="/tmp/runnable_deploy.lock"
 exec 200>"$LOCK_FILE"
 flock -n 200 || { echo "❌ 다른 배포가 진행 중입니다."; exit 1; }
 
@@ -46,7 +46,7 @@ done
 # --- 기본 설정 ---
 COMPOSE_FILE="docker-compose.yml"
 APP_SERVICE="app"
-IMAGE_NAME="yb-church-app"
+IMAGE_NAME="runnable-app"
 BACKUP_DIR="./backups"
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
 
@@ -125,7 +125,7 @@ section "데이터베이스 백업"
 
 if docker compose -f "$COMPOSE_FILE" ps db 2>/dev/null | grep -q "running"; then
   mkdir -p "$BACKUP_DIR"
-  BACKUP_FILE="$BACKUP_DIR/yb_church_db_${TIMESTAMP}.sql.gz"
+  BACKUP_FILE="$BACKUP_DIR/runnable_db_${TIMESTAMP}.sql.gz"
 
   warn "DB 백업 시작..."
   docker compose -f "$COMPOSE_FILE" exec -T db pg_dump \
@@ -201,7 +201,7 @@ section "DB 스키마 동기화"
 
 warn "drizzle-kit push 실행 중..."
 docker run --rm \
-  --network yb_church_network \
+  --network runnable_network \
   -e DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}" \
   -v "$(pwd)":/workspace \
   -w /workspace \
