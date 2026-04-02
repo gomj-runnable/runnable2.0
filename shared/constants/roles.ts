@@ -7,6 +7,6 @@
  */
 
 export const ROLES = {
-  MEMBER: 1,
-  ADMIN: 10
+    MEMBER: 1,
+    ADMIN: 10
 } as const
