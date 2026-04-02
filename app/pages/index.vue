@@ -20,5 +20,29 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div id="map" />
+    <MapShell>
+        <template #sidebar>
+            <MapSidebar>
+                <template #header>
+                    <SidebarLogo icon="i-lucide-map-pin" label="Runnable" />
+                    <div style="display: flex; gap: 2px;">
+                        <SidebarIconButton icon="i-lucide-search" label="경로 검색" />
+                        <SidebarIconButton icon="i-lucide-list" label="경로 목록" />
+                    </div>
+                </template>
+
+                <template #default>
+                    <SidebarActionButton icon="i-lucide-plus" @click="() => {}">
+                        새 경로
+                    </SidebarActionButton>
+                </template>
+
+                <template #footer>
+                    <SidebarUserProfile @click="() => {}" />
+                </template>
+            </MapSidebar>
+        </template>
+
+        <div id="map" />
+    </MapShell>
 </template>
