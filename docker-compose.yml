@@ -2,7 +2,7 @@ services:
 
   db:
     image: postgres:17-alpine
-    container_name: yb_church_db
+    container_name: runnable_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

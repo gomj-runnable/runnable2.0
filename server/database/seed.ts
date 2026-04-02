@@ -10,8 +10,8 @@ async function seed() {
 
   const ADMIN_ID = 'admin_master_01'
   const adminData = {
-    email: 'admin@youngbok.co.kr',
-    password: '!ybmc2242',
+    email: 'admin@runnable.local',
+    password: '!runnable2242',
     name: '최고관리자'
   }
 
