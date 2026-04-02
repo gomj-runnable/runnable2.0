@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Facility marker">
+  <path
+    d="M16 3c-5.247 0-9.5 4.253-9.5 9.5 0 7.123 7.71 14.657 8.038 14.974a2.1 2.1 0 0 0 2.924 0c.328-.317 8.038-7.851 8.038-14.974C25.5 7.253 21.247 3 16 3Z"
+    fill="#f5f7fa"
+    stroke="#111827"
+    stroke-width="1.8"
+  />
+  <circle cx="16" cy="12.5" r="3.5" fill="#111827" />
+</svg>
