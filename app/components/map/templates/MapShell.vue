@@ -24,7 +24,11 @@ defineProps<{
         </aside>
 
         <div class="map-shell__viewer">
-            <slot />
+            <section class="map-shell__chatbot-layout">
+                <div id="map-wrapper" class="map-shell__chatbot-body">
+                    <slot />
+                </div>
+            </section>
 
             <div v-if="$slots.overlay" class="map-shell__overlay">
                 <slot name="overlay" />
@@ -36,8 +40,10 @@ defineProps<{
 <style scoped>
 .map-shell {
     display: flex;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100vw;
+    min-height: 100vh;
 }
 
 .map-shell__sidebar {
@@ -50,6 +56,36 @@ defineProps<{
     position: relative;
     flex: 1;
     overflow: hidden;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+.map-shell__chatbot-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+}
+
+.map-shell__chatbot-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#map-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+}
+
+#map {
+    position: absolute;
+    inset: 0;
+    height: 100vh;
+    width: 100vw;
 }
 
 .map-shell__overlay {

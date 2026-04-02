@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { themeMapSample } from '#shared/data/theme-map-sample'
-import { mapPrimeAction } from '~/composables/action/mapPrimeAction'
+import MapShell from '~/components/map/templates/MapShell.vue'
+import MapSidebar from '~/components/map/templates/MapSidebar.vue'
+import SidebarActionButton from '~/components/map/molecules/SidebarActionButton.vue'
+import SidebarIconButton from '~/components/map/molecules/SidebarIconButton.vue'
+import SidebarLogo from '~/components/map/molecules/SidebarLogo.vue'
+import SidebarUserProfile from '~/components/map/molecules/SidebarUserProfile.vue'
 
 definePageMeta({ ssr: false, layout: 'map' })
 
@@ -9,13 +13,9 @@ useHead({
 })
 
 const { init } = useMapInit()
-const { setThemeMap, flattenNodes } = useThemeMap()
-const { drawPois } = mapPrimeAction()
 
 onMounted(async () => {
     await init()
-    setThemeMap(themeMapSample)
-    drawPois(flattenNodes(themeMapSample.data.children))
 })
 </script>
 
@@ -25,7 +25,7 @@ onMounted(async () => {
             <MapSidebar>
                 <template #header>
                     <SidebarLogo icon="i-lucide-map-pin" label="Runnable" />
-                    <div style="display: flex; gap: 2px;">
+                    <div style="display: flex; gap: 2px">
                         <SidebarIconButton icon="i-lucide-search" label="경로 검색" />
                         <SidebarIconButton icon="i-lucide-list" label="경로 목록" />
                     </div>
