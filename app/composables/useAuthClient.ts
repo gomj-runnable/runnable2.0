@@ -9,5 +9,5 @@ const authClient = createAuthClient()
  * 전역 getter 정의
  */
 export function useAuthClient() {
-  return authClient
+    return authClient
 }

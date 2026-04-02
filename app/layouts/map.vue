@@ -1,7 +1,7 @@
 <template>
-  <div id="map-wrapper">
-    <slot />
-  </div>
+    <div id="map-wrapper">
+        <slot />
+    </div>
 </template>
 
 <style>
