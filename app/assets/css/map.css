@@ -21,6 +21,15 @@
     --radius-sm: 6px;
     --radius-md: 8px;
 
+    /* 사이드바 */
+    --sidebar-width: 132px;
+    --sidebar-bg: #0d0d0d;
+    --sidebar-border: rgba(255, 255, 255, 0.06);
+    --sidebar-icon-color: rgba(255, 255, 255, 0.45);
+    --sidebar-icon-hover: rgba(255, 255, 255, 0.85);
+    --sidebar-item-hover: rgba(255, 255, 255, 0.05);
+    --sidebar-item-active: rgba(255, 255, 255, 0.09);
+
     /* search panel 색상 (SearchPanel unscoped에서 참조) */
     --text-primary: #e8ebed;
     --text-secondary: #9ca3af;
@@ -41,19 +50,6 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-}
-
-/* =============================================
-   헤더
-   ============================================= */
-#info-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--header-height);
-    z-index: var(--z-header);
-    background-color: var(--secondary-color);
 }
 
 /* =============================================
@@ -105,7 +101,7 @@ html, body {
 }
 
 .icon-poi-wrap img {
-    content: url('/static/icons/ico_facility.svg');
+    content: url('/icons/ico_facility.svg');
     width: 28px;
     height: 28px;
 }
@@ -116,7 +112,7 @@ html, body {
 }
 
 .icon-poi-wrap.highlight-poi img {
-    content: url('/static/icons/ico_facility-active.svg');
+    content: url('/icons/ico_facility-active.svg');
     width: 32px;
     height: 32px;
 }
