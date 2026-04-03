@@ -49,6 +49,7 @@ defineProps<{
 .map-shell__sidebar {
     position: relative;
     z-index: var(--z-panel);
+    width: 240px;
     flex-shrink: 0;
 }
 
@@ -58,34 +59,49 @@ defineProps<{
     overflow: hidden;
     min-width: 0;
     min-height: 100vh;
+    padding: 16px 16px 16px 0;
+    box-sizing: border-box;
+}
+
+.map-shell__viewer::before {
+    content: '';
+    position: absolute;
+    inset: 16px 16px 16px 0;
+    z-index: var(--z-panel);
+    border: 4px solid rgba(255, 255, 255, 0.14);
+    border-radius: 24px;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 12px 40px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
 }
 
 .map-shell__chatbot-layout {
     position: relative;
     width: 100%;
-    height: 100%;
-    min-height: 100vh;
+    height: calc(100vh - 32px);
+    border-radius: 24px;
+    overflow: hidden;
 }
 
 .map-shell__chatbot-body {
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 100vh;
     overflow: hidden;
 }
 
 #map-wrapper {
     position: relative;
-    width: 100vw;
-    height: 100dvh;
+    width: 100%;
+    height: 100%;
 }
 
 #map {
     position: absolute;
     inset: 0;
-    height: 100vh;
-    width: 100vw;
+    width: 100%;
+    height: 100%;
 }
 
 .map-shell__overlay {
