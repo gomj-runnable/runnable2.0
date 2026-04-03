@@ -42,6 +42,10 @@
     --btn-primary-hover: #2563eb;
     --sub-item-bg: rgba(255, 255, 255, 0.06);
     --sub-item-hover: rgba(255, 255, 255, 0.12);
+
+    /* 네비게이션 탭 활성 상태 */
+    --nav-active-color: #4ade80;
+    --nav-active-bg: rgba(74, 222, 128, 0.12);
 }
 
 html, body {
