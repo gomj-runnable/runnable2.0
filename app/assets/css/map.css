@@ -66,6 +66,10 @@ html, body {
     inset: 0;
 }
 
+.map-view {
+    height: 100%;
+}
+
 /* =============================================
    POI 마커 — Cesium이 DOM에 직접 주입하므로 반드시 전역
    ============================================= */
@@ -101,7 +105,7 @@ html, body {
 }
 
 .icon-poi-wrap img {
-    content: url('/icons/ico_facility.svg');
+    content: url('/public/icons/ico_facility.svg');
     width: 28px;
     height: 28px;
 }
@@ -112,7 +116,7 @@ html, body {
 }
 
 .icon-poi-wrap.highlight-poi img {
-    content: url('/icons/ico_facility-active.svg');
+    content: url('/public/icons/ico_facility-active.svg');
     width: 32px;
     height: 32px;
 }

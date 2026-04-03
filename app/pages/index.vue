@@ -43,6 +43,6 @@ onMounted(async () => {
             </MapSidebar>
         </template>
 
-        <div id="map" />
+        <div id="map" class="map-view" />
     </MapShell>
 </template>
