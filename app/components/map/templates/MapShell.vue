@@ -12,15 +12,34 @@
  *     <template #overlay><MapToolbar /></template>
  *   </MapShell>
  */
-defineProps<{
+const props = withDefaults(defineProps<{
     hideSidebar?: boolean
-}>()
+}>(), {
+    hideSidebar: false
+})
+
+const isSidebarCollapsed = ref(false)
+
+const toggleSidebar = () => {
+    if (props.hideSidebar)
+        return
+
+    isSidebarCollapsed.value = !isSidebarCollapsed.value
+}
 </script>
 
 <template>
     <div class="map-shell">
-        <aside v-if="!hideSidebar" class="map-shell__sidebar">
-            <slot name="sidebar" />
+        <aside
+            v-if="!props.hideSidebar"
+            class="map-shell__sidebar"
+            :class="{ 'map-shell__sidebar--collapsed': isSidebarCollapsed }"
+        >
+            <slot
+                name="sidebar"
+                :collapsed="isSidebarCollapsed"
+                :toggleSidebar="toggleSidebar"
+            />
         </aside>
 
         <div class="map-shell__viewer">
@@ -51,6 +70,11 @@ defineProps<{
     z-index: var(--z-panel);
     width: 240px;
     flex-shrink: 0;
+    transition: width var(--transition);
+}
+
+.map-shell__sidebar--collapsed {
+    width: 64px;
 }
 
 .map-shell__viewer {
