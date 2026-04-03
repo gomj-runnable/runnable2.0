@@ -32,6 +32,10 @@ withDefaults(
             </slot>
         </header>
 
+        <div v-if="$slots.subheader" class="map-sidebar__subheader">
+            <slot name="subheader" />
+        </div>
+
         <div v-if="!collapsed" class="map-sidebar__body">
             <slot />
         </div>
@@ -84,6 +88,11 @@ withDefaults(
 .map-sidebar__body::-webkit-scrollbar-thumb {
     background: var(--sidebar-border);
     border-radius: 2px;
+}
+
+.map-sidebar__subheader {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--sidebar-border);
 }
 
 .map-sidebar__footer {

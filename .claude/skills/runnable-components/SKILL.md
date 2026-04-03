@@ -64,8 +64,10 @@ slot과 sub-component 조합으로 자유로운 커스텀이 가능한 인터페
 - `SidebarLogo.vue` — 브랜드 로고 (icon + label, 각각 slot으로 교체 가능)
 - `SidebarIconButton.vue` — 아이콘 전용 버튼 (active 상태, aria-label 필수)
 - `SidebarActionButton.vue` — CTA 버튼 (icon prop + default slot)
+- `SidebarTextButton.vue` — 텍스트 중심 버튼 (축소 상태에서는 icon + label 조합 가능)
 - `SidebarRouteItem.vue` — 경로 목록 아이템 (trailing slot으로 배지 추가 가능)
 - `SidebarUserProfile.vue` — 유저/로그인 영역 (image prop 또는 icon slot)
+- `RouteSearchInput.vue` — 사이드바/패널 공용 검색 입력 필드
 
 ### `app/components/<page>/templates/`
 
@@ -93,8 +95,43 @@ MapShell
 ```
 MapSidebar
 ├── #header     — 로고 + 아이콘 버튼 행
-├── #default    — 경로 목록, 액션 버튼 등 스크롤 영역
+├── #default    — 검색 패널, 경로 목록, 액션 버튼 등 스크롤 영역
 └── #footer     — 유저 프로필 / 로그인 영역
+```
+
+## 지도 사이드바 검색 패널 규칙
+
+- 검색창은 헤더 아이콘 버튼으로 두지 말고 `MapSidebar`의 `#default` 영역 상단 패널에 둔다
+- 헤더에는 브랜드 요소와 패널 열기/닫기 같은 전역 제어만 남긴다
+- 검색 패널 내부 액션은 `SidebarTextButton.vue` 같은 molecule로 분리한다
+- `"검색"`, `"목록"` 같은 액션은 페이지에서 배열 데이터로 선언하고 `v-for`로 렌더링해 추후 항목 추가가 쉽도록 유지한다
+- 펼침 상태에서는 텍스트 중심 버튼으로, 축소 상태에서는 icon + label 조합 버튼으로 표현을 바꾼다
+- 축소 상태에서도 검색 패널 액션은 유지되어야 하므로 `MapSidebar` 본문 슬롯 자체를 숨기지 말고, 각 하위 UI가 `collapsed`에 맞게 자체 렌더링한다
+- `"패널 열기" / "패널 닫기"` 토글은 헤더 기존 위치를 유지한다
+
+예시:
+
+```vue
+<script setup lang="ts">
+const sidebarTextButtons = [
+  { id: 'search', label: '검색', icon: 'i-lucide-search', active: true },
+  { id: 'list', label: '목록', icon: 'i-lucide-list', active: false }
+]
+</script>
+
+<template>
+  <section :class="{ collapsed }">
+    <RouteSearchInput v-if="!collapsed" v-model="searchQuery" placeholder="검색" />
+    <SidebarTextButton
+      v-for="item in sidebarTextButtons"
+      :key="item.id"
+      :label="item.label"
+      :icon="item.icon"
+      :active="item.active"
+      :show-icon="collapsed"
+    />
+  </section>
+</template>
 ```
 
 ## CSS 변수 (map.css 기준)
