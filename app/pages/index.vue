@@ -21,13 +21,28 @@ onMounted(async () => {
 
 <template>
     <MapShell>
-        <template #sidebar>
-            <MapSidebar>
+        <template #sidebar="{ collapsed, toggleSidebar }">
+            <MapSidebar :collapsed="collapsed">
                 <template #header>
-                    <SidebarLogo icon="i-lucide-map-pin" label="Runnable" />
-                    <div style="display: flex; gap: 2px">
-                        <SidebarIconButton icon="i-lucide-search" label="경로 검색" />
-                        <SidebarIconButton icon="i-lucide-list" label="경로 목록" />
+                    <SidebarLogo v-if="!collapsed" icon="i-lucide-map-pin" label="Runnable" />
+                    <div style="display: flex; gap: 2px; margin-left: auto">
+                        <SidebarIconButton
+                            v-if="!collapsed"
+                            icon="i-lucide-search"
+                            label="경로 검색"
+                        />
+                        <SidebarIconButton
+                            v-if="!collapsed"
+                            icon="i-lucide-list"
+                            label="경로 목록"
+                        />
+                        <SidebarIconButton
+                            :icon="
+                                collapsed ? 'i-lucide-panel-left-open' : 'i-lucide-panel-left-close'
+                            "
+                            :label="collapsed ? '패널 열기' : '패널 닫기'"
+                            @click="toggleSidebar"
+                        />
                     </div>
                 </template>
 

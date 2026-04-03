@@ -12,25 +12,31 @@
  *     <template #footer>...</template>
  *   </MapSidebar>
  */
-defineProps<{
-    logoIcon?: string
-    logoLabel?: string
-}>()
+withDefaults(
+    defineProps<{
+        logoIcon?: string
+        logoLabel?: string
+        collapsed?: boolean
+    }>(),
+    {
+        collapsed: false
+    }
+)
 </script>
 
 <template>
-    <div class="map-sidebar">
+    <div class="map-sidebar" :class="{ 'map-sidebar--collapsed': collapsed }">
         <header class="map-sidebar__header">
             <slot name="header">
                 <SidebarLogo :icon="logoIcon" :label="logoLabel" />
             </slot>
         </header>
 
-        <div class="map-sidebar__body">
+        <div v-if="!collapsed" class="map-sidebar__body">
             <slot />
         </div>
 
-        <footer class="map-sidebar__footer">
+        <footer v-if="!collapsed" class="map-sidebar__footer">
             <slot name="footer" />
         </footer>
     </div>
@@ -47,6 +53,10 @@ defineProps<{
     flex-shrink: 0;
 }
 
+.map-sidebar--collapsed {
+    align-items: stretch;
+}
+
 .map-sidebar__header {
     display: flex;
     align-items: center;
@@ -54,6 +64,7 @@ defineProps<{
     padding: 14px 10px 10px;
     gap: 6px;
     flex-shrink: 0;
+    min-height: 56px;
 }
 
 .map-sidebar__body {
