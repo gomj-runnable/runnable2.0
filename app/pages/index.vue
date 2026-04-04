@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import type {
-    DrawActionData,
-    MapPrimeEntity,
-    MapPrimeViewer
-} from '~/composables/useWindow'
+import type { DrawActionData, MapPrimeEntity, MapPrimeViewer } from '~/composables/useWindow'
 import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
 import MapShell from '~/components/map/templates/MapShell.vue'
