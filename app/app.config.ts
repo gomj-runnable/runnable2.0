@@ -1,8 +1,8 @@
 export default defineAppConfig({
   ui: {
     colors: {
-      primary: 'yellow',
-      neutral: 'zinc'
+      primary: 'sky',
+      neutral: 'slate'
     },
 
     input: {
@@ -20,7 +20,7 @@ export default defineAppConfig({
           color: 'white',
           variant: 'outline',
           class:
-            'bg-white/5 ring-1 ring-white/10 text-white placeholder:text-white/20 focus:ring-1 focus:ring-[#facc15] shadow-none'
+            'bg-[var(--color-surface-soft)] ring-1 ring-[var(--color-border-subtle)] text-[var(--color-text-inverse)] placeholder:text-[var(--color-text-inverse-28)] focus:ring-1 focus:ring-[var(--color-focus-ring-soft)] shadow-none'
         }
       ]
     },
@@ -40,34 +40,34 @@ export default defineAppConfig({
           color: 'white',
           variant: 'outline',
           class:
-            'bg-white/5 ring-1 ring-white/10 text-white placeholder:text-white/20 focus:ring-1 focus:ring-[#facc15] shadow-none'
+            'bg-[var(--color-surface-soft)] ring-1 ring-[var(--color-border-subtle)] text-[var(--color-text-inverse)] placeholder:text-[var(--color-text-inverse-28)] focus:ring-1 focus:ring-[var(--color-focus-ring-soft)] shadow-none'
         }
       ]
     },
 
     checkbox: {
       slots: {
-        base: 'border-white/20 bg-white/5 focus:ring-offset-black',
-        label: 'text-white/60 font-medium'
+        base: 'border-[var(--color-border-default)] bg-[var(--color-surface-soft)] focus:ring-offset-[var(--color-surface-overlay)]',
+        label: 'text-[var(--color-text-inverse-60)] font-medium'
       },
       compoundVariants: [
         {
           color: 'primary',
-          class: 'checked:bg-[#facc15] checked:border-[#facc15]'
+          class: 'checked:bg-[var(--color-brand-primary)] checked:border-[var(--color-brand-primary)]'
         }
       ]
     },
 
     modal: {
       slots: {
-        overlay: 'bg-black/80 transition-opacity',
-        content: 'bg-[#111] ring-1 ring-white/10 shadow-2xl sm:rounded-2xl',
+        overlay: 'bg-[var(--color-surface-overlay)] transition-opacity',
+        content: 'bg-[var(--color-surface-elevated)] ring-1 ring-[var(--color-border-subtle)] shadow-2xl sm:rounded-2xl',
         header: 'pb-0 sm:px-6 sm:pt-6',
         body: 'pt-4 sm:px-6 sm:pb-6',
         footer: 'pt-4 sm:px-6 sm:pb-6',
-        title: 'text-white font-bold text-lg',
-        description: 'text-white/60 mt-1',
-        close: 'text-white/40 hover:text-white hover:bg-white/10 top-4 right-4'
+        title: 'text-[var(--color-text-inverse)] font-bold text-lg',
+        description: 'text-[var(--color-text-inverse-60)] mt-1',
+        close: 'text-[var(--color-text-inverse-40)] hover:text-[var(--color-text-inverse)] hover:bg-[var(--color-surface-soft-hover)] top-4 right-4'
       }
     },
 

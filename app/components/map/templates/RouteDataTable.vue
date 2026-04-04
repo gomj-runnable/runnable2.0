@@ -52,7 +52,7 @@ defineProps<{
                 base: 'route-data-table__table',
                 thead: 'route-data-table__thead',
                 th: 'route-data-table__th',
-                td: 'route-data-table__td',
+                td: 'route-data-table__td'
             }"
         />
 

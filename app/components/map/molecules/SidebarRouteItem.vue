@@ -15,11 +15,7 @@ defineEmits<{ click: [] }>()
         :class="{ 'sidebar-route-item--active': active }"
         @click="$emit('click')"
     >
-        <UIcon
-            v-if="icon"
-            :name="icon"
-            class="sidebar-route-item__icon"
-        />
+        <UIcon v-if="icon" :name="icon" class="sidebar-route-item__icon" />
         <span class="sidebar-route-item__label">{{ label }}</span>
         <!-- trailing: 배지, 화살표 등 추가 요소 -->
         <slot name="trailing" />
@@ -41,7 +37,9 @@ defineEmits<{ click: [] }>()
     font-weight: 500;
     cursor: pointer;
     text-align: left;
-    transition: background var(--transition), color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition);
 }
 
 .sidebar-route-item:hover {

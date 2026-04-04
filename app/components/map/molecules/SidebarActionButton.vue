@@ -22,20 +22,23 @@ defineEmits<{ click: [] }>()
     width: 100%;
     padding: 7px 10px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--sidebar-border);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(144, 213, 255, 0.28);
+    background: rgba(244, 251, 255, 0.04);
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition);
     white-space: nowrap;
 }
 
 .sidebar-action-btn:hover {
-    background: var(--sidebar-item-hover);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--surface-hover);
+    color: var(--text-on-dark);
+    border-color: rgba(144, 213, 255, 0.42);
 }
 
 .sidebar-action-btn__icon {
