@@ -40,6 +40,7 @@
     --font-size-xs: 12px;
     --font-size-sm: 13px;
     --font-size-md: 14px;
+    --font-size-base: var(--font-size-md);
     --font-size-lg: 15px;
     --font-size-xl: 22px;
     --font-weight-medium: 500;
@@ -102,6 +103,7 @@
     --shadow-frame:
         inset 0 0 0 1px rgba(244, 251, 255, 0.08),
         0 12px 40px rgba(24, 54, 74, 0.24);
+    --shadow-sm: 0 8px 24px rgba(24, 54, 74, 0.16);
     --shadow-inset-soft: inset 0 0 0 1px rgba(244, 251, 255, 0.08);
     --shadow-inset-active: inset 0 0 0 1px rgba(144, 213, 255, 0.1);
     --focus-ring-color: var(--color-focus-ring);
