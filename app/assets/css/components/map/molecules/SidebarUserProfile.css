@@ -1,21 +1,12 @@
 .sidebar-user {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    width: 100%;
-    padding: var(--space-3) var(--space-5);
-    border-radius: var(--radius-md);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    text-align: left;
-    transition:
-        background var(--transition),
-        color var(--transition);
-}
-
-.sidebar-user:hover {
-    background: var(--sidebar-item-hover);
+    --map-button-gap: var(--gap-section-md);
+    --map-button-width: 100%;
+    --map-button-padding: var(--gap-section-sm) var(--gap-5);
+    --map-button-border: none;
+    --map-button-radius: var(--radius-control-md);
+    --map-button-hover-bg: var(--sidebar-item-hover);
+    --map-button-text-align: left;
+    justify-content: flex-start;
 }
 
 .sidebar-user__avatar {
@@ -41,7 +32,7 @@
 
 .sidebar-user__name {
     flex: 1;
-    font-size: var(--font-size-sm);
+    font-size: var(--text-label-sm);
     font-weight: var(--font-weight-medium);
     color: var(--text-primary);
     overflow: hidden;

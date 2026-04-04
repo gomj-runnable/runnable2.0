@@ -12,7 +12,7 @@
 ### Front-end
 
 - `app/` : 프론트엔드 루트
-- `app/assets/css/` : 전역 CSS와 지도 UI 스타일
+- `app/assets/css/` : 전역 CSS, 디자인 토큰, 지도 UI 스타일
 - `app/assets/images/` : 이미지 자산
 - `app/assets/icons/` : 아이콘 자산
 - `app/components/` : 페이지 단위 UI 컴포넌트
@@ -59,6 +59,9 @@
 - 도메인 타입과 입력 검증 스키마의 기준은 `shared/types/`, `shared/schemas/`에 둔다.
 - 외부 라이브러리인 `lib/`는 직접 수정하기보다 래핑과 조합으로 대응한다.
 - 문서를 수정할 때는 실제 디렉터리 구조와 서비스 목적이 일치해야 한다.
+- 디자인 토큰은 `primitive -> semantic -> feature CSS` 순서로 계층을 유지한다.
+- primitive token은 값 자체만 두고, semantic token은 역할 이름으로 재매핑한다.
+- feature CSS(`map.css`, `components/**`, `pages/**`)에는 토큰 정의보다 실제 UI 규칙을 우선 둔다.
 
 ## 에이전트 작업 규칙
 
@@ -81,6 +84,18 @@
 - `app/pages/`는 화면 조합과 초기 진입만 담당한다.
 - 브라우저 전용 지도 화면은 `definePageMeta({ ssr: false, layout: 'map' })` 형태를 기본으로 본다.
 - 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/layouts/map.vue`, `app/assets/css/map.css` 같은 전용 경계에 둔다.
+
+### CSS 토큰과 스타일 경계
+
+- raw value token은 `app/assets/css/primitive.css`에 둔다.
+- semantic token은 `app/assets/css/semantic.css`에 두고, primitive token을 역할 이름으로 매핑한다.
+- 전역 CSS 엔트리는 `app/assets/css/main.css`이며, `primitive.css`, `semantic.css`, `map.css` 순서의 import를 기준으로 본다.
+- `app/assets/css/map.css`는 지도 전역 레이아웃과 지도 DOM 전용 스타일만 둔다.
+- `app/assets/css/components/**`는 컴포넌트 단위 스타일만 둔다.
+- `app/assets/css/pages/**`는 페이지 조합 스타일만 둔다.
+- 숫자/색상/px 값을 컴포넌트 CSS에 직접 반복 선언하기보다 semantic token을 먼저 추가할 수 있는지 검토한다.
+- 동일한 버튼, 카드, 입력, 라벨 골격이 반복되면 공용 CSS 블록으로 통합하고, 개별 컴포넌트는 modifier 또는 CSS 변수 override 중심으로 유지한다.
+- 상태 표현은 `.active`, `.collapse`, `.w480` 같은 의미가 좁거나 값 중심인 이름보다 `.is-active`, `.is-collapsed` 같은 상태 이름과 semantic token 조합을 우선한다.
 
 ### 지도 엔진 연동
 

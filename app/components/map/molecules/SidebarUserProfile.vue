@@ -34,7 +34,7 @@ const menuItems = [
         :content="{ side: 'top', align: 'start', sideOffset: 6 }"
         :ui="{ content: 'dropdown-profile-menu' }"
     >
-        <button type="button" class="sidebar-user">
+        <button type="button" class="map-button sidebar-user">
             <slot name="icon">
                 <img v-if="image" :src="image" :alt="username" class="sidebar-user__avatar" />
                 <div v-else class="sidebar-user__avatar sidebar-user__avatar--placeholder">

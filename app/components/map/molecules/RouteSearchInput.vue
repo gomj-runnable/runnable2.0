@@ -25,7 +25,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 <template>
     <button
         type="button"
-        class="route-search-trigger"
+        class="map-button route-search-trigger"
         aria-label="경로 검색 열기"
         @click="isOpen = true"
     >
