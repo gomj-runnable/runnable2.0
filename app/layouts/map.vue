@@ -4,6 +4,4 @@
     </div>
 </template>
 
-<style>
-@import '~/assets/css/map.css';
-</style>
+<style src="~/assets/css/map.css"></style>

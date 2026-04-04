@@ -53,7 +53,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                         autofocus
                         @keydown.escape="isOpen = false"
                     />
-                    <kbd class="route-search-trigger__kbd" style="flex-shrink: 0">esc</kbd>
+                    <kbd class="route-search-trigger__kbd route-search-trigger__kbd--shrink">
+                        esc
+                    </kbd>
                 </div>
                 <div v-if="!model" class="route-search-modal__empty">
                     <UIcon name="i-lucide-map" class="route-search-modal__empty-icon" />
@@ -71,127 +73,4 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
     </UModal>
 </template>
 
-<style scoped>
-/* ── 트리거 버튼 ── */
-.route-search-trigger {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 0 10px;
-    height: 36px;
-    background: rgba(244, 251, 255, 0.06);
-    border: 1px solid var(--border-subtle);
-    outline: 1px solid rgba(144, 213, 255, 0.28);
-    outline-offset: 0;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    text-align: left;
-    transition:
-        background var(--transition),
-        border-color var(--transition);
-    box-sizing: border-box;
-}
-
-.route-search-trigger:hover {
-    background: var(--surface-hover);
-    border-color: rgba(144, 213, 255, 0.34);
-    outline-color: rgba(144, 213, 255, 0.42);
-}
-
-.route-search-trigger:focus-visible {
-    outline-color: rgba(144, 213, 255, 0.64);
-}
-
-.route-search-trigger__icon {
-    width: 15px;
-    height: 15px;
-    color: var(--sidebar-icon-color);
-    flex-shrink: 0;
-}
-
-.route-search-trigger__placeholder {
-    flex: 1;
-    font-size: 13px;
-    color: var(--sidebar-icon-color);
-    min-width: 0;
-    text-align: left;
-}
-
-.route-search-trigger__shortcut {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    flex-shrink: 0;
-}
-
-.route-search-trigger__kbd {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 4px;
-    background: rgba(244, 251, 255, 0.08);
-    border: 1px solid var(--border-subtle);
-    border-radius: 4px;
-    font-size: 11px;
-    color: var(--sidebar-icon-color);
-    font-family: inherit;
-    line-height: 1;
-}
-
-/* ── 모달 내부 ── */
-.route-search-modal {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-}
-
-.route-search-modal__input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--sidebar-border);
-}
-
-.route-search-modal__icon {
-    width: 16px;
-    height: 16px;
-    color: var(--sidebar-icon-color);
-    flex-shrink: 0;
-}
-
-.route-search-modal__input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 15px;
-    color: var(--text-primary);
-    font-family: inherit;
-}
-
-.route-search-modal__input::placeholder {
-    color: var(--text-muted);
-}
-
-.route-search-modal__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 40px 20px;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.route-search-modal__empty-icon {
-    width: 28px;
-    height: 28px;
-    opacity: 0.4;
-}
-</style>
+<style scoped src="~/assets/css/components/map/molecules/RouteSearchInput.css"></style>

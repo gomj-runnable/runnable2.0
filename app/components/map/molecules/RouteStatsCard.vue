@@ -41,45 +41,4 @@ defineProps<{
     </div>
 </template>
 
-<style scoped>
-.route-stats-card {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 14px 16px;
-    background: var(--sidebar-item-hover);
-    border: 1px solid var(--sidebar-border);
-    border-radius: 12px;
-    flex: 1;
-    min-width: 0;
-}
-
-.route-stats-card__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.route-stats-card__title {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--sidebar-icon-color);
-    letter-spacing: 0.01em;
-}
-
-.route-stats-card__icon {
-    font-size: 14px;
-    color: var(--sidebar-icon-color);
-}
-
-.route-stats-card__value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--sidebar-icon-hover);
-    line-height: 1.1;
-}
-
-.route-stats-card__delta {
-    align-self: flex-start;
-}
-</style>
+<style scoped src="~/assets/css/components/map/molecules/RouteStatsCard.css"></style>

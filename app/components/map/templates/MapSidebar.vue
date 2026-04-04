@@ -36,68 +36,16 @@ withDefaults(
             <slot name="subheader" />
         </div>
 
-        <div v-if="!collapsed" class="map-sidebar__body">
-            <slot />
+        <div class="map-sidebar__content" :class="{ 'map-sidebar__content--collapsed': collapsed }">
+            <div class="map-sidebar__body">
+                <slot />
+            </div>
         </div>
 
-        <footer v-if="!collapsed" class="map-sidebar__footer">
+        <footer class="map-sidebar__footer" :class="{ 'map-sidebar__footer--collapsed': collapsed }">
             <slot name="footer" />
         </footer>
     </div>
 </template>
 
-<style scoped>
-.map-sidebar {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    background: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
-    flex-shrink: 0;
-}
-
-.map-sidebar--collapsed {
-    align-items: stretch;
-}
-
-.map-sidebar__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 8px 10px;
-    gap: 6px;
-    flex-shrink: 0;
-    min-height: 56px;
-}
-
-.map-sidebar__body {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 6px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.map-sidebar__body::-webkit-scrollbar {
-    width: 3px;
-}
-
-.map-sidebar__body::-webkit-scrollbar-thumb {
-    background: var(--sidebar-border);
-    border-radius: 2px;
-}
-
-.map-sidebar__subheader {
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--sidebar-border);
-}
-
-.map-sidebar__footer {
-    padding: 8px;
-    border-top: 1px solid var(--sidebar-border);
-    flex-shrink: 0;
-}
-</style>
+<style scoped src="~/assets/css/components/map/templates/MapSidebar.css"></style>

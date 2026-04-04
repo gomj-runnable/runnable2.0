@@ -61,16 +61,4 @@ const tooltipTemplate = (d: DataPoint) => {
     </div>
 </template>
 
-<style scoped>
-.route-chart {
-    width: 100%;
-    --vis-axis-tick-label-color: var(--sidebar-icon-color);
-    --vis-axis-label-color: var(--sidebar-icon-color);
-    --vis-axis-domain-color: var(--sidebar-border);
-    --vis-axis-grid-color: var(--sidebar-border);
-    --vis-crosshair-line-stroke-color: var(--sidebar-icon-color);
-    --vis-tooltip-background-color: #1a1a1a;
-    --vis-tooltip-border-color: var(--sidebar-border);
-    --vis-tooltip-text-color: var(--sidebar-icon-hover);
-}
-</style>
+<style scoped src="~/assets/css/components/map/molecules/RouteChart.client.css"></style>

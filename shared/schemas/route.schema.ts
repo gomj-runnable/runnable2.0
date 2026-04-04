@@ -1,9 +1,10 @@
 import { z } from 'zod'
 
 export const sectionAttrSchema = z.object({
-    seq: z.number().int().nonnegative(),
-    speed: z.number().optional(),
-    time: z.string().optional()
+    seq: z.int(),
+    name: z.string().optional(),
+    comment: z.string().optional(),
+    description: z.string().optional()
 })
 
 export const createSectionSchema = z.object({
@@ -17,11 +18,56 @@ export const createRouteSchema = z.object({
         .string()
         .min(1, '경로 제목을 입력해주세요')
         .max(255, '경로 제목은 최대 255자까지 가능합니다'),
-    descript: z.string().optional(),
+    description: z.string().optional(),
     highHeight: z.number().optional(),
     lowHeight: z.number().optional(),
     distance: z.number().nonnegative().optional()
 })
+
+export interface RouteDrawMetricsInput {
+    distance?: number | null
+    heights?: Array<number | null | undefined> | null
+}
+
+export class RouteDraftBuilder {
+    constructor(private readonly drawMetrics?: RouteDrawMetricsInput | null) {}
+
+    getDistance() {
+        return typeof this.drawMetrics?.distance === 'number'
+            ? this.drawMetrics.distance
+            : undefined
+    }
+
+    getHeights() {
+        const heights = (this.drawMetrics?.heights ?? []).filter(
+            (height): height is number => typeof height === 'number' && Number.isFinite(height)
+        )
+
+        if (heights.length === 0) {
+            return {
+                highHeight: undefined,
+                lowHeight: undefined
+            }
+        }
+
+        return {
+            highHeight: Math.max(...heights),
+            lowHeight: Math.min(...heights)
+        }
+    }
+
+    toRoute(input: { title: string; description?: string | null }) {
+        const { highHeight, lowHeight } = this.getHeights()
+
+        return createRouteSchema.parse({
+            title: input.title,
+            description: input.description || undefined,
+            distance: this.getDistance(),
+            highHeight,
+            lowHeight
+        })
+    }
+}
 
 export type SectionAttrSchema = z.infer<typeof sectionAttrSchema>
 export type CreateSectionSchema = z.infer<typeof createSectionSchema>
