@@ -3,46 +3,7 @@
 
 @import "tailwindcss";
 @import "@nuxt/ui";
-
-:root {
-  /* color-family */
-  --color-brand-primary: #90d5ff;
-  --color-brand-secondary: #57b9ff;
-  --color-brand-tertiary: #88b1d4;
-  --color-brand-quaternary: #517891;
-
-  /* text */
-  --color-text-strong: #18364a;
-  --color-text-default: #35566b;
-  --color-text-muted: #5c7a8d;
-  --color-text-on-brand: #0f2533;
-  --color-text-inverse: #f4fbff;
-  --color-text-inverse-80: rgba(244, 251, 255, 0.8);
-  --color-text-inverse-60: rgba(244, 251, 255, 0.6);
-  --color-text-inverse-40: rgba(244, 251, 255, 0.4);
-  --color-text-inverse-28: rgba(244, 251, 255, 0.28);
-  --color-text-inverse-20: rgba(244, 251, 255, 0.2);
-
-  /* surface */
-  --color-surface-canvas: #edf7fd;
-  --color-surface-base: rgba(81, 120, 145, 0.92);
-  --color-surface-elevated: rgba(81, 120, 145, 0.86);
-  --color-surface-soft: rgba(244, 251, 255, 0.06);
-  --color-surface-soft-hover: rgba(144, 213, 255, 0.12);
-  --color-surface-soft-active: rgba(87, 185, 255, 0.18);
-  --color-surface-emphasis: rgba(87, 185, 255, 0.24);
-  --color-surface-overlay: rgba(24, 54, 74, 0.8);
-
-  /* border */
-  --color-border-subtle: rgba(144, 213, 255, 0.18);
-  --color-border-default: rgba(144, 213, 255, 0.2);
-  --color-border-strong: rgba(144, 213, 255, 0.34);
-
-  /* interactive */
-  --color-focus-ring: rgba(144, 213, 255, 0.64);
-  --color-focus-ring-soft: rgba(144, 213, 255, 0.42);
-  --color-shadow-strong: rgba(24, 54, 74, 0.24);
-}
+@import '~/assets/css/constant.css';
 
 html,
 body {
@@ -51,5 +12,5 @@ body {
 }
 
 @theme static {
-  --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  --font-sans: var(--font-family-sans);
 }

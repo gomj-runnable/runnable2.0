@@ -1,0 +1,20 @@
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.sidebar-logo__icon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.sidebar-logo__label {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-on-dark);
+    letter-spacing: var(--letter-spacing-tight);
+    white-space: nowrap;
+}

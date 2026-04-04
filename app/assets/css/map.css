@@ -12,47 +12,42 @@
     --text-on-primary: var(--color-text-on-brand);
     --text-on-dark: var(--color-text-inverse);
     --header-bg: var(--color-surface-base);
-    --icon-color: rgba(24, 54, 74, 0.72);
+    --icon-color: color-mix(in srgb, var(--color-text-strong) 72%, transparent);
 
     --header-height: 48px;
     --panel-width: 310px;
     --slider-height: 128px;
-    --toggle-short: 28px;
+    --toggle-short: var(--size-control-md);
     --toggle-long: 56px;
 
-    --z-panel: 10;
-    --z-header: 11;
-
     --blur: blur(4px);
-    --transition: 0.3s ease;
-    --radius-sm: 6px;
-    --radius-md: 8px;
+    --transition: var(--transition-base);
 
     /* 사이드바 */
     --sidebar-width: 132px;
     --sidebar-bg: var(--color-surface-base);
     --sidebar-border: var(--color-border-default);
-    --sidebar-icon-color: rgba(244, 251, 255, 0.72);
+    --sidebar-icon-color: var(--color-text-inverse-80);
     --sidebar-icon-hover: var(--text-on-dark);
     --sidebar-item-hover: var(--color-surface-soft-hover);
     --sidebar-item-active: var(--color-surface-emphasis);
 
     /* search panel 색상 (SearchPanel unscoped에서 참조) */
     --text-primary: var(--text-on-dark);
-    --text-secondary: rgba(244, 251, 255, 0.78);
+    --text-secondary: var(--color-text-inverse-80);
     --text-muted: var(--text-color-muted);
     --border-subtle: var(--color-border-subtle);
     --surface-hover: var(--color-surface-soft-hover);
     --surface-active: var(--color-surface-soft-active);
-    --surface-inset: rgba(24, 54, 74, 0.22);
+    --surface-inset: var(--color-surface-inset);
     --btn-primary-bg: var(--secondary-color);
     --btn-primary-hover: var(--primary-color);
-    --sub-item-bg: rgba(244, 251, 255, 0.08);
+    --sub-item-bg: var(--color-surface-soft-strong);
     --sub-item-hover: var(--color-surface-soft-active);
 
     /* 네비게이션 탭 활성 상태 */
     --nav-active-color: var(--primary-color);
-    --nav-active-bg: rgba(144, 213, 255, 0.16);
+    --nav-active-bg: color-mix(in srgb, var(--color-brand-primary) 16%, transparent);
 }
 
 html, body {
@@ -101,14 +96,14 @@ html, body {
    POI 마커 — Cesium이 DOM에 직접 주입하므로 반드시 전역
    ============================================= */
 .icon-poi-wrap {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     font-family: 'Segoe UI', sans-serif;
-    color: #fff;
+    color: var(--color-text-inverse);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: var(--space-3);
     pointer-events: auto;
     cursor: pointer;
     user-select: none;
@@ -119,7 +114,7 @@ html, body {
     max-width: 160px;
     text-align: center;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-inverse);
     -webkit-text-stroke: 1px #000;
     paint-order: stroke fill;
     line-height: 1.35;
