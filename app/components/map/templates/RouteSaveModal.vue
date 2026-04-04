@@ -23,7 +23,12 @@ const formatDistance = (distance?: number) => {
 </script>
 
 <template>
-    <UModal :open="open" :dismissible="true" :overlay="true" @update:open="$emit('update:open', $event)">
+    <UModal
+        :open="open"
+        :dismissible="true"
+        :overlay="true"
+        @update:open="$emit('update:open', $event)"
+    >
         <template #content>
             <div class="route-save-modal">
                 <div class="route-save-modal__header">
@@ -32,21 +37,25 @@ const formatDistance = (distance?: number) => {
                 </div>
 
                 <div class="route-save-modal__fields">
-                    <label class="route-save-modal__field">
-                        <span>제목</span>
+                    <label class="route-save-modal__field map-form-field">
+                        <span class="map-form-label">제목</span>
                         <input
                             :value="title"
                             type="text"
+                            class="map-form-control"
                             placeholder="경로 제목"
-                            @input="$emit('update:title', ($event.target as HTMLInputElement).value)"
+                            @input="
+                                $emit('update:title', ($event.target as HTMLInputElement).value)
+                            "
                         />
                     </label>
 
-                    <label class="route-save-modal__field">
-                        <span>설명</span>
+                    <label class="route-save-modal__field map-form-field">
+                        <span class="map-form-label">설명</span>
                         <textarea
                             :value="description"
                             rows="4"
+                            class="map-form-control"
                             placeholder="경로 설명"
                             @input="
                                 $emit(
@@ -57,11 +66,12 @@ const formatDistance = (distance?: number) => {
                         />
                     </label>
 
-                    <label class="route-save-modal__field">
-                        <span>거리</span>
+                    <label class="route-save-modal__field map-form-field">
+                        <span class="map-form-label">거리</span>
                         <input
                             :value="formatDistance(distance)"
                             type="text"
+                            class="map-form-control"
                             placeholder="0.00"
                             disabled
                         />
@@ -69,12 +79,16 @@ const formatDistance = (distance?: number) => {
                 </div>
 
                 <div class="route-save-modal__actions">
-                    <button type="button" class="route-save-modal__button" @click="$emit('update:open', false)">
+                    <button
+                        type="button"
+                        class="map-button route-save-modal__button"
+                        @click="$emit('update:open', false)"
+                    >
                         취소
                     </button>
                     <button
                         type="button"
-                        class="route-save-modal__button route-save-modal__button--primary"
+                        class="map-button route-save-modal__button route-save-modal__button--primary"
                         @click="$emit('submit')"
                     >
                         저장

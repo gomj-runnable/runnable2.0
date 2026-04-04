@@ -19,13 +19,15 @@ withDefaults(
         collapsed?: boolean
     }>(),
     {
+        logoIcon: undefined,
+        logoLabel: undefined,
         collapsed: false
     }
 )
 </script>
 
 <template>
-    <div class="map-sidebar" :class="{ 'map-sidebar--collapsed': collapsed }">
+    <div class="map-sidebar" :class="{ 'is-collapsed': collapsed }">
         <header class="map-sidebar__header">
             <slot name="header">
                 <SidebarLogo :icon="logoIcon" :label="logoLabel" />
@@ -36,13 +38,13 @@ withDefaults(
             <slot name="subheader" />
         </div>
 
-        <div class="map-sidebar__content" :class="{ 'map-sidebar__content--collapsed': collapsed }">
+        <div class="map-sidebar__content" :class="{ 'is-collapsed': collapsed }">
             <div class="map-sidebar__body">
                 <slot />
             </div>
         </div>
 
-        <footer class="map-sidebar__footer" :class="{ 'map-sidebar__footer--collapsed': collapsed }">
+        <footer class="map-sidebar__footer" :class="{ 'is-collapsed': collapsed }">
             <slot name="footer" />
         </footer>
     </div>

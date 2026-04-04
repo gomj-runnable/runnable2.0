@@ -1,8 +1,20 @@
 .route-save-modal {
+    --map-form-label-color: var(--color-text-inverse-80);
+    --map-form-bg: var(--color-surface-soft);
+    --map-form-color: var(--text-on-dark);
+    --map-form-font-size: var(--text-body-sm);
+    --map-form-line-height: 1.5;
+    --map-form-padding: var(--gap-section-md);
+    --map-form-resize: vertical;
+    --map-form-placeholder: var(--color-text-inverse-40);
+    --map-form-focus-border: var(--color-border-active);
+    --map-form-focus-bg: var(--color-surface-soft-strong);
+    --map-form-disabled-color: var(--color-text-inverse-60);
+    --map-form-disabled-bg: var(--color-surface-softer);
     width: min(100%, 420px);
-    padding: var(--space-8);
+    padding: var(--gap-section-xl);
     border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-surface-lg);
     background: var(--color-surface-elevated);
     box-shadow: var(--shadow-frame);
     color: var(--text-on-dark);
@@ -11,12 +23,12 @@
 .route-save-modal__header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-6);
+    gap: var(--gap-section-xs);
+    margin-bottom: var(--gap-section-lg);
 }
 
 .route-save-modal__eyebrow {
-    font-size: var(--font-size-2xs);
+    font-size: var(--text-label-xs);
     font-weight: var(--font-weight-semibold);
     letter-spacing: var(--letter-spacing-wider);
     color: var(--color-text-inverse-60);
@@ -24,7 +36,7 @@
 
 .route-save-modal__title {
     margin: 0;
-    font-size: var(--font-size-xl);
+    font-size: var(--text-heading-sm);
     font-weight: var(--font-weight-bold);
     line-height: 1.2;
     color: var(--text-on-dark);
@@ -33,90 +45,32 @@
 .route-save-modal__fields {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-}
-
-.route-save-modal__field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.route-save-modal__field span {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-inverse-80);
-}
-
-.route-save-modal__field input,
-.route-save-modal__field textarea {
-    width: 100%;
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface-soft);
-    color: var(--text-on-dark);
-    font-size: var(--font-size-md);
-    line-height: 1.5;
-    padding: var(--space-4);
-    outline: none;
-    resize: vertical;
-    transition:
-        border-color var(--transition-base),
-        box-shadow var(--transition-base),
-        background var(--transition-base);
-}
-
-.route-save-modal__field input::placeholder,
-.route-save-modal__field textarea::placeholder {
-    color: var(--color-text-inverse-40);
-}
-
-.route-save-modal__field input:focus,
-.route-save-modal__field textarea:focus {
-    border-color: var(--color-border-active);
-    box-shadow: 0 0 0 3px var(--color-focus-ring-soft);
-    background: var(--color-surface-soft-strong);
-}
-
-.route-save-modal__field input:disabled {
-    cursor: not-allowed;
-    color: var(--color-text-inverse-60);
-    background: var(--color-surface-softer);
+    gap: var(--gap-section-md);
 }
 
 .route-save-modal__actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
+    gap: var(--gap-section-sm);
+    margin-top: var(--gap-section-lg);
 }
 
 .route-save-modal__button {
-    min-width: 88px;
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-lg);
-    background: transparent;
-    color: var(--text-on-dark);
-    font-size: var(--font-size-md);
+    --map-button-padding: var(--gap-section-md) var(--gap-section-lg);
+    --map-button-border: 1px solid var(--color-border-default);
+    --map-button-radius: var(--radius-surface-md);
+    --map-button-color: var(--text-on-dark);
+    --map-button-hover-bg: var(--color-surface-soft-hover);
+    --map-button-hover-border: var(--color-border-active);
+    font-size: var(--text-label-md);
     font-weight: var(--font-weight-semibold);
     line-height: 1.4;
-    padding: var(--space-4) var(--space-6);
-    transition:
-        border-color var(--transition-base),
-        background var(--transition-base),
-        color var(--transition-base);
-}
-
-.route-save-modal__button:hover {
-    border-color: var(--color-border-active);
-    background: var(--color-surface-soft-hover);
+    min-width: 88px;
 }
 
 .route-save-modal__button--primary {
-    border-color: var(--color-border-active-strong);
-    background: var(--color-surface-emphasis);
-}
-
-.route-save-modal__button--primary:hover {
-    background: var(--color-surface-soft-active);
+    --map-button-border: 1px solid var(--color-border-active-strong);
+    --map-button-bg: var(--color-surface-emphasis);
+    --map-button-hover-bg: var(--color-surface-soft-active);
+    --map-button-hover-border: var(--color-border-active-strong);
 }

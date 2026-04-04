@@ -137,35 +137,44 @@ const sidebarTextButtons = [
 
 ## CSS 자산 구조
 
-- 디자인 토큰(color-family, font, size, radius, effect)은 `app/assets/css/constant.css`에서 통합 관리한다
-- 전역 엔트리 CSS는 `app/assets/css/main.css`이며 `constant.css`를 먼저 import 한다
-- 지도 전용 semantic 변수와 전역 지도 스타일은 `app/assets/css/map.css`에서 관리한다
+- raw value token(color palette, number scale, font scale, motion, border width)은 `app/assets/css/primitive.css`에서 관리한다
+- semantic token(text role, gap, radius, control size, shadow, surface, transition)은 `app/assets/css/semantic.css`에서 관리한다
+- 전역 엔트리 CSS는 `app/assets/css/main.css`이며 `primitive.css`, `semantic.css`, `map.css` 순서의 import를 기준으로 본다
+- 지도 전역 스타일과 지도 DOM 전용 스타일은 `app/assets/css/map.css`에서 관리한다
+- 여러 map 컴포넌트가 공유하는 버튼, 카드, 입력, 라벨 골격은 `app/assets/css/components/map/common.css`에서 관리한다
 - 컴포넌트와 template 스타일은 Vue 파일 안에 직접 쓰지 말고 `app/assets/css/components/<page>/.../*.css`로 분리한다
 - 페이지 조합 스타일은 `app/assets/css/pages/*.css`로 분리하고 Vue 파일에서는 `<style scoped src=\"...\">`만 사용한다
 - 팝업/모달 UI도 page에 직접 쓰지 말고 `templates/`로 분리한다
 
-## CSS 변수 (constant.css + map.css 기준)
+## CSS 변수 (primitive.css + semantic.css 기준)
 
-공통 규격은 `app/assets/css/constant.css`, 지도 semantic 변수는 `app/assets/css/map.css`의 `:root`에서 관리한다.
+primitive token은 값 자체를, semantic token은 역할을 표현한다. 새 컴포넌트에서는 semantic token을 우선 사용하고, semantic이 없다면 primitive를 직접 참조하기보다 semantic 추가를 먼저 검토한다.
 
 ```css
---color-brand-primary: #90d5ff;
---color-text-strong: #18364a;
---font-size-sm: 13px;
---radius-md: 8px;
---sidebar-bg: var(--color-surface-base);
---sidebar-border: var(--color-border-default);
---sidebar-item-hover: var(--color-surface-soft-hover);
+--size-6: 1rem;
+--font-size-15: 1.5rem;
+--text-label-small: var(--font-size-15);
+--gap-4: var(--size-7);
+--radius-control-md: var(--size-3);
+--sidebar-bg: var(--surface-panel);
 ```
 
 새로운 컴포넌트에서 색상/글꼴/크기 값을 하드코딩하지 말고 이 변수를 참조한다.
+
+## 공통 CSS와 상태 클래스 규칙
+
+- 반복되는 UI 골격은 공통 블록 클래스로 통합한다. 예: 버튼, 입력, 카드, 섹션 라벨
+- 공통 블록은 `common.css`에 두고, 개별 CSS는 spacing, state, variant만 덮어쓴다
+- 상태 클래스는 `.active`, `.collapse`처럼 모호한 이름보다 `.is-active`, `.is-collapsed`처럼 상태 의미가 드러나는 이름을 사용한다
+- 폭/높이 값을 그대로 드러내는 `.w480` 같은 클래스는 지양하고 semantic token 또는 컴포넌트 고유 클래스에서 관리한다
+- 컴포넌트 modifier가 필요하면 `component-name.is-active` 또는 `component-name--variant`처럼 역할 중심으로 유지한다
 
 ## 컴포넌트 설계 원칙
 
 - **slot 우선** — 내용은 slot으로 받는다. props로 내용을 고정하면 확장이 막힌다
 - **데이터는 props, 구조는 slot** — 데이터(label, icon, active)는 props, 레이아웃 구조는 slot
 - **emit으로 인터랙션 전달** — composable 또는 상태 변경 로직을 컴포넌트 안에 넣지 않는다
-- **CSS 변수 참조** — 색상/글꼴/크기 값은 `constant.css`와 `map.css` 변수에서 가져온다
+- **semantic token 우선** — 색상/글꼴/크기 값은 `semantic.css`를 우선 참조하고, raw 값은 `primitive.css`에만 둔다
 - **외부 CSS 분리** — 컴포넌트 스타일 정의는 `.vue` 안에 직접 쓰지 말고 외부 `.css` 파일로 분리한다
 - **style src 사용** — Vue 파일에서는 `<style scoped src=\"...\">`만 사용하고, 실제 정의는 외부 CSS 파일에 둔다
 - **전역 스타일 예외** — POI 마커 등 Cesium이 DOM에 직접 주입하는 전역 스타일만 `map.css`에 둔다
@@ -180,7 +189,7 @@ const sidebarTextButtons = [
 3. Flat API(props)와 Compound API(slot) 중 무엇을 제공할지 결정한다
 4. props → slot → emit 순서로 인터페이스를 설계한다
 5. 스타일은 외부 CSS 파일에 작성하고 Vue 파일에서는 `style src`로 연결한다
-6. 색상/글꼴/크기 토큰은 `constant.css`, 지도 semantic 변수는 `map.css`에서 참조한다
+6. 색상/글꼴/크기 토큰은 `semantic.css`를 우선 참조하고, 필요한 raw scale은 `primitive.css`에서 정의한다
 7. 페이지(`index.vue`)에서 template를 통해 조합한다
 
 ## 점검 항목
@@ -188,6 +197,8 @@ const sidebarTextButtons = [
 - molecule이 composable이나 전역 상태에 직접 의존하지 않는가
 - template이 내용을 직접 렌더링하지 않고 slot으로 위임하는가
 - 확장 지점(slot)이 미리 명시되어 있는가
-- CSS 값이 `constant.css` 또는 `map.css` 변수를 참조하고 있는가
+- CSS 값이 `semantic.css`를 우선 참조하고 있는가
+- 중복되는 버튼/입력/카드 골격이 `common.css`로 통합 가능한 상태인가
+- 상태 클래스 이름이 의미 중심(`is-*`)으로 정리되어 있는가
 - `.vue` 파일 안에 스타일 정의가 남아 있지 않고 외부 CSS로 분리되어 있는가
 - 페이지가 template 조합만 수행하고 있는가

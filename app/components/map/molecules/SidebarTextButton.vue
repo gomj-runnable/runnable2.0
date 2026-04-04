@@ -24,10 +24,10 @@ defineEmits<{ click: [] }>()
 <template>
     <button
         type="button"
-        class="sidebar-text-btn"
+        class="map-button sidebar-text-btn"
         :class="{
-            'sidebar-text-btn--active': active,
-            'sidebar-text-btn--collapsed': collapsed
+            'is-active': active,
+            'is-collapsed': collapsed
         }"
         :aria-label="label"
         :title="label"
