@@ -65,7 +65,7 @@ withDefaults(
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 10px 10px;
+    padding: 14px 8px 10px;
     gap: 6px;
     flex-shrink: 0;
     min-height: 56px;

@@ -39,11 +39,7 @@ defineEmits<{
         @click="$emit('click')"
         @keydown.enter="$emit('click')"
     >
-        <UIcon
-            v-if="icon"
-            :name="icon"
-            class="route-list-item__icon"
-        />
+        <UIcon v-if="icon" :name="icon" class="route-list-item__icon" />
 
         <div class="route-list-item__content">
             <span class="route-list-item__label">{{ label }}</span>

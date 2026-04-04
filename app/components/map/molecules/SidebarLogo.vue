@@ -26,14 +26,14 @@ defineProps<{
 .sidebar-logo__icon {
     width: 20px;
     height: 20px;
-    color: #facc15;
+    color: var(--primary-color);
     flex-shrink: 0;
 }
 
 .sidebar-logo__label {
     font-size: 14px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-on-dark);
     letter-spacing: -0.02em;
     white-space: nowrap;
 }

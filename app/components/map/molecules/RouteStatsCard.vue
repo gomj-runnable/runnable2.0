@@ -25,11 +25,7 @@ defineProps<{
     <div class="route-stats-card">
         <div class="route-stats-card__header">
             <span class="route-stats-card__title">{{ title }}</span>
-            <UIcon
-                v-if="icon"
-                :name="icon"
-                class="route-stats-card__icon"
-            />
+            <UIcon v-if="icon" :name="icon" class="route-stats-card__icon" />
         </div>
 
         <div class="route-stats-card__value">{{ value }}</div>

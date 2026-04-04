@@ -12,17 +12,19 @@
  *     <template #overlay><MapToolbar /></template>
  *   </MapShell>
  */
-const props = withDefaults(defineProps<{
-    hideSidebar?: boolean
-}>(), {
-    hideSidebar: false
-})
+const props = withDefaults(
+    defineProps<{
+        hideSidebar?: boolean
+    }>(),
+    {
+        hideSidebar: false
+    }
+)
 
 const isSidebarCollapsed = ref(false)
 
 const toggleSidebar = () => {
-    if (props.hideSidebar)
-        return
+    if (props.hideSidebar) return
 
     isSidebarCollapsed.value = !isSidebarCollapsed.value
 }
@@ -35,16 +37,12 @@ const toggleSidebar = () => {
             class="map-shell__sidebar"
             :class="{ 'map-shell__sidebar--collapsed': isSidebarCollapsed }"
         >
-            <slot
-                name="sidebar"
-                :collapsed="isSidebarCollapsed"
-                :toggleSidebar="toggleSidebar"
-            />
+            <slot name="sidebar" :collapsed="isSidebarCollapsed" :toggle-sidebar="toggleSidebar" />
         </aside>
 
         <div class="map-shell__viewer">
             <section class="map-shell__chatbot-layout">
-                <div id="map-wrapper" class="map-shell__chatbot-body">
+                <div class="map-shell__chatbot-body map-shell__map-wrapper">
                     <slot />
                 </div>
             </section>
@@ -59,10 +57,11 @@ const toggleSidebar = () => {
 <style scoped>
 .map-shell {
     display: flex;
-    width: 100vw;
-    height: 100vh;
-    min-width: 100vw;
-    min-height: 100vh;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
 }
 
 .map-shell__sidebar {
@@ -79,10 +78,12 @@ const toggleSidebar = () => {
 
 .map-shell__viewer {
     position: relative;
+    display: flex;
+    flex-direction: column;
     flex: 1;
     overflow: hidden;
     min-width: 0;
-    min-height: 100vh;
+    min-height: 100dvh;
     padding: 16px 16px 16px 0;
     box-sizing: border-box;
 }
@@ -92,33 +93,41 @@ const toggleSidebar = () => {
     position: absolute;
     inset: 16px 16px 16px 0;
     z-index: var(--z-panel);
-    border: 4px solid rgba(255, 255, 255, 0.14);
+    border: 4px solid rgba(136, 177, 212, 0.32);
     border-radius: 24px;
     box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 12px 40px rgba(0, 0, 0, 0.18);
+        inset 0 0 0 1px rgba(244, 251, 255, 0.08),
+        0 12px 40px rgba(24, 54, 74, 0.24);
     pointer-events: none;
 }
 
 .map-shell__chatbot-layout {
     position: relative;
+    display: flex;
+    flex: 1 1 auto;
     width: 100%;
-    height: calc(100vh - 32px);
+    height: calc(100dvh - 32px);
+    min-height: calc(100dvh - 32px);
     border-radius: 24px;
     overflow: hidden;
 }
 
 .map-shell__chatbot-body {
     position: relative;
+    display: flex;
+    flex: 1 1 auto;
     width: 100%;
     height: 100%;
+    min-height: 100%;
     overflow: hidden;
 }
 
-#map-wrapper {
+.map-shell__map-wrapper {
     position: relative;
+    flex: 1 1 auto;
     width: 100%;
     height: 100%;
+    min-height: 100%;
 }
 
 #map {

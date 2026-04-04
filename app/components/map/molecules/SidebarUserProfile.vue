@@ -9,22 +9,22 @@ const menuItems = [
         {
             label: '프로필 편집',
             icon: 'i-lucide-user',
-            onSelect: () => {},
+            onSelect: () => {}
         },
         {
             label: '설정',
             icon: 'i-lucide-settings',
-            onSelect: () => {},
-        },
+            onSelect: () => {}
+        }
     ],
     [
         {
             label: '로그아웃',
             icon: 'i-lucide-log-out',
             color: 'error' as const,
-            onSelect: () => {},
-        },
-    ],
+            onSelect: () => {}
+        }
+    ]
 ]
 </script>
 
@@ -36,12 +36,7 @@ const menuItems = [
     >
         <button type="button" class="sidebar-user">
             <slot name="icon">
-                <img
-                    v-if="image"
-                    :src="image"
-                    :alt="username"
-                    class="sidebar-user__avatar"
-                />
+                <img v-if="image" :src="image" :alt="username" class="sidebar-user__avatar" />
                 <div v-else class="sidebar-user__avatar sidebar-user__avatar--placeholder">
                     <UIcon name="i-lucide-user" class="sidebar-user__avatar-icon" />
                 </div>
@@ -66,7 +61,9 @@ const menuItems = [
     background: transparent;
     cursor: pointer;
     text-align: left;
-    transition: background var(--transition), color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition);
 }
 
 .sidebar-user:hover {

@@ -33,8 +33,8 @@ const props = withDefaults(
     }>(),
     {
         color: 'var(--ui-primary)',
-        height: 160,
-    },
+        height: 160
+    }
 )
 
 const tooltipTemplate = (d: DataPoint) => {
@@ -50,30 +50,11 @@ const tooltipTemplate = (d: DataPoint) => {
 
 <template>
     <div class="route-chart">
-        <VisXYContainer
-            :data="data"
-            :height="height"
-            :style="{ '--vis-color-main': color }"
-        >
-            <VisArea
-                :x="x"
-                :y="y"
-                :color="color"
-                :opacity="0.15"
-            />
-            <VisLine
-                :x="x"
-                :y="y"
-                :color="color"
-            />
-            <VisAxis
-                type="x"
-                :tick-format="(v: number) => `${v}${xLabel ?? ''}`"
-            />
-            <VisAxis
-                type="y"
-                :tick-format="(v: number) => `${v}${yLabel ?? ''}`"
-            />
+        <VisXYContainer :data="data" :height="height" :style="{ '--vis-color-main': color }">
+            <VisArea :x="x" :y="y" :color="color" :opacity="0.15" />
+            <VisLine :x="x" :y="y" :color="color" />
+            <VisAxis type="x" :tick-format="(v: number) => `${v}${xLabel ?? ''}`" />
+            <VisAxis type="y" :tick-format="(v: number) => `${v}${yLabel ?? ''}`" />
             <VisCrosshair :template="tooltipTemplate" />
             <VisTooltip />
         </VisXYContainer>

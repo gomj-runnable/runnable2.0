@@ -26,7 +26,7 @@ const activeNav = ref('목록')
 const navItems = [
     { icon: 'i-lucide-list', label: '목록' },
     { icon: 'i-lucide-pencil', label: '그리기' },
-    { icon: 'i-lucide-users', label: '친구' },
+    { icon: 'i-lucide-users', label: '친구' }
 ] as const
 </script>
 
@@ -36,7 +36,10 @@ const navItems = [
             <MapSidebar :collapsed="collapsed">
                 <template #header>
                     <SidebarLogo v-if="!collapsed" icon="i-lucide-map-pin" label="Runnable" />
-                    <div style="display: flex; gap: 2px; margin-left: auto">
+                    <div
+                        class="sidebar-header-actions"
+                        :class="{ 'sidebar-header-actions--collapsed': collapsed }"
+                    >
                         <SidebarIconButton
                             :icon="
                                 collapsed ? 'i-lucide-panel-left-open' : 'i-lucide-panel-left-close'
@@ -91,6 +94,18 @@ const navItems = [
 </template>
 
 <style scoped>
+.sidebar-header-actions {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+}
+
+.sidebar-header-actions--collapsed {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+}
+
 .sidebar-nav-tabs {
     display: flex;
     flex-direction: row;
