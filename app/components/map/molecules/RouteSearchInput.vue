@@ -53,7 +53,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                         autofocus
                         @keydown.escape="isOpen = false"
                     />
-                    <kbd class="route-search-trigger__kbd" style="flex-shrink:0">esc</kbd>
+                    <kbd class="route-search-trigger__kbd" style="flex-shrink: 0">esc</kbd>
                 </div>
                 <div v-if="!model" class="route-search-modal__empty">
                     <UIcon name="i-lucide-map" class="route-search-modal__empty-icon" />
@@ -62,7 +62,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                 <div v-else class="route-search-modal__empty">
                     <UIcon name="i-lucide-search-x" class="route-search-modal__empty-icon" />
                     <span>
-                        <strong>{{ model }}</strong>에 대한 결과가 없습니다
+                        <strong>{{ model }}</strong
+                        >에 대한 결과가 없습니다
                     </span>
                 </div>
             </div>
@@ -79,18 +80,27 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
     width: 100%;
     padding: 0 10px;
     height: 36px;
-    background: var(--sidebar-item-hover);
-    border: 1px solid var(--sidebar-border);
+    background: rgba(244, 251, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    outline: 1px solid rgba(144, 213, 255, 0.28);
+    outline-offset: 0;
     border-radius: var(--radius-md);
     cursor: pointer;
     text-align: left;
-    transition: background var(--transition), border-color var(--transition);
+    transition:
+        background var(--transition),
+        border-color var(--transition);
     box-sizing: border-box;
 }
 
 .route-search-trigger:hover {
-    background: var(--sidebar-item-active);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--surface-hover);
+    border-color: rgba(144, 213, 255, 0.34);
+    outline-color: rgba(144, 213, 255, 0.42);
+}
+
+.route-search-trigger:focus-visible {
+    outline-color: rgba(144, 213, 255, 0.64);
 }
 
 .route-search-trigger__icon {
@@ -122,8 +132,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
     min-width: 20px;
     height: 20px;
     padding: 0 4px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--sidebar-border);
+    background: rgba(244, 251, 255, 0.08);
+    border: 1px solid var(--border-subtle);
     border-radius: 4px;
     font-size: 11px;
     color: var(--sidebar-icon-color);

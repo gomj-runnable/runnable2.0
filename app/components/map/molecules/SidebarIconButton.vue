@@ -35,7 +35,9 @@ defineEmits<{ click: [] }>()
     background: transparent;
     cursor: pointer;
     color: var(--sidebar-icon-color);
-    transition: color var(--transition), background var(--transition);
+    transition:
+        color var(--transition),
+        background var(--transition);
     flex-shrink: 0;
 }
 

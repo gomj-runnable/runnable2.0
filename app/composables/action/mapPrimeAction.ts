@@ -42,6 +42,8 @@ export const mapPrimeAction = () => {
         const positions = coords?.map(([lon, lat, alt]: Position) =>
             window.Cesium.Cartesian3.fromDegrees(lon, lat, alt ?? 0)
         )
+
+        if (positions === undefined) return
         const bs = window.Cesium.BoundingSphere.fromPoints(positions)
         const range = (bs.radius / Math.tan(window.viewer.camera.frustum.fov / 2)) * 3
         window.viewer.camera.flyToBoundingSphere(bs, {
