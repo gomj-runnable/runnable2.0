@@ -80,6 +80,7 @@ molecules를 slot으로 조합하는 레이아웃 단위 컴포넌트를 둔다.
 현재 구현된 templates (지도 페이지 기준):
 - `MapSidebar.vue` — 사이드바 전체 (header / body / footer 세 slot)
 - `MapShell.vue` — 사이드바 + 뷰어 전체 Shell (sidebar / default / overlay 세 slot)
+- `RouteSaveModal.vue` — 그리기 저장용 팝업 (route title / description / distance 확인)
 
 ## MapShell 슬롯 구조
 
@@ -134,29 +135,41 @@ const sidebarTextButtons = [
 </template>
 ```
 
-## CSS 변수 (map.css 기준)
+## CSS 자산 구조
 
-사이드바 관련 CSS 변수는 `app/assets/css/map.css`의 `:root`에서 관리한다.
+- 디자인 토큰(color-family, font, size, radius, effect)은 `app/assets/css/constant.css`에서 통합 관리한다
+- 전역 엔트리 CSS는 `app/assets/css/main.css`이며 `constant.css`를 먼저 import 한다
+- 지도 전용 semantic 변수와 전역 지도 스타일은 `app/assets/css/map.css`에서 관리한다
+- 컴포넌트와 template 스타일은 Vue 파일 안에 직접 쓰지 말고 `app/assets/css/components/<page>/.../*.css`로 분리한다
+- 페이지 조합 스타일은 `app/assets/css/pages/*.css`로 분리하고 Vue 파일에서는 `<style scoped src=\"...\">`만 사용한다
+- 팝업/모달 UI도 page에 직접 쓰지 말고 `templates/`로 분리한다
+
+## CSS 변수 (constant.css + map.css 기준)
+
+공통 규격은 `app/assets/css/constant.css`, 지도 semantic 변수는 `app/assets/css/map.css`의 `:root`에서 관리한다.
 
 ```css
---sidebar-width: 132px;
---sidebar-bg: #0d0d0d;
---sidebar-border: rgba(255, 255, 255, 0.06);
---sidebar-icon-color: rgba(255, 255, 255, 0.45);
---sidebar-icon-hover: rgba(255, 255, 255, 0.85);
---sidebar-item-hover: rgba(255, 255, 255, 0.05);
---sidebar-item-active: rgba(255, 255, 255, 0.09);
+--color-brand-primary: #90d5ff;
+--color-text-strong: #18364a;
+--font-size-sm: 13px;
+--radius-md: 8px;
+--sidebar-bg: var(--color-surface-base);
+--sidebar-border: var(--color-border-default);
+--sidebar-item-hover: var(--color-surface-soft-hover);
 ```
 
-새로운 컴포넌트에서 색상/크기 값을 하드코딩하지 말고 이 변수를 참조한다.
+새로운 컴포넌트에서 색상/글꼴/크기 값을 하드코딩하지 말고 이 변수를 참조한다.
 
 ## 컴포넌트 설계 원칙
 
 - **slot 우선** — 내용은 slot으로 받는다. props로 내용을 고정하면 확장이 막힌다
 - **데이터는 props, 구조는 slot** — 데이터(label, icon, active)는 props, 레이아웃 구조는 slot
 - **emit으로 인터랙션 전달** — composable 또는 상태 변경 로직을 컴포넌트 안에 넣지 않는다
-- **CSS 변수 참조** — 색상/크기 값은 map.css 변수에서 가져온다
-- **scoped 스타일** — 컴포넌트 스타일은 `<style scoped>`로 격리한다 (POI 마커 등 Cesium이 DOM에 직접 주입하는 전역 스타일은 예외)
+- **CSS 변수 참조** — 색상/글꼴/크기 값은 `constant.css`와 `map.css` 변수에서 가져온다
+- **외부 CSS 분리** — 컴포넌트 스타일 정의는 `.vue` 안에 직접 쓰지 말고 외부 `.css` 파일로 분리한다
+- **style src 사용** — Vue 파일에서는 `<style scoped src=\"...\">`만 사용하고, 실제 정의는 외부 CSS 파일에 둔다
+- **전역 스타일 예외** — POI 마커 등 Cesium이 DOM에 직접 주입하는 전역 스타일만 `map.css`에 둔다
+- **저장 팝업 규칙** — `_drawAction()` 응답을 직접 template에서 가공하지 말고 `shared/schemas/route.schema.ts`의 class를 통해 route payload로 변환한 뒤 modal submit에서 저장한다
 
 ## 새 컴포넌트 추가 절차
 
@@ -166,13 +179,15 @@ const sidebarTextButtons = [
    - 여러 molecule을 조합하는 레이아웃 → `templates/`
 3. Flat API(props)와 Compound API(slot) 중 무엇을 제공할지 결정한다
 4. props → slot → emit 순서로 인터페이스를 설계한다
-5. 스타일은 CSS 변수를 참조하는 scoped 스타일로 작성한다
-6. 페이지(`index.vue`)에서 template를 통해 조합한다
+5. 스타일은 외부 CSS 파일에 작성하고 Vue 파일에서는 `style src`로 연결한다
+6. 색상/글꼴/크기 토큰은 `constant.css`, 지도 semantic 변수는 `map.css`에서 참조한다
+7. 페이지(`index.vue`)에서 template를 통해 조합한다
 
 ## 점검 항목
 
 - molecule이 composable이나 전역 상태에 직접 의존하지 않는가
 - template이 내용을 직접 렌더링하지 않고 slot으로 위임하는가
 - 확장 지점(slot)이 미리 명시되어 있는가
-- CSS 값이 map.css 변수를 참조하고 있는가
+- CSS 값이 `constant.css` 또는 `map.css` 변수를 참조하고 있는가
+- `.vue` 파일 안에 스타일 정의가 남아 있지 않고 외부 CSS로 분리되어 있는가
 - 페이지가 template 조합만 수행하고 있는가

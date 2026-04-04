@@ -4,6 +4,32 @@ export interface MapPrimeEntity {
     [key: string]: unknown
 }
 
+export interface DrawActionData {
+    area?: number
+    distance?: number
+    heights?: number[]
+    GeoJSON?: Record<string, unknown>
+    positions?: unknown[]
+    wgs84Array?: number[][]
+    unit?: string
+    averageElevation?: string
+    gridGeoJSON?: Record<string, unknown>
+    gridSampleHeight?: number[]
+}
+
+export interface DrawActionResponse {
+    data?: DrawActionData
+    state?: string
+}
+
+export interface DrawActionError {
+    state?: string
+    code?: string
+    message?: string
+}
+
+export type DrawActionResult = DrawActionResponse | DrawActionError | null
+
 interface CesiumCartesian3 {
     x: number
     y: number
@@ -26,7 +52,7 @@ interface DivPoiOptions {
     pointerEvents: boolean
 }
 
-interface MapPrimeViewer {
+export interface MapPrimeViewer {
     camera: {
         heading: number
         pitch: number
@@ -41,6 +67,11 @@ interface MapPrimeViewer {
     _createDivPOI(options: DivPoiOptions): void
     _removeGraphic(entity: MapPrimeEntity | null): void
     _createEntity(type: string, options: Record<string, unknown>): MapPrimeEntity
+    _drawAction(options: {
+        shapeType: number
+        showLabel?: boolean
+        stopDrawElement?: HTMLElement
+    }): Promise<DrawActionResult>
 }
 
 interface CesiumInstance {

@@ -22,47 +22,4 @@ defineEmits<{ click: [] }>()
     </button>
 </template>
 
-<style scoped>
-.sidebar-route-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: left;
-    transition:
-        background var(--transition),
-        color var(--transition);
-}
-
-.sidebar-route-item:hover {
-    background: var(--sidebar-item-hover);
-    color: var(--text-primary);
-}
-
-.sidebar-route-item--active {
-    background: var(--sidebar-item-active);
-    color: var(--text-primary);
-}
-
-.sidebar-route-item__icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-    opacity: 0.6;
-}
-
-.sidebar-route-item__label {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-</style>
+<style scoped src="~/assets/css/components/map/molecules/SidebarRouteItem.css"></style>
