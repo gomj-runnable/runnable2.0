@@ -15,9 +15,12 @@
 - `app/composables/` 책임 분리 작업: `.claude/skills/runnable-composables/SKILL.md`
 - 토큰을 아껴야 하는 작업: `.claude/commands/lean.md`
 
+컴포넌트/UI/layout 작업에는 `app/assets/css/primitive.css`, `app/assets/css/semantic.css`, `app/assets/css/map.css`, `app/assets/css/components/**`, `app/assets/css/pages/**`의 토큰/스타일 경계 정리도 포함한다.
+
 ## Expected Workflow
 
 - 작업 전 `CLAUDE.md`에서 현재 변경 범위와 직접 관련된 규칙을 먼저 확인한다.
 - 변경이 architecture, components, composables 중 하나에 해당하면 대응되는 `.claude/skills/*/SKILL.md`도 함께 참고한다.
+- CSS 토큰 구조를 바꾸거나 공통 스타일을 통합할 때는 `CLAUDE.md`의 token 계층 규칙과 `runnable-components` 스킬의 CSS 규칙을 함께 따른다.
 - 문서 내용을 복제하기보다 기존 `.claude` 문서를 기준으로 구현과 리뷰를 진행한다.
 - 새 프로젝트 규칙이 생기면 가능하면 `CLAUDE.md` 또는 `.claude/skills`를 갱신하고, 이 파일에는 연결 정보만 최소한으로 유지한다.

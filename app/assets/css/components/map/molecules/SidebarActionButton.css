@@ -1,28 +1,15 @@
 .sidebar-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    width: 100%;
-    padding: 7px var(--space-5);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border-accent);
-    background: var(--color-surface-softer);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
+    --map-button-gap: var(--gap-section-sm);
+    --map-button-width: 100%;
+    --map-button-padding: var(--gap-5) var(--gap-5);
+    --map-button-border: 1px solid var(--color-border-accent);
+    --map-button-bg: var(--color-surface-softer);
+    --map-button-color: var(--text-secondary);
+    --map-button-hover-bg: var(--surface-hover);
+    --map-button-hover-color: var(--text-on-dark);
+    --map-button-hover-border: var(--color-border-accent-strong);
+    font-size: var(--text-label-sm);
     font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition:
-        background var(--transition),
-        color var(--transition),
-        border-color var(--transition);
-    white-space: nowrap;
-}
-
-.sidebar-action-btn:hover {
-    background: var(--surface-hover);
-    color: var(--text-on-dark);
-    border-color: var(--color-border-accent-strong);
 }
 
 .sidebar-action-btn__icon {

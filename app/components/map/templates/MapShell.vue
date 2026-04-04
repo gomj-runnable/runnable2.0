@@ -35,7 +35,7 @@ const toggleSidebar = () => {
         <aside
             v-if="!props.hideSidebar"
             class="map-shell__sidebar"
-            :class="{ 'map-shell__sidebar--collapsed': isSidebarCollapsed }"
+            :class="{ 'is-collapsed': isSidebarCollapsed }"
         >
             <slot name="sidebar" :collapsed="isSidebarCollapsed" :toggle-sidebar="toggleSidebar" />
         </aside>

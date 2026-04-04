@@ -42,7 +42,7 @@ const routeDistance = computed(() => new RouteDraftBuilder(drawMetrics.value).ge
 
 const createDefaultSectionAttr = (index: number): SectionAttrSchema => ({
     seq: index,
-    name: `구간${index}`,
+    name: undefined,
     comment: undefined,
     description: undefined
 })
@@ -247,7 +247,7 @@ watch(activeNav, async (nextNav, prevNav) => {
 
                 <template #default>
                     <template v-if="activeNav === '목록'">
-                        <div class="sidebar-section-label">경로 검색</div>
+                        <div class="map-section-label">경로 검색</div>
                         <RouteSearchInput v-model="searchQuery" />
                     </template>
                     <DrawRoutePanel

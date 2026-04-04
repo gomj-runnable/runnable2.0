@@ -3,7 +3,8 @@
 
 @import "tailwindcss";
 @import "@nuxt/ui";
-@import '~/assets/css/constant.css';
+@import '~/assets/css/primitive.css';
+@import '~/assets/css/semantic.css';
 
 html,
 body {

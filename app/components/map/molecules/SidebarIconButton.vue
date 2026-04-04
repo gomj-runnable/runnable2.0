@@ -11,8 +11,8 @@ defineEmits<{ click: [] }>()
 <template>
     <button
         type="button"
-        class="sidebar-icon-btn"
-        :class="{ 'sidebar-icon-btn--active': active }"
+        class="map-button sidebar-icon-btn"
+        :class="{ 'is-active': active }"
         :aria-label="label"
         :title="label"
         @click="$emit('click')"
