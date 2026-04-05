@@ -4,13 +4,21 @@ export interface MapPrimeEntity {
     [key: string]: unknown
 }
 
+export interface MapPrimePosition {
+    x: number
+    y: number
+    z: number
+}
+
+export type Wgs84Coordinate = [number, number] | [number, number, number]
+
 export interface DrawActionData {
     area?: number
     distance?: number
     heights?: number[]
     GeoJSON?: Record<string, unknown>
-    positions?: unknown[]
-    wgs84Array?: number[][]
+    positions?: MapPrimePosition[]
+    wgs84Array?: Wgs84Coordinate[]
     unit?: string
     averageElevation?: string
     gridGeoJSON?: Record<string, unknown>
@@ -29,12 +37,6 @@ export interface DrawActionError {
 }
 
 export type DrawActionResult = DrawActionResponse | DrawActionError | null
-
-interface CesiumCartesian3 {
-    x: number
-    y: number
-    z: number
-}
 
 interface CesiumBoundingSphere {
     radius: number
@@ -65,8 +67,15 @@ export interface MapPrimeViewer {
     extend(extension: unknown, options: Record<string, unknown>): void
     _removeDivPOI(id: string): void
     _createDivPOI(options: DivPoiOptions): void
+    _removeEntity(entity: MapPrimeEntity | null): void
     _removeGraphic(entity: MapPrimeEntity | null): void
     _createEntity(type: string, options: Record<string, unknown>): MapPrimeEntity
+    _createPoint(options: {
+        positions: MapPrimePosition | MapPrimePosition[]
+        color?: string
+        opacity?: number
+        clampToGround?: boolean
+    }): MapPrimeEntity[]
     _drawAction(options: {
         shapeType: number
         showLabel?: boolean
@@ -79,10 +88,10 @@ interface CesiumInstance {
     HorizontalOrigin: { CENTER: number; LEFT: number; RIGHT: number }
     VerticalOrigin: { TOP: number; CENTER: number; BOTTOM: number; BASELINE: number }
     Cartesian3: {
-        fromDegrees(longitude: number, latitude: number, height?: number): CesiumCartesian3
+        fromDegrees(longitude: number, latitude: number, height?: number): MapPrimePosition
     }
     BoundingSphere: {
-        fromPoints(positions: CesiumCartesian3[]): CesiumBoundingSphere
+        fromPoints(positions: MapPrimePosition[]): CesiumBoundingSphere
     }
     HeadingPitchRange: new (heading: number, pitch: number, range: number) => unknown
 }

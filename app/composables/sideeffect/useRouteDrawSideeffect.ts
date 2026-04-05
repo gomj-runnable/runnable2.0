@@ -1,5 +1,10 @@
 import type { Ref, ShallowRef } from 'vue'
-import type { DrawActionData, MapPrimeEntity, MapPrimeViewer } from '~/composables/useWindow'
+import type {
+    DrawActionData,
+    MapPrimeEntity,
+    MapPrimePosition,
+    MapPrimeViewer
+} from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import { createSectionSchema } from '#shared/schemas/route.schema'
 import {
@@ -12,7 +17,7 @@ import {
 
 interface UseRouteDrawSideeffectOptions {
     viewer: ShallowRef<MapPrimeViewer | null>
-    drawnPositions: Ref<unknown[] | null>
+    drawnPositions: Ref<MapPrimePosition[] | null>
     drawMetrics: Ref<DrawActionData | null>
     sectionDraft: Ref<CreateSectionSchema | null>
     sectionPointRanges: Ref<Array<{ start: number; end: number }>>
@@ -20,36 +25,47 @@ interface UseRouteDrawSideeffectOptions {
     resetRouteDrawState: () => void
 }
 
-export const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
-    const drawnSectionPolylines = shallowRef<MapPrimeEntity[]>([])
-    const drawnSectionMarkers = shallowRef<MapPrimeEntity[]>([])
+const SECTION_COLORS = ['#57B9FF', '#FF7A59', '#7AD957', '#F7C948', '#A78BFA', '#FF5FA2'] as const
+const SECTION_START_MARKER_COLOR = '#FFFFFF'
 
-    const createPolyline = (positions: unknown): MapPrimeEntity | null => {
+const getSectionColor = (rangeStartIndex: number): string =>
+    SECTION_COLORS[rangeStartIndex % SECTION_COLORS.length] ?? SECTION_COLORS[0]
+
+const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
+    const drawnSectionPolylines = shallowRef<MapPrimeEntity[]>([])
+    const drawnSectionPoints = shallowRef<MapPrimeEntity[][]>([])
+
+    const drawSection = (
+        positions: MapPrimePosition[],
+        rangeStartIndex: number
+    ): MapPrimeEntity | null => {
         if (!options.viewer.value) {
             return null
         }
 
-        return options.viewer.value._createEntity('polyline', {
+        const color = getSectionColor(rangeStartIndex)
+
+        const polyline = options.viewer.value._createEntity('polyline', {
             positions,
-            width: 8,
-            clampToGround: false,
-            color: '#57B9FF',
+            width: 4,
+            clampToGround: true,
+            color,
             opacity: 0.95
         })
+
+        return polyline
     }
 
-    const createSectionStartMarker = (position: unknown): MapPrimeEntity | null => {
+    const createRoutePoint = (position: MapPrimePosition, color: string): MapPrimeEntity[] => {
         if (!options.viewer.value) {
-            return null
+            return []
         }
 
-        return options.viewer.value._createEntity('point', {
-            position,
-            pixelSize: 10,
-            color: '#CCFF00',
-            outlineColor: '#131416',
-            outlineWidth: 2,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+        return options.viewer.value._createPoint({
+            positions: position,
+            color,
+            opacity: 0.95,
+            clampToGround: true
         })
     }
 
@@ -61,15 +77,25 @@ export const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) =
         entities.forEach((entity) => options.viewer.value?._removeGraphic(entity))
     }
 
+    const removePointEntities = (entityGroups: MapPrimeEntity[][]) => {
+        if (!options.viewer.value) {
+            return
+        }
+
+        entityGroups.flat().forEach((entity) => options.viewer.value?._removeEntity(entity))
+    }
+
     const clearSectionGraphics = () => {
         removeGraphics(drawnSectionPolylines.value)
-        removeGraphics(drawnSectionMarkers.value)
+        removePointEntities(drawnSectionPoints.value)
         drawnSectionPolylines.value = []
-        drawnSectionMarkers.value = []
+        drawnSectionPoints.value = []
     }
 
     const redrawSectionGraphics = () => {
-        const positions = Array.isArray(options.drawnPositions.value) ? options.drawnPositions.value : []
+        const positions = Array.isArray(options.drawnPositions.value)
+            ? options.drawnPositions.value
+            : []
         const ranges = options.sectionPointRanges.value
 
         clearSectionGraphics()
@@ -82,17 +108,28 @@ export const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) =
             .map((range) => {
                 const sectionPoints = positions.slice(range.start, range.end + 1)
 
-                return sectionPoints.length >= 2 ? createPolyline(sectionPoints) : null
+                return sectionPoints.length >= 2 ? drawSection(sectionPoints, range.start) : null
             })
             .filter((entity): entity is MapPrimeEntity => entity !== null)
 
-        drawnSectionMarkers.value = ranges
-            .map((range) => {
-                const startPoint = positions[range.start]
+        const routePointEntities: MapPrimeEntity[][] = []
+        const firstPoint = positions[0]
 
-                return startPoint ? createSectionStartMarker(startPoint) : null
-            })
-            .filter((entity): entity is MapPrimeEntity => entity !== null)
+        if (firstPoint) {
+            routePointEntities.push(createRoutePoint(firstPoint, SECTION_START_MARKER_COLOR))
+        }
+
+        ranges.forEach((range) => {
+            const endPoint = positions[range.end]
+
+            if (!endPoint) {
+                return
+            }
+
+            routePointEntities.push(createRoutePoint(endPoint, getSectionColor(range.start)))
+        })
+
+        drawnSectionPoints.value = routePointEntities
     }
 
     const handleDrawReset = async () => {
@@ -159,7 +196,10 @@ export const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) =
             return
         }
 
-        options.sectionPointRanges.value = mergeSectionPointRanges(options.sectionPointRanges.value, index)
+        options.sectionPointRanges.value = mergeSectionPointRanges(
+            options.sectionPointRanges.value,
+            index
+        )
         options.sectionDraft.value = removeSectionDraftAttr(options.sectionDraft.value, index)
         redrawSectionGraphics()
     }
@@ -171,3 +211,4 @@ export const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) =
         handleRemoveSection
     }
 }
+export default useRouteDrawSideeffect
