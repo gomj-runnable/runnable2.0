@@ -9,16 +9,3 @@
     justify-content: center;
     margin-left: 0;
 }
-
-.sidebar-nav-tabs {
-    display: flex;
-    flex-direction: row;
-    gap: var(--gap-section-2xs);
-    padding: var(--gap-section-sm) var(--gap-section-md);
-}
-
-.sidebar-nav-icons {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-}

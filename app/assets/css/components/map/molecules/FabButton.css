@@ -1,0 +1,55 @@
+.fab-button {
+    --map-button-width: 56px;
+    --map-button-height: 56px;
+    --map-button-padding: 0;
+    --map-button-border: none;
+    --map-button-radius: var(--radius-round);
+    --map-button-bg: var(--secondary-color);
+    --map-button-color: var(--text-on-primary);
+    --map-button-hover-bg: var(--primary-color);
+    --map-button-hover-border: transparent;
+    --map-button-hover-shadow: var(--shadow-md);
+    --map-button-active-bg: var(--primary-color);
+    --map-button-active-border: transparent;
+    --map-button-active-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.fab-button--small {
+    --map-button-width: 40px;
+    --map-button-height: 40px;
+}
+
+.fab-button--large {
+    --map-button-width: 72px;
+    --map-button-height: 72px;
+}
+
+.fab-button.is-extended {
+    --map-button-width: auto;
+    --map-button-padding: 0 var(--gap-section-lg);
+    --map-button-gap: var(--gap-section-sm);
+}
+
+.fab-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.56;
+    box-shadow: none;
+}
+
+.fab-button__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.fab-button--large .fab-button__icon {
+    width: 24px;
+    height: 24px;
+}
+
+.fab-button__label {
+    line-height: 1;
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-semibold);
+}

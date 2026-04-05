@@ -71,7 +71,7 @@
     --radius-surface-lg: var(--size-10);
     --radius-round: 9999px;
 
-    --size-sidebar-expanded: 240px;
+    --size-sidebar-expanded: 280px;
     --size-sidebar-collapsed: 64px;
     --size-control-xs: var(--size-8);
     --size-control-sm: 1.25rem;
@@ -219,15 +219,15 @@
     /* --action-disabled: ; */
     /* --action-focus-ring: ; */
 
-    /* input role */
-    /* --input-bg: ; */
-    /* --input-bg-disabled: ; */
-    /* --input-border: ; */
-    /* --input-border-hover: ; */
-    /* --input-border-active: ; */
-    /* --input-border-error: ; */
-    /* --input-text: ; */
-    /* --input-placeholder: ; */
+    /* inputs role */
+    /* --inputs-bg: ; */
+    /* --inputs-bg-disabled: ; */
+    /* --inputs-border: ; */
+    /* --inputs-border-hover: ; */
+    /* --inputs-border-active: ; */
+    /* --inputs-border-error: ; */
+    /* --inputs-text: ; */
+    /* --inputs-placeholder: ; */
 
     /* button role */
     /* --button-primary-bg: ; */

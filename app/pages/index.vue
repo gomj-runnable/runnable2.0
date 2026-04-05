@@ -4,13 +4,12 @@ import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/rou
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
 import MapShell from '~/components/map/templates/MapShell.vue'
 import MapSidebar from '~/components/map/templates/MapSidebar.vue'
+import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
 import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
 import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
-import SidebarIconButton from '~/components/map/molecules/SidebarIconButton.vue'
-import SidebarLogo from '~/components/map/molecules/SidebarLogo.vue'
+import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/SidebarUserProfile.vue'
-import SidebarTextButton from '~/components/map/molecules/SidebarTextButton.vue'
-import RouteSearchInput from '~/components/map/molecules/RouteSearchInput.vue'
+import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 
 definePageMeta({ ssr: false, layout: 'map' })
 
@@ -206,49 +205,33 @@ watch(activeNav, async (nextNav, prevNav) => {
         <template #sidebar="{ collapsed, toggleSidebar }">
             <MapSidebar :collapsed="collapsed">
                 <template #header>
-                    <SidebarLogo v-if="!collapsed" icon="i-lucide-map-pin" label="Runnable" />
+                    <IconButton v-if="!collapsed" icon="i-lucide-map-pin" label="Runnable" />
                     <div
                         class="sidebar-header-actions"
                         :class="{ 'sidebar-header-actions--collapsed': collapsed }"
                     >
-                        <SidebarIconButton
+                        <IconButton
                             :icon="
                                 collapsed ? 'i-lucide-panel-left-open' : 'i-lucide-panel-left-close'
                             "
-                            :label="collapsed ? '패널 열기' : '패널 닫기'"
                             @click="toggleSidebar"
                         />
                     </div>
                 </template>
 
                 <template #subheader>
-                    <div v-if="!collapsed" class="sidebar-nav-tabs">
-                        <SidebarTextButton
-                            v-for="item in navItems"
-                            :key="item.label"
-                            :icon="item.icon"
-                            :label="item.label"
-                            :active="activeNav === item.label"
-                            @click="activeNav = item.label"
-                        />
-                    </div>
-                    <div v-else class="sidebar-nav-icons">
-                        <SidebarTextButton
-                            v-for="item in navItems"
-                            :key="item.label"
-                            :icon="item.icon"
-                            :label="item.label"
-                            :active="activeNav === item.label"
-                            :collapsed="true"
-                            @click="activeNav = item.label"
-                        />
-                    </div>
+                    <MapSidebarTabs v-model="activeNav" :items="navItems" :collapsed="collapsed" />
                 </template>
 
                 <template #default>
                     <template v-if="activeNav === '목록'">
                         <div class="map-section-label">경로 검색</div>
-                        <RouteSearchInput v-model="searchQuery" />
+                        <Textfield
+                            v-model="searchQuery"
+                            type="search"
+                            placeholder="경로 이름으로 검색"
+                            leading-icon="i-lucide-search"
+                        />
                     </template>
                     <DrawRoutePanel
                         v-else-if="activeNav === '그리기'"
