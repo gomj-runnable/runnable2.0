@@ -27,10 +27,10 @@
     --color-surface-canvas-base: var(--color-gray-90);
     --color-surface-brand-900-92: color-mix(in srgb, var(--color-gray-90) 92%, transparent);
     --color-surface-brand-900-86: color-mix(in srgb, var(--color-gray-90) 86%, transparent);
-    --color-white-06: rgba(255, 255, 0, 0.06);
-    --color-white-08: rgba(255, 255, 0, 0.08);
-    --color-white-04: rgba(255, 255, 0, 0.04);
-    --color-white-02: rgba(255, 255, 0, 0.02);
+    --color-white-06: rgba(255, 255, 255, 0.06);
+    --color-white-08: rgba(255, 255, 255, 0.08);
+    --color-white-04: rgba(255, 255, 255, 0.04);
+    --color-white-02: rgba(255, 255, 255, 0.02);
     --color-brand-primary-12: rgba(204, 255, 0, 0.12);
     --color-brand-secondary-18: rgba(255, 255, 0, 0.18);
     --color-brand-secondary-24: rgba(255, 255, 0, 0.24);
