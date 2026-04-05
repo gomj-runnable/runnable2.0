@@ -40,4 +40,4 @@ const handleSelect = (label: string) => {
     </div>
 </template>
 
-<style scoped src="~/assets/css/components/map/templates/MapSidebarTabs.css"></style>
+<style scoped src="~/assets/css/components/templates/MapSidebarTabs.css"></style>

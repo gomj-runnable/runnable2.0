@@ -54,4 +54,4 @@ const toggleSidebar = () => {
     </div>
 </template>
 
-<style scoped src="~/assets/css/components/map/templates/MapShell.css"></style>
+<style scoped src="~/assets/css/components/templates/MapShell.css"></style>

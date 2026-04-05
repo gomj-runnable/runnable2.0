@@ -95,4 +95,4 @@ const formatDistance = (distance?: number) => {
     </UModal>
 </template>
 
-<style scoped src="~/assets/css/components/map/templates/RouteSaveModal.css"></style>
+<style scoped src="~/assets/css/components/templates/RouteSaveModal.css"></style>

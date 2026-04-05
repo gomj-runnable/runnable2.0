@@ -63,4 +63,4 @@ const toggleValue = (value: string) => {
     </div>
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/SegmentedButton.css"></style>
+<style scoped src="~/assets/css/components/molecules/buttons/SegmentedButton.css"></style>

@@ -61,7 +61,7 @@
 - 문서를 수정할 때는 실제 디렉터리 구조와 서비스 목적이 일치해야 한다.
 - 디자인 토큰은 `primitive -> semantic -> feature CSS` 순서로 계층을 유지한다.
 - primitive token은 값 자체만 두고, semantic token은 역할 이름으로 재매핑한다.
-- feature CSS(`map.css`, `components/**`, `pages/**`)에는 토큰 정의보다 실제 UI 규칙을 우선 둔다.
+- feature CSS(`components/**`, `pages/**`)에는 토큰 정의보다 실제 UI 규칙을 우선 둔다.
 
 ## 에이전트 작업 규칙
 
@@ -87,15 +87,17 @@
 
 ### CSS 토큰과 스타일 경계
 
-- raw value token은 `app/assets/css/primitive.css`에 둔다.
-- semantic token은 `app/assets/css/semantic.css`에 두고, primitive token을 역할 이름으로 매핑한다.
-- 전역 CSS 엔트리는 `app/assets/css/base/main.css`이며, `primitive.css`, `semantic.css`, 공통 map CSS 순서의 import를 기준으로 본다.
+- raw value token은 `app/assets/css/base/primitive.css`에 둔다.
+- semantic token은 `app/assets/css/base/semantic.css`에 두고, primitive token을 역할 이름으로 매핑한다.
+- 전역 CSS 엔트리는 `app/assets/css/base/main.css`이며, `primitive.css`, `semantic.css`, `components/common.css` 순서의 import를 기준으로 본다.
 - 지도 전역 레이아웃과 지도 DOM 전용 스타일은 `app/assets/css/base/main.css`의 전역 블록에서 관리한다.
 - `app/assets/css/components/**`는 컴포넌트 단위 스타일만 둔다.
 - `app/assets/css/pages/**`는 페이지 조합 스타일만 둔다.
+- 현재 외부 CSS 경계는 `app/assets/css/components/templates/**`, `app/assets/css/components/molecules/**`, `app/assets/css/components/organization/**`, `app/assets/css/components/common.css`를 기본으로 본다.
 - 숫자/색상/px 값을 컴포넌트 CSS에 직접 반복 선언하기보다 semantic token을 먼저 추가할 수 있는지 검토한다.
 - 동일한 버튼, 카드, 입력, 라벨 골격이 반복되면 공용 CSS 블록으로 통합하고, 개별 컴포넌트는 modifier 또는 CSS 변수 override 중심으로 유지한다.
 - 상태 표현은 `.active`, `.collapse`, `.w480` 같은 의미가 좁거나 값 중심인 이름보다 `.is-active`, `.is-collapsed` 같은 상태 이름과 semantic token 조합을 우선한다.
+- 경로 정리나 UI 변경 후 더 이상 쓰지 않는 class, CSS variable override, 구분선 pseudo-element 같은 잔재는 바로 제거한다.
 
 ### 지도 엔진 연동
 
@@ -183,6 +185,18 @@
 - 하나의 composable이 `action`, `sideeffect`, `store`의 책임을 동시에 수행하지 않는지 확인한다.
 - 브라우저 전용 지도 엔진 접근이 페이지에 직접 남아 있지 않은지 확인한다.
 - 외부 지도 서버 호출이 프론트엔드에서 직접 수행되지 않는지 확인한다.
+
+## 빠른 판단표
+
+- 화면 조합 변경: `app/pages/` 또는 `app/components/<page>/templates/`
+- 재사용 UI 추가: `app/components/<page>/molecules/`, `app/components/<page>/templates/`
+- 외부 CSS 수정: `app/assets/css/components/**`, `app/assets/css/pages/**`
+- 토큰 수정: `app/assets/css/base/primitive.css`, `app/assets/css/base/semantic.css`
+- 순수 계산 로직: `app/composables/action/`
+- 외부 API, 브라우저 API, 지도 초기화: `app/composables/sideeffect/`
+- 공유 상태: `app/composables/store/`
+- 공통 타입, 스키마, fixture: `shared/**`
+- API, 프록시, 인증, DB: `server/**`
 
 ## 현재 .claude Skill
 
