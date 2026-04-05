@@ -1,4 +1,4 @@
-import type { DrawActionData } from '~/composables/useWindow'
+import type { DrawActionData, MapPrimePosition } from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import { RouteDraftBuilder } from '#shared/schemas/route.schema'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
@@ -6,7 +6,7 @@ import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 export const useRouteDrawStore = () => {
     const searchQuery = ref('')
     const activeNav = ref('목록')
-    const drawnPositions = ref<unknown[] | null>(null)
+    const drawnPositions = ref<MapPrimePosition[] | null>(null)
     const drawMetrics = ref<DrawActionData | null>(null)
     const sectionDraft = ref<CreateSectionSchema | null>(null)
     const sectionPointRanges = ref<SectionPointRange[]>([])

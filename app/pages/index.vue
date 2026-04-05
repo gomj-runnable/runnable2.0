@@ -9,6 +9,8 @@ import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
+import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
+import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
 
 definePageMeta({ ssr: false })
 
