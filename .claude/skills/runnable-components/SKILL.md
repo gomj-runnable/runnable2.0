@@ -1,6 +1,6 @@
 ---
 name: runnable-components
-description: This skill should be used when the user asks to "컴포넌트 구조를 정리", "UI 컴포넌트를 추가", "Toss 디자인 시스템 원칙에 맞게 구현", "atoms/templates 계층을 설계", "사이드바/지도 shell 컴포넌트를 수정"해야 할 때.
+description: This skill should be used when the user asks to "컴포넌트 구조를 정리", "UI 컴포넌트를 추가", "Toss 디자인 시스템 원칙에 맞게 구현", "molecules/templates 계층을 설계", "사이드바/지도 shell 컴포넌트를 수정"해야 할 때.
 ---
 
 # Runnable Components Skill
@@ -21,7 +21,11 @@ props만으로 기본 사용이 가능한 단순한 인터페이스를 제공한
 
 ```vue
 <!-- 간단한 경우: props만으로 사용 -->
-<MapSidebar logo-icon="i-lucide-map-pin" logo-label="Runnable" />
+<MapSidebar>
+  <template #header>
+    <IconButton icon="i-lucide-map-pin" label="Runnable" />
+  </template>
+</MapSidebar>
 ```
 
 ### Compound API
@@ -32,11 +36,11 @@ slot과 sub-component 조합으로 자유로운 커스텀이 가능한 인터페
 <!-- 커스텀이 필요한 경우: slot으로 조합 -->
 <MapSidebar>
   <template #header>
-    <SidebarLogo icon="i-lucide-map-pin" label="Runnable" />
-    <SidebarIconButton icon="i-lucide-search" label="검색" />
+    <IconButton icon="i-lucide-map-pin" label="Runnable" />
+    <IconButton icon="i-lucide-panel-left-close" />
   </template>
   <template #default>
-    <SidebarActionButton icon="i-lucide-plus">새 경로</SidebarActionButton>
+    <PushButton label="새 경로" />
   </template>
   <template #footer>
     <SidebarUserProfile />
@@ -61,13 +65,16 @@ slot과 sub-component 조합으로 자유로운 커스텀이 가능한 인터페
 - emit으로 사용자 인터랙션을 외부에 전달한다
 
 현재 구현된 molecules (지도 페이지 기준):
-- `SidebarLogo.vue` — 브랜드 로고 (icon + label, 각각 slot으로 교체 가능)
-- `SidebarIconButton.vue` — 아이콘 전용 버튼 (active 상태, aria-label 필수)
-- `SidebarActionButton.vue` — CTA 버튼 (icon prop + default slot)
-- `SidebarTextButton.vue` — 텍스트 중심 버튼 (축소 상태에서는 icon + label 조합 가능)
-- `SidebarRouteItem.vue` — 경로 목록 아이템 (trailing slot으로 배지 추가 가능)
-- `SidebarUserProfile.vue` — 유저/로그인 영역 (image prop 또는 icon slot)
-- `RouteSearchInput.vue` — 사이드바/패널 공용 검색 입력 필드
+- `molecules/buttons/Button.vue` — 공용 버튼 (appearance + role + size 조합)
+- `molecules/buttons/IconButton.vue` — 아이콘 중심 버튼
+- `molecules/buttons/PushButton.vue` — Apple push button 스타일 wrapper
+- `molecules/buttons/SquareButton.vue` — 정사각형 버튼 wrapper
+- `molecules/buttons/HelpButton.vue` — 도움말 버튼 wrapper
+- `molecules/buttons/ImageButton.vue` — 이미지 버튼
+- `molecules/buttons/SegmentedButton.vue` — 세그먼트 버튼
+- `molecules/buttons/FabButton.vue` — FAB 계열 버튼
+- `molecules/profiles/SidebarUserProfile.vue` — 유저/로그인 영역
+- `atoms/inputs/Textfield.vue` — 공용 text field 입력
 
 ### `app/components/<page>/templates/`
 
@@ -104,7 +111,7 @@ MapSidebar
 
 - 검색창은 헤더 아이콘 버튼으로 두지 말고 `MapSidebar`의 `#default` 영역 상단 패널에 둔다
 - 헤더에는 브랜드 요소와 패널 열기/닫기 같은 전역 제어만 남긴다
-- 검색 패널 내부 액션은 `SidebarTextButton.vue` 같은 molecule로 분리한다
+- 검색 패널 내부 액션은 공용 `Button.vue` 또는 필요한 wrapper molecule로 분리한다
 - `"검색"`, `"목록"` 같은 액션은 페이지에서 배열 데이터로 선언하고 `v-for`로 렌더링해 추후 항목 추가가 쉽도록 유지한다
 - 펼침 상태에서는 텍스트 중심 버튼으로, 축소 상태에서는 icon + label 조합 버튼으로 표현을 바꾼다
 - 축소 상태에서도 검색 패널 액션은 유지되어야 하므로 `MapSidebar` 본문 슬롯 자체를 숨기지 말고, 각 하위 UI가 `collapsed`에 맞게 자체 렌더링한다
@@ -114,7 +121,7 @@ MapSidebar
 
 ```vue
 <script setup lang="ts">
-const sidebarTextButtons = [
+const sidebarButtons = [
   { id: 'search', label: '검색', icon: 'i-lucide-search', active: true },
   { id: 'list', label: '목록', icon: 'i-lucide-list', active: false }
 ]
@@ -122,14 +129,14 @@ const sidebarTextButtons = [
 
 <template>
   <section :class="{ collapsed }">
-    <RouteSearchInput v-if="!collapsed" v-model="searchQuery" placeholder="검색" />
-    <SidebarTextButton
-      v-for="item in sidebarTextButtons"
+    <Textfield v-if="!collapsed" v-model="searchQuery" type="search" placeholder="검색" leading-icon="i-lucide-search" />
+    <Button
+      v-for="item in sidebarButtons"
       :key="item.id"
       :label="item.label"
       :icon="item.icon"
       :active="item.active"
-      :show-icon="collapsed"
+      appearance="secondary"
     />
   </section>
 </template>
@@ -139,8 +146,8 @@ const sidebarTextButtons = [
 
 - raw value token(color palette, number scale, font scale, motion, border width)은 `app/assets/css/primitive.css`에서 관리한다
 - semantic token(text role, gap, radius, control size, shadow, surface, transition)은 `app/assets/css/semantic.css`에서 관리한다
-- 전역 엔트리 CSS는 `app/assets/css/main.css`이며 `primitive.css`, `semantic.css`, `map.css` 순서의 import를 기준으로 본다
-- 지도 전역 스타일과 지도 DOM 전용 스타일은 `app/assets/css/map.css`에서 관리한다
+- 전역 엔트리 CSS는 `app/assets/css/base/main.css`를 기준으로 본다
+- 지도 전역 스타일과 지도 DOM 전용 스타일은 `app/assets/css/base/main.css` 안의 map 전역 블록에서 관리한다
 - 여러 map 컴포넌트가 공유하는 버튼, 카드, 입력, 라벨 골격은 `app/assets/css/components/map/common.css`에서 관리한다
 - 컴포넌트와 template 스타일은 Vue 파일 안에 직접 쓰지 말고 `app/assets/css/components/<page>/.../*.css`로 분리한다
 - 페이지 조합 스타일은 `app/assets/css/pages/*.css`로 분리하고 Vue 파일에서는 `<style scoped src=\"...\">`만 사용한다
@@ -177,7 +184,7 @@ primitive token은 값 자체를, semantic token은 역할을 표현한다. 새 
 - **semantic token 우선** — 색상/글꼴/크기 값은 `semantic.css`를 우선 참조하고, raw 값은 `primitive.css`에만 둔다
 - **외부 CSS 분리** — 컴포넌트 스타일 정의는 `.vue` 안에 직접 쓰지 말고 외부 `.css` 파일로 분리한다
 - **style src 사용** — Vue 파일에서는 `<style scoped src=\"...\">`만 사용하고, 실제 정의는 외부 CSS 파일에 둔다
-- **전역 스타일 예외** — POI 마커 등 Cesium이 DOM에 직접 주입하는 전역 스타일만 `map.css`에 둔다
+- **전역 스타일 예외** — POI 마커 등 Cesium이 DOM에 직접 주입하는 전역 스타일만 `base/main.css` 같은 전역 CSS 경계에 둔다
 - **저장 팝업 규칙** — `_drawAction()` 응답을 직접 template에서 가공하지 말고 `shared/schemas/route.schema.ts`의 class를 통해 route payload로 변환한 뒤 modal submit에서 저장한다
 
 ## 새 컴포넌트 추가 절차
