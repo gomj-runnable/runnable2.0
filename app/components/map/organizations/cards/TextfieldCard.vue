@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import Card from '~/assets/css/components/organization/cards/Card.vue'
+import Card from '~/components/map/organizations/cards/Card.vue'
+import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 
 type TextfieldCardField = {
@@ -33,6 +34,7 @@ const props = withDefaults(
         fields?: TextfieldCardField[]
         selected?: boolean
         disabled?: boolean
+        deletable?: boolean
     }>(),
     {
         title: undefined,
@@ -41,13 +43,15 @@ const props = withDefaults(
         titleField: undefined,
         fields: () => [],
         selected: false,
-        disabled: false
+        disabled: false,
+        deletable: true
     }
 )
 
 defineEmits<{
     click: [event: MouseEvent]
     'update:field': [payload: { id: string; value: string; index: number }]
+    delete: []
 }>()
 </script>
 
@@ -63,30 +67,41 @@ defineEmits<{
         @click="$emit('click', $event)"
     >
         <template v-if="titleField" #title>
-            <div class="textfield-card__title-field">
-                <Textfield
-                    :model-value="titleField.modelValue ?? ''"
-                    :label="titleField.label"
-                    :placeholder="titleField.placeholder"
-                    :type="titleField.type ?? 'text'"
-                    :name="titleField.name"
-                    :autocomplete="titleField.autocomplete"
-                    :inputmode="titleField.inputmode"
-                    :leading-icon="titleField.leadingIcon"
-                    :trailing-icon="titleField.trailingIcon"
-                    :supporting-text="titleField.supportingText"
-                    :disabled="disabled || titleField.disabled"
-                    :readonly="titleField.readonly"
-                    :required="titleField.required"
-                    :invalid="titleField.invalid"
-                    :autofocus="titleField.autofocus"
-                    @update:model-value="
-                        $emit('update:field', {
-                            id: titleField.id,
-                            value: $event,
-                            index: -1
-                        })
-                    "
+            <div class="textfield-card__title-row">
+                <div class="textfield-card__title-field">
+                    <Textfield
+                        :model-value="titleField.modelValue ?? ''"
+                        :label="titleField.label"
+                        :placeholder="titleField.placeholder"
+                        :type="titleField.type ?? 'text'"
+                        :name="titleField.name"
+                        :autocomplete="titleField.autocomplete"
+                        :inputmode="titleField.inputmode"
+                        :leading-icon="titleField.leadingIcon"
+                        :trailing-icon="titleField.trailingIcon"
+                        :supporting-text="titleField.supportingText"
+                        :disabled="disabled || titleField.disabled"
+                        :readonly="titleField.readonly"
+                        :required="titleField.required"
+                        :invalid="titleField.invalid"
+                        :autofocus="titleField.autofocus"
+                        @update:model-value="
+                            $emit('update:field', {
+                                id: titleField.id,
+                                value: $event,
+                                index: -1
+                            })
+                        "
+                    />
+                </div>
+
+                <IconButton
+                    v-if="deletable"
+                    icon="i-lucide-trash-2"
+                    class="textfield-card__delete-button"
+                    aria-label="휴지통"
+                    title="휴지통"
+                    @click.stop="$emit('delete')"
                 />
             </div>
         </template>
@@ -163,4 +178,4 @@ defineEmits<{
     </Card>
 </template>
 
-<style scoped src="~/assets/css/components/organization/cards/TextfieldCard.css"></style>
+<style scoped src="~/assets/css/components/organizations/cards/TextfieldCard.css"></style>

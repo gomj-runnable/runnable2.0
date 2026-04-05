@@ -114,4 +114,4 @@ const hasFooter = computed(() => {
     </component>
 </template>
 
-<style scoped src="~/assets/css/components/organization/cards/Card.css"></style>
+<style scoped src="~/assets/css/components/organizations/cards/Card.css"></style>

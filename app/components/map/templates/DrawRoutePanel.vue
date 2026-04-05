@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
-import TextfieldCard from '~/assets/css/components/organization/cards/TextfieldCard.vue'
+import TextfieldCard from '~/components/map/organizations/cards/TextfieldCard.vue'
 import Button from '~/components/map/molecules/buttons/Button.vue'
 
 defineProps<{
@@ -13,6 +13,7 @@ defineEmits<{
     updateSectionAttr: [
         payload: { index: number; field: 'name' | 'comment' | 'description'; value: string }
     ]
+    removeSection: [payload: { index: number }]
 }>()
 </script>
 
@@ -41,6 +42,7 @@ defineEmits<{
             <TextfieldCard
                 v-for="(sectionAttr, index) in sectionAttrs"
                 :key="`section-attr-${index}`"
+                :deletable="index > 0"
                 :title-field="{
                     id: 'name',
                     modelValue: sectionAttr.name || '',
@@ -68,6 +70,7 @@ defineEmits<{
                         value: $event.value
                     })
                 "
+                @delete="$emit('removeSection', { index })"
             >
                 <template #meta>
                     {{ `포인트 ${index + 1}` }}
