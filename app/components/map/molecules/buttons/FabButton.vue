@@ -38,4 +38,4 @@ defineEmits<{ click: [] }>()
     </button>
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/FabButton.css"></style>
+<style scoped src="~/assets/css/components/molecules/buttons/FabButton.css"></style>

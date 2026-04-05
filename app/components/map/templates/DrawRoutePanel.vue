@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
+import TextfieldCard from '~/assets/css/components/organization/cards/TextfieldCard.vue'
 import Button from '~/components/map/molecules/buttons/Button.vue'
-import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 
 defineProps<{
     sectionAttrs: SectionAttrSchema[]
@@ -38,55 +38,43 @@ defineEmits<{
         <div class="map-section-label">구간 목록</div>
 
         <div class="draw-route-panel__section-list">
-            <article
+            <TextfieldCard
                 v-for="(sectionAttr, index) in sectionAttrs"
                 :key="`section-attr-${index}`"
-                class="draw-route-panel__section-card map-surface-card"
+                :title-field="{
+                    id: 'name',
+                    modelValue: sectionAttr.name || '',
+                    placeholder: `구간제목${index + 1}`
+                }"
+                :fields="[
+                    {
+                        id: 'comment',
+                        modelValue: sectionAttr.comment || '',
+                        placeholder: '구간 요약',
+                        maxLength: 80
+                    },
+                    {
+                        id: 'description',
+                        modelValue: sectionAttr.description || '',
+                        placeholder: '구간 설명',
+                        multiline: true,
+                        rows: 2
+                    }
+                ]"
+                @update:field="
+                    $emit('updateSectionAttr', {
+                        index,
+                        field: $event.id as 'name' | 'comment' | 'description',
+                        value: $event.value
+                    })
+                "
             >
-                <div class="map-form-field">
-                    <Textfield
-                        :model-value="sectionAttr.name || ''"
-                        placeholder="구간명"
-                        @update:model-value="
-                            $emit('updateSectionAttr', {
-                                index,
-                                field: 'name',
-                                value: $event
-                            })
-                        "
-                    />
-                </div>
-
-                <div class="map-form-field">
-                    <Textfield
-                        :model-value="sectionAttr.comment || ''"
-                        placeholder="구간 요약"
-                        @update:model-value="
-                            $emit('updateSectionAttr', {
-                                index,
-                                field: 'comment',
-                                value: $event
-                            })
-                        "
-                    />
-                </div>
-
-                <div class="map-form-field">
-                    <Textfield
-                        :model-value="sectionAttr.description || ''"
-                        placeholder="구간 설명"
-                        @update:model-value="
-                            $emit('updateSectionAttr', {
-                                index,
-                                field: 'description',
-                                value: $event
-                            })
-                        "
-                    />
-                </div>
-            </article>
+                <template #meta>
+                    {{ `포인트 ${index + 1}` }}
+                </template>
+            </TextfieldCard>
         </div>
     </div>
 </template>
 
-<style scoped src="~/assets/css/components/map/templates/DrawRoutePanel.css"></style>
+<style scoped src="~/assets/css/components/templates/DrawRoutePanel.css"></style>

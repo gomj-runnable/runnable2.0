@@ -44,4 +44,4 @@ defineEmits<{ click: [] }>()
     </IconButton>
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/SquareButton.css"></style>
+<style scoped src="~/assets/css/components/molecules/buttons/SquareButton.css"></style>

@@ -53,4 +53,4 @@ const resolvedAppearance = computed(() => props.appearance ?? 'plain')
     </button>
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/IconButton.css"></style>
+<style scoped src="~/assets/css/components/molecules/buttons/IconButton.css"></style>

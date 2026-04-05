@@ -29,4 +29,4 @@ defineEmits<{ click: [] }>()
     />
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/HelpButton.css"></style>
+<style scoped src="~/assets/css/components/molecules/buttons/HelpButton.css"></style>
