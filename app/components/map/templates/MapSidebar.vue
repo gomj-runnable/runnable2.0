@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
+
 /**
  * MapSidebar — Compound 패턴
  *
@@ -30,7 +32,7 @@ withDefaults(
     <div class="map-sidebar" :class="{ 'is-collapsed': collapsed }">
         <header class="map-sidebar__header">
             <slot name="header">
-                <SidebarLogo :icon="logoIcon" :label="logoLabel" />
+                <IconButton :icon="logoIcon" :label="logoLabel" />
             </slot>
         </header>
 

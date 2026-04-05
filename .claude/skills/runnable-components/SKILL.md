@@ -1,6 +1,6 @@
 ---
 name: runnable-components
-description: This skill should be used when the user asks to "컴포넌트 구조를 정리", "UI 컴포넌트를 추가", "Toss 디자인 시스템 원칙에 맞게 구현", "molecules/templates 계층을 설계", "사이드바/지도 shell 컴포넌트를 수정"해야 할 때.
+description: This skill should be used when the user asks to "컴포넌트 구조를 정리", "UI 컴포넌트를 추가", "Toss 디자인 시스템 원칙에 맞게 구현", "atoms/templates 계층을 설계", "사이드바/지도 shell 컴포넌트를 수정"해야 할 때.
 ---
 
 # Runnable Components Skill

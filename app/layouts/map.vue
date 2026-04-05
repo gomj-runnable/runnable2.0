@@ -3,5 +3,3 @@
         <slot />
     </div>
 </template>
-
-<style src="~/assets/css/map.css"></style>

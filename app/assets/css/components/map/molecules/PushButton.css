@@ -1,0 +1,3 @@
+.push-button {
+    --map-button-radius: var(--radius-control-sm);
+}
