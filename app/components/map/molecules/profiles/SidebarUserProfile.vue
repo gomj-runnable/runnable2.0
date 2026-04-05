@@ -42,7 +42,7 @@ const menuItems = [
     <UDropdownMenu
         :items="menuItems"
         :content="{ side: 'top', align: 'start', sideOffset: 10 }"
-        :ui="{ content: 'dropdown-profile-menu' }"
+        :ui="{ content: 'dropdown-profiles-menu' }"
     >
         <button type="button" class="map-button sidebar-user" @click="$emit('click')">
             <slot name="icon">

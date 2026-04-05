@@ -15,7 +15,7 @@
 - `app/composables/` 책임 분리 작업: `.claude/skills/runnable-composables/SKILL.md`
 - 토큰을 아껴야 하는 작업: `.claude/commands/lean.md`
 
-컴포넌트/UI/layout 작업에는 `app/assets/css/primitive.css`, `app/assets/css/semantic.css`, `app/assets/css/map.css`, `app/assets/css/components/**`, `app/assets/css/pages/**`의 토큰/스타일 경계 정리도 포함한다.
+컴포넌트/UI/layout 작업에는 `app/assets/css/base/primitive.css`, `app/assets/css/base/semantic.css`, `app/assets/css/base/main.css`, `app/assets/css/components/**`, `app/assets/css/pages/**`의 토큰/스타일 경계 정리도 포함한다.
 
 ## Expected Workflow
 

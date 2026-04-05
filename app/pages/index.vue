@@ -8,10 +8,10 @@ import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
 import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
 import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
-import SidebarUserProfile from '~/components/map/molecules/SidebarUserProfile.vue'
+import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 
-definePageMeta({ ssr: false, layout: 'map' })
+definePageMeta({ ssr: false })
 
 useHead({
     link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }]
@@ -248,19 +248,21 @@ watch(activeNav, async (nextNav, prevNav) => {
             </MapSidebar>
         </template>
 
-        <div id="map" class="map-view" />
-
-        <RouteSaveModal
-            :open="isRouteSaveModalOpen"
-            :title="routeForm.title"
-            :description="routeForm.description"
-            :distance="routeDistance"
-            @update:open="handleRouteModalOpenChange"
-            @update:title="handleRouteTitleChange"
-            @update:description="handleRouteDescriptionChange"
-            @submit="handleRouteSaveSubmit"
-        />
+        <template #default>
+            <div id="map" class="map-view" />
+        </template>
     </MapShell>
+
+    <RouteSaveModal
+        :open="isRouteSaveModalOpen"
+        :title="routeForm.title"
+        :description="routeForm.description"
+        :distance="routeDistance"
+        @update:open="handleRouteModalOpenChange"
+        @update:title="handleRouteTitleChange"
+        @update:description="handleRouteDescriptionChange"
+        @submit="handleRouteSaveSubmit"
+    />
 </template>
 
 <style scoped src="~/assets/css/pages/index.css"></style>
