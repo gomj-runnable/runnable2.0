@@ -52,4 +52,4 @@ withDefaults(
     </div>
 </template>
 
-<style scoped src="~/assets/css/components/map/templates/MapSidebar.css"></style>
+<style scoped src="~/assets/css/components/templates/MapSidebar.css"></style>

@@ -85,4 +85,4 @@ const resolvedAppearance = computed(() => {
     </button>
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/Button.css"></style>
+<style scoped src="~/assets/css/components/molecules/buttons/Button.css"></style>

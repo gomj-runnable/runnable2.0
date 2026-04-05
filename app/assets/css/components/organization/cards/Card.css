@@ -1,0 +1,146 @@
+.organization-card {
+    --organization-card-border: color-mix(in srgb, var(--color-border-default) 88%, transparent);
+    --organization-card-border-hover: color-mix(in srgb, var(--color-border-strong) 92%, transparent);
+    --organization-card-surface:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--color-surface-elevated) 94%, transparent) 0%,
+            color-mix(in srgb, var(--color-surface-base) 96%, transparent) 100%
+        );
+    --organization-card-glow:
+        radial-gradient(
+            circle at top left,
+            color-mix(in srgb, var(--color-brand-secondary) 18%, transparent) 0%,
+            transparent 48%
+        );
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-md);
+    width: 100%;
+    padding: var(--layout-padding-card-md);
+    border: 1px solid var(--organization-card-border);
+    border-radius: var(--radius-surface-lg);
+    background: var(--organization-card-surface);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 8%, transparent),
+        0 20px 48px color-mix(in srgb, var(--color-shadow-strong) 88%, transparent);
+    color: var(--text-primary);
+    text-align: left;
+    text-decoration: none;
+    overflow: hidden;
+    isolation: isolate;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    transition:
+        transform var(--transition-normal),
+        border-color var(--transition-normal),
+        box-shadow var(--transition-normal),
+        background var(--transition-normal);
+}
+
+.organization-card:is(button) {
+    appearance: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+.organization-card__glow {
+    position: absolute;
+    inset: 0;
+    background: var(--organization-card-glow);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.organization-card__header,
+.organization-card__body,
+.organization-card__footer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-xs);
+}
+
+.organization-card__eyebrow {
+    margin: 0;
+    font-size: var(--text-label-xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-label);
+    letter-spacing: var(--letter-spacing-wider);
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text-secondary) 92%, transparent);
+}
+
+.organization-card__title {
+    margin: 0;
+    font-size: var(--text-heading-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-primary);
+}
+
+.organization-card__description {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-body);
+    color: color-mix(in srgb, var(--text-secondary) 94%, transparent);
+}
+
+.organization-card__footer {
+    padding-top: var(--gap-section-sm);
+    border-top: 1px solid color-mix(in srgb, var(--organization-card-border) 84%, transparent);
+}
+
+.organization-card__meta {
+    margin: 0;
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-label);
+    color: color-mix(in srgb, var(--text-primary) 72%, transparent);
+}
+
+.organization-card.is-interactive:hover,
+.organization-card.is-selected {
+    border-color: var(--organization-card-border-hover);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 10%, transparent),
+        0 28px 56px color-mix(in srgb, var(--color-shadow-strong) 92%, transparent);
+    transform: translateY(-2px);
+}
+
+.organization-card.is-interactive:focus-visible {
+    outline: none;
+    border-color: var(--color-border-active);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 10%, transparent),
+        0 0 0 3px var(--color-focus-ring-soft),
+        0 28px 56px color-mix(in srgb, var(--color-shadow-strong) 92%, transparent);
+}
+
+.organization-card.is-selected {
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--color-surface-elevated) 96%, var(--color-brand-primary-12)) 0%,
+            color-mix(in srgb, var(--color-surface-base) 96%, var(--color-brand-primary-12)) 100%
+        );
+}
+
+.organization-card.is-disabled {
+    opacity: 0.52;
+    cursor: default;
+    pointer-events: none;
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 4%, transparent),
+        0 12px 24px color-mix(in srgb, var(--color-shadow-soft) 72%, transparent);
+}
+
+@media (max-width: 768px) {
+    .organization-card {
+        padding: var(--layout-padding-card-sm);
+        border-radius: var(--radius-surface-md);
+    }
+}

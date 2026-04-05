@@ -5,7 +5,7 @@
 @import "@nuxt/ui";
 @import '~/assets/css/base/primitive.css';
 @import '~/assets/css/base/semantic.css';
-@import '~/assets/css/components/map/common.css';
+@import '~/assets/css/components/common.css';
 
 html,
 body {

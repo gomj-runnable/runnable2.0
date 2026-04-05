@@ -66,4 +66,4 @@ const menuItems = [
     </UDropdownMenu>
 </template>
 
-<style scoped src="~/assets/css/components/map/molecules/SidebarUserProfile.css"></style>
+<style scoped src="~/assets/css/components/organization/profiles/SidebarUserProfile.css"></style>

@@ -16,7 +16,3 @@
     flex-direction: column;
     gap: var(--gap-section-sm);
 }
-
-.draw-route-panel__section-card {
-    --map-surface-padding: var(--gap-section-md);
-}
