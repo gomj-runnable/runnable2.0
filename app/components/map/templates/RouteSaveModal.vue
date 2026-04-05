@@ -30,6 +30,9 @@ const formatDistance = (distance?: number) => {
         :open="open"
         :dismissible="true"
         :overlay="true"
+        :ui="{
+            content: '!w-auto !max-w-none !bg-transparent !ring-0 !shadow-none !rounded-none !p-0',
+        }"
         @update:open="$emit('update:open', $event)"
     >
         <template #content>

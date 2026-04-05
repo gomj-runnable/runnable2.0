@@ -11,11 +11,11 @@
     --map-form-focus-bg: var(--color-surface-soft-strong);
     --map-form-disabled-color: var(--color-text-inverse-60);
     --map-form-disabled-bg: var(--color-surface-softer);
-    width: min(100%, 420px);
+    width: 480px;
     padding: var(--gap-section-xl);
     border: 1px solid var(--color-border-default);
     border-radius: var(--radius-surface-lg);
-    background: var(--color-surface-elevated);
+    background: var(--color-surface-canvas);
     box-shadow: var(--shadow-frame);
     color: var(--text-on-dark);
 }
