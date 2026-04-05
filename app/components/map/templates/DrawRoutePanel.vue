@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
-import SidebarActionButton from '~/components/map/molecules/SidebarActionButton.vue'
+import Button from '~/components/map/molecules/buttons/Button.vue'
+import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 
 defineProps<{
     sectionAttrs: SectionAttrSchema[]
@@ -20,12 +21,18 @@ defineEmits<{
         <div class="map-section-label">경로 그리기</div>
 
         <div class="draw-route-panel__actions">
-            <SidebarActionButton icon="i-lucide-rotate-ccw" @click="$emit('reset')">
+            <Button
+                icon="i-lucide-rotate-ccw"
+                appearance="secondary"
+                role="cancel"
+                block
+                @click="$emit('reset')"
+            >
                 초기화
-            </SidebarActionButton>
-            <SidebarActionButton icon="i-lucide-save" @click="$emit('save')">
+            </Button>
+            <Button icon="i-lucide-save" appearance="prominent" block @click="$emit('save')">
                 저장
-            </SidebarActionButton>
+            </Button>
         </div>
 
         <div class="map-section-label">구간 목록</div>
@@ -37,48 +44,42 @@ defineEmits<{
                 class="draw-route-panel__section-card map-surface-card"
             >
                 <div class="map-form-field">
-                    <input
-                        :value="sectionAttr.name || ''"
-                        type="text"
-                        class="map-form-control"
+                    <Textfield
+                        :model-value="sectionAttr.name || ''"
                         placeholder="구간명"
-                        @input="
+                        @update:model-value="
                             $emit('updateSectionAttr', {
                                 index,
                                 field: 'name',
-                                value: ($event.target as HTMLInputElement).value
+                                value: $event
                             })
                         "
                     />
                 </div>
 
                 <div class="map-form-field">
-                    <input
-                        :value="sectionAttr.comment || ''"
-                        type="text"
-                        class="map-form-control"
+                    <Textfield
+                        :model-value="sectionAttr.comment || ''"
                         placeholder="구간 요약"
-                        @input="
+                        @update:model-value="
                             $emit('updateSectionAttr', {
                                 index,
                                 field: 'comment',
-                                value: ($event.target as HTMLInputElement).value
+                                value: $event
                             })
                         "
                     />
                 </div>
 
                 <div class="map-form-field">
-                    <input
-                        :value="sectionAttr.description || ''"
-                        type="text"
-                        class="map-form-control"
+                    <Textfield
+                        :model-value="sectionAttr.description || ''"
                         placeholder="구간 설명"
-                        @input="
+                        @update:model-value="
                             $emit('updateSectionAttr', {
                                 index,
                                 field: 'description',
-                                value: ($event.target as HTMLInputElement).value
+                                value: $event
                             })
                         "
                     />

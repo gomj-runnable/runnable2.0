@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Button from '~/components/map/molecules/buttons/Button.vue'
+import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
+
 defineProps<{
     open: boolean
     title: string
@@ -39,14 +42,10 @@ const formatDistance = (distance?: number) => {
                 <div class="route-save-modal__fields">
                     <label class="route-save-modal__field map-form-field">
                         <span class="map-form-label">제목</span>
-                        <input
-                            :value="title"
-                            type="text"
-                            class="map-form-control"
+                        <Textfield
+                            :model-value="title"
                             placeholder="경로 제목"
-                            @input="
-                                $emit('update:title', ($event.target as HTMLInputElement).value)
-                            "
+                            @update:model-value="$emit('update:title', $event)"
                         />
                     </label>
 
@@ -68,10 +67,8 @@ const formatDistance = (distance?: number) => {
 
                     <label class="route-save-modal__field map-form-field">
                         <span class="map-form-label">거리</span>
-                        <input
-                            :value="formatDistance(distance)"
-                            type="text"
-                            class="map-form-control"
+                        <Textfield
+                            :model-value="formatDistance(distance)"
                             placeholder="0.00"
                             disabled
                         />
@@ -79,20 +76,19 @@ const formatDistance = (distance?: number) => {
                 </div>
 
                 <div class="route-save-modal__actions">
-                    <button
-                        type="button"
-                        class="map-button route-save-modal__button"
+                    <Button
+                        appearance="secondary"
+                        role="cancel"
+                        class="route-save-modal__button"
+                        label="취소"
                         @click="$emit('update:open', false)"
-                    >
-                        취소
-                    </button>
-                    <button
-                        type="button"
-                        class="map-button route-save-modal__button route-save-modal__button--primary"
+                    />
+                    <Button
+                        appearance="prominent"
+                        class="route-save-modal__button route-save-modal__button--primary"
+                        label="저장"
                         @click="$emit('submit')"
-                    >
-                        저장
-                    </button>
+                    />
                 </div>
             </div>
         </template>

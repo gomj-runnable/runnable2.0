@@ -1,0 +1,95 @@
+.textfield {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-xs);
+    width: 100%;
+}
+
+.textfield__label {
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    line-height: var(--line-height-label);
+}
+
+.textfield__control {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-section-sm);
+    min-height: 44px;
+    padding: 0 var(--gap-section-md);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-surface-md);
+    background: color-mix(in srgb, var(--color-surface-soft) 88%, transparent);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-white-08) 80%, transparent),
+        0 1px 2px color-mix(in srgb, var(--color-shadow-subtle) 48%, transparent);
+    transition:
+        border-color var(--transition-base),
+        box-shadow var(--transition-base),
+        background var(--transition-base);
+}
+
+.textfield__control:focus-within {
+    border-color: var(--color-border-accent-strong);
+    background: var(--color-surface-base);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-white-08) 80%, transparent),
+        0 0 0 3px var(--color-focus-ring-soft);
+}
+
+.textfield__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    padding: var(--gap-section-sm) 0;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-body);
+    outline: none;
+}
+
+.textfield__input::placeholder {
+    color: var(--text-muted);
+}
+
+.textfield__input:disabled,
+.textfield__input:readonly {
+    cursor: not-allowed;
+}
+
+.textfield__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--sidebar-icon-color);
+}
+
+.textfield__supporting {
+    font-size: var(--text-label-xs);
+    color: var(--text-muted);
+    line-height: var(--line-height-caption);
+}
+
+.textfield.is-disabled {
+    opacity: 0.6;
+}
+
+.textfield.is-disabled .textfield__control {
+    background: var(--color-surface-softer);
+    box-shadow: none;
+}
+
+.textfield.is-invalid .textfield__control {
+    border-color: var(--color-border-active);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--color-white-08) 80%, transparent),
+        0 0 0 3px color-mix(in srgb, var(--color-border-active) 22%, transparent);
+}
+
+.textfield.is-invalid .textfield__supporting {
+    color: var(--nav-active-color);
+}
