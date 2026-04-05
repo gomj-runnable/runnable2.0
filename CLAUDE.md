@@ -82,15 +82,15 @@
 ### 페이지와 레이아웃
 
 - `app/pages/`는 화면 조합과 초기 진입만 담당한다.
-- 브라우저 전용 지도 화면은 `definePageMeta({ ssr: false, layout: 'map' })` 형태를 기본으로 본다.
-- 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/layouts/map.vue`, `app/assets/css/map.css` 같은 전용 경계에 둔다.
+- 브라우저 전용 지도 화면은 `definePageMeta({ ssr: false })` 형태를 기본으로 본다.
+- 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/components/map/templates/MapShell.vue`, `app/assets/css/base/main.css` 같은 전용 경계에 둔다.
 
 ### CSS 토큰과 스타일 경계
 
 - raw value token은 `app/assets/css/primitive.css`에 둔다.
 - semantic token은 `app/assets/css/semantic.css`에 두고, primitive token을 역할 이름으로 매핑한다.
-- 전역 CSS 엔트리는 `app/assets/css/main.css`이며, `primitive.css`, `semantic.css`, `map.css` 순서의 import를 기준으로 본다.
-- `app/assets/css/map.css`는 지도 전역 레이아웃과 지도 DOM 전용 스타일만 둔다.
+- 전역 CSS 엔트리는 `app/assets/css/base/main.css`이며, `primitive.css`, `semantic.css`, 공통 map CSS 순서의 import를 기준으로 본다.
+- 지도 전역 레이아웃과 지도 DOM 전용 스타일은 `app/assets/css/base/main.css`의 전역 블록에서 관리한다.
 - `app/assets/css/components/**`는 컴포넌트 단위 스타일만 둔다.
 - `app/assets/css/pages/**`는 페이지 조합 스타일만 둔다.
 - 숫자/색상/px 값을 컴포넌트 CSS에 직접 반복 선언하기보다 semantic token을 먼저 추가할 수 있는지 검토한다.
