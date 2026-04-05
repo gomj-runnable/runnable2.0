@@ -1,3 +1,4 @@
+import type { MapPrimePosition, Wgs84Coordinate } from '~/composables/useWindow'
 import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
 import { createSectionSchema } from '#shared/schemas/route.schema'
 
@@ -19,13 +20,16 @@ export const createInitialSectionPointRanges = (pointCount: number): SectionPoin
         end: index + 1
     }))
 
-export const toSectionGeom = (positions: unknown[], wgs84Array?: number[][]) =>
+export const toSectionGeom = (positions: MapPrimePosition[], wgs84Array?: Wgs84Coordinate[]) =>
     JSON.stringify({
         type: 'LineString',
         coordinates: wgs84Array?.length ? wgs84Array : positions
     })
 
-export const createInitialSectionDraft = (positions: unknown[], wgs84Array?: number[][]) =>
+export const createInitialSectionDraft = (
+    positions: MapPrimePosition[],
+    wgs84Array?: Wgs84Coordinate[]
+) =>
     createSectionSchema.parse({
         routeId: 'draft-route',
         geom: toSectionGeom(positions, wgs84Array),

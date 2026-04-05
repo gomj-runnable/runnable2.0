@@ -22,7 +22,7 @@ const props = withDefaults(
     }
 )
 
-defineEmits<{ click: [] }>()
+defineEmits<{ click: [event: MouseEvent] }>()
 
 const resolvedAppearance = computed(() => props.appearance ?? 'plain')
 </script>
@@ -42,7 +42,7 @@ const resolvedAppearance = computed(() => props.appearance ?? 'plain')
         :aria-label="label"
         :title="label"
         :disabled="disabled"
-        @click="$emit('click')"
+        @click="$emit('click', $event)"
     >
         <slot name="icon">
             <UIcon v-if="icon" :name="icon" class="icon-button__icon" />
