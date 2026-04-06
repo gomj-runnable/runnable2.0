@@ -84,15 +84,13 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
         const color = getSectionColor(rangeStartIndex)
 
-        const polyline = options.viewer.value._createEntity('polyline', {
+        return options.viewer.value._createEntity('polyline', {
             positions,
             width: 4,
             clampToGround: true,
             color,
             opacity: 0.95
         })
-
-        return polyline
     }
 
     /**
