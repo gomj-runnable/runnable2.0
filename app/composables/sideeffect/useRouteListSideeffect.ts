@@ -49,7 +49,8 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             positions: position,
             color,
             opacity: 0.95,
-            clampToGround: true
+            // clampToGround: true,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
         })
     }
 

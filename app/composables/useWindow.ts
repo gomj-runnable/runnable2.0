@@ -81,6 +81,12 @@ interface CesiumBoundingSphere {
     radius: number
 }
 
+interface CesiumCartographic {
+    longitude: number
+    latitude: number
+    height: number
+}
+
 /** `_createDivPOI` 호출 시 전달하는 POI 레이어 옵션 */
 interface DivPoiOptions {
     id: string
@@ -149,8 +155,14 @@ interface CesiumInstance {
     Cartesian3: {
         fromDegrees(longitude: number, latitude: number, height?: number): MapPrimePosition
     }
+    Cartographic: {
+        fromCartesian(position: MapPrimePosition): CesiumCartographic
+    }
     BoundingSphere: {
         fromPoints(positions: MapPrimePosition[]): CesiumBoundingSphere
+    }
+    Math: {
+        toDegrees(radians: number): number
     }
     HeadingPitchRange: new (heading: number, pitch: number, range: number) => unknown
 }

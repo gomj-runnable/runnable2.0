@@ -49,10 +49,22 @@ export const createInitialSectionPointRanges = (pointCount: number): SectionPoin
  * @param wgs84Array - 경위도 기반 WGS84 좌표 배열 (있으면 우선 적용)
  * @returns GeoJSON LineString 형식의 직렬화된 문자열
  */
+const cartesianToWgs84Coordinate = (position: MapPrimePosition): GeoJsonLineStringPosition => {
+    const cartographic = window.Cesium.Cartographic.fromCartesian(position)
+
+    return [
+        window.Cesium.Math.toDegrees(cartographic.longitude),
+        window.Cesium.Math.toDegrees(cartographic.latitude),
+        0
+    ]
+}
+
 const toLineStringCoordinate = (
     coordinate: Wgs84Coordinate | MapPrimePosition
 ): GeoJsonLineStringPosition =>
-    Array.isArray(coordinate) ? [coordinate[0], coordinate[1], 0] : [coordinate.x, coordinate.y, 0]
+    Array.isArray(coordinate)
+        ? [coordinate[0], coordinate[1], 0]
+        : cartesianToWgs84Coordinate(coordinate)
 
 export const toSectionGeom = (
     positions: MapPrimePosition[],
