@@ -21,9 +21,7 @@ const formatDistance = (distance?: number) => {
     <div class="route-list-panel">
         <div class="map-section-label">저장된 경로</div>
 
-        <div v-if="routes.length === 0" class="route-list-panel__empty">
-            저장된 경로가 없습니다
-        </div>
+        <div v-if="routes.length === 0" class="route-list-panel__empty">저장된 경로가 없습니다</div>
 
         <ul v-else class="route-list-panel__list">
             <li v-for="route in routes" :key="route.routeId">

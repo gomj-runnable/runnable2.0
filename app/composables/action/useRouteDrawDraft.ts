@@ -1,5 +1,6 @@
 import type { MapPrimePosition, Wgs84Coordinate } from '~/composables/useWindow'
 import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
+import type { GeoJsonLineString, GeoJsonLineStringPosition } from '#shared/types/route'
 import { createSectionSchema } from '#shared/schemas/route.schema'
 
 /** 지도에서 그린 폴리라인을 구간(Section)으로 분할할 때 각 구간이 담당하는 포인트 인덱스 범위 */
@@ -48,11 +49,35 @@ export const createInitialSectionPointRanges = (pointCount: number): SectionPoin
  * @param wgs84Array - 경위도 기반 WGS84 좌표 배열 (있으면 우선 적용)
  * @returns GeoJSON LineString 형식의 직렬화된 문자열
  */
-export const toSectionGeom = (positions: MapPrimePosition[], wgs84Array?: Wgs84Coordinate[]) =>
-    JSON.stringify({
-        type: 'LineString',
-        coordinates: wgs84Array?.length ? wgs84Array : positions
-    })
+const toLineStringCoordinate = (
+    coordinate: Wgs84Coordinate | MapPrimePosition
+): GeoJsonLineStringPosition =>
+    Array.isArray(coordinate) ? [coordinate[0], coordinate[1], 0] : [coordinate.x, coordinate.y, 0]
+
+export const toSectionGeom = (
+    positions: MapPrimePosition[],
+    wgs84Array?: Wgs84Coordinate[]
+): GeoJsonLineString => ({
+    type: 'LineString',
+    coordinates: (wgs84Array?.length ? wgs84Array : positions).map(toLineStringCoordinate)
+})
+
+export const createSectionDraftsFromRanges = (
+    attrs: SectionAttrSchema[],
+    ranges: SectionPointRange[],
+    positions: MapPrimePosition[],
+    wgs84Array?: Wgs84Coordinate[]
+): CreateSectionSchema[] =>
+    ranges.map((range, index) =>
+        createSectionSchema.parse({
+            routeId: 'draft-route',
+            geom: toSectionGeom(
+                positions.slice(range.start, range.end + 1),
+                wgs84Array?.slice(range.start, range.end + 1)
+            ),
+            attrs: [{ ...(attrs[index] ?? createDefaultSectionAttr(index)), seq: index }]
+        })
+    )
 
 /**
  * 드로잉 결과로부터 구간 초안(draft)을 생성한다.
@@ -67,10 +92,29 @@ export const createInitialSectionDraft = (
     positions: MapPrimePosition[],
     wgs84Array?: Wgs84Coordinate[]
 ) =>
-    createSectionSchema.parse({
-        routeId: 'draft-route',
-        geom: toSectionGeom(positions, wgs84Array),
-        attrs: positions.slice(0, -1).map((_, index) => createDefaultSectionAttr(index))
+    createSectionSchema.parse(
+        (() => {
+            const ranges = createInitialSectionPointRanges(positions.length)
+
+            return {
+                routeId: 'draft-route',
+                geom: toSectionGeom(positions, wgs84Array),
+                attrs: ranges.map((_, index) => createDefaultSectionAttr(index))
+            }
+        })()
+    )
+
+export const syncSectionAttrs = (
+    attrs: SectionAttrSchema[],
+    ranges: SectionPointRange[]
+): SectionAttrSchema[] =>
+    ranges.map((_, index) => {
+        const currentAttr = attrs[index] ?? createDefaultSectionAttr(index)
+
+        return {
+            ...currentAttr,
+            seq: index
+        }
     })
 
 /**

@@ -1,12 +1,12 @@
-import type { CreateRouteSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
-import type { SavedRoute, SavedSection } from '#shared/types/route'
+import type { CreateRouteSchema } from '#shared/schemas/route.schema'
+import type { GeoJsonLineString, SavedRoute, SavedSection, SectionAttr } from '#shared/types/route'
 
 export type { SavedRoute, SavedSection }
 
 /** 구간 생성 입력. routeId는 저장소가 내부적으로 연결한다. */
 export type CreateSectionInput = {
-    geom?: string
-    attrs?: SectionAttrSchema[]
+    geom?: GeoJsonLineString
+    attrs?: SectionAttr[]
 }
 
 /**

@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+export const geoJsonLineStringPositionSchema = z.tuple([z.number(), z.number(), z.number()])
+export const geoJsonLineStringSchema = z.object({
+    type: z.literal('LineString'),
+    coordinates: z.array(geoJsonLineStringPositionSchema)
+})
+
 export const sectionAttrSchema = z.object({
     seq: z.int(),
     name: z.string().optional(),
@@ -9,7 +15,7 @@ export const sectionAttrSchema = z.object({
 
 export const createSectionSchema = z.object({
     routeId: z.string().min(1),
-    geom: z.string().optional(),
+    geom: geoJsonLineStringSchema.optional(),
     attrs: z.array(sectionAttrSchema).optional()
 })
 

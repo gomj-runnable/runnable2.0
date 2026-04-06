@@ -12,8 +12,10 @@ import {
     createInitialSectionPointRanges,
     mergeSectionPointRanges,
     removeSectionDraftAttr,
+    syncSectionAttrs,
     updateSectionDraftAttr
 } from '~/composables/action/useRouteDrawDraft'
+import { SECTION_COLORS, SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 
 /**
  * `useRouteDrawSideeffect`에 주입하는 의존성 옵션.
@@ -36,20 +38,14 @@ interface UseRouteDrawSideeffectOptions {
     resetRouteDrawState: () => void
 }
 
-/** 구간을 구분하는 색상 팔레트. 구간 인덱스 % 6 으로 순환 적용된다. */
-const SECTION_COLORS = ['#57B9FF', '#FF7A59', '#7AD957', '#F7C948', '#A78BFA', '#FF5FA2'] as const
-
-/** 경로 시작점 마커 색상 */
-const SECTION_START_MARKER_COLOR = '#FFFFFF'
-
 /**
- * 구간 시작 인덱스를 기반으로 팔레트 색상을 순환 선택한다.
+ * 구간 순서를 기반으로 팔레트 색상을 순환 선택한다.
  *
- * @param rangeStartIndex - 구간의 `start` 포인트 인덱스
+ * @param sectionIndex - 구간 순서 인덱스
  * @returns 팔레트에서 선택된 hex 색상 문자열
  */
-const getSectionColor = (rangeStartIndex: number): string =>
-    SECTION_COLORS[rangeStartIndex % SECTION_COLORS.length] ?? SECTION_COLORS[0]
+const getSectionColor = (sectionIndex: number): string =>
+    SECTION_COLORS[sectionIndex % SECTION_COLORS.length] ?? SECTION_COLORS[0]
 
 /**
  * 경로 드로잉과 구간 그래픽 렌더링을 담당하는 sideeffect composable.
@@ -71,18 +67,18 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      * 포인트가 2개 미만이거나 뷰어가 없으면 `null`을 반환한다.
      *
      * @param positions - 구간에 포함될 3D 포인트 배열
-     * @param rangeStartIndex - 구간의 시작 포인트 인덱스 (색상 선택에 사용)
+     * @param sectionIndex - 구간 순서 인덱스 (색상 선택에 사용)
      * @returns 생성된 폴리라인 엔티티, 뷰어 미준비 시 `null`
      */
     const drawSection = (
         positions: MapPrimePosition[],
-        rangeStartIndex: number
+        sectionIndex: number
     ): MapPrimeEntity | null => {
         if (!options.viewer.value) {
             return null
         }
 
-        const color = getSectionColor(rangeStartIndex)
+        const color = getSectionColor(sectionIndex)
 
         return options.viewer.value._createEntity('polyline', {
             positions,
@@ -169,10 +165,10 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         }
 
         drawnSectionPolylines.value = ranges
-            .map((range) => {
+            .map((range, index) => {
                 const sectionPoints = positions.slice(range.start, range.end + 1)
 
-                return sectionPoints.length >= 2 ? drawSection(sectionPoints, range.start) : null
+                return sectionPoints.length >= 2 ? drawSection(sectionPoints, index) : null
             })
             .filter((entity): entity is MapPrimeEntity => entity !== null)
 
@@ -183,14 +179,14 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             routePointEntities.push(createRoutePoint(firstPoint, SECTION_START_MARKER_COLOR))
         }
 
-        ranges.forEach((range) => {
+        ranges.forEach((range, index) => {
             const endPoint = positions[range.end]
 
             if (!endPoint) {
                 return
             }
 
-            routePointEntities.push(createRoutePoint(endPoint, getSectionColor(range.start)))
+            routePointEntities.push(createRoutePoint(endPoint, getSectionColor(index)))
         })
 
         drawnSectionPoints.value = routePointEntities
@@ -237,6 +233,16 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         options.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
         options.sectionDraft.value = createInitialSectionDraft(positions, data?.wgs84Array)
         redrawSectionGraphics()
+    }
+
+    /** 진행 중인 드로잉을 취소하고 지도 위 구간 그래픽을 정리한다. */
+    const cancelDrawing = () => {
+        if (!options.viewer.value) {
+            return
+        }
+
+        options.viewer.value._cancelDrawAction()
+        clearSectionGraphics()
     }
 
     /**
@@ -291,11 +297,16 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             options.sectionPointRanges.value,
             index
         )
-        options.sectionDraft.value = removeSectionDraftAttr(options.sectionDraft.value, index)
+        const nextDraft = removeSectionDraftAttr(options.sectionDraft.value, index)
+        options.sectionDraft.value = {
+            ...nextDraft,
+            attrs: syncSectionAttrs(nextDraft.attrs ?? [], options.sectionPointRanges.value)
+        }
         redrawSectionGraphics()
     }
 
     return {
+        cancelDrawing,
         handleDrawReset,
         handleDrawSave,
         handleUpdateSectionAttr,
