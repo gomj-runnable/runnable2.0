@@ -2,6 +2,7 @@ import type { DrawActionData, MapPrimePosition } from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import { RouteDraftBuilder } from '#shared/schemas/route.schema'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
+import type { SavedRoute } from '#shared/types/route'
 
 /**
  * 경로 드로잉 화면 전반의 공유 상태를 관리하는 store composable.
@@ -27,6 +28,12 @@ export const useRouteDrawStore = () => {
 
     /** 각 구간이 담당하는 포인트 인덱스 범위 배열. 구간 추가·삭제 시 갱신된다. */
     const sectionPointRanges = ref<SectionPointRange[]>([])
+
+    /** 저장된 경로 목록 */
+    const routes = ref<SavedRoute[]>([])
+
+    /** 목록에서 현재 선택된 경로 ID */
+    const selectedRouteId = ref<string | null>(null)
 
     /** 저장 모달(RouteSaveModal)의 열림 상태 */
     const isRouteSaveModalOpen = ref(false)
@@ -62,6 +69,8 @@ export const useRouteDrawStore = () => {
     return {
         searchQuery,
         activeNav,
+        routes,
+        selectedRouteId,
         drawnPositions,
         drawMetrics,
         sectionDraft,

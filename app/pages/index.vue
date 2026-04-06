@@ -11,6 +11,9 @@ import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserP
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
+import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
+import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
+import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
 
 definePageMeta({ ssr: false })
 
@@ -24,12 +27,24 @@ const routeDrawStore = useRouteDrawStore()
 const {
     searchQuery,
     activeNav,
+    routes,
+    selectedRouteId,
     drawMetrics,
     sectionDraft,
     isRouteSaveModalOpen,
     routeForm,
     routeDistance
 } = routeDrawStore
+const { saveRoute } = useRouteSaveSideeffect()
+const { fetchRoutes, selectRoute, clearPreview } = useRouteListSideeffect({
+    viewer,
+    routes,
+    selectedRouteId
+})
+
+const filteredRoutes = computed(() =>
+    routes.value.filter((r) => r.title.includes(searchQuery.value))
+)
 const { handleDrawReset, handleDrawSave, handleUpdateSectionAttr, handleRemoveSection } =
     useRouteDrawSideeffect({
         viewer,
@@ -44,6 +59,7 @@ const { handleDrawReset, handleDrawSave, handleUpdateSectionAttr, handleRemoveSe
 onMounted(async () => {
     await init()
     viewer.value = window.viewer
+    await fetchRoutes()
 })
 
 const handleRouteModalOpenChange = (open: boolean) => {
@@ -58,24 +74,22 @@ const handleRouteDescriptionChange = (description: string) => {
     routeForm.value.description = description
 }
 
-const handleRouteSaveSubmit = () => {
+const handleRouteSaveSubmit = async () => {
     if (!sectionDraft.value) {
         alert('먼저 구간을 그려주세요.')
         return
     }
 
     try {
-        const routeBuilder = new RouteDraftBuilder(drawMetrics.value)
-        const routePayload = routeBuilder.toRoute(routeForm.value)
+        const routePayload = new RouteDraftBuilder(drawMetrics.value).toRoute(routeForm.value)
         const sectionPayload = createSectionSchema.parse(sectionDraft.value)
 
-        console.log({
-            route: routePayload,
-            section: sectionPayload
-        })
+        await saveRoute(routePayload, sectionPayload)
+        await fetchRoutes()
 
         isRouteSaveModalOpen.value = false
-        alert('저장')
+        routeDrawStore.resetRouteDrawState()
+        alert('저장되었습니다.')
     } catch (error) {
         alert(error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.')
     }
@@ -88,12 +102,12 @@ const navItems = [
 ] as const
 
 watch(activeNav, async (nextNav, prevNav) => {
-    if (nextNav !== '그리기' || prevNav === '그리기') {
-        return
+    if (nextNav === '그리기' && prevNav !== '그리기') {
+        clearPreview()
+        selectedRouteId.value = null
+        await nextTick()
+        await handleDrawReset()
     }
-
-    await nextTick()
-    await handleDrawReset()
 })
 </script>
 
@@ -122,12 +136,16 @@ watch(activeNav, async (nextNav, prevNav) => {
 
                 <template #default>
                     <template v-if="activeNav === '목록'">
-                        <div class="map-section-label">경로 검색</div>
                         <Textfield
                             v-model="searchQuery"
                             type="search"
                             placeholder="경로 이름으로 검색"
                             leading-icon="i-lucide-search"
+                        />
+                        <RouteListPanel
+                            :routes="filteredRoutes"
+                            :selected-route-id="selectedRouteId"
+                            @select="selectRoute"
                         />
                     </template>
                     <DrawRoutePanel

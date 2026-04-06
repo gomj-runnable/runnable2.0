@@ -21,3 +21,21 @@ export interface Route {
     lowHeight?: number
     distance?: number
 }
+
+/** API 응답으로 반환되는 저장된 경로 객체 */
+export interface SavedRoute {
+    routeId: string
+    title: string
+    description?: string
+    highHeight?: number
+    lowHeight?: number
+    distance?: number
+}
+
+/** API 응답으로 반환되는 저장된 구간 객체 */
+export interface SavedSection {
+    sectionId: string
+    routeId: string
+    geom?: string
+    attrs?: Array<{ seq: number; name?: string; comment?: string; description?: string }>
+}
