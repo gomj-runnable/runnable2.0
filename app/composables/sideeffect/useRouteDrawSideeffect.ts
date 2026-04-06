@@ -106,7 +106,8 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             positions: position,
             color,
             opacity: 0.95,
-            clampToGround: true
+            // clampToGround: true,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
         })
     }
 
