@@ -1,6 +1,7 @@
 import type { Ref, ShallowRef } from 'vue'
-import type { MapPrimeEntity, MapPrimeViewer } from '~/composables/useWindow'
-import type { SavedRoute, SavedSection } from '#shared/types/route'
+import type { MapPrimeEntity, MapPrimePosition, MapPrimeViewer } from '~/composables/useWindow'
+import type { GeoJsonLineString, SavedRoute, SavedSection } from '#shared/types/route'
+import { SECTION_COLORS, SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 
 interface UseRouteListSideeffectOptions {
     viewer: ShallowRef<MapPrimeViewer | null>
@@ -8,21 +9,27 @@ interface UseRouteListSideeffectOptions {
     selectedRouteId: Ref<string | null>
 }
 
-const SECTION_COLORS = ['#57B9FF', '#FF7A59', '#7AD957', '#F7C948', '#A78BFA', '#FF5FA2'] as const
-
 /**
- * GeoJSON LineString 문자열을 MapPrimePosition 배열로 변환한다.
+ * GeoJSON LineString을 MapPrimePosition 배열로 변환한다.
  * `window.Cesium.Cartesian3.fromDegrees`를 사용하므로 브라우저 환경에서만 호출해야 한다.
  */
-const geomToPositions = (geom: string) => {
-    try {
-        const parsed = JSON.parse(geom) as { coordinates: [number, number, number?][] }
-        return parsed.coordinates.map(([lng, lat, alt]) =>
-            window.Cesium.Cartesian3.fromDegrees(lng, lat, alt ?? 0)
-        )
-    } catch {
+const geomToPositions = (geom?: GeoJsonLineString) => {
+    if (!geom) {
         return []
     }
+
+    let coords = geom.coordinates
+
+    // 닫힌 좌표(첫 좌표 == 마지막 좌표)가 포함된 경우 제거
+    if (coords.length > 1) {
+        const first = coords[0]
+        const last = coords[coords.length - 1]
+        if (first && last && first[0] === last[0] && first[1] === last[1]) {
+            coords = coords.slice(0, -1)
+        }
+    }
+
+    return coords.map(([lng, lat]) => window.Cesium.Cartesian3.fromDegrees(lng, lat, 0))
 }
 
 /**
@@ -31,11 +38,32 @@ const geomToPositions = (geom: string) => {
  */
 export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) => {
     const previewPolylines = shallowRef<MapPrimeEntity[]>([])
+    const previewPoints = shallowRef<MapPrimeEntity[][]>([])
+
+    const createRoutePoint = (position: MapPrimePosition, color: string) => {
+        if (!options.viewer.value) {
+            return []
+        }
+
+        return options.viewer.value._createPoint({
+            positions: position,
+            color,
+            opacity: 0.95,
+            clampToGround: true
+        })
+    }
 
     /** 지도에 그려진 미리보기 폴리라인을 모두 제거한다. */
     const clearPreview = () => {
         previewPolylines.value.forEach((e) => options.viewer.value?._removeGraphic(e))
+        previewPoints.value.flat().forEach((e) => options.viewer.value?._removeEntity(e))
         previewPolylines.value = []
+        previewPoints.value = []
+    }
+
+    /** 목록에서 선택된 경로와 section 상세 상태를 초기화한다. */
+    const clearSelection = () => {
+        options.selectedRouteId.value = null
     }
 
     /** 서버에서 전체 경로 목록을 가져와 store에 반영한다. */
@@ -51,34 +79,51 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
         clearPreview()
 
         if (options.selectedRouteId.value === routeId) {
-            options.selectedRouteId.value = null
+            clearSelection()
             return
         }
 
-        options.selectedRouteId.value = routeId
-
         const sections = await $fetch<SavedSection[]>(`/api/routes/${routeId}/sections`)
+        options.selectedRouteId.value = routeId
 
         if (!options.viewer.value) return
 
-        previewPolylines.value = sections.flatMap((section, index) => {
-            if (!section.geom) return []
-            const positions = geomToPositions(section.geom)
-            if (positions.length < 2) return []
+        const previewSegments = sections
+            .map((section) => geomToPositions(section.geom))
+            .filter((positions) => positions.length >= 2)
 
+        previewPolylines.value = previewSegments.map((positions, index) => {
             const color = SECTION_COLORS[index % SECTION_COLORS.length] ?? SECTION_COLORS[0]
 
-            return [
-                options.viewer.value!._createEntity('polyline', {
-                    positions,
-                    width: 4,
-                    clampToGround: true,
-                    color,
-                    opacity: 0.95
-                })
-            ]
+            return options.viewer.value!._createEntity('polyline', {
+                positions,
+                width: 4,
+                clampToGround: true,
+                color,
+                opacity: 0.95
+            })
         })
+
+        const routePointEntities: MapPrimeEntity[][] = []
+        const firstPoint = previewSegments[0]?.[0]
+
+        if (firstPoint) {
+            routePointEntities.push(createRoutePoint(firstPoint, SECTION_START_MARKER_COLOR))
+        }
+
+        previewSegments.forEach((positions, index) => {
+            const endPoint = positions.at(-1)
+            const color = SECTION_COLORS[index % SECTION_COLORS.length] ?? SECTION_COLORS[0]
+
+            if (!endPoint) {
+                return
+            }
+
+            routePointEntities.push(createRoutePoint(endPoint, color))
+        })
+
+        previewPoints.value = routePointEntities
     }
 
-    return { fetchRoutes, selectRoute, clearPreview }
+    return { fetchRoutes, selectRoute, clearPreview, clearSelection }
 }

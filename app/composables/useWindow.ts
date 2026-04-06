@@ -137,6 +137,8 @@ export interface MapPrimeViewer {
         showLabel?: boolean
         stopDrawElement?: HTMLElement
     }): Promise<DrawActionResult>
+    /** 진행 중인 사용자 드로잉 액션을 취소한다. */
+    _cancelDrawAction(): void
 }
 
 /** `window.Cesium`에 할당되는 Cesium 라이브러리 인스턴스 타입 */
