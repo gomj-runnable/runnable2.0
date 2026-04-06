@@ -1,0 +1,22 @@
+.route-list-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-md);
+    width: 100%;
+}
+
+.route-list-panel__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-sm);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.route-list-panel__empty {
+    padding: var(--gap-section-lg) 0;
+    font-size: var(--text-body-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
