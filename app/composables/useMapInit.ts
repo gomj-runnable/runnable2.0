@@ -35,7 +35,8 @@ export const useMapInit = () => {
         })
 
         window.viewer.extend(window.MapPrime3DExtension, {
-            tileset: '/proxy/MapPrime3DManager/root/incheon/base/tileset/in_mesh3d/tileset.json',
+            terrain: 'https://mapprime.synology.me:15289/seoul/data/terrain/1m_v1.1/',
+            tileset: 'https://mapprime.synology.me:15289/seoul/data/all_ktx2/tileset.json',
             maximumScreenSpaceError: 0,
             controls: [],
             imageries: [
@@ -44,7 +45,7 @@ export const useMapInit = () => {
                     credit: 'Arcgis',
                     type: 'TMS',
                     epsg: 'EPSG:3857',
-                    url: '/proxy/MapPrimeServer/map/wmts?layer=Outer_image_BASEMAP_AIREX_WM&tilematrixset=OSM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=images%2Fwebp&TileMatrix={z}&TileCol={x}&TileRow={y}',
+                    url: 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                     format: 'jpeg',
                     maximumLevel: 18,
                     current: true
@@ -52,11 +53,12 @@ export const useMapInit = () => {
             ],
             credit: '<i>Runnable</i>',
             initialCamera: {
-                longitude: 126.73598,
-                latitude: 37.56909,
-                height: 893.23,
-                heading: 100,
-                pitch: -60
+                longitude: 127.035,
+                latitude: 37.519,
+                height: 400,
+                heading: 340,
+                pitch: -50,
+                roll: 0
             }
         })
     }
