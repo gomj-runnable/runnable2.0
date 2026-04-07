@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { GeoJsonLineString } from '#shared/types/route'
 
 export const geoJsonLineStringPositionSchema = z.tuple([z.number(), z.number(), z.number()])
 export const geoJsonLineStringSchema = z.object({
@@ -33,6 +34,7 @@ export const createRouteSchema = z.object({
 export interface RouteDrawMetricsInput {
     distance?: number | null
     heights?: Array<number | null | undefined> | null
+    geoJson?: GeoJsonLineString | null
 }
 
 export class RouteDraftBuilder {
@@ -49,7 +51,18 @@ export class RouteDraftBuilder {
             (height): height is number => typeof height === 'number' && Number.isFinite(height)
         )
 
-        if (heights.length === 0) {
+        if (heights.length > 0) {
+            return {
+                highHeight: Math.max(...heights),
+                lowHeight: Math.min(...heights)
+            }
+        }
+
+        const geoJsonHeights = (this.drawMetrics?.geoJson?.coordinates ?? [])
+            .map((coordinate) => coordinate[2])
+            .filter((height): height is number => Number.isFinite(height))
+
+        if (geoJsonHeights.length === 0) {
             return {
                 highHeight: undefined,
                 lowHeight: undefined
@@ -57,8 +70,8 @@ export class RouteDraftBuilder {
         }
 
         return {
-            highHeight: Math.max(...heights),
-            lowHeight: Math.min(...heights)
+            highHeight: Math.max(...geoJsonHeights),
+            lowHeight: Math.min(...geoJsonHeights)
         }
     }
 

@@ -1,23 +1,26 @@
-import type { Position } from '#shared/types/base.ts'
+export type GeoJsonPosition = [number, number, number]
 
-export interface GeoJsonPoint {
+export interface GeoJson {
+    type: string
+    coordinates: GeoJsonPosition[][] | GeoJsonPosition[] | GeoJsonPosition
+}
+
+export interface GeoJsonPoint extends GeoJson {
     type: 'Point'
-    coordinates: Position
+    coordinates: GeoJsonPosition
 }
 
-export interface GeoJsonPolyline {
+export interface GeoJsonLineString extends GeoJson {
     type: 'LineString'
-    coordinates: Position[]
+    coordinates: GeoJsonPosition[]
 }
 
-export interface GeoJsonPolygon {
+export interface GeoJsonPolygon extends GeoJson {
     type: 'Polygon'
-    coordinates: Position[][]
+    coordinates: GeoJsonPosition[][]
 }
 
 export interface GeoJsonMultiPolygon {
     type: 'MultiPolygon'
-    coordinates: Position[][][]
+    coordinates: GeoJsonPosition[][][]
 }
-
-export type GeoJson = GeoJsonPoint | GeoJsonPolyline | GeoJsonPolygon | GeoJsonMultiPolygon

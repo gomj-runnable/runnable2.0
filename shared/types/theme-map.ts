@@ -1,5 +1,4 @@
-import type { GeoJson } from '#shared/types/geojson.ts'
-import type { Position } from '#shared/types/base.ts'
+import type { GeoJsonPosition, GeoJson } from '#shared/types/geojson.ts'
 
 export type NodeType = 'station' | 'sector' | 'floor' | 'spot' | 'facility' | 'move'
 
@@ -26,8 +25,8 @@ export interface Resources {
 export interface Camera {
     id: string
     name: string
-    position: Position
-    direction: Position
+    position: GeoJsonPosition
+    direction: GeoJsonPosition
     resources?: Resources
 }
 
@@ -37,7 +36,7 @@ export interface BaseNode {
     type: NodeType
     cameras?: Camera[]
     children: BaseNode[]
-    position?: Position
+    position?: GeoJsonPosition
     template?: string | null
     attribute?: NodeAttribute
     resources?: Resources

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MapPrimeViewer } from '~/composables/useWindow'
+import type { CesiumViewer } from '~/composables/useWindow'
 import MapShell from '~/components/map/templates/MapShell.vue'
 import MapSidebar from '~/components/map/templates/MapSidebar.vue'
 import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
@@ -18,7 +18,7 @@ useHead({
 })
 
 const { init } = useMapInit()
-const viewer = shallowRef<MapPrimeViewer | null>(null)
+const viewer = shallowRef<CesiumViewer | null>(null)
 
 const {
     searchQuery,

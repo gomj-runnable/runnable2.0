@@ -30,6 +30,7 @@
     "auth-client": "^0.4.11",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.4.18",
+    "cesium": "^1.140.0",
     "drizzle-orm": "^0.45.1",
     "lib": "link:@/lib",
     "nuxt": "^4.3.0",
