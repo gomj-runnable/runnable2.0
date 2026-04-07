@@ -1,13 +1,10 @@
 import type { Ref, ShallowRef } from 'vue'
-import type {
-    DrawActionData,
-    MapPrimeEntity,
-    MapPrimePosition,
-    MapPrimeViewer
-} from '~/composables/useWindow'
+import type { DrawActionData, CesiumEntity, CesiumViewer } from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
+import type { GeoJsonPosition } from '#shared/types/geojson'
 import { createSectionSchema } from '#shared/schemas/route.schema'
 import {
+    createHeightAwareRouteGeom,
     createInitialSectionDraft,
     createInitialSectionPointRanges,
     mergeSectionPointRanges,
@@ -15,17 +12,23 @@ import {
     syncSectionAttrs,
     updateSectionDraftAttr
 } from '~/composables/action/useRouteDrawDraft'
-import { SECTION_COLORS, SECTION_START_MARKER_COLOR } from '#shared/constants/route'
+import {
+    getSectionColor,
+    normalizeDrawPositions,
+    toCartesianPosition,
+    toCesiumColor
+} from '~/composables/action/useRouteDrawUtils'
+import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 
 /**
  * `useRouteDrawSideeffect`에 주입하는 의존성 옵션.
  * store의 ref들을 직접 전달받아 사이드이펙트 결과를 store에 반영한다.
  */
 interface UseRouteDrawSideeffectOptions {
-    /** 초기화된 MapPrime 뷰어 인스턴스 ref. 뷰어가 준비되지 않은 경우 `null`. */
-    viewer: ShallowRef<MapPrimeViewer | null>
-    /** 드로잉 완료 후 저장할 3D 포인트 배열 ref */
-    drawnPositions: Ref<MapPrimePosition[] | null>
+    /** 초기화된 Cesium 뷰어 인스턴스 ref. 뷰어가 준비되지 않은 경우 `null`. */
+    viewer: ShallowRef<CesiumViewer | null>
+    /** 드로잉 완료 후 저장할 경도/위도/고도 포인트 배열 ref */
+    drawnPositions: Ref<GeoJsonPosition[] | null>
     /** 드로잉 완료 후 저장할 측정값 ref */
     drawMetrics: Ref<DrawActionData | null>
     /** 구간 초안 ref */
@@ -39,17 +42,8 @@ interface UseRouteDrawSideeffectOptions {
 }
 
 /**
- * 구간 순서를 기반으로 팔레트 색상을 순환 선택한다.
- *
- * @param sectionIndex - 구간 순서 인덱스
- * @returns 팔레트에서 선택된 hex 색상 문자열
- */
-const getSectionColor = (sectionIndex: number): string =>
-    SECTION_COLORS[sectionIndex % SECTION_COLORS.length] ?? SECTION_COLORS[0]
-
-/**
  * 경로 드로잉과 구간 그래픽 렌더링을 담당하는 sideeffect composable.
- * MapPrime 뷰어 API를 직접 호출하여 폴리라인·포인트를 지도에 그리고,
+ * Cesium 뷰어 API를 직접 호출하여 폴리라인·포인트를 지도에 그리고,
  * 드로잉 이벤트(리셋·저장·구간 수정·구간 삭제)를 처리한다.
  * 상태 반영은 주입받은 `options`의 ref를 통해 store에 위임한다.
  *
@@ -57,10 +51,10 @@ const getSectionColor = (sectionIndex: number): string =>
  */
 const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
     /** 현재 지도에 그려진 구간 폴리라인 엔티티 목록 */
-    const drawnSectionPolylines = shallowRef<MapPrimeEntity[]>([])
+    const drawnSectionPolylines = shallowRef<CesiumEntity[]>([])
 
-    /** 현재 지도에 그려진 구간 경계 포인트 엔티티 목록 (구간별 배열) */
-    const drawnSectionPoints = shallowRef<MapPrimeEntity[][]>([])
+    /** 현재 지도에 그려진 구간 경계 포인트 엔티티 목록 */
+    const drawnSectionPoints = shallowRef<CesiumEntity[]>([])
 
     /**
      * 단일 구간의 폴리라인을 지도에 그린다.
@@ -71,21 +65,22 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      * @returns 생성된 폴리라인 엔티티, 뷰어 미준비 시 `null`
      */
     const drawSection = (
-        positions: MapPrimePosition[],
+        positions: GeoJsonPosition[],
         sectionIndex: number
-    ): MapPrimeEntity | null => {
+    ): CesiumEntity | null => {
         if (!options.viewer.value) {
             return null
         }
 
         const color = getSectionColor(sectionIndex)
 
-        return options.viewer.value._createEntity('polyline', {
-            positions,
-            width: 4,
-            clampToGround: true,
-            color,
-            opacity: 0.95
+        return options.viewer.value.entities.add({
+            polyline: {
+                positions: positions.map(toCartesianPosition),
+                width: 4,
+                clampToGround: true,
+                material: toCesiumColor(color, 0.95)
+            }
         })
     }
 
@@ -95,46 +90,36 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      *
      * @param position - 마커를 배치할 3D 포인트
      * @param color - 마커 색상 (hex 문자열)
-     * @returns 생성된 포인트 엔티티 배열, 뷰어 미준비 시 빈 배열
+     * @returns 생성된 포인트 엔티티, 뷰어 미준비 시 `null`
      */
-    const createRoutePoint = (position: MapPrimePosition, color: string): MapPrimeEntity[] => {
+    const createRoutePoint = (position: GeoJsonPosition, color: string): CesiumEntity | null => {
         if (!options.viewer.value) {
-            return []
+            return null
         }
 
-        return options.viewer.value._createPoint({
-            positions: position,
-            color,
-            opacity: 0.95,
-            // clampToGround: true,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+        return options.viewer.value.entities.add({
+            position: toCartesianPosition(position),
+            point: {
+                pixelSize: 10,
+                color: toCesiumColor(color, 0.95),
+                outlineColor: window.Cesium.Color.WHITE,
+                outlineWidth: 2,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            }
         })
     }
 
     /**
      * 지도에서 그래픽(폴리라인) 엔티티 목록을 일괄 제거한다.
      *
-     * @param entities - 제거할 MapPrime 그래픽 엔티티 배열
+     * @param entities - 제거할 Cesium 그래픽 엔티티 배열
      */
-    const removeGraphics = (entities: MapPrimeEntity[]) => {
+    const removeGraphics = (entities: CesiumEntity[]) => {
         if (!options.viewer.value) {
             return
         }
 
-        entities.forEach((entity) => options.viewer.value?._removeGraphic(entity))
-    }
-
-    /**
-     * 지도에서 포인트 엔티티 그룹을 일괄 제거한다.
-     *
-     * @param entityGroups - 구간별로 묶인 포인트 엔티티 이중 배열
-     */
-    const removePointEntities = (entityGroups: MapPrimeEntity[][]) => {
-        if (!options.viewer.value) {
-            return
-        }
-
-        entityGroups.flat().forEach((entity) => options.viewer.value?._removeEntity(entity))
+        entities.forEach((entity) => options.viewer.value?.entities.remove(entity))
     }
 
     /**
@@ -143,7 +128,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      */
     const clearSectionGraphics = () => {
         removeGraphics(drawnSectionPolylines.value)
-        removePointEntities(drawnSectionPoints.value)
+        removeGraphics(drawnSectionPoints.value)
         drawnSectionPolylines.value = []
         drawnSectionPoints.value = []
     }
@@ -171,13 +156,17 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
                 return sectionPoints.length >= 2 ? drawSection(sectionPoints, index) : null
             })
-            .filter((entity): entity is MapPrimeEntity => entity !== null)
+            .filter((entity): entity is CesiumEntity => entity !== null)
 
-        const routePointEntities: MapPrimeEntity[][] = []
+        const routePointEntities: CesiumEntity[] = []
         const firstPoint = positions[0]
 
         if (firstPoint) {
-            routePointEntities.push(createRoutePoint(firstPoint, SECTION_START_MARKER_COLOR))
+            const startPointEntity = createRoutePoint(firstPoint, SECTION_START_MARKER_COLOR)
+
+            if (startPointEntity) {
+                routePointEntities.push(startPointEntity)
+            }
         }
 
         ranges.forEach((range, index) => {
@@ -187,7 +176,11 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
                 return
             }
 
-            routePointEntities.push(createRoutePoint(endPoint, getSectionColor(index)))
+            const pointEntity = createRoutePoint(endPoint, getSectionColor(index))
+
+            if (pointEntity) {
+                routePointEntities.push(pointEntity)
+            }
         })
 
         drawnSectionPoints.value = routePointEntities
@@ -195,7 +188,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     /**
      * 드로잉을 초기화하고 새 경로 드로잉을 시작한다.
-     * 기존 그래픽과 상태를 모두 제거한 뒤 MapPrime `_drawAction`을 실행한다.
+     * 기존 그래픽과 상태를 모두 제거한 뒤 Cesium `_drawAction` helper를 실행한다.
      * 드로잉 완료 시 store의 포인트·측정값·구간 초안을 갱신하고 구간 그래픽을 다시 그린다.
      * "그리기" 버튼 클릭 이벤트에 연결한다.
      */
@@ -221,18 +214,23 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             }
             return
         }
-
         const data = result.data
-        const positions = data?.positions
+        const positions = normalizeDrawPositions(data)
+        const routeGeom = createHeightAwareRouteGeom(data, positions)
 
-        if (!Array.isArray(positions) || positions.length === 0) {
+        if (positions.length === 0) {
             return
         }
 
-        options.drawMetrics.value = data ?? null
+        options.drawMetrics.value = data
+            ? {
+                  ...data,
+                  GeoJSON: routeGeom ?? data.GeoJSON
+              }
+            : null
         options.drawnPositions.value = positions
         options.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
-        options.sectionDraft.value = createInitialSectionDraft(positions, data?.wgs84Array)
+        options.sectionDraft.value = createInitialSectionDraft(positions, routeGeom)
         redrawSectionGraphics()
     }
 

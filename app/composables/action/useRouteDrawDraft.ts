@@ -1,7 +1,13 @@
-import type { MapPrimePosition, Wgs84Coordinate } from '~/composables/useWindow'
+import type { Cartesian3 } from 'cesium'
+import type { DrawActionData } from '~/composables/useWindow'
 import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
-import type { GeoJsonLineString, GeoJsonLineStringPosition } from '#shared/types/route'
+import type { GeoJsonLineString } from '#shared/types/route'
+import type { GeoJsonPosition } from '#shared/types/geojson'
 import { createSectionSchema } from '#shared/schemas/route.schema'
+import {
+    extractLineStringGeometry,
+    toLineStringCoordinate
+} from '~/composables/action/useRouteDrawUtils'
 
 /** 지도에서 그린 폴리라인을 구간(Section)으로 분할할 때 각 구간이 담당하는 포인트 인덱스 범위 */
 export interface SectionPointRange {
@@ -40,35 +46,41 @@ export const createInitialSectionPointRanges = (pointCount: number): SectionPoin
         end: index + 1
     }))
 
-/**
- * 포인트 배열을 GeoJSON LineString 문자열로 변환한다.
- * WGS84 좌표 배열이 있으면 그것을 우선 사용하고, 없으면 MapPrime 내부 좌표를 사용한다.
- * 구간 초안의 `geom` 필드를 채울 때 사용한다.
- *
- * @param positions - MapPrime 뷰어에서 반환된 3D 내부 좌표 배열
- * @param wgs84Array - 경위도 기반 WGS84 좌표 배열 (있으면 우선 적용)
- * @returns GeoJSON LineString 형식의 직렬화된 문자열
- */
-const cartesianToWgs84Coordinate = (position: MapPrimePosition): GeoJsonLineStringPosition => {
-    const cartographic = window.Cesium.Cartographic.fromCartesian(position)
+export const createHeightAwareRouteGeom = (
+    data: DrawActionData | undefined,
+    positions: GeoJsonPosition[]
+): GeoJsonLineString | undefined => {
+    const lineString = extractLineStringGeometry(data?.GeoJSON)
+    const baseCoordinates =
+        lineString?.coordinates.length === positions.length
+            ? lineString.coordinates
+            : positions.map(toLineStringCoordinate)
 
-    return [
-        window.Cesium.Math.toDegrees(cartographic.longitude),
-        window.Cesium.Math.toDegrees(cartographic.latitude),
-        0
-    ]
+    if (baseCoordinates.length === 0) {
+        return undefined
+    }
+
+    return {
+        type: 'LineString',
+        coordinates: baseCoordinates.map((coordinate, index) => [
+            coordinate[0],
+            coordinate[1],
+            positions[index]?.[2] ?? coordinate[2] ?? data?.heights?.[index] ?? 0
+        ])
+    }
 }
 
-const toLineStringCoordinate = (
-    coordinate: Wgs84Coordinate | MapPrimePosition
-): GeoJsonLineStringPosition =>
-    Array.isArray(coordinate)
-        ? [coordinate[0], coordinate[1], 0]
-        : cartesianToWgs84Coordinate(coordinate)
+const sliceLineStringByRange = (
+    geom: GeoJsonLineString,
+    range: SectionPointRange
+): GeoJsonLineString => ({
+    type: 'LineString',
+    coordinates: geom.coordinates.slice(range.start, range.end + 1)
+})
 
 export const toSectionGeom = (
-    positions: MapPrimePosition[],
-    wgs84Array?: Wgs84Coordinate[]
+    positions: Array<Cartesian3 | GeoJsonPosition>,
+    wgs84Array?: GeoJsonPosition[]
 ): GeoJsonLineString => ({
     type: 'LineString',
     coordinates: (wgs84Array?.length ? wgs84Array : positions).map(toLineStringCoordinate)
@@ -77,16 +89,19 @@ export const toSectionGeom = (
 export const createSectionDraftsFromRanges = (
     attrs: SectionAttrSchema[],
     ranges: SectionPointRange[],
-    positions: MapPrimePosition[],
-    wgs84Array?: Wgs84Coordinate[]
+    positions: GeoJsonPosition[],
+    wgs84Array?: GeoJsonPosition[],
+    routeGeom?: GeoJsonLineString
 ): CreateSectionSchema[] =>
     ranges.map((range, index) =>
         createSectionSchema.parse({
             routeId: 'draft-route',
-            geom: toSectionGeom(
-                positions.slice(range.start, range.end + 1),
-                wgs84Array?.slice(range.start, range.end + 1)
-            ),
+            geom: routeGeom
+                ? sliceLineStringByRange(routeGeom, range)
+                : toSectionGeom(
+                      positions.slice(range.start, range.end + 1),
+                      wgs84Array?.slice(range.start, range.end + 1)
+                  ),
             attrs: [{ ...(attrs[index] ?? createDefaultSectionAttr(index)), seq: index }]
         })
     )
@@ -96,13 +111,14 @@ export const createSectionDraftsFromRanges = (
  * 저장 모달이 열리기 직전, 지도 드로잉이 완료된 시점에 호출한다.
  * 포인트 N개 → N-1개의 빈 구간 속성을 자동으로 생성한다.
  *
- * @param positions - MapPrime 뷰어에서 반환된 3D 포인트 배열
+ * @param positions - Cesium 드로잉 helper가 반환한 3D 포인트 배열
  * @param wgs84Array - WGS84 좌표 배열. `toSectionGeom`으로 전달되어 geom 필드에 사용된다.
  * @returns Zod 스키마(`createSectionSchema`)로 파싱된 구간 초안 객체
  */
 export const createInitialSectionDraft = (
-    positions: MapPrimePosition[],
-    wgs84Array?: Wgs84Coordinate[]
+    positions: GeoJsonPosition[],
+    routeGeom?: GeoJsonLineString,
+    wgs84Array?: GeoJsonPosition[]
 ) =>
     createSectionSchema.parse(
         (() => {
@@ -110,7 +126,7 @@ export const createInitialSectionDraft = (
 
             return {
                 routeId: 'draft-route',
-                geom: toSectionGeom(positions, wgs84Array),
+                geom: routeGeom ?? toSectionGeom(positions, wgs84Array),
                 attrs: ranges.map((_, index) => createDefaultSectionAttr(index))
             }
         })()

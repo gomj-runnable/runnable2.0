@@ -1,8 +1,6 @@
 import 'dotenv/config'
 import { db } from '../utils/db'
 import { users, userAccounts } from './schema/users'
-import { boards } from './schema/boards'
-import { eq } from 'drizzle-orm'
 import { hashPassword } from 'better-auth/crypto'
 
 async function seed() {
@@ -52,26 +50,6 @@ async function seed() {
     })
     console.log('✅ 관리자 계정 설정 완료 (ID: ' + ADMIN_ID + ')')
 
-    // 2. 게시판 생성 (기존 로직 유지)
-    await db
-      .insert(boards)
-      .values({
-        title: '온특새 은혜 나눔',
-        slug: 'dawn-grace',
-        groupSlug: 'dawn-prayer',
-        year: 2026,
-        layout: 'list',
-        isActive: true,
-        permissions: {
-          guest: ['read', 'write'],
-          member: ['read', 'write', 'comment'],
-          admin: ['read', 'write', 'comment', 'delete']
-        },
-        options: { allowComment: true, allowGuest: true }
-      })
-      .onConflictDoNothing()
-
-    console.log('✅ 게시판 설정 완료')
   } catch (error) {
     console.error('❌ Seed 작업 중 예외 발생:', error)
     process.exit(1)

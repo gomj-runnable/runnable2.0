@@ -1,12 +1,16 @@
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
+import type { GeoJsonLineString } from '#shared/types/geojson'
 
 export type SectionAttr = SectionAttrSchema
-export type GeoJsonLineStringPosition = [number, number, number]
+export type { GeoJsonLineString }
 
-export interface GeoJsonLineString {
-    type: 'LineString'
-    coordinates: GeoJsonLineStringPosition[]
+export interface GeoJsonFeature<TGeometry> {
+    type: 'Feature'
+    properties: Record<string, unknown>
+    geometry: TGeometry
 }
+
+export type RouteGeoJson = GeoJsonLineString | GeoJsonFeature<GeoJsonLineString>
 
 export interface SavedRoute {
     routeId: string
@@ -20,7 +24,7 @@ export interface SavedRoute {
 export interface SavedSection {
     sectionId: string
     routeId: string
-    /** GeoJSON LineString - 경도/위도/고도(현재는 0 고정) */
+    /** GeoJSON LineString - 경도/위도/고도 */
     geom?: GeoJsonLineString
     attrs?: SectionAttr[]
 }

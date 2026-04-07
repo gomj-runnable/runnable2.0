@@ -1,5 +1,6 @@
-import type { DrawActionData, MapPrimePosition } from '~/composables/useWindow'
+import type { DrawActionData } from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
+import type { GeoJsonPosition } from '#shared/types/geojson'
 import { RouteDraftBuilder } from '#shared/schemas/route.schema'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import type { SavedRoute } from '#shared/types/route'
@@ -17,8 +18,8 @@ export const useRouteDrawStore = () => {
     /** 현재 활성화된 사이드바 탭 이름 */
     const activeNav = ref('목록')
 
-    /** 지도 드로잉 완료 후 저장된 MapPrime 내부 3D 포인트 배열. 드로잉 전이면 `null`. */
-    const drawnPositions = ref<MapPrimePosition[] | null>(null)
+    /** 지도 드로잉 완료 후 저장된 경도/위도/고도 포인트 배열. 드로잉 전이면 `null`. */
+    const drawnPositions = ref<GeoJsonPosition[] | null>(null)
 
     /** 지도 드로잉 완료 후 저장된 거리·면적 등 측정값. 드로잉 전이면 `null`. */
     const drawMetrics = ref<DrawActionData | null>(null)
