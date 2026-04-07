@@ -1,8 +1,11 @@
 import type { ShallowRef } from 'vue'
-import type { MapPrimeViewer } from '~/composables/useWindow'
+import type { CesiumViewer } from '~/composables/useWindow'
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
-import { createSectionDraftsFromRanges } from '~/composables/action/useRouteDrawDraft'
+import {
+    createHeightAwareRouteGeom,
+    createSectionDraftsFromRanges
+} from '~/composables/action/useRouteDrawDraft'
 import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
 import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
 import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
@@ -13,9 +16,9 @@ import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSid
  * 내부적으로 store, draw/save/list sideeffect를 조합하며,
  * 페이지는 이 composable만 사용해 그리기·저장·목록 기능을 이용한다.
  *
- * @param viewer - 페이지에서 초기화한 MapPrime 뷰어 ref
+ * @param viewer - 페이지에서 초기화한 Cesium 뷰어 ref
  */
-export const useRouteMapFacade = (viewer: ShallowRef<MapPrimeViewer | null>) => {
+export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
     // ─── 내부 의존성 조합 ─────────────────────────────────────────
 
     const store = useRouteDrawStore()
@@ -118,23 +121,24 @@ export const useRouteMapFacade = (viewer: ShallowRef<MapPrimeViewer | null>) => 
         }
 
         try {
-            const routeDraftPayload = new RouteDraftBuilder(store.drawMetrics.value).toRoute(
-                store.routeForm.value
+            const routeGeom = createHeightAwareRouteGeom(
+                store.drawMetrics.value ?? undefined,
+                store.drawnPositions.value
             )
-            const routePayload = {
-                ...routeDraftPayload,
-                highHeight: 0,
-                lowHeight: 0
-            }
+            const routeDraftPayload = new RouteDraftBuilder({
+                ...(store.drawMetrics.value ?? {}),
+                geoJson: routeGeom
+            }).toRoute(store.routeForm.value)
             const sectionPayload = createSectionSchema.parse(store.sectionDraft.value)
             const sectionPayloads = createSectionDraftsFromRanges(
                 sectionPayload.attrs ?? [],
                 store.sectionPointRanges.value,
                 store.drawnPositions.value,
-                store.drawMetrics.value?.wgs84Array
+                undefined,
+                routeGeom
             )
 
-            await saveEffect.saveRoute(routePayload, sectionPayloads)
+            await saveEffect.saveRoute(routeDraftPayload, sectionPayloads)
             await listEffect.fetchRoutes()
 
             store.isRouteSaveModalOpen.value = false

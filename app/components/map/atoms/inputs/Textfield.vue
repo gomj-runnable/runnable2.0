@@ -9,7 +9,7 @@ withDefaults(
         type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number'
         name?: string
         autocomplete?: string
-        inputmode?: string
+        inputmode?: 'none' | 'search' | 'text' | 'email' | 'tel' | 'url' | 'numeric' | 'decimal'
         leadingIcon?: string
         trailingIcon?: string
         supportingText?: string
