@@ -1,6 +1,10 @@
 import type { ShallowRef, Ref, ComputedRef } from 'vue'
-import type { CesiumEntity, CesiumViewer } from '~/composables/useWindow'
-import type { CesiumRuntime, GeoJsonDataSourceInstance } from '#shared/types/cesium'
+import type { CesiumViewer } from '~/composables/useWindow'
+import type {
+    CesiumRuntime,
+    GeoJsonDataSourceInstance,
+    GroundPolylinePrimitiveInstance
+} from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
 import type { SeoulMonthlyWeather, DailyWeather, WeatherLayer } from '#shared/types/weather'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
@@ -32,7 +36,8 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     } = options
 
     let weatherDataSource: GeoJsonDataSourceInstance | null = null
-    const weatherOutlinePolylines = shallowRef<Array<{ code: string; entity: CesiumEntity }>>([])
+    let weatherOutlinePrimitive: GroundPolylinePrimitiveInstance | null = null
+    const weatherOutlineInstances = shallowRef<Array<{ code: string; id: string }>>([])
 
     const getCesium = (): CesiumRuntime => (window as unknown as { Cesium: CesiumRuntime }).Cesium
 
@@ -68,10 +73,11 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         return geometry.coordinates.flatMap((polygon) => polygon)
     }
 
-    const buildBoundaryOutlinePolylines = () => {
+    const buildBoundaryOutlinePrimitive = () => {
         const v = viewer.value
         if (!v || !boundaryGeojson.value) return
 
+        const Cesium = getCesium()
         const featureCollection = boundaryGeojson.value as {
             features?: Array<{
                 properties?: Record<string, unknown>
@@ -81,10 +87,15 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         const snapshot = dailySnapshot.value
         const layer = activeLayer.value
 
-        weatherOutlinePolylines.value.forEach(({ entity }) => v.entities.remove(entity))
-        weatherOutlinePolylines.value = []
+        if (weatherOutlinePrimitive) {
+            v.scene.primitives.remove(weatherOutlinePrimitive)
+            weatherOutlinePrimitive = null
+        }
+        weatherOutlineInstances.value = []
 
-        for (const feature of featureCollection.features ?? []) {
+        const geometryInstances: unknown[] = []
+
+        for (const [featureIndex, feature] of (featureCollection.features ?? []).entries()) {
             const geometry = feature.geometry
             if (!geometry || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) {
                 continue
@@ -93,23 +104,39 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
             const code = String(feature.properties?.SIG_CD ?? feature.properties?.EMD_CD ?? '')
             const outlineColor = toOpaqueColor(getLayerColor(snapshot, layer, code))
 
-            const polylineEntities = getPolygonRings(geometry)
+            getPolygonRings(geometry)
                 .filter((ring) => ring.length >= 2)
-                .map((ring) =>
-                    v.entities.add({
-                        polyline: {
-                            positions: ring.map(toCartesianPosition),
-                            width: 2,
-                            clampToGround: true,
-                            material: window.Cesium.Color.fromCssColorString(outlineColor)
-                        }
-                    })
-                )
-
-            weatherOutlinePolylines.value.push(
-                ...polylineEntities.map((entity) => ({ code, entity }))
-            )
+                .forEach((ring, ringIndex) => {
+                    const id = `${code || 'boundary'}-${featureIndex}-${ringIndex}`
+                    geometryInstances.push(
+                        new Cesium.GeometryInstance({
+                            id,
+                            geometry: new Cesium.GroundPolylineGeometry({
+                                positions: ring.map(toCartesianPosition),
+                                width: 2
+                            }),
+                            attributes: {
+                                color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+                                    Cesium.Color.fromCssColorString(outlineColor)
+                                )
+                            }
+                        })
+                    )
+                    weatherOutlineInstances.value.push({ code, id })
+                })
         }
+
+        if (geometryInstances.length === 0) {
+            return
+        }
+
+        weatherOutlinePrimitive = new Cesium.GroundPolylinePrimitive({
+            geometryInstances,
+            appearance: new Cesium.PolylineColorAppearance(),
+            asynchronous: false,
+            show: isVisible.value
+        })
+        v.scene.primitives.add(weatherOutlinePrimitive)
     }
 
     const fetchBoundary = async () => {
@@ -152,7 +179,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
                 v as unknown as { dataSources: { add(ds: unknown): Promise<void> } }
             ).dataSources.add(ds)
             weatherDataSource = ds
-            buildBoundaryOutlinePolylines()
+            buildBoundaryOutlinePrimitive()
         } catch (err) {
             console.error('[WeatherSideeffect] GeoJsonDataSource load failed', err)
         }
@@ -180,12 +207,14 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
             )
         }
 
-        weatherOutlinePolylines.value.forEach(({ code, entity }) => {
+        weatherOutlineInstances.value.forEach(({ code, id }) => {
             const outlineColor = toOpaqueColor(getLayerColor(snapshot, layer, code))
-            if (!entity.polyline) return
+            const attributes = weatherOutlinePrimitive?.getGeometryInstanceAttributes(id)
+            if (!attributes) return
 
-            entity.polyline.material = Cesium.Color.fromCssColorString(outlineColor)
-            entity.polyline.width = 2
+            attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(
+                Cesium.Color.fromCssColorString(outlineColor)
+            )
         })
     }
 
@@ -200,8 +229,11 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
             weatherDataSource = null
         }
 
-        weatherOutlinePolylines.value.forEach(({ entity }) => v.entities.remove(entity))
-        weatherOutlinePolylines.value = []
+        if (weatherOutlinePrimitive) {
+            v.scene.primitives.remove(weatherOutlinePrimitive)
+            weatherOutlinePrimitive = null
+        }
+        weatherOutlineInstances.value = []
     }
 
     const init = async () => {
@@ -217,9 +249,9 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         if (weatherDataSource) {
             ;(weatherDataSource as unknown as { show: boolean }).show = v
         }
-        weatherOutlinePolylines.value.forEach(({ entity }) => {
-            entity.show = v
-        })
+        if (weatherOutlinePrimitive) {
+            weatherOutlinePrimitive.show = v
+        }
     })
     watch(selectedMonth, async (newMonth) => {
         await fetchMonthlyWeather(newMonth)

@@ -60,6 +60,23 @@ export interface CesiumRuntime {
             }
         ): Promise<GeoJsonDataSourceInstance>
     }
+    GroundPolylineGeometry: new (options: { positions: Cartesian3[]; width: number }) => unknown
+    GeometryInstance: new (options: {
+        id?: string
+        geometry: unknown
+        attributes?: Record<string, unknown>
+    }) => unknown
+    GroundPolylinePrimitive: new (options: {
+        geometryInstances: unknown[]
+        appearance: unknown
+        asynchronous?: boolean
+        show?: boolean
+    }) => GroundPolylinePrimitiveInstance
+    PolylineColorAppearance: new () => unknown
+    ColorGeometryInstanceAttribute: {
+        fromColor(color: Color): unknown
+        toValue(color: Color): unknown
+    }
     ColorMaterialProperty: new (color: unknown) => unknown
 }
 
@@ -79,10 +96,15 @@ export interface GeoJsonEntityInstance {
           }
         | null
         | undefined
-    polyline?: {
-        material: unknown
-        width?: number
-    } | null
+}
+
+export interface GroundPolylinePrimitiveInstance {
+    show: boolean
+    getGeometryInstanceAttributes(id: string):
+        | {
+              color?: unknown
+          }
+        | undefined
 }
 
 export interface CesiumSceneRuntime {
@@ -94,6 +116,7 @@ export interface CesiumSceneRuntime {
     }
     primitives: {
         add(primitive: unknown): void
+        remove(primitive: unknown): boolean
     }
 }
 
