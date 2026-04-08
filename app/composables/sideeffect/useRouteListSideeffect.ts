@@ -58,22 +58,28 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
         options.routes.value = await $fetch<SavedRoute[]>('/api/routes')
     }
 
+    /** 특정 경로의 section 목록을 서버에서 가져온다. */
+    const fetchRouteSections = (routeId: string) =>
+        $fetch<SavedSection[]>(`/api/routes/${routeId}/sections`)
+
     /**
      * 경로를 선택하고 해당 구간들을 지도에 그린다.
      * 이미 선택된 경로를 다시 클릭하면 선택을 해제하고 미리보기를 지운다.
      */
-    const selectRoute = async (routeId: string) => {
+    const selectRoute = async (routeId: string): Promise<SavedSection[] | null> => {
         clearPreview()
 
         if (options.selectedRouteId.value === routeId) {
             clearSelection()
-            return
+            return null
         }
 
-        const sections = await $fetch<SavedSection[]>(`/api/routes/${routeId}/sections`)
+        const sections = await fetchRouteSections(routeId)
         options.selectedRouteId.value = routeId
 
-        if (!options.viewer.value) return
+        if (!options.viewer.value) {
+            return sections
+        }
 
         const previewSegments = sections
             .map((section) => geomToRouteDrawPositions(section.geom))
@@ -119,7 +125,9 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
         })
 
         previewPoints.value = routePointEntities
+
+        return sections
     }
 
-    return { fetchRoutes, selectRoute, clearPreview, clearSelection }
+    return { fetchRoutes, fetchRouteSections, selectRoute, clearPreview, clearSelection }
 }

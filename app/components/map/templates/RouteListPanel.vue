@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
 import Card from '~/components/map/organizations/cards/Card.vue'
+import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 
 defineProps<{
     routes: SavedRoute[]
@@ -9,6 +10,7 @@ defineProps<{
 
 defineEmits<{
     select: [routeId: string]
+    download: [routeId: string]
 }>()
 
 const formatDistance = (distance?: number) => {
@@ -26,14 +28,35 @@ const formatDistance = (distance?: number) => {
         <ul v-else class="route-list-panel__list">
             <li v-for="route in routes" :key="route.routeId">
                 <Card
-                    :title="route.title"
-                    :description="route.description"
-                    :meta="formatDistance(route.distance) ?? undefined"
                     interactive
                     :selected="selectedRouteId === route.routeId"
                     as="article"
                     @click="$emit('select', route.routeId)"
-                />
+                >
+                    <template #header>
+                        <div class="route-list-panel__card-header">
+                            <h3 class="route-list-panel__card-title">
+                                {{ route.title }}
+                            </h3>
+                            <IconButton
+                                icon="i-lucide-download"
+                                appearance="secondary"
+                                label="경로 다운로드"
+                                @click.stop="$emit('download', route.routeId)"
+                            />
+                        </div>
+                    </template>
+
+                    <p v-if="route.description" class="route-list-panel__card-description">
+                        {{ route.description }}
+                    </p>
+
+                    <template #meta>
+                        <span class="route-list-panel__card-meta">
+                            {{ formatDistance(route.distance) ?? '' }}
+                        </span>
+                    </template>
+                </Card>
             </li>
         </ul>
     </div>
