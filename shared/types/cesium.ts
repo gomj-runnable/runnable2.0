@@ -24,9 +24,17 @@ export interface CesiumRuntime {
         MOUSE_MOVE: unknown
         RIGHT_CLICK: unknown
     }
+    CameraEventType: {
+        LEFT_DRAG: unknown
+        RIGHT_DRAG: unknown
+        MIDDLE_DRAG: unknown
+        WHEEL: unknown
+        PINCH: unknown
+    }
     CallbackProperty: new (callback: () => Cartesian3[], isConstant: boolean) => CallbackProperty
     Color: {
         WHITE: Color
+        fromCssColorString(color: string): Color
     }
     CesiumTerrainProvider: {
         fromUrl?: (url: string) => Promise<unknown>
@@ -41,6 +49,40 @@ export interface CesiumRuntime {
     Cartesian3: {
         fromDegrees(longitude: number, latitude: number, height?: number): Cartesian3
     }
+    GeoJsonDataSource: {
+        load(
+            data: object | string,
+            options?: {
+                stroke?: unknown
+                fill?: unknown
+                strokeWidth?: number
+                clampToGround?: boolean
+            }
+        ): Promise<GeoJsonDataSourceInstance>
+    }
+    ColorMaterialProperty: new (color: unknown) => unknown
+}
+
+export interface GeoJsonDataSourceInstance {
+    entities: {
+        values: GeoJsonEntityInstance[]
+    }
+}
+
+export interface GeoJsonEntityInstance {
+    properties: Record<string, { getValue(): unknown }> | null
+    polygon:
+        | {
+              material: unknown
+              outlineColor: unknown
+              outline: unknown
+          }
+        | null
+        | undefined
+    polyline?: {
+        material: unknown
+        width?: number
+    } | null
 }
 
 export interface CesiumSceneRuntime {
@@ -58,6 +100,10 @@ export interface CesiumSceneRuntime {
 export interface CesiumViewerRuntime {
     canvas: unknown
     scene: CesiumSceneRuntime
+    screenSpaceCameraController?: {
+        rotateEventTypes?: unknown
+        zoomEventTypes?: unknown
+    }
     camera: {
         getPickRay(windowPosition: unknown): unknown
         setView(options: unknown): void
@@ -67,4 +113,8 @@ export interface CesiumViewerRuntime {
         addImageryProvider(provider: unknown): void
     }
     terrainProvider?: unknown
+    dataSources?: {
+        add(dataSource: unknown): Promise<unknown>
+        remove(dataSource: unknown): boolean
+    }
 }

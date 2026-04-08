@@ -178,6 +178,20 @@
     --layout-gap-section: var(--gap-section-lg);
     --layout-gap-block: var(--gap-section-md);
 
+    /* weather layer tokens */
+    --color-weather-clear: rgba(255, 230, 50, 0.5);
+    --color-weather-partly-cloudy: rgba(180, 200, 220, 0.5);
+    --color-weather-cloudy: rgba(140, 155, 170, 0.5);
+    --color-weather-rainy: rgba(60, 150, 220, 0.5);
+    --color-weather-snowy: rgba(200, 230, 255, 0.5);
+
+    --color-pm10-good: rgba(100, 200, 100, 0.5);
+    --color-pm10-moderate: rgba(250, 220, 50, 0.5);
+    --color-pm10-bad: rgba(255, 150, 50, 0.5);
+    --color-pm10-very-bad: rgba(220, 60, 60, 0.5);
+
+    --z-weather-overlay: 12;
+
     /*
      * Reserved semantic slots
      * Uncomment and fill these when the service token system expands.

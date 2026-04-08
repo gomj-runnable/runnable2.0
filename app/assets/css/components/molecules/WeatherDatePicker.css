@@ -1,0 +1,115 @@
+.weather-date-picker {
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-surface-md);
+    padding: var(--gap-section-sm);
+    min-width: 240px;
+    backdrop-filter: var(--blur);
+    box-shadow: var(--shadow-md);
+}
+
+.weather-date-picker__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gap-section-xs);
+}
+
+.weather-date-picker__month-label {
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.weather-date-picker__nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: var(--gap-1);
+    border-radius: var(--radius-control-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weather-date-picker__nav-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.weather-date-picker__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: var(--gap-1);
+}
+
+.weather-date-picker__weekday {
+    text-align: center;
+    font-size: var(--text-caption);
+    color: var(--text-muted);
+    padding: var(--gap-1) 0;
+}
+
+.weather-date-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.weather-date-picker__day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-caption);
+    border-radius: var(--radius-control-sm);
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    transition: background var(--transition-fast);
+    position: relative;
+}
+
+.weather-date-picker__day:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.weather-date-picker__day.is-selected {
+    background: var(--nav-active-bg);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.weather-date-picker__day.is-today {
+    border: 1px solid var(--color-border-active);
+}
+
+.weather-date-picker__day.is-no-data {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.weather-date-picker__day.is-no-data::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--color-border-default);
+}
+
+.weather-date-picker__day.is-no-data.is-selected {
+    opacity: 1;
+    background: var(--color-surface-soft);
+    color: var(--text-muted);
+}
+
+.weather-date-picker__day--empty {
+    pointer-events: none;
+}

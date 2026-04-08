@@ -192,10 +192,10 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      * 드로잉 완료 시 store의 포인트·측정값·구간 초안을 갱신하고 구간 그래픽을 다시 그린다.
      * "그리기" 버튼 클릭 이벤트에 연결한다.
      */
-    const handleDrawReset = async () => {
+    const handleDrawReset = async (): Promise<GeoJsonPosition[] | null> => {
         if (!options.viewer.value) {
             alert('지도를 아직 불러오는 중입니다.')
-            return
+            return null
         }
 
         clearSectionGraphics()
@@ -212,14 +212,14 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             if (result && 'message' in result && result.message) {
                 alert(result.message)
             }
-            return
+            return null
         }
         const data = result.data
         const positions = normalizeDrawPositions(data)
         const routeGeom = createHeightAwareRouteGeom(data, positions)
 
         if (positions.length === 0) {
-            return
+            return null
         }
 
         options.drawMetrics.value = data
@@ -232,6 +232,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         options.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
         options.sectionDraft.value = createInitialSectionDraft(positions, routeGeom)
         redrawSectionGraphics()
+        return positions
     }
 
     /** 진행 중인 드로잉을 취소하고 지도 위 구간 그래픽을 정리한다. */

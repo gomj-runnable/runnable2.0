@@ -21,6 +21,11 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-01-15',
 
+  runtimeConfig: {
+    weatherKor: process.env.WEATHER_KOR ?? '',
+    openData: process.env.OPEN_DATA ?? '',
+  },
+
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {

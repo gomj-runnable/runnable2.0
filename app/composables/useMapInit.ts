@@ -296,6 +296,18 @@ export const useMapInit = () => {
         const terrainUrl = 'https://mapprime.synology.me:15289/seoul/data/terrain/1m_v1.1/'
         const tilesetUrl = 'https://mapprime.synology.me:15289/seoul/data/all_ktx2/tileset.json'
 
+        if (rawViewer.screenSpaceCameraController) {
+            rawViewer.screenSpaceCameraController.rotateEventTypes = [
+                CesiumLib.CameraEventType.LEFT_DRAG,
+                CesiumLib.CameraEventType.RIGHT_DRAG
+            ]
+            rawViewer.screenSpaceCameraController.zoomEventTypes = [
+                CesiumLib.CameraEventType.WHEEL,
+                CesiumLib.CameraEventType.PINCH,
+                CesiumLib.CameraEventType.MIDDLE_DRAG
+            ]
+        }
+
         if (rawViewer.scene.globe) {
             rawViewer.scene.globe.depthTestAgainstTerrain = true
         }
