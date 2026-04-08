@@ -1,12 +1,19 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
+import {
+    createRouteElevationProfile,
+    createRouteElevationProfileFromDraft,
+    createRouteElevationProfileFromSections
+} from '~/composables/action/useRouteElevationProfile'
+import { createRouteGpx, toGpxFileName } from '~/composables/action/useRouteGpx'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import {
     createHeightAwareRouteGeom,
     createSectionDraftsFromRanges
 } from '~/composables/action/useRouteDrawDraft'
 import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
+import { useRouteDownloadSideeffect } from '~/composables/sideeffect/useRouteDownloadSideeffect'
 import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
 import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
 
@@ -34,12 +41,67 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
     })
 
     const saveEffect = useRouteSaveSideeffect()
+    const downloadEffect = useRouteDownloadSideeffect()
 
     const listEffect = useRouteListSideeffect({
         viewer,
         routes: store.routes,
         selectedRouteId: store.selectedRouteId
     })
+
+    const closeElevationChart = () => {
+        store.isElevationChartOpen.value = false
+        store.elevationProfile.value = null
+    }
+
+    const openElevationChart = (
+        title: string,
+        profile: ReturnType<typeof createRouteElevationProfile>
+    ) => {
+
+        if (!profile) {
+            closeElevationChart()
+            return
+        }
+
+        store.elevationChartTitle.value = title
+        store.elevationProfile.value = profile
+        store.isElevationChartOpen.value = true
+    }
+
+    const startDrawing = async () => {
+        closeElevationChart()
+        const positions = await drawEffect.handleDrawReset()
+
+        if (!positions?.length) {
+            return
+        }
+
+        openElevationChart(
+            '그린 경로 고도 그래프',
+            createRouteElevationProfileFromDraft(
+                positions,
+                store.sectionPointRanges.value,
+                store.sectionDraft.value?.attrs
+            )
+        )
+    }
+
+    const selectRoute = async (routeId: string) => {
+        const sections = await listEffect.selectRoute(routeId)
+
+        if (!sections?.length) {
+            closeElevationChart()
+            return
+        }
+
+        const selectedRoute = store.routes.value.find((route) => route.routeId === routeId)
+
+        openElevationChart(
+            selectedRoute?.title ?? '저장된 경로 고도 그래프',
+            createRouteElevationProfileFromSections(sections)
+        )
+    }
 
     // ─── 내부 오케스트레이션 ──────────────────────────────────────
 
@@ -49,12 +111,16 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             listEffect.clearPreview()
             listEffect.clearSelection()
             await nextTick()
-            await drawEffect.handleDrawReset()
+            await startDrawing()
             return
         }
 
         if (prev === '그리기' && next !== '그리기') {
             drawEffect.cancelDrawing()
+        }
+
+        if (next !== '그리기' && next !== '목록') {
+            closeElevationChart()
         }
     })
 
@@ -74,69 +140,48 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
     const restartDrawing = async () => {
         drawEffect.cancelDrawing()
         await nextTick()
-        await drawEffect.handleDrawReset()
+        await startDrawing()
     }
 
-    // ─── 공개 액션: 그리기 ────────────────────────────────────────
+    const buildSavePayload = () => {
+        if (!store.sectionDraft.value) {
+            throw new Error('먼저 구간을 그려주세요.')
+        }
 
-    /**
-     * 기존 드로잉을 초기화하고 새 경로 그리기를 시작한다.
-     * DrawRoutePanel의 "그리기" 버튼에 연결한다.
-     */
-    const startDrawing = () => restartDrawing()
+        if (!store.drawnPositions.value?.length) {
+            throw new Error('경로 포인트가 없습니다.')
+        }
 
-    /**
-     * 드로잉된 경로의 유효성을 검사하고 저장 모달을 연다.
-     * DrawRoutePanel의 "저장" 버튼에 연결한다.
-     */
-    const openSaveModal = () => drawEffect.handleDrawSave()
+        const routeGeom = createHeightAwareRouteGeom(
+            store.drawMetrics.value ?? undefined,
+            store.drawnPositions.value
+        )
+        const routeDraftPayload = new RouteDraftBuilder({
+            ...(store.drawMetrics.value ?? {}),
+            geoJson: routeGeom
+        }).toRoute(store.routeForm.value)
+        const sectionPayload = createSectionSchema.parse(store.sectionDraft.value)
+        const sectionPayloads = createSectionDraftsFromRanges(
+            sectionPayload.attrs ?? [],
+            store.sectionPointRanges.value,
+            store.drawnPositions.value,
+            undefined,
+            routeGeom
+        )
 
-    /**
-     * 구간의 속성(이름·코멘트·설명)을 수정한다.
-     * DrawRoutePanel의 입력 필드 변경 이벤트에 연결한다.
-     */
-    const updateSectionAttr = drawEffect.handleUpdateSectionAttr
-
-    /**
-     * 특정 구간을 삭제하고 인접 구간과 병합한다.
-     * DrawRoutePanel의 구간 삭제 버튼에 연결한다.
-     */
-    const removeSection = drawEffect.handleRemoveSection
-
-    // ─── 공개 액션: 저장 ──────────────────────────────────────────
+        return {
+            routeDraftPayload,
+            sectionPayloads
+        }
+    }
 
     /**
      * 저장 모달에서 "저장" 버튼 클릭 시 경로를 확정 저장한다.
      * 저장 성공 후 목록을 갱신하고 드로잉 상태를 초기화한다.
      */
     const confirmSave = async () => {
-        if (!store.sectionDraft.value) {
-            alert('먼저 구간을 그려주세요.')
-            return
-        }
-
-        if (!store.drawnPositions.value?.length) {
-            alert('경로 포인트가 없습니다.')
-            return
-        }
-
         try {
-            const routeGeom = createHeightAwareRouteGeom(
-                store.drawMetrics.value ?? undefined,
-                store.drawnPositions.value
-            )
-            const routeDraftPayload = new RouteDraftBuilder({
-                ...(store.drawMetrics.value ?? {}),
-                geoJson: routeGeom
-            }).toRoute(store.routeForm.value)
-            const sectionPayload = createSectionSchema.parse(store.sectionDraft.value)
-            const sectionPayloads = createSectionDraftsFromRanges(
-                sectionPayload.attrs ?? [],
-                store.sectionPointRanges.value,
-                store.drawnPositions.value,
-                undefined,
-                routeGeom
-            )
+            const { routeDraftPayload, sectionPayloads } = buildSavePayload()
 
             await saveEffect.saveRoute(routeDraftPayload, sectionPayloads)
             await listEffect.fetchRoutes()
@@ -150,43 +195,67 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         }
     }
 
-    // ─── 공개 액션: 경로 목록 ─────────────────────────────────────
+    const downloadRouteGpx = async (routeId: string) => {
+        try {
+            const route = store.routes.value.find((item) => item.routeId === routeId)
 
-    /**
-     * 경로 카드를 클릭해 선택하고 해당 구간을 지도에 표시한다.
-     * 이미 선택된 경로를 다시 클릭하면 선택을 해제하고 미리보기를 지운다.
-     */
-    const selectRoute = listEffect.selectRoute
+            if (!route) {
+                throw new Error('경로 정보를 찾을 수 없습니다.')
+            }
+
+            const sections = await listEffect.fetchRouteSections(routeId)
+
+            if (!sections.length) {
+                throw new Error('다운로드할 경로 구간이 없습니다.')
+            }
+
+            downloadEffect.downloadTextFile(
+                toGpxFileName(route.title),
+                createRouteGpx(route, sections),
+                'application/gpx+xml;charset=utf-8'
+            )
+        } catch (error) {
+            alert(error instanceof Error ? error.message : 'GPX 다운로드 중 오류가 발생했습니다.')
+        }
+    }
+
+    const drawing = proxyRefs({
+        sectionDraft: store.sectionDraft,
+        start: restartDrawing,
+        openSaveModal: () => drawEffect.handleDrawSave(),
+        updateSectionAttr: drawEffect.handleUpdateSectionAttr,
+        removeSection: drawEffect.handleRemoveSection
+    })
+
+    const saveModal = proxyRefs({
+        open: store.isRouteSaveModalOpen,
+        routeForm: store.routeForm,
+        routeDistance: store.routeDistance,
+        confirm: confirmSave
+    })
+
+    const routeList = proxyRefs({
+        searchQuery: store.searchQuery,
+        filteredRoutes,
+        selectedRouteId: store.selectedRouteId,
+        select: selectRoute,
+        download: downloadRouteGpx
+    })
+
+    const elevationChart = proxyRefs({
+        open: store.isElevationChartOpen,
+        title: store.elevationChartTitle,
+        profile: store.elevationProfile,
+        close: closeElevationChart
+    })
 
     // ─── 공개 인터페이스 ──────────────────────────────────────────
 
     return {
-        // 상태: 검색 및 내비게이션
-        searchQuery: store.searchQuery,
         activeNav: store.activeNav,
-
-        // 상태: 경로 목록
-        filteredRoutes,
-        selectedRouteId: store.selectedRouteId,
-
-        // 상태: 드로잉
-        sectionDraft: store.sectionDraft,
-
-        // 상태: 저장 모달
-        isRouteSaveModalOpen: store.isRouteSaveModalOpen,
-        routeForm: store.routeForm,
-        routeDistance: store.routeDistance,
-
-        // 액션: 그리기
-        startDrawing,
-        openSaveModal,
-        updateSectionAttr,
-        removeSection,
-
-        // 액션: 저장
-        confirmSave,
-
-        // 액션: 경로 목록
-        selectRoute
+        drawing,
+        saveModal,
+        routeList,
+        elevationChart
     }
 }

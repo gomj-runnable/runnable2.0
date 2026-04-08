@@ -1,6 +1,7 @@
 import type { DrawActionData } from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
+import type { RouteElevationProfile } from '#shared/types/route'
 import { RouteDraftBuilder } from '#shared/schemas/route.schema'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import type { SavedRoute } from '#shared/types/route'
@@ -39,6 +40,15 @@ export const useRouteDrawStore = () => {
     /** 저장 모달(RouteSaveModal)의 열림 상태 */
     const isRouteSaveModalOpen = ref(false)
 
+    /** 지도 내부 고도 그래프 모달 열림 상태 */
+    const isElevationChartOpen = ref(false)
+
+    /** 현재 표시 중인 고도 그래프 제목 */
+    const elevationChartTitle = ref('경로 고도 그래프')
+
+    /** 현재 표시 중인 거리-고도 프로필 데이터 */
+    const elevationProfile = ref<RouteElevationProfile | null>(null)
+
     /** 저장 모달에서 입력하는 경로 제목과 설명 */
     const routeForm = ref({
         title: '',
@@ -61,6 +71,9 @@ export const useRouteDrawStore = () => {
         sectionDraft.value = null
         sectionPointRanges.value = []
         isRouteSaveModalOpen.value = false
+        isElevationChartOpen.value = false
+        elevationChartTitle.value = '경로 고도 그래프'
+        elevationProfile.value = null
         routeForm.value = {
             title: '',
             description: ''
@@ -77,6 +90,9 @@ export const useRouteDrawStore = () => {
         sectionDraft,
         sectionPointRanges,
         isRouteSaveModalOpen,
+        isElevationChartOpen,
+        elevationChartTitle,
+        elevationProfile,
         routeForm,
         routeDistance,
         resetRouteDrawState

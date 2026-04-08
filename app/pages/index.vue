@@ -4,12 +4,16 @@ import MapShell from '~/components/map/templates/MapShell.vue'
 import MapSidebar from '~/components/map/templates/MapSidebar.vue'
 import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
 import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
+import RouteElevationModal from '~/components/map/templates/RouteElevationModal.vue'
 import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
+import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
+import { useWeatherStore } from '~/composables/store/useWeatherStore'
+import { useWeatherSideeffect } from '~/composables/sideeffect/useWeatherSideeffect'
 
 definePageMeta({ ssr: false })
 
@@ -21,25 +25,30 @@ const { init } = useMapInit()
 const viewer = shallowRef<CesiumViewer | null>(null)
 
 const {
-    searchQuery,
     activeNav,
-    filteredRoutes,
-    selectedRouteId,
-    sectionDraft,
-    isRouteSaveModalOpen,
-    routeForm,
-    routeDistance,
-    startDrawing,
-    openSaveModal,
-    updateSectionAttr,
-    removeSection,
-    confirmSave,
-    selectRoute
+    drawing,
+    saveModal,
+    routeList,
+    elevationChart
 } = useRouteMapFacade(viewer)
+
+const weather = useWeatherStore()
+const { init: initWeather } = useWeatherSideeffect({
+    viewer,
+    selectedDate: weather.selectedDate,
+    selectedMonth: weather.selectedMonth,
+    monthlyData: weather.monthlyData,
+    boundaryGeojson: weather.boundaryGeojson,
+    dailySnapshot: weather.dailySnapshot,
+    activeLayer: weather.activeLayer,
+    isLoading: weather.isLoading,
+    isVisible: weather.isVisible,
+})
 
 onMounted(async () => {
     await init()
     viewer.value = window.viewer
+    await initWeather()
 })
 
 const navItems = [
@@ -82,24 +91,25 @@ const navItems = [
                     <template #default>
                         <template v-if="activeNav === '목록'">
                             <Textfield
-                                v-model="searchQuery"
+                                v-model="routeList.searchQuery"
                                 type="search"
                                 placeholder="경로 이름으로 검색"
                                 leading-icon="i-lucide-search"
                             />
                             <RouteListPanel
-                                :routes="filteredRoutes"
-                                :selected-route-id="selectedRouteId"
-                                @select="selectRoute"
+                                :routes="routeList.filteredRoutes"
+                                :selected-route-id="routeList.selectedRouteId"
+                                @select="routeList.select"
+                                @download="routeList.download"
                             />
                         </template>
                         <DrawRoutePanel
                             v-else-if="activeNav === '그리기'"
-                            :section-attrs="sectionDraft?.attrs ?? []"
-                            @reset="startDrawing"
-                            @save="openSaveModal"
-                            @update-section-attr="updateSectionAttr"
-                            @remove-section="removeSection"
+                            :section-attrs="drawing.sectionDraft?.attrs ?? []"
+                            @reset="drawing.start"
+                            @save="drawing.openSaveModal"
+                            @update-section-attr="drawing.updateSectionAttr"
+                            @remove-section="drawing.removeSection"
                         />
                     </template>
 
@@ -112,17 +122,37 @@ const navItems = [
             <template #default>
                 <div id="map" class="map-view" />
             </template>
+
+            <template #overlay>
+                <WeatherOverlay
+                    :viewer="viewer"
+                    :selected-date="weather.selectedDate.value"
+                    :selected-month="weather.selectedMonth.value"
+                    :active-layer="weather.activeLayer.value"
+                    :monthly-data="weather.monthlyData.value"
+                    :is-loading="weather.isLoading.value"
+                    @update:selected-date="weather.selectedDate.value = $event"
+                    @update:selected-month="weather.selectedMonth.value = $event"
+                    @update:active-layer="weather.activeLayer.value = $event"
+                />
+                <RouteElevationModal
+                    :open="elevationChart.open"
+                    :title="elevationChart.title"
+                    :profile="elevationChart.profile"
+                    @update:open="elevationChart.close()"
+                />
+            </template>
         </MapShell>
 
         <RouteSaveModal
-            :open="isRouteSaveModalOpen"
-            :title="routeForm.title"
-            :description="routeForm.description"
-            :distance="routeDistance"
-            @update:open="isRouteSaveModalOpen = $event"
-            @update:title="routeForm.title = $event"
-            @update:description="routeForm.description = $event"
-            @submit="confirmSave"
+            :open="saveModal.open"
+            :title="saveModal.routeForm.title"
+            :description="saveModal.routeForm.description"
+            :distance="saveModal.routeDistance"
+            @update:open="saveModal.open = $event"
+            @update:title="saveModal.routeForm.title = $event"
+            @update:description="saveModal.routeForm.description = $event"
+            @submit="saveModal.confirm"
         />
     </div>
 </template>
