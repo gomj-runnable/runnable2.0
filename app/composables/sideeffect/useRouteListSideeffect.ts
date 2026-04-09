@@ -1,6 +1,6 @@
 import type { Ref, ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/composables/useWindow'
-import type { SavedRoute, SavedSection } from '#shared/types/route'
+import type { RouteSectionBase, SavedRoute, SavedSection } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { SECTION_COLORS, SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import {
@@ -22,6 +22,11 @@ interface UseRouteListSideeffectOptions {
 export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) => {
     const previewPolylines = shallowRef<CesiumEntity[]>([])
     const previewPoints = shallowRef<CesiumEntity[]>([])
+
+    const toPreviewSegments = (sections: RouteSectionBase[]) =>
+        sections
+            .map((section) => geomToRouteDrawPositions(section.geom))
+            .filter((positions) => positions.length >= 2)
 
     const createRoutePoint = (position: GeoJsonPosition, color: string) => {
         if (!options.viewer.value) {
@@ -81,9 +86,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             return sections
         }
 
-        const previewSegments = sections
-            .map((section) => geomToRouteDrawPositions(section.geom))
-            .filter((positions) => positions.length >= 2)
+        const previewSegments = toPreviewSegments(sections)
 
         previewPolylines.value = previewSegments.map((positions, index) => {
             const color = SECTION_COLORS[index % SECTION_COLORS.length] ?? SECTION_COLORS[0]
