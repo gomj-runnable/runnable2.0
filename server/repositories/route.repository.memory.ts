@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { CreateRouteSchema } from '#shared/schemas/route.schema'
+import type { RouteDraftInput } from '#shared/types/route'
 import type {
     IRouteRepository,
     SavedRoute,
@@ -11,7 +11,7 @@ class InMemoryRouteRepository implements IRouteRepository {
     private readonly routes = new Map<string, SavedRoute>()
     private readonly sections = new Map<string, SavedSection>()
 
-    async createRoute(input: CreateRouteSchema): Promise<SavedRoute> {
+    async createRoute(input: RouteDraftInput): Promise<SavedRoute> {
         const route: SavedRoute = { routeId: randomUUID(), ...input }
         this.routes.set(route.routeId, route)
         return route
@@ -27,7 +27,7 @@ class InMemoryRouteRepository implements IRouteRepository {
 
     async updateRoute(
         routeId: string,
-        input: Partial<CreateRouteSchema>
+        input: Partial<RouteDraftInput>
     ): Promise<SavedRoute | null> {
         const existing = this.routes.get(routeId)
         if (!existing) return null

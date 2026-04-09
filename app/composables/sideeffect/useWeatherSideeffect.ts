@@ -6,17 +6,17 @@ import type {
     GroundPolylinePrimitiveInstance
 } from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
-import type { SeoulMonthlyWeather, DailyWeather, WeatherLayer } from '#shared/types/weather'
+import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
 
 interface UseWeatherSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
     selectedDate: Ref<string>
-    selectedMonth: Ref<string>
+    selectedHour: Ref<string>
     monthlyData: Ref<SeoulMonthlyWeather | null>
     boundaryGeojson: Ref<unknown>
-    dailySnapshot: ComputedRef<Map<string, DailyWeather>>
+    dailySnapshot: ComputedRef<Map<string, HourlyWeather>>
     activeLayer: Ref<WeatherLayer>
     isLoading: Ref<boolean>
     isVisible: Ref<boolean>
@@ -26,7 +26,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     const {
         viewer,
         selectedDate,
-        selectedMonth,
+        selectedHour,
         monthlyData,
         boundaryGeojson,
         dailySnapshot,
@@ -42,9 +42,9 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     const getCesium = (): CesiumRuntime => (window as unknown as { Cesium: CesiumRuntime }).Cesium
 
     const resolveWeatherByCode = (
-        snapshot: Map<string, DailyWeather>,
+        snapshot: Map<string, HourlyWeather>,
         code: string
-    ): DailyWeather | undefined => {
+    ): HourlyWeather | undefined => {
         for (const [dongCode, daily] of snapshot) {
             if (code.startsWith(dongCode.slice(0, 5)) || dongCode.startsWith(code.slice(0, 5))) {
                 return daily
@@ -55,7 +55,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     }
 
     const getLayerColor = (
-        snapshot: Map<string, DailyWeather>,
+        snapshot: Map<string, HourlyWeather>,
         layer: WeatherLayer,
         code: string
     ): string => {
@@ -148,10 +148,10 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         }
     }
 
-    const fetchMonthlyWeather = async (month: string) => {
+    const fetchMonthlyWeather = async () => {
         isLoading.value = true
         try {
-            const data = await $fetch<SeoulMonthlyWeather>(`/api/weather/${month}`)
+            const data = await $fetch<SeoulMonthlyWeather>(`/api/weather/${selectedDate.value}`)
             monthlyData.value = data
         } catch (err) {
             console.error('[WeatherSideeffect] weather fetch failed', err)
@@ -238,12 +238,13 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
 
     const init = async () => {
         await fetchBoundary()
-        await fetchMonthlyWeather(selectedMonth.value)
+        await fetchMonthlyWeather()
         await loadBoundaryDataSource()
         updateCesiumPolygons()
     }
 
     watch(selectedDate, () => updateCesiumPolygons())
+    watch(selectedHour, () => updateCesiumPolygons())
     watch(activeLayer, () => updateCesiumPolygons())
     watch(isVisible, (v) => {
         if (weatherDataSource) {
@@ -253,10 +254,5 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
             weatherOutlinePrimitive.show = v
         }
     })
-    watch(selectedMonth, async (newMonth) => {
-        await fetchMonthlyWeather(newMonth)
-        updateCesiumPolygons()
-    })
-
     return { init, clearWeatherLayer }
 }

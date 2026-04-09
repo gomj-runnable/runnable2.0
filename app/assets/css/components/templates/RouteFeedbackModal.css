@@ -1,0 +1,41 @@
+.route-feedback-modal__panel-wrap {
+    width: min(420px, calc(100vw - var(--gap-section-xl)));
+}
+
+.route-feedback-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-md);
+    padding: var(--gap-section-lg);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-surface-lg);
+    background: var(--color-surface-canvas);
+    box-shadow: var(--shadow-frame);
+    color: var(--text-on-dark);
+}
+
+.route-feedback-modal.is-success {
+    border-color: rgb(84 214 122 / 0.5);
+}
+
+.route-feedback-modal.is-error {
+    border-color: rgb(255 122 89 / 0.5);
+}
+
+.route-feedback-modal__title {
+    margin: 0;
+    font-size: var(--text-heading-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.route-feedback-modal__message {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
+    color: var(--color-text-inverse-80);
+}
+
+.route-feedback-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+}

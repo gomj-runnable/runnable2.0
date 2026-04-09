@@ -25,6 +25,30 @@
     position: relative;
 }
 
+.weather-overlay__hour-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-2);
+    padding: var(--gap-2) var(--gap-3);
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-control-lg);
+    color: var(--text-primary);
+    font-size: var(--text-body-xs);
+    backdrop-filter: var(--blur);
+    box-shadow: var(--shadow-sm);
+}
+
+.weather-overlay__hour-select {
+    min-width: 84px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    outline: none;
+}
+
 .weather-overlay__calendar-toggle {
     display: flex;
     align-items: center;
@@ -63,18 +87,52 @@
     animation: spin 1s linear infinite;
 }
 
+.weather-overlay__calendar-modal-panel {
+    width: min(360px, calc(100vw - var(--gap-section-xl)));
+}
+
+.weather-overlay__calendar-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-sm);
+    padding: var(--gap-section-md);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-surface-lg);
+    background: var(--color-surface-elevated);
+    box-shadow: var(--shadow-frame);
+}
+
+.weather-overlay__calendar-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-section-sm);
+}
+
+.weather-overlay__calendar-modal-title {
+    margin: 0;
+    font-size: var(--text-label-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.weather-overlay__calendar-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-control-md);
+    background: var(--color-surface-soft);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.weather-overlay__calendar-close:hover {
+    background: var(--color-surface-soft-hover);
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
-
-.calendar-fade-enter-active,
-.calendar-fade-leave-active {
-    transition: opacity var(--transition-fast), transform var(--transition-fast);
-}
-
-.calendar-fade-enter-from,
-.calendar-fade-leave-to {
-    opacity: 0;
-    transform: translateY(-4px);
-}
-

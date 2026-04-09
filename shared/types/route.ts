@@ -36,8 +36,7 @@ export interface RouteElevationProfile {
     lowestPoint: RouteElevationPoint
 }
 
-export interface SavedRoute {
-    routeId: string
+export interface RouteBase {
     title: string
     description?: string
     highHeight?: number
@@ -45,10 +44,28 @@ export interface SavedRoute {
     distance?: number
 }
 
-export interface SavedSection {
-    sectionId: string
+export type RouteDraftInput = RouteBase
+
+export interface SavedRoute extends RouteBase {
     routeId: string
+}
+
+export interface RouteSectionBase {
     /** GeoJSON LineString - 경도/위도/고도 */
     geom?: GeoJsonLineString
     attrs?: SectionAttr[]
+}
+
+export interface RouteSectionDraftInput extends RouteSectionBase {
+    routeId: string
+}
+
+export interface SavedSection extends RouteSectionBase {
+    sectionId: string
+    routeId: string
+}
+
+export interface RouteSectionCreateInput extends RouteSectionBase {
+    /** GeoJSON LineString - 경도/위도/고도 */
+    routeId?: never
 }

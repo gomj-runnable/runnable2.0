@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SavedRoute } from '#shared/types/route'
+import type { RouteBase, SavedRoute } from '#shared/types/route'
 import Card from '~/components/map/organizations/cards/Card.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 
@@ -13,7 +13,7 @@ defineEmits<{
     download: [routeId: string]
 }>()
 
-const formatDistance = (distance?: number) => {
+const formatDistance = (distance?: RouteBase['distance']) => {
     if (typeof distance !== 'number') return null
     return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`
 }
