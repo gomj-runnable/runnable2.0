@@ -1,8 +1,8 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
+import type { createRouteElevationProfile } from '~/composables/action/useRouteElevationProfile'
 import {
-    createRouteElevationProfile,
     createRouteElevationProfileFromDraft,
     createRouteElevationProfileFromSections
 } from '~/composables/action/useRouteElevationProfile'
@@ -49,16 +49,43 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         selectedRouteId: store.selectedRouteId
     })
 
+    const feedbackModal = ref({
+        open: false,
+        title: '',
+        message: '',
+        tone: 'info' as 'success' | 'error' | 'info'
+    })
+
+    const openFeedbackModal = (payload: {
+        title: string
+        message: string
+        tone?: 'success' | 'error' | 'info'
+    }) => {
+        feedbackModal.value = {
+            open: true,
+            title: payload.title,
+            message: payload.message,
+            tone: payload.tone ?? 'info'
+        }
+    }
+
+    const closeFeedbackModal = () => {
+        feedbackModal.value.open = false
+    }
+
     const closeElevationChart = () => {
         store.isElevationChartOpen.value = false
         store.elevationProfile.value = null
+    }
+
+    const setElevationChartOpen = (open: boolean) => {
+        store.isElevationChartOpen.value = open
     }
 
     const openElevationChart = (
         title: string,
         profile: ReturnType<typeof createRouteElevationProfile>
     ) => {
-
         if (!profile) {
             closeElevationChart()
             return
@@ -189,9 +216,17 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             store.isRouteSaveModalOpen.value = false
             store.resetRouteDrawState()
             store.activeNav.value = '목록'
-            alert('저장되었습니다.')
+            openFeedbackModal({
+                title: '저장 완료',
+                message: '경로가 저장되었습니다.',
+                tone: 'success'
+            })
         } catch (error) {
-            alert(error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.')
+            openFeedbackModal({
+                title: '저장 실패',
+                message: error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.',
+                tone: 'error'
+            })
         }
     }
 
@@ -214,8 +249,18 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
                 createRouteGpx(route, sections),
                 'application/gpx+xml;charset=utf-8'
             )
+            openFeedbackModal({
+                title: '다운로드 준비 완료',
+                message: `${route.title} GPX 다운로드를 시작했습니다.`,
+                tone: 'success'
+            })
         } catch (error) {
-            alert(error instanceof Error ? error.message : 'GPX 다운로드 중 오류가 발생했습니다.')
+            openFeedbackModal({
+                title: '다운로드 실패',
+                message:
+                    error instanceof Error ? error.message : 'GPX 다운로드 중 오류가 발생했습니다.',
+                tone: 'error'
+            })
         }
     }
 
@@ -246,7 +291,16 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         open: store.isElevationChartOpen,
         title: store.elevationChartTitle,
         profile: store.elevationProfile,
+        setOpen: setElevationChartOpen,
         close: closeElevationChart
+    })
+
+    const feedback = proxyRefs({
+        open: computed(() => feedbackModal.value.open),
+        title: computed(() => feedbackModal.value.title),
+        message: computed(() => feedbackModal.value.message),
+        tone: computed(() => feedbackModal.value.tone),
+        close: closeFeedbackModal
     })
 
     // ─── 공개 인터페이스 ──────────────────────────────────────────
@@ -256,6 +310,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         drawing,
         saveModal,
         routeList,
-        elevationChart
+        elevationChart,
+        feedback
     }
 }

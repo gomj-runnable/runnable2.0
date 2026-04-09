@@ -6,6 +6,7 @@ import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
 import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
 import RouteElevationModal from '~/components/map/templates/RouteElevationModal.vue'
 import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
+import RouteFeedbackModal from '~/components/map/templates/RouteFeedbackModal.vue'
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
 import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
@@ -24,25 +25,20 @@ useHead({
 const { init } = useMapInit()
 const viewer = shallowRef<CesiumViewer | null>(null)
 
-const {
-    activeNav,
-    drawing,
-    saveModal,
-    routeList,
-    elevationChart
-} = useRouteMapFacade(viewer)
+const { activeNav, drawing, saveModal, routeList, elevationChart, feedback } =
+    useRouteMapFacade(viewer)
 
 const weather = useWeatherStore()
 const { init: initWeather } = useWeatherSideeffect({
     viewer,
     selectedDate: weather.selectedDate,
-    selectedMonth: weather.selectedMonth,
+    selectedHour: weather.selectedHour,
     monthlyData: weather.monthlyData,
     boundaryGeojson: weather.boundaryGeojson,
     dailySnapshot: weather.dailySnapshot,
     activeLayer: weather.activeLayer,
     isLoading: weather.isLoading,
-    isVisible: weather.isVisible,
+    isVisible: weather.isVisible
 })
 
 onMounted(async () => {
@@ -125,13 +121,14 @@ const navItems = [
 
             <template #overlay>
                 <WeatherOverlay
-                    :viewer="viewer"
                     :selected-date="weather.selectedDate.value"
+                    :selected-hour="weather.selectedHour.value"
                     :selected-month="weather.selectedMonth.value"
                     :active-layer="weather.activeLayer.value"
                     :monthly-data="weather.monthlyData.value"
                     :is-loading="weather.isLoading.value"
                     @update:selected-date="weather.selectedDate.value = $event"
+                    @update:selected-hour="weather.selectedHour.value = $event"
                     @update:selected-month="weather.selectedMonth.value = $event"
                     @update:active-layer="weather.activeLayer.value = $event"
                 />
@@ -139,7 +136,7 @@ const navItems = [
                     :open="elevationChart.open"
                     :title="elevationChart.title"
                     :profile="elevationChart.profile"
-                    @update:open="elevationChart.close()"
+                    @update:open="elevationChart.setOpen($event)"
                 />
             </template>
         </MapShell>
@@ -153,6 +150,13 @@ const navItems = [
             @update:title="saveModal.routeForm.title = $event"
             @update:description="saveModal.routeForm.description = $event"
             @submit="saveModal.confirm"
+        />
+        <RouteFeedbackModal
+            :open="feedback.open"
+            :title="feedback.title"
+            :message="feedback.message"
+            :tone="feedback.tone"
+            @update:open="feedback.close()"
         />
     </div>
 </template>

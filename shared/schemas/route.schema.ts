@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import type { GeoJsonLineString } from '#shared/types/route'
+import type {
+    GeoJsonLineString,
+    RouteDraftInput,
+    RouteSectionDraftInput
+} from '#shared/types/route'
 
 export const geoJsonLineStringPositionSchema = z.tuple([z.number(), z.number(), z.number()])
 export const geoJsonLineStringSchema = z.object({
@@ -14,13 +18,13 @@ export const sectionAttrSchema = z.object({
     description: z.string().optional()
 })
 
-export const createSectionSchema = z.object({
+export const createSectionSchema: z.ZodType<RouteSectionDraftInput> = z.object({
     routeId: z.string().min(1),
     geom: geoJsonLineStringSchema.optional(),
     attrs: z.array(sectionAttrSchema).optional()
 })
 
-export const createRouteSchema = z.object({
+export const createRouteSchema: z.ZodType<RouteDraftInput> = z.object({
     title: z
         .string()
         .min(1, '경로 제목을 입력해주세요')

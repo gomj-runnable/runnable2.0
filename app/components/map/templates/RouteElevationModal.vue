@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { RouteElevationPoint, RouteElevationProfile } from '#shared/types/route'
 import Button from '~/components/map/molecules/buttons/Button.vue'
+import PopupModal from '~/components/map/templates/PopupModal.vue'
 import { createDistanceTicks } from '~/composables/action/useRouteElevationProfile'
 
 const CHART_WIDTH = 720
@@ -36,13 +37,9 @@ const formatElevation = (elevation?: number) =>
 type RenderedPoint = RouteElevationPoint & { x: number; y: number }
 type RenderedSectionSegment = RouteElevationProfile['sections'][number] & { path: string }
 
-const findRenderedPoint = (
-    linePoints: RenderedPoint[],
-    target: RouteElevationPoint
-) =>
+const findRenderedPoint = (linePoints: RenderedPoint[], target: RouteElevationPoint) =>
     linePoints.find(
-        (point) =>
-            point.distanceKm === target.distanceKm && point.elevation === target.elevation
+        (point) => point.distanceKm === target.distanceKm && point.elevation === target.elevation
     ) ?? null
 
 const summaryItems = computed(() => {
@@ -124,19 +121,35 @@ const chartGeometry = computed(() => {
 </script>
 
 <template>
-    <div
-        v-if="open && profile"
-        class="route-elevation-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="경로 고도 그래프"
-        @click.self="$emit('update:open', false)"
+    <button
+        v-if="profile"
+        id="popup-route-elevation-trigger"
+        type="button"
+        class="route-elevation-modal__chip-button"
+        :class="{ 'is-active': open }"
+        aria-controls="popup-route-elevation"
+        :aria-expanded="open"
+        @click="$emit('update:open', !open)"
     >
-        <section class="route-elevation-modal__panel">
+        <span class="i-lucide-chart-line" />
+        <span>{{ title }}</span>
+    </button>
+
+    <PopupModal
+        :open="open && !!profile"
+        popup-id="popup-route-elevation"
+        aria-labelledby="popup-title-route-elevation"
+        position="bottom"
+        panel-class="route-elevation-modal__popup-panel"
+        @update:open="$emit('update:open', $event)"
+    >
+        <section v-if="profile" class="route-elevation-modal route-elevation-modal__panel">
             <header class="route-elevation-modal__header">
                 <div>
                     <p class="route-elevation-modal__eyebrow">Elevation Profile</p>
-                    <h2 class="route-elevation-modal__title">{{ title }}</h2>
+                    <h2 id="popup-title-route-elevation" class="route-elevation-modal__title">
+                        {{ title }}
+                    </h2>
                 </div>
                 <Button
                     appearance="secondary"
@@ -159,10 +172,14 @@ const chartGeometry = computed(() => {
 
             <div class="route-elevation-modal__chart">
                 <div class="route-elevation-modal__legend">
-                    <span class="route-elevation-modal__legend-stat route-elevation-modal__legend-stat--up">
+                    <span
+                        class="route-elevation-modal__legend-stat route-elevation-modal__legend-stat--up"
+                    >
                         상승 {{ formatElevation(profile.elevationGain) }}
                     </span>
-                    <span class="route-elevation-modal__legend-stat route-elevation-modal__legend-stat--down">
+                    <span
+                        class="route-elevation-modal__legend-stat route-elevation-modal__legend-stat--down"
+                    >
                         하강 {{ formatElevation(profile.elevationLoss) }}
                     </span>
 
@@ -187,13 +204,7 @@ const chartGeometry = computed(() => {
                     class="route-elevation-modal__svg"
                 >
                     <defs>
-                        <linearGradient
-                            id="route-elevation-gradient"
-                            x1="0"
-                            y1="0"
-                            x2="0"
-                            y2="1"
-                        >
+                        <linearGradient id="route-elevation-gradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color="#ffe09b" stop-opacity="0.28" />
                             <stop offset="100%" stop-color="#ffe09b" stop-opacity="0.02" />
                         </linearGradient>
@@ -286,7 +297,7 @@ const chartGeometry = computed(() => {
                 <span>0.5km 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
             </footer>
         </section>
-    </div>
+    </PopupModal>
 </template>
 
 <style scoped src="~/assets/css/components/templates/RouteElevationModal.css"></style>

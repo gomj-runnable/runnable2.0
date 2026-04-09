@@ -1,16 +1,46 @@
 .route-elevation-modal {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: var(--gap-section-xl);
+    width: min(820px, 100%);
     background: linear-gradient(180deg, rgb(7 10 16 / 0.06) 0%, rgb(7 10 16 / 0.42) 100%);
+    border-radius: var(--radius-surface-lg);
+}
+
+.route-elevation-modal__chip-button {
+    position: absolute;
+    left: 50%;
+    bottom: var(--gap-section-lg);
+    transform: translateX(-50%);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-section-xs);
+    padding: var(--gap-section-xs) var(--gap-section-md);
+    border: 1px solid rgb(255 255 255 / 0.24);
+    border-radius: 999px;
+    background: rgb(13 18 24 / 0.88);
+    color: var(--text-on-dark);
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-semibold);
+    box-shadow: var(--shadow-floating, 0 10px 26px rgb(0 0 0 / 0.32));
+    backdrop-filter: blur(10px);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.route-elevation-modal__chip-button:hover {
+    border-color: rgb(255 255 255 / 0.4);
+    background: rgb(17 24 32 / 0.92);
+}
+
+.route-elevation-modal__chip-button.is-active {
+    border-color: rgb(241 194 91 / 0.7);
+    background: rgb(29 36 46 / 0.94);
+}
+
+.route-elevation-modal__popup-panel {
+    width: min(820px, calc(100vw - var(--gap-section-xl)));
 }
 
 .route-elevation-modal__panel {
-    width: min(820px, 100%);
-    max-width: 100%;
+    width: 100%;
     padding: var(--gap-section-lg);
     border: 1px solid rgb(255 255 255 / 0.08);
     border-radius: var(--radius-surface-lg);
@@ -205,14 +235,12 @@
 }
 
 @media (max-width: 1024px) {
-    .route-elevation-modal {
-        align-items: stretch;
-        padding: var(--gap-section-md);
+    .route-elevation-modal__popup-panel {
+        width: calc(100vw - var(--gap-section-lg));
     }
 
-    .route-elevation-modal__panel {
+    .route-elevation-modal {
         width: 100%;
-        align-self: flex-end;
     }
 }
 
@@ -227,6 +255,11 @@
 }
 
 @media (max-width: 540px) {
+    .route-elevation-modal__chip-button {
+        width: calc(100vw - var(--gap-section-lg));
+        justify-content: center;
+    }
+
     .route-elevation-modal__summary {
         grid-template-columns: 1fr;
     }

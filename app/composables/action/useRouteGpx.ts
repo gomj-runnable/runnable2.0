@@ -1,9 +1,8 @@
-import type { CreateRouteSchema, CreateSectionSchema } from '#shared/schemas/route.schema'
-import type { SavedRoute, SavedSection } from '#shared/types/route'
+import type { RouteBase, RouteSectionBase } from '#shared/types/route'
 
 const XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
-type GpxRouteSource = Pick<CreateRouteSchema | SavedRoute, 'title' | 'description'>
-type GpxSectionSource = Pick<CreateSectionSchema | SavedSection, 'geom' | 'attrs'>
+type GpxRouteSource = Pick<RouteBase, 'title' | 'description'>
+type GpxSectionSource = Pick<RouteSectionBase, 'geom' | 'attrs'>
 
 const escapeXml = (value?: string) =>
     (value ?? '')
