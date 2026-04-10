@@ -237,15 +237,12 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     }
 
     const init = async () => {
-        await fetchBoundary()
-        await fetchMonthlyWeather()
+        await Promise.all([fetchBoundary(), fetchMonthlyWeather()])
         await loadBoundaryDataSource()
         updateCesiumPolygons()
     }
 
-    watch(selectedDate, () => updateCesiumPolygons())
-    watch(selectedHour, () => updateCesiumPolygons())
-    watch(activeLayer, () => updateCesiumPolygons())
+    watch([selectedDate, selectedHour, activeLayer], () => updateCesiumPolygons())
     watch(isVisible, (v) => {
         if (weatherDataSource) {
             ;(weatherDataSource as unknown as { show: boolean }).show = v

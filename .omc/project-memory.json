@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775653845008,
+  "lastScanned": 1775778867748,
   "projectRoot": "/Users/kmj/WebstormProjects/Runnable",
   "techStack": {
     "languages": [
@@ -70,7 +70,7 @@
       "path": "app",
       "purpose": "Application code",
       "fileCount": 2,
-      "lastAccessed": 1775653845001,
+      "lastAccessed": 1775778867740,
       "keyFiles": [
         "app.config.ts",
         "app.vue"
@@ -80,14 +80,14 @@
       "path": "lib",
       "purpose": "Library code",
       "fileCount": 0,
-      "lastAccessed": 1775653845001,
+      "lastAccessed": 1775778867743,
       "keyFiles": []
     },
     "public": {
       "path": "public",
       "purpose": "Public files",
       "fileCount": 2,
-      "lastAccessed": 1775653845002,
+      "lastAccessed": 1775778867744,
       "keyFiles": [
         "favicon.ico"
       ]
@@ -96,42 +96,42 @@
       "path": "server",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1775653845004,
+      "lastAccessed": 1775778867744,
       "keyFiles": []
     },
     "shared": {
       "path": "shared",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1775653845006,
+      "lastAccessed": 1775778867744,
       "keyFiles": []
     },
     "uploads": {
       "path": "uploads",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1775653845006,
+      "lastAccessed": 1775778867744,
       "keyFiles": []
     },
     "app/assets": {
       "path": "app/assets",
       "purpose": "Static assets",
       "fileCount": 0,
-      "lastAccessed": 1775653845007,
+      "lastAccessed": 1775778867745,
       "keyFiles": []
     },
     "app/components": {
       "path": "app/components",
       "purpose": "UI components",
       "fileCount": 0,
-      "lastAccessed": 1775653845007,
+      "lastAccessed": 1775778867745,
       "keyFiles": []
     },
     "app/pages": {
       "path": "app/pages",
       "purpose": "Page components",
       "fileCount": 1,
-      "lastAccessed": 1775653845007,
+      "lastAccessed": 1775778867745,
       "keyFiles": [
         "index.vue"
       ]
@@ -140,21 +140,21 @@
       "path": "public/docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1775653845007,
+      "lastAccessed": 1775778867746,
       "keyFiles": []
     },
     "server/api": {
       "path": "server/api",
       "purpose": "API routes",
       "fileCount": 0,
-      "lastAccessed": 1775653845007,
+      "lastAccessed": 1775778867746,
       "keyFiles": []
     },
     "server/utils": {
       "path": "server/utils",
       "purpose": "Utility functions",
       "fileCount": 3,
-      "lastAccessed": 1775653845007,
+      "lastAccessed": 1775778867747,
       "keyFiles": [
         "auth.ts",
         "db.ts",
@@ -165,14 +165,14 @@
       "path": "shared/data",
       "purpose": "Data files",
       "fileCount": 0,
-      "lastAccessed": 1775653845008,
+      "lastAccessed": 1775778867747,
       "keyFiles": []
     },
     "shared/schemas": {
       "path": "shared/schemas",
       "purpose": "Schema definitions",
       "fileCount": 4,
-      "lastAccessed": 1775653845008,
+      "lastAccessed": 1775778867748,
       "keyFiles": [
         "category.schema.ts",
         "route.schema.ts",
@@ -183,7 +183,7 @@
       "path": "shared/types",
       "purpose": "Type definitions",
       "fileCount": 9,
-      "lastAccessed": 1775653845008,
+      "lastAccessed": 1775778867748,
       "keyFiles": [
         "category.ts",
         "cesium.ts",
@@ -194,26 +194,302 @@
   "hotPaths": [
     {
       "path": ".claude/skills/create-popup-modal/SKILL.md",
+      "accessCount": 8,
+      "lastAccessed": 1775781076144,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/sideeffect/useWeatherSideeffect.ts",
+      "accessCount": 7,
+      "lastAccessed": 1775780462521,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/sideeffect/useRouteListSideeffect.ts",
       "accessCount": 6,
-      "lastAccessed": 1775709569610,
+      "lastAccessed": 1775780443715,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/action/useRouteElevationProfile.ts",
+      "accessCount": 5,
+      "lastAccessed": 1775780384581,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 4,
+      "lastAccessed": 1775779495216,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 3,
+      "lastAccessed": 1775779495650,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/useMapInit.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775780195648,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/useRouteMapFacade.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775780196631,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/store/useWeatherStore.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775780210474,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/sideeffect/useRouteDrawSideeffect.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775780427911,
+      "type": "file"
+    },
+    {
+      "path": "app/AGENTS.md",
+      "accessCount": 2,
+      "lastAccessed": 1775779496111,
+      "type": "file"
+    },
+    {
+      "path": "app/components/AGENTS.md",
+      "accessCount": 2,
+      "lastAccessed": 1775779497024,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/AGENTS.md",
+      "accessCount": 2,
+      "lastAccessed": 1775779497434,
+      "type": "file"
+    },
+    {
+      "path": "server/AGENTS.md",
+      "accessCount": 2,
+      "lastAccessed": 1775779497945,
+      "type": "file"
+    },
+    {
+      "path": "shared/AGENTS.md",
+      "accessCount": 2,
+      "lastAccessed": 1775779497963,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/store/useRouteDrawStore.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775780130691,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/useWindow.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775780196162,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/action/useRouteDrawUtils.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775780412426,
       "type": "file"
     },
     {
       "path": ".claude/skills/create-popup-modal/examples/state.md",
-      "accessCount": 1,
-      "lastAccessed": 1775709590240,
+      "accessCount": 2,
+      "lastAccessed": 1775780959362,
       "type": "file"
     },
     {
       "path": ".claude/skills/create-popup-modal/examples/css.md",
-      "accessCount": 1,
-      "lastAccessed": 1775709604700,
+      "accessCount": 2,
+      "lastAccessed": 1775780959561,
+      "type": "file"
+    },
+    {
+      "path": "shared/types/route.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775780964492,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/runnable-architecture/SKILL.md",
+      "accessCount": 2,
+      "lastAccessed": 1775781074761,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/runnable-components/SKILL.md",
+      "accessCount": 2,
+      "lastAccessed": 1775781075189,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/runnable-composables/SKILL.md",
+      "accessCount": 2,
+      "lastAccessed": 1775781075669,
+      "type": "file"
+    },
+    {
+      "path": ".claude/skills/create-type-role/SKILL.md",
+      "accessCount": 2,
+      "lastAccessed": 1775781076630,
       "type": "file"
     },
     {
       "path": ".claude/skills/create-popup-modal/examples/Parent.vue",
       "accessCount": 1,
       "lastAccessed": 1775709617214,
+      "type": "file"
+    },
+    {
+      "path": "nuxt.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775779009018,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1775779009070,
+      "type": "file"
+    },
+    {
+      "path": "server/utils/db.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775779010957,
+      "type": "file"
+    },
+    {
+      "path": "shared/types/cesium.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775779048307,
+      "type": "file"
+    },
+    {
+      "path": "server/api/routes/index.post.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775779049090,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1775779391972,
+      "type": "directory"
+    },
+    {
+      "path": "app/composables/action/useRouteDrawDraft.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780130802,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/sideeffect/useRouteDownloadSideeffect.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780139673,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/sideeffect/useRouteSaveSideeffect.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780140183,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/action/useRouteGpx.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780141763,
+      "type": "file"
+    },
+    {
+      "path": "app/composables/action/useWeatherDataTransform.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780143036,
+      "type": "file"
+    },
+    {
+      "path": "app/assets/css/base/primitive.css",
+      "accessCount": 1,
+      "lastAccessed": 1775780960829,
+      "type": "file"
+    },
+    {
+      "path": "app/assets/css/base/main.css",
+      "accessCount": 1,
+      "lastAccessed": 1775780961217,
+      "type": "file"
+    },
+    {
+      "path": "app/assets/css/base/semantic.css",
+      "accessCount": 1,
+      "lastAccessed": 1775780961342,
+      "type": "file"
+    },
+    {
+      "path": "app/assets/css/components/common.css",
+      "accessCount": 1,
+      "lastAccessed": 1775780961440,
+      "type": "file"
+    },
+    {
+      "path": "shared/types/user.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780964474,
+      "type": "file"
+    },
+    {
+      "path": "shared/types/common.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780964531,
+      "type": "file"
+    },
+    {
+      "path": "shared/types/category.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780964713,
+      "type": "file"
+    },
+    {
+      "path": "shared/schemas/user.schema.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780964923,
+      "type": "file"
+    },
+    {
+      "path": "shared/schemas/route.schema.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775780965095,
+      "type": "file"
+    },
+    {
+      "path": "app/pages/index.vue",
+      "accessCount": 1,
+      "lastAccessed": 1775780967417,
+      "type": "file"
+    },
+    {
+      "path": "app/components/map/molecules/buttons/IconButton.vue",
+      "accessCount": 1,
+      "lastAccessed": 1775780970141,
+      "type": "file"
+    },
+    {
+      "path": "app/components/map/atoms/inputs/Textfield.vue",
+      "accessCount": 1,
+      "lastAccessed": 1775780970281,
+      "type": "file"
+    },
+    {
+      "path": "app/components/map/templates/MapSidebar.vue",
+      "accessCount": 1,
+      "lastAccessed": 1775780970483,
       "type": "file"
     }
   ],

@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 
-이 저장소는 러닝 경로 제작 서비스를 위한 풀스택 프로젝트다.
+이 저장소는 Cesium 3D 지도 기반 러닝 경로 제작 서비스를 위한 풀스택 프로젝트다.
 프론트엔드는 `app/` 아래의 Vue/Nuxt UI를 사용하고, 백엔드는 `server/` 아래의 Nuxt 서버 기능으로 구성한다.
 공통 도메인 코드와 타입, 상수, 샘플 데이터는 `shared/`에 둔다.
 지도 렌더링과 외부 지도 엔진 연동은 브라우저 전용 경계로 분리해 다룬다.
@@ -17,12 +17,15 @@
 - `app/assets/icons/` : 아이콘 자산
 - `app/components/` : 페이지 단위 UI 컴포넌트
 - `app/components/<page>/` : 페이지별 독립 컴포넌트 패키지
+- `app/components/<page>/atoms/` : 최소 단위 입력 컴포넌트 (예: Textfield)
 - `app/components/<page>/molecules/` : atomic design 기준의 중간 단위 컴포넌트
+- `app/components/<page>/organizations/` : 조직 단위 컴포넌트 (예: cards)
 - `app/components/<page>/templates/` : 페이지 조합 단위 컴포넌트
 - `app/composables/` : 상태 관리, 독립 유틸, 부수효과 처리
 - `app/composables/action/` : 독립적인 유틸리티 기능 패키지
 - `app/composables/sideeffect/` : 외부 API 통신 등 부수 효과를 이해하기 쉽고 테스트 가능하게 관리하는 패키지
 - `app/composables/store/` : 데이터 상태를 관리하는 패키지
+- `app/composables/constant/` : 상수 composable (향후 상수 composable용 예약 디렉터리)
 - `app/layouts/` : 공통 레이아웃
 - `app/pages/` : 실제 라우트 페이지
 
@@ -30,9 +33,15 @@
 
 - `server/` : 백엔드 루트
 - `server/api/` : API 엔드포인트
+- `server/api/auth/` : better-auth 핸들러
+- `server/api/boundary/` : 서울 행정경계 GeoJSON API
+- `server/api/routes/` : 러닝 경로 CRUD API
+- `server/api/weather/` : 날씨 API
 - `server/routes/` : Nitro route 핸들러
 - `server/database/` : DB 연결, 스키마, 시드
+- `server/repositories/` : 데이터 접근 계층 (route.repository.ts = 인터페이스, route.repository.memory.ts = 인메모리 구현체)
 - `server/utils/` : 인증, DB, 에러 공통 유틸
+- `server/utils/weather/` : 날씨 서비스 (observed.adapter, forecast.adapter, merge.service, weather.service, common)
 
 ### Shared
 
@@ -87,6 +96,22 @@
 - `/project:lean` : 최소 파일만 읽고, 짧은 진행 보고와 짧은 최종 답변으로 작업하도록 유도하는 프로젝트 전용 명령
 - `/project:lean` 사용 시에는 필요한 파일 목록을 먼저 좁히고, 구현에 직접 필요한 구간만 읽는다.
 
+## 3-에이전트 팀 워크플로우
+
+모든 비trivial 작업은 아래 구조로 진행한다.
+
+| 역할 | 모델 | 책임 |
+|------|------|------|
+| **설계 (Architect)** | Claude Opus 4.6 | 시스템 분석, 구현 계획, 브리프 작성 |
+| **코딩 (Builder)** | Claude Sonnet 4.5 | 브리프 기반 코드 구현 |
+| **테스트 (Tester)** | Claude Sonnet 4.5 | 품질 검증, 성능 테스트 |
+
+작업 순서: Architect → Builder → Tester → Architect(최종 확인)
+
+- Architect는 전체 구조를 파악하고 무엇을, 어느 파일에, 어떤 순서로 수정할지 브리프를 작성한다. 실제 코드 수정은 하지 않는다.
+- Builder는 브리프에 명시된 파일과 범위만 수정한다. 브리프에 없는 기능은 추가하지 않는다.
+- Tester는 변경된 코드의 품질과 브리프 준수 여부를 검증하고, 문제 발생 시 구체적인 수정 사항을 Builder에게 반환한다.
+
 ## Front-end 아키텍처
 
 ### 페이지와 레이아웃
@@ -130,12 +155,27 @@
 - `server/routes/`는 프록시, 정적 경로형 핸들러, 외부 서비스 중계 같은 Nitro route 경계를 둔다.
 - 프론트엔드에서 직접 외부 서비스에 붙기보다 서버 경유 경계를 먼저 검토한다.
 
+### Repository 패턴
+
+- 데이터 접근은 `server/repositories/`에서 관리한다.
+- `route.repository.ts`는 인터페이스(계약)를 정의하고, `route.repository.memory.ts`는 인메모리 구현체를 제공한다.
+- DB 연동 구현체가 추가되어도 인터페이스를 교체 없이 바꿀 수 있도록 의존성 역전 원칙을 따른다.
+
 ### 인증과 DB 경계
 
 - better-auth 설정과 핸들러 소유권은 `server/utils/auth.ts`, `server/api/auth/[...all].ts`에 둔다.
 - DB 연결과 ORM 초기화는 `server/utils/db.ts`에 둔다.
 - Drizzle 테이블 정의는 `server/database/schema/**`에 두고, 진입점은 `server/database/schema.ts`로 통합한다.
 - 시드 데이터는 `server/database/seed.ts`에서 관리한다.
+
+### 날씨 서비스 구조
+
+- `server/utils/weather/`는 날씨 데이터 처리 파이프라인을 담당한다.
+- `observed.adapter`: 현재 관측 데이터를 정규화한다.
+- `forecast.adapter`: 예보 데이터를 정규화한다.
+- `merge.service`: 관측 + 예보 데이터를 병합한다.
+- `weather.service`: 외부 날씨 API 호출과 전체 파이프라인을 조율한다.
+- `common`: 공통 타입과 유틸리티를 둔다.
 
 ## Shared 아키텍처
 

@@ -1,8 +1,7 @@
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteElevationProfile, RouteElevationSection, SavedSection } from '#shared/types/route'
-import { SECTION_COLORS } from '#shared/constants/route'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
-import { geomToRouteDrawPositions } from '~/composables/action/useRouteDrawUtils'
+import { geomToRouteDrawPositions, getSectionColor } from '~/composables/action/useRouteDrawUtils'
 
 interface RouteElevationSectionInput {
     label: string
@@ -34,8 +33,6 @@ const calculateDistanceMeters = (start: GeoJsonPosition, end: GeoJsonPosition) =
 
 const roundMetric = (value: number, precision = 1) => Number(value.toFixed(precision))
 
-const toSectionColor = (index: number) =>
-    SECTION_COLORS[index % SECTION_COLORS.length] ?? SECTION_COLORS[0]
 
 const normalizeSectionInputs = (sections: RouteElevationSectionInput[]) =>
     sections.filter((section) => section.positions.length > 0)
@@ -131,7 +128,7 @@ export const createRouteElevationProfileFromDraft = (
     createRouteElevationProfile(
         ranges.map((range, index) => ({
             label: sectionNames?.[index]?.name?.trim() || `구간 ${index + 1}`,
-            color: toSectionColor(index),
+            color: getSectionColor(index),
             positions: positions.slice(range.start, range.end + 1)
         }))
     )
@@ -140,7 +137,7 @@ export const createRouteElevationProfileFromSections = (sections: SavedSection[]
     createRouteElevationProfile(
         sections.map((section, index) => ({
             label: section.attrs?.[0]?.name?.trim() || `구간 ${index + 1}`,
-            color: toSectionColor(index),
+            color: getSectionColor(index),
             positions: geomToRouteDrawPositions(section.geom)
         }))
     )
