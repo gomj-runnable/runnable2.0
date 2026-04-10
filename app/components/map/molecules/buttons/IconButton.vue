@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 const props = withDefaults(
     defineProps<{
         icon?: string
@@ -11,20 +9,10 @@ const props = withDefaults(
         disabled?: boolean
         type?: 'button' | 'submit' | 'reset'
     }>(),
-    {
-        icon: undefined,
-        label: undefined,
-        appearance: 'plain',
-        role: 'default',
-        active: false,
-        disabled: false,
-        type: 'button'
-    }
+    { appearance: 'plain', role: 'default', active: false, disabled: false, type: 'button' }
 )
 
 defineEmits<{ click: [event: MouseEvent] }>()
-
-const resolvedAppearance = computed(() => props.appearance ?? 'plain')
 </script>
 
 <template>
@@ -32,7 +20,7 @@ const resolvedAppearance = computed(() => props.appearance ?? 'plain')
         :type="type"
         class="map-button icon-button"
         :class="[
-            `icon-button--${resolvedAppearance}`,
+            `icon-button--${appearance}`,
             `icon-button--role-${role}`,
             {
                 'is-active': active,

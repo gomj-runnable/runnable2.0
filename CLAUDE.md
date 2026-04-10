@@ -253,6 +253,9 @@
 - `runnable-architecture` : 러닝 경로 제작 서비스의 패키지 구조와 작업 규칙을 따르기 위한 프로젝트 전용 스킬
 - `runnable-composables` : `app/composables/action`, `app/composables/sideeffect`, `app/composables/store`의 책임 분리를 따르기 위한 프로젝트 전용 스킬
 - `runnable-components` : `app/components/<page>/molecules/`와 `app/components/<page>/templates/` 계층 기준으로 Toss Flat+Compound 원칙에 따라 UI 컴포넌트를 설계하고 구현하기 위한 프로젝트 전용 스킬
+- `create-map-overlay` : MapShell `#overlay` 슬롯에 배치되는 부유 UI(지도 위 컨트롤 패널)의 공통 구조·CSS 패턴을 따르기 위한 프로젝트 전용 스킬
+- `create-api-service` : 외부 API 연동 시 원본 Response Class + 추상화 Local Response 분리, `service.requestBy{기준}()` 네이밍 규칙을 따르기 위한 프로젝트 전용 스킬
+- `create-unified-api-response` : 한 기능에서 2개 이상 API 사용 시 공통 Local Response를 정의하고, 호출부 외 모든 후속 로직을 통일하는 프로젝트 전용 스킬
 
 ## 현재 .claude Command
 
