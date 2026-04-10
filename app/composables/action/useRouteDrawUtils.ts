@@ -63,6 +63,22 @@ export const toLineStringCoordinate = (
         ? [coordinate[0], coordinate[1], coordinate[2] ?? 0]
         : cartesianToWgs84Coordinate(coordinate)
 
+export const addRoutePointEntity = (
+    viewer: { entities: { add(options: unknown): unknown } },
+    position: GeoJsonPosition,
+    color: string
+) =>
+    viewer.entities.add({
+        position: toCartesianPosition(position),
+        point: {
+            pixelSize: 10,
+            color: toCesiumColor(color, 0.95),
+            outlineColor: window.Cesium.Color.WHITE,
+            outlineWidth: 2,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+        }
+    })
+
 export const isGeoJsonLineString = (value: unknown): value is GeoJsonLineString =>
     typeof value === 'object' &&
     value !== null &&
