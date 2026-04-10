@@ -18,6 +18,7 @@ import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeff
 import { useRouteDownloadSideeffect } from '~/composables/sideeffect/useRouteDownloadSideeffect'
 import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
 import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
+import { useAuthStore } from '~/composables/store/useAuthStore'
 
 /**
  * 경로 지도 화면의 모든 기능을 단일 진입점으로 제공하는 Facade.
@@ -148,6 +149,28 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         )
     }
 
+    /** 탐색 탭에서 공개 경로를 선택해 지도에 미리보기 + 고도 그래프를 표시한다 */
+    const exploreSelectRoute = async (routeId: string, routeTitle?: string) => {
+        const sections = await listEffect.fetchRouteSections(routeId)
+
+        if (!sections?.length) {
+            closeElevationChart()
+            return
+        }
+
+        // 지도에 미리보기 표시
+        listEffect.clearPreview()
+        await listEffect.selectRoute(routeId)
+
+        const sectionInputs = buildSavedSectionInputs(sections)
+        const densified = await densifyAndSample(sectionInputs)
+
+        openElevationChart(
+            routeTitle ?? '경로 고도 그래프',
+            createRouteElevationProfile(densified)
+        )
+    }
+
     // ─── 내부 오케스트레이션 ──────────────────────────────────────
 
     /** 그리기 탭 진입 시 미리보기를 정리하고 드로잉을 시작한다 */
@@ -224,7 +247,20 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
      * 저장 모달에서 "저장" 버튼 클릭 시 경로를 확정 저장한다.
      * 저장 성공 후 목록을 갱신하고 드로잉 상태를 초기화한다.
      */
+    const authStore = useAuthStore()
+
     const confirmSave = async () => {
+        if (!authStore.isLoggedIn.value) {
+            store.isRouteSaveModalOpen.value = false
+            authStore.openLoginModal()
+            openFeedbackModal({
+                title: '로그인 필요',
+                message: '경로를 저장하려면 먼저 로그인해주세요.',
+                tone: 'info'
+            })
+            return
+        }
+
         try {
             const { routeDraftPayload, sectionPayloads } = buildSavePayload()
 
@@ -329,6 +365,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         saveModal,
         routeList,
         elevationChart,
-        feedback
+        feedback,
+        exploreSelectRoute
     }
 }

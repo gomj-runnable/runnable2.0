@@ -47,7 +47,17 @@ const maxMonth = computed(() =>
     props.monthlyData?.rangeEnd ? props.monthlyData.rangeEnd.slice(0, 7).replace('-', '') : null
 )
 const canMovePrev = computed(() => !minMonth.value || activeMonthKey.value > minMonth.value)
-const canMoveNext = computed(() => !maxMonth.value || activeMonthKey.value < maxMonth.value)
+const nextMonthFromNow = computed(() => {
+    const now = new Date()
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+    return `${next.getFullYear()}${String(next.getMonth() + 1).padStart(2, '0')}`
+})
+const canMoveNext = computed(() => {
+    const upperBound = maxMonth.value
+        ? maxMonth.value > nextMonthFromNow.value ? maxMonth.value : nextMonthFromNow.value
+        : nextMonthFromNow.value
+    return activeMonthKey.value < upperBound
+})
 
 // 날짜 문자열 생성 (YYYY-MM-DD)
 const toDateStr = (day: number) => {

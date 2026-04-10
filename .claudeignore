@@ -1,0 +1,41 @@
+# Build outputs
+.output/
+.nuxt/
+.nitro/
+dist/
+
+# Dependencies
+node_modules/
+
+# External libraries (static assets)
+lib/
+
+# IDE / editor
+.idea/
+.fleet/
+.vscode/
+
+# OMC state (agent orchestration)
+.omc/
+
+# Codex
+.codex/
+
+# Logs & cache
+logs/
+*.log
+.cache/
+.data/
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Deploy scripts
+deploy.sh
+
+# Lock files
+pnpm-lock.yaml
+
+# Static docs
+public/docs/

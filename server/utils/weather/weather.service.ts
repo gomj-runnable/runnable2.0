@@ -1,10 +1,12 @@
 import type { DongWeather, HourlyWeather, SeoulMonthlyWeather } from '#shared/types/weather'
+import { fetchSeoulAirQuality } from './airquality.adapter'
 import { fetchForecastWeatherSlots } from './forecast.adapter'
 import { mergeWeatherSlots } from './merge.service'
 import { fetchObservedWeatherSlots } from './observed.adapter'
 import {
     SEOUL_GU_GRID,
     addDays,
+    mapPm10Grade,
     parseYmd,
     toDateOnly,
     truncateToKstHour,
@@ -14,6 +16,7 @@ import {
 export interface WeatherRequestOptions {
     authKey?: string
     openDataKey?: string
+    airKoreaKey?: string
 }
 
 const toBaseDate = (requestedDate?: string): Date => {
@@ -35,7 +38,7 @@ class WeatherService {
         requestedDate?: string,
         options: WeatherRequestOptions = {}
     ): Promise<SeoulMonthlyWeather> {
-        const { authKey, openDataKey } = options
+        const { authKey, openDataKey, airKoreaKey } = options
         const baseDate = toBaseDate(requestedDate)
         const now = truncateToKstHour(new Date())
         const today = toDateOnly(now)
@@ -53,7 +56,12 @@ class WeatherService {
 
         const forecastPromise = fetchForecastWeatherSlots(openDataKey ?? '', toIsoDate(baseDate), now)
 
-        const [observedSlots, forecastSlots] = await Promise.all([
+        const airQualityPromise = fetchSeoulAirQuality(airKoreaKey ?? '').catch((error) => {
+            console.error('[WeatherService] airquality adapter failed, fallback continues', error)
+            return new Map<string, import('./airquality.adapter').AirQualitySlot[]>()
+        })
+
+        const [observedSlots, forecastSlots, airQualityByGu] = await Promise.all([
             observedPromise.catch((error) => {
                 console.error('[WeatherService] observed adapter failed, fallback continues', error)
                 return []
@@ -61,7 +69,8 @@ class WeatherService {
             forecastPromise.catch((error) => {
                 console.error('[WeatherService] forecast adapter failed, fallback continues', error)
                 return []
-            })
+            }),
+            airQualityPromise
         ])
 
         const mergedSlots = mergeWeatherSlots({
@@ -70,13 +79,35 @@ class WeatherService {
             forecastSlots
         })
 
-        const dongs: DongWeather[] = Object.entries(SEOUL_GU_GRID).map(([guCode, gu]) => ({
-            dongCode: guCode,
-            dongName: gu.name,
-            nx: gu.nx,
-            ny: gu.ny,
-            hourly: [...mergedSlots]
-        }))
+        const dongs: DongWeather[] = Object.entries(SEOUL_GU_GRID).map(([guCode, gu]) => {
+            const guAirSlots = airQualityByGu.get(guCode) ?? []
+            const hourly = mergedSlots.map((slot) => {
+                if (slot.pm10 !== null) return { ...slot }
+
+                const matched = guAirSlots.find((aq) => {
+                    const [datePart, timePart] = aq.dataTime.split(' ')
+                    return datePart === slot.date && timePart === slot.time
+                })
+
+                if (matched?.pm10 !== null && matched?.pm10 !== undefined) {
+                    return {
+                        ...slot,
+                        pm10: matched.pm10,
+                        pm10Grade: mapPm10Grade(matched.pm10)
+                    }
+                }
+
+                return { ...slot }
+            })
+
+            return {
+                dongCode: guCode,
+                dongName: gu.name,
+                nx: gu.nx,
+                ny: gu.ny,
+                hourly
+            }
+        })
 
         const rangeStart = toDateOnly(addDays(baseDate, -30))
         const rangeEnd = toDateOnly(addDays(baseDate, 31))

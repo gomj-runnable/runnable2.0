@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig(event)
     const authKey = String(config.weatherKor ?? '').trim()
     const openDataKey = String(config.openData ?? '').trim()
+    const airKoreaKey = String(config.airKoreaKey ?? '').trim()
 
-    return weatherService.requestByDate(dateParam, { authKey, openDataKey })
+    return weatherService.requestByDate(dateParam, { authKey, openDataKey, airKoreaKey })
 })

@@ -12,7 +12,7 @@ withDefaults(
     }
 )
 
-defineEmits<{ click: [] }>()
+const emit = defineEmits<{ click: []; logout: [] }>()
 
 const menuItems = [
     [
@@ -32,7 +32,7 @@ const menuItems = [
             label: '로그아웃',
             icon: 'i-lucide-log-out',
             color: 'error' as const,
-            onSelect: () => {}
+            onSelect: () => emit('logout')
         }
     ]
 ]
