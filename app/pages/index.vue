@@ -9,12 +9,15 @@ import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
 import RouteFeedbackModal from '~/components/map/templates/RouteFeedbackModal.vue'
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
 import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
+import FacilityOverlay from '~/components/map/templates/FacilityOverlay.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
 import { useWeatherStore } from '~/composables/store/useWeatherStore'
 import { useWeatherSideeffect } from '~/composables/sideeffect/useWeatherSideeffect'
+import { useFacilityStore } from '~/composables/store/useFacilityStore'
+import { useFacilitySideeffect } from '~/composables/sideeffect/useFacilitySideeffect'
 
 definePageMeta({ ssr: false })
 
@@ -29,17 +32,10 @@ const { activeNav, drawing, saveModal, routeList, elevationChart, feedback } =
     useRouteMapFacade(viewer)
 
 const weather = useWeatherStore()
-const { init: initWeather } = useWeatherSideeffect({
-    viewer,
-    selectedDate: weather.selectedDate,
-    selectedHour: weather.selectedHour,
-    monthlyData: weather.monthlyData,
-    boundaryGeojson: weather.boundaryGeojson,
-    dailySnapshot: weather.dailySnapshot,
-    activeLayer: weather.activeLayer,
-    isLoading: weather.isLoading,
-    isVisible: weather.isVisible
-})
+const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
+
+const facility = useFacilityStore()
+useFacilitySideeffect({ viewer, ...facility })
 
 onMounted(async () => {
     await init()
@@ -131,6 +127,11 @@ const navItems = [
                     @update:selected-hour="weather.selectedHour.value = $event"
                     @update:selected-month="weather.selectedMonth.value = $event"
                     @update:active-layer="weather.activeLayer.value = $event"
+                />
+                <FacilityOverlay
+                    :active-types="facility.activeTypes.value"
+                    :is-loading="facility.isLoading.value"
+                    @toggle="facility.toggleType"
                 />
                 <RouteElevationModal
                     :open="elevationChart.open"

@@ -29,3 +29,35 @@ export interface SeoulMonthlyWeather {
     rangeEnd: string // "2026-04-09"
     dongs: DongWeather[]
 }
+
+// ─── 원본 Response Classes ───
+
+/** KMA TYP01 관측 텍스트 파싱 결과 (observed.adapter) */
+export class KmaObservedOriginalResponse {
+    rows: Array<Record<string, string>>
+    constructor(rows: Array<Record<string, string>>) {
+        this.rows = rows
+    }
+}
+
+/** 기상청 동네예보 API 원본 아이템 */
+export interface VilageFcstOriginalItem {
+    category: string
+    fcstDate: string
+    fcstTime: string
+    fcstValue: string
+}
+
+/** 기상청 동네예보 API 원본 응답 */
+export class VilageFcstOriginalResponse {
+    response?: {
+        header?: { resultCode: string; resultMsg: string }
+        body?: {
+            items?: { item?: VilageFcstOriginalItem[] }
+        }
+    }
+    constructor(data: unknown) {
+        const parsed = data as Record<string, unknown>
+        this.response = parsed?.response as typeof this.response
+    }
+}

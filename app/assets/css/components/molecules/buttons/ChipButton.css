@@ -1,0 +1,106 @@
+.chip-button {
+    --map-button-height: var(--size-chip-md);
+    --map-button-padding: 0 var(--gap-section-sm);
+    --map-button-radius: var(--radius-round);
+    --map-button-border: 1px solid var(--color-border-default);
+    --map-button-bg: var(--color-surface-soft);
+    --map-button-color: var(--text-on-dark);
+    --map-button-hover-bg: var(--color-surface-soft-strong);
+    --map-button-hover-border: var(--color-border-strong);
+    --map-button-active-bg: var(--color-surface-soft-active);
+    --map-button-active-border: var(--color-border-active);
+    --map-button-hover-shadow: var(--shadow-inset-soft);
+    --map-button-active-shadow: var(--shadow-inset-active);
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-semibold);
+    backdrop-filter: blur(10px);
+}
+
+/* ── size variants ── */
+
+.chip-button--xs {
+    --map-button-height: var(--size-chip-xs);
+    --map-button-padding: 0 var(--gap-section-xs);
+    font-size: var(--text-label-xs);
+}
+
+.chip-button--sm {
+    --map-button-height: var(--size-chip-sm);
+    --map-button-padding: 0 var(--gap-section-xs);
+    font-size: var(--text-label-xs);
+}
+
+.chip-button--md {
+    --map-button-height: var(--size-chip-md);
+    --map-button-padding: 0 var(--gap-section-sm);
+    font-size: var(--text-label-sm);
+}
+
+.chip-button--lg {
+    --map-button-height: var(--size-chip-lg);
+    --map-button-padding: 0 var(--gap-section-md);
+    font-size: var(--text-label-md);
+}
+
+/* ── appearance variants ── */
+
+.chip-button--elevated {
+    --map-button-bg: rgb(13 18 24 / 0.88);
+    --map-button-border: 1px solid rgb(255 255 255 / 0.24);
+    --map-button-hover-bg: rgb(17 24 32 / 0.92);
+    --map-button-hover-border: rgb(255 255 255 / 0.4);
+    --map-button-active-bg: rgb(29 36 46 / 0.94);
+    --map-button-active-border: var(--color-border-active);
+    box-shadow: var(--shadow-floating, 0 10px 26px rgb(0 0 0 / 0.32));
+}
+
+.chip-button--tinted {
+    --map-button-bg: color-mix(in srgb, var(--secondary-color) 14%, transparent);
+    --map-button-border: 1px solid transparent;
+    --map-button-hover-bg: color-mix(in srgb, var(--secondary-color) 20%, transparent);
+    --map-button-hover-border: transparent;
+    --map-button-active-bg: color-mix(in srgb, var(--secondary-color) 24%, transparent);
+    --map-button-active-border: transparent;
+}
+
+.chip-button--outlined {
+    --map-button-bg: transparent;
+    --map-button-border: 1px solid var(--color-border-default);
+    --map-button-hover-bg: var(--color-surface-soft);
+    --map-button-hover-border: var(--color-border-strong);
+    --map-button-active-bg: var(--color-surface-soft-active);
+    --map-button-active-border: var(--color-border-active);
+}
+
+/* ── icon sizing ── */
+
+.chip-button__icon {
+    flex-shrink: 0;
+}
+
+.chip-button--xs .chip-button__icon {
+    width: 12px;
+    height: 12px;
+}
+
+.chip-button--sm .chip-button__icon {
+    width: 14px;
+    height: 14px;
+}
+
+.chip-button--md .chip-button__icon {
+    width: 16px;
+    height: 16px;
+}
+
+.chip-button--lg .chip-button__icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* ── disabled ── */
+
+.chip-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.56;
+}

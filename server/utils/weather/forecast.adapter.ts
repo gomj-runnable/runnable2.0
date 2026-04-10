@@ -1,4 +1,5 @@
 import type { HourlyWeather } from '#shared/types/weather'
+import { VilageFcstOriginalResponse, type VilageFcstOriginalItem } from '#shared/types/weather'
 import {
     addDays,
     fromKstParts,
@@ -9,25 +10,9 @@ import {
     mapConditionByCloudAndRain,
     parseNumber,
     parseYmd,
+    toDateOnly,
     SEOUL_GU_GRID
 } from './common'
-
-interface VilageFcstItem {
-    category: string
-    fcstDate: string
-    fcstTime: string
-    fcstValue: string
-}
-
-interface VilageFcstResponse {
-    response?: {
-        body?: {
-            items?: {
-                item?: VilageFcstItem[]
-            }
-        }
-    }
-}
 
 const FORECAST_BASE_TIMES = ['0200', '0500', '0800', '1100', '1400', '1700', '2000', '2300']
 
@@ -61,7 +46,7 @@ const fetchVilageFcst = async (
     baseTime: string,
     nx: number,
     ny: number
-): Promise<VilageFcstItem[]> => {
+): Promise<VilageFcstOriginalItem[]> => {
     const url = new URL('https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst')
     url.searchParams.set('serviceKey', serviceKey)
     url.searchParams.set('pageNo', '1')
@@ -77,8 +62,8 @@ const fetchVilageFcst = async (
         throw new Error(`KMA forecast request failed (${response.status})`)
     }
 
-    const payload = (await response.json()) as VilageFcstResponse
-    return payload.response?.body?.items?.item ?? []
+    const original = new VilageFcstOriginalResponse(await response.json())
+    return original.response?.body?.items?.item ?? []
 }
 
 const toSlotDate = (fcstDate: string, fcstTime: string): Date | null => {
@@ -124,8 +109,7 @@ export const fetchForecastWeatherSlots = async (
     }
 
     const targetDate = parseYmd(requestedDate)
-    const today = new Date(now)
-    today.setHours(0, 0, 0, 0)
+    const today = toDateOnly(now)
     const isToday = targetDate ? targetDate.getTime() === today.getTime() : false
     const isFuture = targetDate ? targetDate.getTime() > today.getTime() : false
     const base = isToday || isFuture ? now : (targetDate ?? now)

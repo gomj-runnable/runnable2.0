@@ -19,23 +19,7 @@ withDefaults(
         invalid?: boolean
         autofocus?: boolean
     }>(),
-    {
-        id: undefined,
-        label: undefined,
-        placeholder: undefined,
-        type: 'text',
-        name: undefined,
-        autocomplete: undefined,
-        inputmode: undefined,
-        leadingIcon: undefined,
-        trailingIcon: undefined,
-        supportingText: undefined,
-        disabled: false,
-        readonly: false,
-        required: false,
-        invalid: false,
-        autofocus: false
-    }
+    { type: 'text', disabled: false, readonly: false, required: false, invalid: false, autofocus: false }
 )
 </script>
 

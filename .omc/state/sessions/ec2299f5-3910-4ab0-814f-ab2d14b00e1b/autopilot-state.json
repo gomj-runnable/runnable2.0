@@ -1,0 +1,10 @@
+{
+  "active": true,
+  "started_at": "2026-04-10T02:39:35.258Z",
+  "original_prompt": "/autopilot",
+  "session_id": "ec2299f5-3910-4ab0-814f-ab2d14b00e1b",
+  "project_path": "/Users/kmj/WebstormProjects/Runnable",
+  "reinforcement_count": 0,
+  "awaiting_confirmation": true,
+  "last_checked_at": "2026-04-10T02:39:35.259Z"
+}

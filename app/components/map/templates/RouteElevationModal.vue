@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { RouteElevationPoint, RouteElevationProfile } from '#shared/types/route'
 import Button from '~/components/map/molecules/buttons/Button.vue'
+import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
 import { createDistanceTicks } from '~/composables/action/useRouteElevationProfile'
 
@@ -34,6 +35,12 @@ const formatDistance = (distanceKm?: number) => {
 const formatElevation = (elevation?: number) =>
     typeof elevation === 'number' && !Number.isNaN(elevation) ? `${Math.round(elevation)}m` : '-'
 
+const formatTickLabel = (km: number) => {
+    if (km === 0) return '0'
+    if (km < 1) return `${Math.round(km * 1000)}m`
+    return Number.isInteger(km) ? `${km}km` : `${km.toFixed(1)}km`
+}
+
 type RenderedPoint = RouteElevationPoint & { x: number; y: number }
 type RenderedSectionSegment = RouteElevationProfile['sections'][number] & { path: string }
 
@@ -50,9 +57,7 @@ const summaryItems = computed(() => {
     return [
         { label: '총 거리', value: formatDistance(props.profile.distanceKm) },
         { label: '최고 고도', value: formatElevation(props.profile.maxElevation) },
-        { label: '최저 고도', value: formatElevation(props.profile.minElevation) },
-        { label: '상승', value: formatElevation(props.profile.elevationGain) },
-        { label: '하강', value: formatElevation(props.profile.elevationLoss) }
+        { label: '최저 고도', value: formatElevation(props.profile.minElevation) }
     ]
 })
 
@@ -121,19 +126,19 @@ const chartGeometry = computed(() => {
 </script>
 
 <template>
-    <button
+    <ChipButton
         v-if="profile"
         id="popup-route-elevation-trigger"
-        type="button"
-        class="route-elevation-modal__chip-button"
-        :class="{ 'is-active': open }"
-        aria-controls="popup-route-elevation"
+        :label="title"
+        icon="i-lucide-chart-line"
+        appearance="elevated"
+        size="md"
+        :active="open"
+        class="route-elevation-modal__chip-trigger"
+        :aria-controls="'popup-route-elevation'"
         :aria-expanded="open"
         @click="$emit('update:open', !open)"
-    >
-        <span class="i-lucide-chart-line" />
-        <span>{{ title }}</span>
-    </button>
+    />
 
     <PopupModal
         :open="open && !!profile"
@@ -172,17 +177,6 @@ const chartGeometry = computed(() => {
 
             <div class="route-elevation-modal__chart">
                 <div class="route-elevation-modal__legend">
-                    <span
-                        class="route-elevation-modal__legend-stat route-elevation-modal__legend-stat--up"
-                    >
-                        상승 {{ formatElevation(profile.elevationGain) }}
-                    </span>
-                    <span
-                        class="route-elevation-modal__legend-stat route-elevation-modal__legend-stat--down"
-                    >
-                        하강 {{ formatElevation(profile.elevationLoss) }}
-                    </span>
-
                     <div class="route-elevation-modal__section-legend">
                         <span
                             v-for="section in profile.sections"
@@ -286,7 +280,7 @@ const chartGeometry = computed(() => {
                             text-anchor="middle"
                             class="route-elevation-modal__tick-label"
                         >
-                            {{ tick.value.toFixed(1) }}km
+                            {{ formatTickLabel(tick.value) }}
                         </text>
                     </g>
                 </svg>
@@ -294,7 +288,7 @@ const chartGeometry = computed(() => {
 
             <footer class="route-elevation-modal__footer">
                 <span>섹션별 선 색상은 지도 구간 색상과 동일합니다.</span>
-                <span>0.5km 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
+                <span>500m 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
             </footer>
         </section>
     </PopupModal>
