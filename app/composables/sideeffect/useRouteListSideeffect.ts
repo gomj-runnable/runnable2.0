@@ -2,9 +2,11 @@ import type { Ref, ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/composables/useWindow'
 import type { RouteSectionBase, SavedRoute, SavedSection } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
-import { SECTION_COLORS, SECTION_START_MARKER_COLOR } from '#shared/constants/route'
+import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import {
+    addRoutePointEntity,
     geomToRouteDrawPositions,
+    getSectionColor,
     toCartesianPosition,
     toCesiumColor
 } from '~/composables/action/useRouteDrawUtils'
@@ -33,16 +35,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             return null
         }
 
-        return options.viewer.value.entities.add({
-            position: toCartesianPosition(position),
-            point: {
-                pixelSize: 10,
-                color: toCesiumColor(color, 0.95),
-                outlineColor: window.Cesium.Color.WHITE,
-                outlineWidth: 2,
-                disableDepthTestDistance: Number.POSITIVE_INFINITY
-            }
-        })
+        return addRoutePointEntity(options.viewer.value, position, color)
     }
 
     /** 지도에 그려진 미리보기 폴리라인을 모두 제거한다. */
@@ -89,7 +82,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
         const previewSegments = toPreviewSegments(sections)
 
         previewPolylines.value = previewSegments.map((positions, index) => {
-            const color = SECTION_COLORS[index % SECTION_COLORS.length] ?? SECTION_COLORS[0]
+            const color = getSectionColor(index)
 
             return options.viewer.value!.entities.add({
                 polyline: {
@@ -114,7 +107,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
 
         previewSegments.forEach((positions, index) => {
             const endPoint = positions.at(-1)
-            const color = SECTION_COLORS[index % SECTION_COLORS.length] ?? SECTION_COLORS[0]
+            const color = getSectionColor(index)
 
             if (!endPoint) {
                 return

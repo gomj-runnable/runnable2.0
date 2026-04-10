@@ -13,6 +13,7 @@ import {
     updateSectionDraftAttr
 } from '~/composables/action/useRouteDrawDraft'
 import {
+    addRoutePointEntity,
     getSectionColor,
     normalizeDrawPositions,
     toCartesianPosition,
@@ -84,29 +85,12 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         })
     }
 
-    /**
-     * 단일 포인트 마커를 지도에 그린다.
-     * 구간 시작점(흰색)과 구간 끝점(구간 색상)을 구분하여 표시할 때 사용한다.
-     *
-     * @param position - 마커를 배치할 3D 포인트
-     * @param color - 마커 색상 (hex 문자열)
-     * @returns 생성된 포인트 엔티티, 뷰어 미준비 시 `null`
-     */
     const createRoutePoint = (position: GeoJsonPosition, color: string): CesiumEntity | null => {
         if (!options.viewer.value) {
             return null
         }
 
-        return options.viewer.value.entities.add({
-            position: toCartesianPosition(position),
-            point: {
-                pixelSize: 10,
-                color: toCesiumColor(color, 0.95),
-                outlineColor: window.Cesium.Color.WHITE,
-                outlineWidth: 2,
-                disableDepthTestDistance: Number.POSITIVE_INFINITY
-            }
-        })
+        return addRoutePointEntity(options.viewer.value, position, color) as CesiumEntity
     }
 
     /**
