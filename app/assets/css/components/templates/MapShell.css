@@ -84,9 +84,14 @@
 
 .map-shell__overlay {
     position: absolute;
-    inset: 0;
+    top: var(--gap-section-xl);
+    right: var(--gap-section-xl);
+    bottom: var(--gap-section-xl);
+    left: 0;
     pointer-events: none;
     z-index: var(--z-panel);
+    border-radius: var(--radius-surface-lg);
+    overflow: hidden;
 }
 
 .map-shell__overlay > * {

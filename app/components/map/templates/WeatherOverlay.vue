@@ -74,6 +74,17 @@ const hourLabel = computed(() => {
     const h = props.selectedHour.split(':')[0]
     return `${h}시`
 })
+
+/** 선택된 날짜/시간의 현재 온도 (서울 대표 구 기준) */
+const currentTemperature = computed<number | null>(() => {
+    if (!props.monthlyData) return null
+    const dong = props.monthlyData.dongs[0]
+    if (!dong) return null
+    const slot = dong.hourly.find(
+        (s) => s.date === props.selectedDate && s.time === props.selectedHour
+    )
+    return slot?.temperature ?? null
+})
 </script>
 
 <template>
@@ -156,7 +167,7 @@ const hourLabel = computed(() => {
             </div>
         </div>
         <div class="weather-overlay__bottombar">
-            <WeatherLegend :active-layer="activeLayer" />
+            <WeatherLegend :active-layer="activeLayer" :current-temperature="currentTemperature" />
         </div>
     </div>
 </template>

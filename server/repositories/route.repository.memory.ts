@@ -11,8 +11,14 @@ class InMemoryRouteRepository implements IRouteRepository {
     private readonly routes = new Map<string, SavedRoute>()
     private readonly sections = new Map<string, SavedSection>()
 
-    async createRoute(input: RouteDraftInput): Promise<SavedRoute> {
-        const route: SavedRoute = { routeId: randomUUID(), ...input }
+    async createRoute(input: RouteDraftInput, userId: string): Promise<SavedRoute> {
+        const route: SavedRoute = {
+            routeId: randomUUID(),
+            userId,
+            isPublic: input.isPublic ?? true,
+            createdAt: new Date().toISOString(),
+            ...input
+        }
         this.routes.set(route.routeId, route)
         return route
     }
@@ -23,6 +29,21 @@ class InMemoryRouteRepository implements IRouteRepository {
 
     async listRoutes(): Promise<SavedRoute[]> {
         return Array.from(this.routes.values())
+    }
+
+    async listRoutesByUser(userId: string): Promise<SavedRoute[]> {
+        return Array.from(this.routes.values()).filter((r) => r.userId === userId)
+    }
+
+    async searchPublicRoutes(query?: string): Promise<SavedRoute[]> {
+        const publicRoutes = Array.from(this.routes.values()).filter((r) => r.isPublic !== false)
+        if (!query) return publicRoutes
+        const q = query.toLowerCase()
+        return publicRoutes.filter(
+            (r) =>
+                r.title.toLowerCase().includes(q) ||
+                r.description?.toLowerCase().includes(q)
+        )
     }
 
     async updateRoute(

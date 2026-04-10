@@ -25,13 +25,13 @@ export const conditionToColor = (condition: WeatherCondition): string => {
         case 'clear':
             return 'rgba(255, 230, 50, 0.5)'
         case 'partly-cloudy':
-            return 'rgba(180, 200, 220, 0.5)'
+            return 'rgba(200, 185, 155, 0.5)'
         case 'cloudy':
-            return 'rgba(140, 155, 170, 0.5)'
+            return 'rgba(120, 120, 160, 0.5)'
         case 'rainy':
             return 'rgba(60, 150, 220, 0.5)'
         case 'snowy':
-            return 'rgba(200, 230, 255, 0.5)'
+            return 'rgba(150, 210, 250, 0.6)'
     }
 }
 

@@ -1,0 +1,60 @@
+.explore-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-md);
+    width: 100%;
+}
+
+.explore-panel__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-sm);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.explore-panel__empty {
+    padding: var(--gap-section-lg) 0;
+    font-size: var(--text-body-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.explore-panel__card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-section-sm);
+}
+
+.explore-panel__card-title {
+    margin: 0;
+    font-size: var(--text-heading-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-primary);
+}
+
+.explore-panel__card-author {
+    flex-shrink: 0;
+    font-size: var(--text-label-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.explore-panel__card-description {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-body);
+    color: color-mix(in srgb, var(--text-secondary) 94%, transparent);
+}
+
+.explore-panel__card-meta {
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-label);
+    color: color-mix(in srgb, var(--text-primary) 72%, transparent);
+}

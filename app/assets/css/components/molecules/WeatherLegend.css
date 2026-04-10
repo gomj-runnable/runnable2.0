@@ -44,6 +44,26 @@
     border-style: dashed;
 }
 
+/* 온도 레이어: 현재 온도 */
+.weather-legend__current-temp {
+    display: flex;
+    align-items: baseline;
+    gap: var(--gap-2);
+    margin-bottom: var(--gap-2);
+}
+
+.weather-legend__temp-value {
+    font-size: var(--text-heading-sm, 1.25rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.weather-legend__temp-label {
+    font-size: var(--text-caption);
+    color: var(--text-muted);
+}
+
 /* 온도 레이어: 그래디언트 바 */
 .weather-legend__gradient-bar {
     display: flex;
