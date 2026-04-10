@@ -15,9 +15,11 @@ export type CreateSectionInput = RouteSectionCreateInput
  * 구현체(InMemory, Postgres 등)만 교체하면 저장 방식을 변경할 수 있다.
  */
 export interface IRouteRepository {
-    createRoute(input: RouteDraftInput): Promise<SavedRoute>
+    createRoute(input: RouteDraftInput, userId: string): Promise<SavedRoute>
     getRoute(routeId: string): Promise<SavedRoute | null>
     listRoutes(): Promise<SavedRoute[]>
+    listRoutesByUser(userId: string): Promise<SavedRoute[]>
+    searchPublicRoutes(query?: string): Promise<SavedRoute[]>
     updateRoute(routeId: string, input: Partial<RouteDraftInput>): Promise<SavedRoute | null>
     deleteRoute(routeId: string): Promise<boolean>
     createSection(routeId: string, input: CreateSectionInput): Promise<SavedSection>

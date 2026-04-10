@@ -10,14 +10,19 @@ import RouteFeedbackModal from '~/components/map/templates/RouteFeedbackModal.vu
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
 import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
 import FacilityOverlay from '~/components/map/templates/FacilityOverlay.vue'
+import ExplorePanel from '~/components/map/templates/ExplorePanel.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
+import AuthModal from '~/components/map/templates/AuthModal.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
 import { useWeatherStore } from '~/composables/store/useWeatherStore'
 import { useWeatherSideeffect } from '~/composables/sideeffect/useWeatherSideeffect'
 import { useFacilityStore } from '~/composables/store/useFacilityStore'
 import { useFacilitySideeffect } from '~/composables/sideeffect/useFacilitySideeffect'
+import { useAuthStore } from '~/composables/store/useAuthStore'
+import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
+import { useExploreSearchSideeffect } from '~/composables/sideeffect/useExploreSearchSideeffect'
 
 definePageMeta({ ssr: false })
 
@@ -28,8 +33,11 @@ useHead({
 const { init } = useMapInit()
 const viewer = shallowRef<CesiumViewer | null>(null)
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, feedback } =
+const { activeNav, drawing, saveModal, routeList, elevationChart, feedback, exploreSelectRoute } =
     useRouteMapFacade(viewer)
+
+const authStore = useAuthStore()
+const authEffect = useAuthSideeffect()
 
 const weather = useWeatherStore()
 const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
@@ -40,13 +48,36 @@ useFacilitySideeffect({ viewer, ...facility })
 onMounted(async () => {
     await init()
     viewer.value = window.viewer
-    await initWeather()
+    await Promise.all([initWeather(), authEffect.fetchSession()])
 })
+
+const handleAuthSuccess = async () => {
+    authStore.closeAuthModal()
+}
+
+const handleLogout = async () => {
+    await authEffect.logout()
+}
+
+const handleExploreSelect = async (routeId: string) => {
+    explore.selectRoute(routeId)
+    const route = explore.searchResults.value.find((r) => r.routeId === routeId)
+    await exploreSelectRoute(routeId, route?.title)
+}
+
+// 탐색 탭 진입 시 공개 경로 자동 로드
+watch(activeNav, (next) => {
+    if (next === '탐색') {
+        explore.search(explore.searchQuery.value)
+    }
+})
+
+const explore = useExploreSearchSideeffect()
 
 const navItems = [
     { icon: 'i-lucide-list', label: '목록' },
     { icon: 'i-lucide-pencil', label: '그리기' },
-    { icon: 'i-lucide-users', label: '친구' }
+    { icon: 'i-lucide-search', label: '탐색' }
 ] as const
 </script>
 
@@ -103,10 +134,31 @@ const navItems = [
                             @update-section-attr="drawing.updateSectionAttr"
                             @remove-section="drawing.removeSection"
                         />
+                        <template v-else-if="activeNav === '탐색'">
+                            <Textfield
+                                v-model="explore.searchQuery.value"
+                                type="search"
+                                placeholder="경로 이름으로 검색"
+                                leading-icon="i-lucide-search"
+                                @keyup.enter="explore.search(explore.searchQuery.value)"
+                            />
+                            <ExplorePanel
+                                :routes="explore.searchResults.value"
+                                :selected-route-id="explore.selectedRouteId.value"
+                                :is-loading="explore.isSearching.value"
+                                @select="handleExploreSelect"
+                            />
+                        </template>
                     </template>
 
                     <template #footer>
-                        <SidebarUserProfile @click="() => {}" />
+                        <SidebarUserProfile
+                            :username="authStore.user.value?.name"
+                            :image="authStore.user.value?.image ?? undefined"
+                            :subtitle="authStore.isLoggedIn.value ? '계정 설정' : '로그인하세요'"
+                            @click="authStore.isLoggedIn.value ? undefined : authStore.openLoginModal()"
+                            @logout="handleLogout"
+                        />
                     </template>
                 </MapSidebar>
             </template>
@@ -158,6 +210,13 @@ const navItems = [
             :message="feedback.message"
             :tone="feedback.tone"
             @update:open="feedback.close()"
+        />
+        <AuthModal
+            :open="authStore.isAuthModalOpen.value"
+            :mode="authStore.authModalMode.value"
+            @update:open="authStore.isAuthModalOpen.value = $event"
+            @update:mode="authStore.authModalMode.value = $event"
+            @success="handleAuthSuccess"
         />
     </div>
 </template>

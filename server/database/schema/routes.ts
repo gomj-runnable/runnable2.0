@@ -1,0 +1,46 @@
+import { pgTable, text, varchar, numeric, boolean, timestamp, index } from 'drizzle-orm/pg-core'
+import { users } from './users'
+
+// routes
+export const routes = pgTable(
+  'routes',
+  {
+    routeId: text('route_id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: varchar('title', { length: 255 }).notNull(),
+    description: text('description'),
+    highHeight: numeric('high_height', { precision: 10, scale: 2 }),
+    lowHeight: numeric('low_height', { precision: 10, scale: 2 }),
+    distance: numeric('distance', { precision: 12, scale: 2 }),
+    isPublic: boolean('is_public').notNull().default(true),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date())
+  },
+  (table) => [
+    index('route_user_idx').on(table.userId),
+    index('route_public_idx').on(table.isPublic),
+    index('route_title_idx').on(table.title)
+  ]
+)
+
+// route_sections
+export const routeSections = pgTable(
+  'route_sections',
+  {
+    sectionId: text('section_id').primaryKey(),
+    routeId: text('route_id')
+      .notNull()
+      .references(() => routes.routeId, { onDelete: 'cascade' }),
+    geom: text('geom'), // GeoJSON LineString as JSON string
+    attrs: text('attrs'), // SectionAttr[] as JSON string
+    createdAt: timestamp('created_at').notNull().defaultNow()
+  },
+  (table) => [
+    index('section_route_idx').on(table.routeId)
+  ]
+)

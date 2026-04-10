@@ -42,12 +42,16 @@ export interface RouteBase {
     highHeight?: number
     lowHeight?: number
     distance?: number
+    isPublic?: boolean
 }
 
 export type RouteDraftInput = RouteBase
 
 export interface SavedRoute extends RouteBase {
     routeId: string
+    userId?: string
+    createdAt?: string
+    authorName?: string
 }
 
 export interface RouteSectionBase {

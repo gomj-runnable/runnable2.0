@@ -24,6 +24,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     weatherKor: process.env.WEATHER_KOR ?? '',
     openData: process.env.OPEN_DATA ?? '',
+    airKoreaKey: process.env.OPEN_DATA ?? '',
   },
 
   vite: {

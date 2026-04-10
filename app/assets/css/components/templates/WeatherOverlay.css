@@ -11,7 +11,7 @@
     display: flex;
     align-items: flex-start;
     gap: var(--gap-section-sm);
-    padding: var(--gap-section-md);
+    padding: var(--gap-section-lg) var(--gap-section-lg);
     pointer-events: auto;
 }
 
@@ -76,8 +76,9 @@
 }
 
 .weather-overlay__bottombar {
-    margin-top: auto;
-    padding: var(--gap-section-md);
+    position: absolute;
+    bottom: var(--gap-section-lg);
+    left: var(--gap-section-lg);
     pointer-events: auto;
 }
 

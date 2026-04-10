@@ -3,14 +3,15 @@ import type { WeatherLayer } from '#shared/types/weather'
 
 const props = defineProps<{
     activeLayer: WeatherLayer
+    currentTemperature?: number | null
 }>()
 
 const weatherItems = [
     { label: '맑음', color: 'rgba(255, 230, 50, 0.5)' },
-    { label: '구름많음', color: 'rgba(180, 200, 220, 0.5)' },
-    { label: '흐림', color: 'rgba(140, 155, 170, 0.5)' },
+    { label: '구름많음', color: 'rgba(200, 185, 155, 0.5)' },
+    { label: '흐림', color: 'rgba(120, 120, 160, 0.5)' },
     { label: '비', color: 'rgba(60, 150, 220, 0.5)' },
-    { label: '눈', color: 'rgba(200, 230, 255, 0.5)' },
+    { label: '눈', color: 'rgba(150, 210, 250, 0.6)' },
 ]
 
 const pm10Items = [
@@ -45,6 +46,10 @@ const pm10Items = [
         <!-- 온도 레이어 -->
         <template v-else-if="activeLayer === 'temperature'">
             <p class="weather-legend__title">온도 (°C)</p>
+            <div v-if="currentTemperature !== null && currentTemperature !== undefined" class="weather-legend__current-temp">
+                <span class="weather-legend__temp-value">{{ currentTemperature.toFixed(1) }}°C</span>
+                <span class="weather-legend__temp-label">현재</span>
+            </div>
             <div class="weather-legend__gradient-bar">
                 <div class="weather-legend__gradient" />
                 <div class="weather-legend__gradient-labels">
