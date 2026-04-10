@@ -31,7 +31,7 @@ defineEmits<{
             >
                 초기화
             </Button>
-            <Button icon="i-lucide-save" appearance="prominent" block @click="$emit('save')">
+            <Button icon="i-lucide-save" appearance="tinted" block @click="$emit('save')">
                 저장
             </Button>
         </div>

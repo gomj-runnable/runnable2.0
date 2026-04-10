@@ -3,7 +3,7 @@ import type { RouteElevationProfile, RouteElevationSection, SavedSection } from 
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import { geomToRouteDrawPositions, getSectionColor } from '~/composables/action/useRouteDrawUtils'
 
-interface RouteElevationSectionInput {
+export interface RouteElevationSectionInput {
     label: string
     color: string
     positions: GeoJsonPosition[]
@@ -33,6 +33,64 @@ const calculateDistanceMeters = (start: GeoJsonPosition, end: GeoJsonPosition) =
 
 const roundMetric = (value: number, precision = 1) => Number(value.toFixed(precision))
 
+
+const DENSIFY_STEP_METERS = 50
+
+/**
+ * 경로 위치 배열을 일정 간격(기본 50m)으로 보간하여 밀도를 높인다.
+ * 고도는 0으로 초기화되며, 이후 지형 샘플링으로 채워진다.
+ */
+export const densifyPositions = (
+    positions: GeoJsonPosition[],
+    stepMeters: number = DENSIFY_STEP_METERS
+): GeoJsonPosition[] => {
+    if (positions.length < 2) return [...positions]
+
+    const result: GeoJsonPosition[] = []
+
+    for (let i = 0; i < positions.length - 1; i++) {
+        const start = positions[i]!
+        const end = positions[i + 1]!
+        const distance = calculateDistanceMeters(start, end)
+        const steps = Math.max(1, Math.ceil(distance / stepMeters))
+
+        for (let j = 0; j < steps; j++) {
+            const t = j / steps
+            result.push([
+                start[0] + t * (end[0] - start[0]),
+                start[1] + t * (end[1] - start[1]),
+                0
+            ])
+        }
+    }
+
+    result.push([...positions[positions.length - 1]!])
+    return result
+}
+
+/**
+ * 드래프트 드로잉에서 섹션 입력을 빌드한다.
+ */
+export const buildDraftSectionInputs = (
+    positions: GeoJsonPosition[],
+    ranges: SectionPointRange[],
+    sectionNames?: Array<{ name?: string }>
+): RouteElevationSectionInput[] =>
+    ranges.map((range, index) => ({
+        label: sectionNames?.[index]?.name?.trim() || `구간 ${index + 1}`,
+        color: getSectionColor(index),
+        positions: positions.slice(range.start, range.end + 1)
+    }))
+
+/**
+ * 저장된 섹션에서 섹션 입력을 빌드한다.
+ */
+export const buildSavedSectionInputs = (sections: SavedSection[]): RouteElevationSectionInput[] =>
+    sections.map((section, index) => ({
+        label: section.attrs?.[0]?.name?.trim() || `구간 ${index + 1}`,
+        color: getSectionColor(index),
+        positions: geomToRouteDrawPositions(section.geom)
+    }))
 
 const normalizeSectionInputs = (sections: RouteElevationSectionInput[]) =>
     sections.filter((section) => section.positions.length > 0)

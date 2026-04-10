@@ -1,11 +1,13 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
-import type { createRouteElevationProfile } from '~/composables/action/useRouteElevationProfile'
 import {
-    createRouteElevationProfileFromDraft,
-    createRouteElevationProfileFromSections
+    createRouteElevationProfile,
+    densifyPositions,
+    buildDraftSectionInputs,
+    buildSavedSectionInputs
 } from '~/composables/action/useRouteElevationProfile'
+import { useTerrainSampler } from '~/composables/sideeffect/useTerrainSampler'
 import { createRouteGpx, toGpxFileName } from '~/composables/action/useRouteGpx'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import {
@@ -42,6 +44,16 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
 
     const saveEffect = useRouteSaveSideeffect()
     const downloadEffect = useRouteDownloadSideeffect()
+
+    const terrainSampler = useTerrainSampler(viewer)
+
+    const densifyAndSample = async (sections: ReturnType<typeof buildDraftSectionInputs>) =>
+        Promise.all(
+            sections.map(async (s) => ({
+                ...s,
+                positions: await terrainSampler.sampleTerrain(densifyPositions(s.positions))
+            }))
+        )
 
     const listEffect = useRouteListSideeffect({
         viewer,
@@ -104,13 +116,16 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             return
         }
 
+        const sectionInputs = buildDraftSectionInputs(
+            positions,
+            store.sectionPointRanges.value,
+            store.sectionDraft.value?.attrs
+        )
+        const densified = await densifyAndSample(sectionInputs)
+
         openElevationChart(
-            '그린 경로 고도 그래프',
-            createRouteElevationProfileFromDraft(
-                positions,
-                store.sectionPointRanges.value,
-                store.sectionDraft.value?.attrs
-            )
+            '경로 고도 그래프',
+            createRouteElevationProfile(densified)
         )
     }
 
@@ -124,9 +139,12 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
 
         const selectedRoute = store.routes.value.find((route) => route.routeId === routeId)
 
+        const sectionInputs = buildSavedSectionInputs(sections)
+        const densified = await densifyAndSample(sectionInputs)
+
         openElevationChart(
-            selectedRoute?.title ?? '저장된 경로 고도 그래프',
-            createRouteElevationProfileFromSections(sections)
+            selectedRoute?.title ?? '경로 고도 그래프',
+            createRouteElevationProfile(densified)
         )
     }
 

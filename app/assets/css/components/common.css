@@ -22,20 +22,20 @@
         background var(--transition-base),
         border-color var(--transition-base),
         box-shadow var(--transition-base);
-}
 
-.map-button:hover {
-    color: var(--map-button-hover-color, var(--map-button-color, inherit));
-    background: var(--map-button-hover-bg, var(--map-button-bg, transparent));
-    border-color: var(--map-button-hover-border, currentColor);
-    box-shadow: var(--map-button-hover-shadow, none);
-}
+    &:hover {
+        color: var(--map-button-hover-color, var(--map-button-color, inherit));
+        background: var(--map-button-hover-bg, var(--map-button-bg, transparent));
+        border-color: var(--map-button-hover-border, currentColor);
+        box-shadow: var(--map-button-hover-shadow, none);
+    }
 
-.map-button.is-active {
-    color: var(--map-button-active-color, var(--map-button-hover-color, var(--map-button-color, inherit)));
-    background: var(--map-button-active-bg, var(--map-button-hover-bg, var(--map-button-bg, transparent)));
-    border-color: var(--map-button-active-border, var(--map-button-hover-border, currentColor));
-    box-shadow: var(--map-button-active-shadow, var(--map-button-hover-shadow, none));
+    &.is-active {
+        color: var(--map-button-active-color, var(--map-button-hover-color, var(--map-button-color, inherit)));
+        background: var(--map-button-active-bg, var(--map-button-hover-bg, var(--map-button-bg, transparent)));
+        border-color: var(--map-button-active-border, var(--map-button-hover-border, currentColor));
+        box-shadow: var(--map-button-active-shadow, var(--map-button-hover-shadow, none));
+    }
 }
 
 .map-section-label {
@@ -86,20 +86,20 @@
         border-color var(--transition-base),
         box-shadow var(--transition-base),
         background var(--transition-base);
-}
 
-.map-form-control::placeholder {
-    color: var(--map-form-placeholder, var(--text-secondary));
-}
+    &::placeholder {
+        color: var(--map-form-placeholder, var(--text-secondary));
+    }
 
-.map-form-control:focus {
-    border-color: var(--map-form-focus-border, var(--color-border-accent));
-    box-shadow: 0 0 0 3px var(--map-form-focus-ring, var(--color-focus-ring-soft));
-    background: var(--map-form-focus-bg, var(--color-surface-base));
-}
+    &:focus {
+        border-color: var(--map-form-focus-border, var(--color-border-accent));
+        box-shadow: 0 0 0 3px var(--map-form-focus-ring, var(--color-focus-ring-soft));
+        background: var(--map-form-focus-bg, var(--color-surface-base));
+    }
 
-.map-form-control:disabled {
-    cursor: not-allowed;
-    color: var(--map-form-disabled-color, var(--text-secondary));
-    background: var(--map-form-disabled-bg, var(--color-surface-softer));
+    &:disabled {
+        cursor: not-allowed;
+        color: var(--map-form-disabled-color, var(--text-secondary));
+        background: var(--map-form-disabled-bg, var(--color-surface-softer));
+    }
 }

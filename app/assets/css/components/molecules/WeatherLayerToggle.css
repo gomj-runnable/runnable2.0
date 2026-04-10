@@ -1,39 +1,4 @@
 .weather-layer-toggle {
     display: flex;
-    background: var(--color-surface-elevated);
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-control-lg);
-    overflow: hidden;
-    backdrop-filter: var(--blur);
-    box-shadow: var(--shadow-sm);
-}
-
-.weather-layer-toggle__btn {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-1);
-    padding: var(--gap-2) var(--gap-3);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-size: var(--text-body-xs);
-    transition: background var(--transition-fast), color var(--transition-fast);
-    white-space: nowrap;
-}
-
-.weather-layer-toggle__btn:hover {
-    background: var(--surface-hover);
-    color: var(--text-primary);
-}
-
-.weather-layer-toggle__btn.is-active {
-    background: var(--nav-active-bg);
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-.weather-layer-toggle__icon {
-    width: var(--size-icon-sm);
-    height: var(--size-icon-sm);
+    gap: var(--gap-section-2xs);
 }

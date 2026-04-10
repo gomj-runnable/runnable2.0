@@ -1,5 +1,5 @@
 import { createError, defineEventHandler } from 'h3'
-import { buildSeoulWeather } from '../../utils/weather/weather.service'
+import { weatherService } from '../../utils/weather/weather.service'
 
 export default defineEventHandler(async (event) => {
     const dateParam = event.context.params?.date
@@ -14,9 +14,5 @@ export default defineEventHandler(async (event) => {
     const authKey = String(config.weatherKor ?? '').trim()
     const openDataKey = String(config.openData ?? '').trim()
 
-    return buildSeoulWeather({
-        requestedDate: dateParam,
-        authKey,
-        openDataKey
-    })
+    return weatherService.requestByDate(dateParam, { authKey, openDataKey })
 })

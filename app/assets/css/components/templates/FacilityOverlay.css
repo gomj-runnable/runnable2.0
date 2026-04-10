@@ -1,0 +1,24 @@
+.facility-overlay {
+    position: absolute;
+    top: var(--gap-section-md);
+    right: var(--gap-section-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-2xs);
+    pointer-events: auto;
+    z-index: var(--z-weather-overlay, 12);
+}
+
+.facility-overlay__chips {
+    display: flex;
+    gap: var(--gap-section-2xs);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.facility-overlay__chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}

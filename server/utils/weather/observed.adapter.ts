@@ -1,4 +1,5 @@
 import type { HourlyWeather } from '#shared/types/weather'
+import { KmaObservedOriginalResponse } from '#shared/types/weather'
 import {
     KMA_TYP01_BASE_URL,
     SEOUL_ASOS_STATION,
@@ -80,7 +81,7 @@ const parseTyp01Table = (rawText: string): Array<Record<string, string>> => {
 const fetchTyp01Rows = async (
     endpoint: string,
     params: Record<string, string>
-): Promise<Array<Record<string, string>>> => {
+): Promise<KmaObservedOriginalResponse> => {
     const url = new URL(`${KMA_TYP01_BASE_URL}/${endpoint}`)
     Object.entries(params).forEach(([key, value]) => {
         url.searchParams.set(key, value)
@@ -92,7 +93,7 @@ const fetchTyp01Rows = async (
     }
 
     const raw = await decodeResponse(response)
-    return parseTyp01Table(raw)
+    return new KmaObservedOriginalResponse(parseTyp01Table(raw))
 }
 
 const fetchHourlyObsMap = async (
@@ -101,7 +102,7 @@ const fetchHourlyObsMap = async (
     tm2: string,
     obs: 'TA' | 'RN' | 'CA_TOT'
 ): Promise<Map<string, number>> => {
-    const rows = await fetchTyp01Rows('kma_sfctm5.php', {
+    const original = await fetchTyp01Rows('kma_sfctm5.php', {
         tm1,
         tm2,
         stn: String(SEOUL_ASOS_STATION),
@@ -112,7 +113,7 @@ const fetchHourlyObsMap = async (
 
     const result = new Map<string, number>()
 
-    for (const row of rows) {
+    for (const row of original.rows) {
         const tm = row.TM
         const value = parseNumber(row[obs])
 
@@ -131,7 +132,7 @@ const fetchPm10Map = async (
     tm1: string,
     tm2: string
 ): Promise<Map<string, number>> => {
-    const rows = await fetchTyp01Rows('dst_pm10_tm.php', {
+    const original = await fetchTyp01Rows('dst_pm10_tm.php', {
         tm_st: tm1,
         tm: tm2,
         stn: String(SEOUL_ASOS_STATION),
@@ -143,7 +144,7 @@ const fetchPm10Map = async (
 
     const result = new Map<string, number>()
 
-    for (const row of rows) {
+    for (const row of original.rows) {
         const tm = row.TM
         const pm10Raw = row.PM10 ?? row.pm10 ?? row.AVG
         const pm10 = parseNumber(pm10Raw)

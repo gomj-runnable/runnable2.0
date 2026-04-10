@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { WeatherLayer } from '#shared/types/weather'
+import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 
 const props = defineProps<{
     modelValue: WeatherLayer
@@ -18,16 +19,16 @@ const layers: { value: WeatherLayer; label: string; icon: string }[] = [
 
 <template>
     <div class="weather-layer-toggle">
-        <button
+        <ChipButton
             v-for="layer in layers"
             :key="layer.value"
-            class="weather-layer-toggle__btn"
-            :class="{ 'is-active': modelValue === layer.value }"
+            :label="layer.label"
+            :icon="layer.icon"
+            size="sm"
+            appearance="elevated"
+            :active="modelValue === layer.value"
             @click="emit('update:modelValue', layer.value)"
-        >
-            <span :class="layer.icon" class="weather-layer-toggle__icon" />
-            <span class="weather-layer-toggle__label">{{ layer.label }}</span>
-        </button>
+        />
     </div>
 </template>
 

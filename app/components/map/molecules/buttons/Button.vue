@@ -15,19 +15,7 @@ const props = withDefaults(
         disabled?: boolean
         type?: 'button' | 'submit' | 'reset'
     }>(),
-    {
-        label: undefined,
-        icon: undefined,
-        iconTrailing: false,
-        appearance: undefined,
-        role: 'default',
-        variant: 'filled',
-        size: 'md',
-        block: false,
-        active: false,
-        disabled: false,
-        type: 'button'
-    }
+    { iconTrailing: false, role: 'default', variant: 'filled', size: 'md', block: false, active: false, disabled: false, type: 'button' }
 )
 
 defineEmits<{ click: [] }>()
