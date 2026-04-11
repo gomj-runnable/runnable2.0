@@ -20,12 +20,23 @@ interface UseFacilitySideeffectOptions {
     isLoading: Ref<boolean>
 }
 
+/**
+ * 시설물 데이터를 서버에서 불러오고 활성 유형에 따라 Cesium 지도에 렌더링하는 sideeffect composable.
+ * `activeTypes` 변화를 감지해 표시/숨김 상태를 자동으로 동기화하며,
+ * 컴포넌트 언마운트 시 모든 엔티티를 정리한다.
+ *
+ * @param options - 뷰어·시설물 데이터·활성 유형 상태 ref를 포함한 의존성 옵션
+ */
 export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => {
     const { viewer, facilities, activeTypes, isLoading } = options
 
     /** 유형별 추가된 Entity 참조 보관 (제거 시 사용) */
     const entityMap = new Map<FacilityType, Entity[]>()
 
+    /**
+     * 시설물 목록을 서버에서 한 번만 가져온다.
+     * 이미 데이터가 있으면 요청을 생략한다.
+     */
     const fetchFacilities = async () => {
         if (facilities.value.length > 0) return
 
@@ -87,6 +98,12 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         })
     }
 
+    /**
+     * 특정 유형의 시설물 엔티티를 지도에 추가한다.
+     * 기존에 표시 중인 같은 유형의 엔티티는 먼저 제거한다.
+     *
+     * @param type - 표시할 시설물 유형
+     */
     const showLayer = (type: FacilityType) => {
         const v = viewer.value
         const C = window.Cesium
@@ -112,6 +129,11 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         entityMap.set(type, entities)
     }
 
+    /**
+     * 특정 유형의 시설물 엔티티를 지도에서 모두 제거한다.
+     *
+     * @param type - 제거할 시설물 유형
+     */
     const removeLayer = (type: FacilityType) => {
         const v = viewer.value
 
@@ -128,6 +150,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         }
     }
 
+    /** 모든 유형의 시설물 엔티티를 지도에서 일괄 제거한다. */
     const removeAllLayers = () => {
         for (const type of entityMap.keys()) {
             removeLayer(type)

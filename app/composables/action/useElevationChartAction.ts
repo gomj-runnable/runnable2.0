@@ -1,8 +1,12 @@
 import type { RouteElevationPoint, RouteElevationProfile } from '#shared/types/route'
 
+/** SVG 차트의 전체 크기와 내부 여백을 정의하는 치수 객체 */
 export interface ChartDimensions {
+    /** SVG 전체 너비 (px) */
     width: number
+    /** SVG 전체 높이 (px) */
     height: number
+    /** 차트 내부 여백 (상·우·하·좌, px) */
     padding: { top: number; right: number; bottom: number; left: number }
 }
 
@@ -90,6 +94,15 @@ function findRenderedPoint(
     )
 }
 
+/**
+ * 고도 프로필과 차트 치수로부터 SVG 렌더링에 필요한 모든 좌표 데이터를 계산한다.
+ * 스케일 함수, 라인 포인트, 면적 경로, 구간 세그먼트, 최고·최저 포인트를 포함한다.
+ *
+ * @param profile - `createRouteElevationProfile`이 반환한 고도 프로필
+ * @param distanceTicks - X축 눈금 거리 배열 (km)
+ * @param dimensions - SVG 차트의 전체 크기와 패딩
+ * @returns SVG 렌더링에 사용할 차트 기하 데이터. 포인트가 없으면 `null`.
+ */
 export function calcChartGeometry(
     profile: RouteElevationProfile,
     distanceTicks: number[],

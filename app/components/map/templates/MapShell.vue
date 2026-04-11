@@ -14,6 +14,7 @@
  */
 const props = withDefaults(
     defineProps<{
+        /** 사이드바를 완전히 숨길지 여부 */
         hideSidebar?: boolean
     }>(),
     {
@@ -23,7 +24,9 @@ const props = withDefaults(
 
 const isSidebarCollapsed = ref(false)
 
+/** 사이드바 접힘 상태를 토글한다 */
 const toggleSidebar = () => {
+    // hideSidebar가 true이면 토글 불가
     if (props.hideSidebar) return
 
     isSidebarCollapsed.value = !isSidebarCollapsed.value

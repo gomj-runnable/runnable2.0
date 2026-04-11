@@ -9,10 +9,12 @@ import type {
 } from './route.repository'
 import { db as _db } from '../utils/db'
 import { routes, routeSections } from '../database/schema/routes'
-
-if (!_db) throw new Error('DrizzleRouteRepository requires a database connection')
-const db = _db
 import { users } from '../database/schema/users'
+
+function getDb() {
+    if (!_db) throw new Error('DrizzleRouteRepository requires a database connection')
+    return _db
+}
 
 const toSavedRoute = (
     row: typeof routes.$inferSelect,
@@ -53,7 +55,7 @@ const toSavedSection = (row: typeof routeSections.$inferSelect): SavedSection =>
 class DrizzleRouteRepository implements IRouteRepository {
     async createRoute(input: RouteDraftInput, userId: string): Promise<SavedRoute> {
         const routeId = randomUUID()
-        const [row] = await db
+        const [row] = await getDb()
             .insert(routes)
             .values({
                 routeId,
@@ -72,7 +74,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async getRoute(routeId: string): Promise<SavedRoute | null> {
-        const rows = await db
+        const rows = await getDb()
             .select()
             .from(routes)
             .leftJoin(users, eq(routes.userId, users.id))
@@ -85,7 +87,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async listRoutes(): Promise<SavedRoute[]> {
-        const rows = await db
+        const rows = await getDb()
             .select()
             .from(routes)
             .leftJoin(users, eq(routes.userId, users.id))
@@ -95,7 +97,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async listRoutesByUser(userId: string): Promise<SavedRoute[]> {
-        const rows = await db
+        const rows = await getDb()
             .select()
             .from(routes)
             .where(eq(routes.userId, userId))
@@ -117,7 +119,7 @@ class DrizzleRouteRepository implements IRouteRepository {
             )
         }
 
-        const rows = await db
+        const rows = await getDb()
             .select()
             .from(routes)
             .leftJoin(users, eq(routes.userId, users.id))
@@ -140,7 +142,7 @@ class DrizzleRouteRepository implements IRouteRepository {
         if (input.distance !== undefined) values.distance = input.distance?.toString()
         if (input.isPublic !== undefined) values.isPublic = input.isPublic
 
-        const [row] = await db
+        const [row] = await getDb()
             .update(routes)
             .set(values)
             .where(eq(routes.routeId, routeId))
@@ -151,13 +153,13 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async deleteRoute(routeId: string): Promise<boolean> {
-        const result = await db.delete(routes).where(eq(routes.routeId, routeId)).returning()
+        const result = await getDb().delete(routes).where(eq(routes.routeId, routeId)).returning()
         return result.length > 0
     }
 
     async createSection(routeId: string, input: CreateSectionInput): Promise<SavedSection> {
         const sectionId = randomUUID()
-        const [row] = await db
+        const [row] = await getDb()
             .insert(routeSections)
             .values({
                 sectionId,
@@ -173,7 +175,7 @@ class DrizzleRouteRepository implements IRouteRepository {
 
     async createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]> {
         if (inputs.length === 0) return []
-        const rows = await db
+        const rows = await getDb()
             .insert(routeSections)
             .values(
                 inputs.map((input) => ({
@@ -188,7 +190,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async getSectionsByRouteId(routeId: string): Promise<SavedSection[]> {
-        const rows = await db
+        const rows = await getDb()
             .select()
             .from(routeSections)
             .where(eq(routeSections.routeId, routeId))

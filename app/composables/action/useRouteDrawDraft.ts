@@ -46,6 +46,14 @@ export const createInitialSectionPointRanges = (pointCount: number): SectionPoin
         end: index + 1
     }))
 
+/**
+ * 드로잉 결과와 샘플링된 고도 포인트를 결합해 고도 정보가 포함된 LineString GeoJSON을 만든다.
+ * 좌표 수가 일치하면 GeoJSON 원본 좌표를 기준으로 하고, 불일치 시 `positions`로 대체한다.
+ *
+ * @param data - Cesium 드로잉 helper가 반환한 측정값. 없으면 `positions`만 사용한다.
+ * @param positions - 테레인 샘플링 후 고도가 채워진 WGS84 포인트 배열
+ * @returns 고도 포함 LineString GeoJSON. 포인트가 없으면 `undefined`.
+ */
 export const createHeightAwareRouteGeom = (
     data: DrawActionData | undefined,
     positions: GeoJsonPosition[]
