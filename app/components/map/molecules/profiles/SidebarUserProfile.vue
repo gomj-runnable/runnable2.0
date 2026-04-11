@@ -44,6 +44,7 @@ const menuItems = [
 
 <template>
     <UDropdownMenu
+        v-if="username"
         :items="menuItems"
         :content="{ side: 'top', align: 'start', sideOffset: 10 }"
         :ui="{ content: 'dropdown-profiles-menu' }"
@@ -58,7 +59,7 @@ const menuItems = [
 
             <div class="sidebar-user__content">
                 <slot>
-                    <span class="sidebar-user__name">{{ username ?? '로그인' }}</span>
+                    <span class="sidebar-user__name">{{ username }}</span>
                 </slot>
                 <span v-if="subtitle" class="sidebar-user__subtitle">{{ subtitle }}</span>
             </div>
@@ -68,6 +69,24 @@ const menuItems = [
             </div>
         </button>
     </UDropdownMenu>
+
+    <button v-else type="button" class="map-button sidebar-user" @click="$emit('click')">
+        <slot name="icon">
+            <div class="sidebar-user__avatar sidebar-user__avatar--placeholder">
+                <UIcon name="i-lucide-user" class="sidebar-user__avatar-icon" />
+            </div>
+        </slot>
+
+        <div class="sidebar-user__content">
+            <slot>
+                <span class="sidebar-user__name">로그인</span>
+            </slot>
+        </div>
+
+        <div class="sidebar-user__trailing">
+            <UIcon name="i-lucide-chevron-up-down" class="sidebar-user__chevron" />
+        </div>
+    </button>
 </template>
 
 <style scoped src="~/assets/css/components/organizations/profiles/SidebarUserProfile.css"></style>

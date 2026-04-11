@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/**
+ * 러닝 경로 제작 서비스의 메인 페이지.
+ *
+ * Cesium 3D 지도 위에서 경로 그리기·저장·목록 조회·탐색·날씨·편의시설 기능을 제공한다.
+ * 사이드바(목록·그리기·탐색 탭)와 지도 오버레이(날씨·편의시설·고도 차트·경로 닫기 칩)로 구성되며,
+ * `useRouteMapFacade`를 통해 드로잉·저장·목록 로직을 단일 진입점으로 사용한다.
+ */
 import type { CesiumViewer } from '~/composables/useWindow'
 import MapShell from '~/components/map/templates/MapShell.vue'
 import MapSidebar from '~/components/map/templates/MapSidebar.vue'
@@ -7,7 +14,7 @@ import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
 import RouteElevationModal from '~/components/map/templates/RouteElevationModal.vue'
 import RouteOverlayBottomBar from '~/components/map/templates/RouteOverlayBottomBar.vue'
 import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
-import RouteFeedbackModal from '~/components/map/templates/RouteFeedbackModal.vue'
+import NotificationModal from '~/components/map/templates/NotificationModal.vue'
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
 import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
 import FacilityOverlay from '~/components/map/templates/FacilityOverlay.vue'
@@ -21,30 +28,44 @@ import { useWeatherStore } from '~/composables/store/useWeatherStore'
 import { useWeatherSideeffect } from '~/composables/sideeffect/useWeatherSideeffect'
 import { useFacilityStore } from '~/composables/store/useFacilityStore'
 import { useFacilitySideeffect } from '~/composables/sideeffect/useFacilitySideeffect'
+import { useSidewalkSideeffect } from '~/composables/sideeffect/useSidewalkSideeffect'
 import { useAuthStore } from '~/composables/store/useAuthStore'
 import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
 import { useExploreSearchSideeffect } from '~/composables/sideeffect/useExploreSearchSideeffect'
 
+/** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
 
 useHead({
     link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }]
 })
 
+// ─── 지도 초기화 ─────────────────────────────────────────────────
+
 const { init } = useMapInit()
+/** Cesium 뷰어 인스턴스. `onMounted` 이후 `window.viewer`로 할당된다. */
 const viewer = shallowRef<CesiumViewer | null>(null)
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, closing, feedback, exploreSelectRoute } =
+// ─── 경로 Facade (그리기·저장·목록·고도·닫기) ────────────────────
+
+const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute } =
     useRouteMapFacade(viewer)
+
+// ─── 인증 ────────────────────────────────────────────────────────
 
 const authStore = useAuthStore()
 const authEffect = useAuthSideeffect()
+
+// ─── 날씨·편의시설 ───────────────────────────────────────────────
 
 const weather = useWeatherStore()
 const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
 
 const facility = useFacilityStore()
 useFacilitySideeffect({ viewer, ...facility })
+useSidewalkSideeffect({ viewer })
+
+// ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
     await init()
@@ -52,29 +73,37 @@ onMounted(async () => {
     await Promise.all([initWeather(), authEffect.fetchSession()])
 })
 
+// ─── 사이드바 탭 구성 ────────────────────────────────────────────
+
+/** 사이드바 네비게이션 탭 목록. 아이콘과 라벨로 구성된다. */
 const navItems = [
     { icon: 'i-lucide-list', label: '목록' },
     { icon: 'i-lucide-pencil', label: '그리기' },
     { icon: 'i-lucide-search', label: '탐색' }
 ] as const
 
+// ─── 탐색 ────────────────────────────────────────────────────────
+
 const explore = useExploreSearchSideeffect()
 
+/** 인증 성공 시 모달을 닫는다. */
 const handleAuthSuccess = async () => {
     authStore.closeAuthModal()
 }
 
+/** 로그아웃 버튼 클릭 시 세션을 종료하고 사용자 상태를 초기화한다. */
 const handleLogout = async () => {
     await authEffect.logout()
 }
 
+/** 탐색 결과에서 경로를 선택하면 지도 미리보기와 고도 차트를 표시한다. */
 const handleExploreSelect = async (routeId: string) => {
     explore.selectRoute(routeId)
     const route = explore.searchResults.value.find((r) => r.routeId === routeId)
     await exploreSelectRoute(routeId, route?.title)
 }
 
-// 탐색 탭 진입 시 공개 경로 자동 로드 (미로드 상태일 때만 실행)
+/** 탐색 탭 진입 시 공개 경로 자동 로드 (미로드 상태일 때만 실행) */
 watch(activeNav, (next) => {
     if (next === '탐색' && explore.searchResults.value.length === 0 && !explore.isSearching.value) {
         explore.search(explore.searchQuery.value)
@@ -157,7 +186,9 @@ watch(activeNav, (next) => {
                             :username="authStore.user.value?.name"
                             :image="authStore.user.value?.image ?? undefined"
                             :subtitle="authStore.isLoggedIn.value ? '계정 설정' : '로그인하세요'"
-                            @click="authStore.isLoggedIn.value ? undefined : authStore.openLoginModal()"
+                            @click="
+                                authStore.isLoggedIn.value ? undefined : authStore.openLoginModal()
+                            "
                             @logout="handleLogout"
                         />
                     </template>
@@ -187,11 +218,13 @@ watch(activeNav, (next) => {
                     @toggle="facility.toggleType"
                 />
                 <RouteOverlayBottomBar
+                    v-if="activeNav === '그리기' || elevationChart.profile"
                     :elevation-chip-label="elevationChart.title"
                     :elevation-chip-active="elevationChart.open"
                     :elevation-profile="elevationChart.profile"
                     :closing-mode="closing.mode"
                     :closing-disabled="!drawing.sectionDraft"
+                    :show-closing="activeNav === '그리기'"
                     @toggle-elevation="elevationChart.setOpen(!elevationChart.open)"
                     @update:closing-mode="closing.setMode($event)"
                 />
@@ -214,13 +247,7 @@ watch(activeNav, (next) => {
             @update:description="saveModal.routeForm.description = $event"
             @submit="saveModal.confirm"
         />
-        <RouteFeedbackModal
-            :open="feedback.open"
-            :title="feedback.title"
-            :message="feedback.message"
-            :tone="feedback.tone"
-            @update:open="feedback.close()"
-        />
+        <NotificationModal />
         <AuthModal
             :open="authStore.isAuthModalOpen.value"
             :mode="authStore.authModalMode.value"

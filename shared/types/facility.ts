@@ -1,4 +1,4 @@
-export type FacilityType = 'crosswalk' | 'fountain' | 'locker' | 'hospital'
+export type FacilityType = 'crosswalk' | 'fountain' | 'locker' | 'hospital' | 'sidewalk'
 
 export interface Facility {
     id: string
