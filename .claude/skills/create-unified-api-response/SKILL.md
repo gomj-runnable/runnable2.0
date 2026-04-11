@@ -39,139 +39,49 @@ app/composables/
 
 ## 분기 경계: 호출부만
 
-```typescript
-// ✅ 올바른 패턴 — 호출부만 분기
-const observedSlots = await observedAdapter.requestByDate(date)   // → LocalResponse[]
-const forecastSlots = await forecastAdapter.requestByDate(date)    // → LocalResponse[]
+- `service.requestByX()` 반환 이후의 코드는 API 출처를 모른다
+- adapter별 호출부만 분기하고, 이후 merge·filter·display는 공통 함수로 통일
+- API별 전용 함수가 adapter 외부에 존재하면 위반
 
-// 이후 모든 로직은 LocalResponse만 다룬다
-const merged = mergeSlots(observedSlots, forecastSlots)  // 공통 함수
-const filtered = filterByHour(merged, hour)              // 공통 함수
-const displayed = formatForDisplay(filtered)             // 공통 함수
-```
-
-```typescript
-// ❌ 잘못된 패턴 — API별로 후속 로직이 다름
-const observed = await observedAdapter.requestByDate(date)
-const forecast = await forecastAdapter.requestByDate(date)
-
-const filteredObserved = filterObserved(observed)  // API-A 전용 함수
-const filteredForecast = filterForecast(forecast)  // API-B 전용 함수
-```
+→ ✅/❌ 패턴 예시: [examples/template-patterns.md](examples/template-patterns.md#분기-경계-호출부만)
 
 ## 공통 Local Response 설계
 
-```typescript
-// shared/types/{domain}.ts
+- `shared/types/{domain}.ts`에 단일 interface로 정의
+- `source` 필드를 **필수**로 포함 — 병합 우선순위 판단 + 디버깅 출처 추적용
+- `{Domain}Source` 타입으로 출처를 열거한다
 
-/** 공통 Local Response — 모든 API 소스의 통합 인터페이스 */
-export interface {Domain}LocalResponse {
-    // 모든 API에서 공통으로 추출 가능한 필드
-    date: string
-    time: string
-    value: number
-    label: string
-
-    // 출처 식별 (디버깅/우선순위용)
-    source: {Domain}Source
-}
-
-/** 데이터 출처 식별 */
-export type {Domain}Source = 'apiA' | 'apiB' | 'fallback'
-```
-
-### source 필드 규칙
-
-- 공통 Local Response에 `source` 필드를 **필수**로 둔다
-- 병합 시 우선순위 판단에 사용: 예) `observed > forecast > fallback`
-- 디버깅 시 데이터 출처를 추적 가능
+→ 코드 템플릿: [examples/template-patterns.md](examples/template-patterns.md#공통-local-response)
 
 ## Adapter 패턴
 
-각 adapter는 **자신의 API 호출 + 공통 Local Response 변환**만 책임진다.
+- 각 adapter는 **자신의 API 호출 + 공통 Local Response 변환**만 책임진다
+- 반환 타입은 반드시 공통 Local Response
 
-```typescript
-// server/utils/{domain}/{sourceA}.adapter.ts
-import { {ApiA}OriginalResponse, type {Domain}LocalResponse } from '#shared/types/{domain}'
-
-export async function requestByDate(date: string): Promise<{Domain}LocalResponse[]> {
-    const res = await fetch(API_A_URL)
-    const original = new {ApiA}OriginalResponse(await res.json())
-
-    return original.items.map(item => ({
-        date: item.fcstDate,
-        time: item.fcstTime,
-        value: Number(item.fcstValue),
-        label: mapCategoryToLabel(item.category),
-        source: 'apiA' as const,
-    }))
-}
-```
+→ 코드 템플릿: [examples/template-patterns.md](examples/template-patterns.md#adapter)
 
 ## Merge 패턴
 
-```typescript
-// server/utils/{domain}/merge.service.ts
+- 소스별 우선순위를 명시적으로 정의
+- 동일 키 데이터가 여러 소스에 있으면 우선순위가 높은 것을 채택
 
-/** 소스별 우선순위 */
-const SOURCE_PRIORITY: Record<{Domain}Source, number> = {
-    apiA: 3,    // 최우선 (실측)
-    apiB: 2,    // 차선 (예보)
-    fallback: 1 // 최후
-}
-
-/** 동일 키의 데이터가 여러 소스에 있으면 우선순위가 높은 것을 채택 */
-export function mergeResponses(
-    ...sources: {Domain}LocalResponse[][]
-): {Domain}LocalResponse[] {
-    const map = new Map<string, {Domain}LocalResponse>()
-
-    for (const slots of sources) {
-        for (const slot of slots) {
-            const key = `${slot.date}_${slot.time}`
-            const existing = map.get(key)
-
-            if (!existing || SOURCE_PRIORITY[slot.source] > SOURCE_PRIORITY[existing.source]) {
-                map.set(key, slot)
-            }
-        }
-    }
-
-    return Array.from(map.values()).sort(/* 시간순 */)
-}
-```
+→ 코드 템플릿: [examples/template-patterns.md](examples/template-patterns.md#merge)
 
 ## Service 오케스트레이터
 
-```typescript
-// server/utils/{domain}/{domain}.service.ts
+- 여러 adapter를 `Promise.all`로 병렬 호출
+- 개별 실패 시 `.catch(() => [])` 로 graceful fallback
+- merge 함수로 통합 후 반환
 
-class {Domain}Service {
-    async requestByDate(date: string): Promise<{Domain}LocalResponse[]> {
-        // 여러 adapter를 병렬 호출 + 개별 실패 허용
-        const [slotsA, slotsB] = await Promise.all([
-            adapterA.requestByDate(date).catch(() => []),
-            adapterB.requestByDate(date).catch(() => []),
-        ])
+→ 코드 템플릿: [examples/template-patterns.md](examples/template-patterns.md#service-오케스트레이터)
 
-        // 공통 merge 함수로 통합
-        return mergeResponses(slotsA, slotsB)
-    }
-}
-```
+## 예시 참조
 
-## 기존 프로젝트 사례: Weather
-
-| 구성 요소 | 파일 |
-|-----------|------|
-| API-A 원본 | `VilageFcstResponse` (forecast.adapter.ts) |
-| API-B 원본 | KMA 텍스트 응답 (observed.adapter.ts) |
-| 공통 Local Response | `HourlyWeather` (shared/types/weather.ts) |
-| source 필드 | `WeatherSlotSource: 'observed' \| 'forecast' \| 'fallback'` |
-| Merge | `merge.service.ts` — source 우선순위 기반 |
-| 오케스트레이터 | `weather.service.ts` — Promise.all + catch fallback |
-
-→ 코드: [examples/unified.ts](examples/unified.ts)
+| 예시 | 설명 |
+|------|------|
+| [examples/weather-usage.md](examples/weather-usage.md) | 실제 프로젝트 사례 — Weather 3개 API 통합 |
+| [examples/template-patterns.md](examples/template-patterns.md) | 템플릿 코드 패턴 (`{Domain}` 플레이스홀더) |
+| [examples/unified.ts](examples/unified.ts) | 가상 Air 도메인 전체 코드 예제 |
 
 ## 새 통합 API 추가 절차
 
