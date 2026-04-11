@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { RouteElevationPoint, RouteElevationProfile } from '#shared/types/route'
+import type { RouteElevationProfile } from '#shared/types/route'
 import Button from '~/components/map/molecules/buttons/Button.vue'
-import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
 import { createDistanceTicks } from '~/composables/action/useRouteElevationProfile'
+import { calcChartGeometry } from '~/composables/action/useElevationChartAction'
 
 const CHART_WIDTH = 720
 const CHART_HEIGHT = 260
@@ -12,6 +12,12 @@ const CHART_PADDING = {
     right: 20,
     bottom: 40,
     left: 20
+}
+
+const CHART_DIMENSIONS = {
+    width: CHART_WIDTH,
+    height: CHART_HEIGHT,
+    padding: CHART_PADDING
 }
 
 const props = defineProps<{
@@ -41,14 +47,6 @@ const formatTickLabel = (km: number) => {
     return Number.isInteger(km) ? `${km}km` : `${km.toFixed(1)}km`
 }
 
-type RenderedPoint = RouteElevationPoint & { x: number; y: number }
-type RenderedSectionSegment = RouteElevationProfile['sections'][number] & { path: string }
-
-const findRenderedPoint = (linePoints: RenderedPoint[], target: RouteElevationPoint) =>
-    linePoints.find(
-        (point) => point.distanceKm === target.distanceKm && point.elevation === target.elevation
-    ) ?? null
-
 const summaryItems = computed(() => {
     if (!props.profile) {
         return []
@@ -62,84 +60,19 @@ const summaryItems = computed(() => {
 })
 
 const chartGeometry = computed(() => {
-    const points = props.profile?.points ?? []
-
-    if (points.length === 0 || !props.profile) {
+    if (!props.profile) {
         return null
     }
 
-    const chartWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right
-    const chartHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom
-    const maxDistance = Math.max(props.profile.distanceKm, 0.001)
-    const minElevation = Math.min(...points.map((point) => point.elevation))
-    const maxElevation = Math.max(...points.map((point) => point.elevation))
-    const elevationRange = Math.max(maxElevation - minElevation, 1)
-    const elevationPadding = Math.max(elevationRange * 0.18, 12)
-    const lowerBound = minElevation - elevationPadding
-    const upperBound = maxElevation + elevationPadding
-    const scaleX = (distanceKm: number) =>
-        CHART_PADDING.left + (distanceKm / maxDistance) * chartWidth
-    const scaleY = (elevation: number) =>
-        CHART_PADDING.top + ((upperBound - elevation) / (upperBound - lowerBound)) * chartHeight
-    const linePoints: RenderedPoint[] = points.map((point) => ({
-        x: Number(scaleX(point.distanceKm).toFixed(2)),
-        y: Number(scaleY(point.elevation).toFixed(2)),
-        distanceKm: point.distanceKm,
-        elevation: point.elevation
-    }))
-    const linePath = linePoints
-        .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
-        .join(' ')
-    const baselineY = CHART_PADDING.top + chartHeight
-    const areaPath = `${linePath} L ${linePoints.at(-1)?.x ?? CHART_PADDING.left} ${baselineY} L ${linePoints[0]?.x ?? CHART_PADDING.left} ${baselineY} Z`
-    const distanceTicks = createDistanceTicks(props.profile.distanceKm).map((distanceKm) => ({
-        value: distanceKm,
-        x: Number(scaleX(distanceKm).toFixed(2))
-    }))
-    const sectionSegments = props.profile.sections
-        .map((section) => {
-            const sectionPoints = linePoints.slice(section.startIndex, section.endIndex + 1)
-
-            if (sectionPoints.length < 2) {
-                return null
-            }
-
-            return {
-                ...section,
-                path: sectionPoints
-                    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
-                    .join(' ')
-            }
-        })
-        .filter((section): section is RenderedSectionSegment => section !== null)
-
-    return {
-        baselineY,
-        distanceTicks,
-        linePoints,
-        areaPath,
-        sectionSegments,
-        highestPoint: findRenderedPoint(linePoints, props.profile.highestPoint),
-        lowestPoint: findRenderedPoint(linePoints, props.profile.lowestPoint)
-    }
+    return calcChartGeometry(
+        props.profile,
+        createDistanceTicks(props.profile.distanceKm),
+        CHART_DIMENSIONS
+    )
 })
 </script>
 
 <template>
-    <ChipButton
-        v-if="profile"
-        id="popup-route-elevation-trigger"
-        :label="title"
-        icon="i-lucide-chart-line"
-        appearance="elevated"
-        size="md"
-        :active="open"
-        class="route-elevation-modal__chip-trigger"
-        :aria-controls="'popup-route-elevation'"
-        :aria-expanded="open"
-        @click="$emit('update:open', !open)"
-    />
-
     <PopupModal
         :open="open && !!profile"
         popup-id="popup-route-elevation"

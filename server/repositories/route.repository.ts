@@ -23,5 +23,6 @@ export interface IRouteRepository {
     updateRoute(routeId: string, input: Partial<RouteDraftInput>): Promise<SavedRoute | null>
     deleteRoute(routeId: string): Promise<boolean>
     createSection(routeId: string, input: CreateSectionInput): Promise<SavedSection>
+    createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]>
     getSectionsByRouteId(routeId: string): Promise<SavedSection[]>
 }

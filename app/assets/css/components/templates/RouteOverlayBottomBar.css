@@ -1,0 +1,11 @@
+.route-overlay-chip-bar {
+    position: absolute;
+    left: 50%;
+    bottom: var(--gap-section-lg);
+    transform: translateX(-50%);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-section-xs);
+    pointer-events: auto;
+}

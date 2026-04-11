@@ -6,4 +6,9 @@ import { auth } from '#server/utils/auth'
  *
  * TODO: (추가확인 필요)
  */
-export default fromWebHandler(auth.handler)
+export default defineEventHandler((event) => {
+    if (!auth) {
+        throw createError({ statusCode: 503, message: 'Auth is disabled in MEMORY mode.' })
+    }
+    return fromWebHandler(auth.handler)(event)
+})

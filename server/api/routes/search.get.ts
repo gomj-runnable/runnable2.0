@@ -1,4 +1,4 @@
-import { routeRepository } from '../../repositories/route.repository.drizzle'
+import { routeRepository } from '../../repositories'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
