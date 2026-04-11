@@ -4,19 +4,28 @@ import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
 
 defineProps<{
+    /** 팝업 표시 여부 */
     open: boolean
+    /** 경로 제목 입력값 */
     title: string
+    /** 경로 설명 입력값 */
     description: string
+    /** 경로 총 거리 (km 단위, 없으면 미표시) */
     distance?: number
 }>()
 
 defineEmits<{
+    /** 팝업 열림/닫힘 상태 변경 시 새 상태 값을 전달 */
     'update:open': [value: boolean]
+    /** 제목 입력 변경 시 새 값을 전달 */
     'update:title': [value: string]
+    /** 설명 입력 변경 시 새 값을 전달 */
     'update:description': [value: string]
+    /** 저장 버튼 클릭 시 발생 */
     submit: []
 }>()
 
+/** 거리 값을 m/km 단위 문자열로 변환한다 */
 const formatDistance = (distance?: number) => {
     if (typeof distance !== 'number' || Number.isNaN(distance)) {
         return ''

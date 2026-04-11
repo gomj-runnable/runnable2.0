@@ -4,15 +4,20 @@ import Card from '~/components/map/organizations/cards/Card.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 
 defineProps<{
+    /** 저장된 경로 목록 */
     routes: SavedRoute[]
+    /** 현재 선택된 경로 ID (없으면 null) */
     selectedRouteId: string | null
 }>()
 
 defineEmits<{
+    /** 경로 카드 클릭 시 선택된 경로 ID를 전달 */
     select: [routeId: string]
+    /** 다운로드 버튼 클릭 시 해당 경로 ID를 전달 */
     download: [routeId: string]
 }>()
 
+/** 거리 값을 m/km 단위 문자열로 변환한다 */
 const formatDistance = (distance?: RouteBase['distance']) => {
     if (typeof distance !== 'number') return null
     return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`

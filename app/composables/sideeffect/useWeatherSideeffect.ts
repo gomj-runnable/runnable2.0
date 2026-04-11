@@ -22,6 +22,12 @@ interface UseWeatherSideeffectOptions {
     isVisible: Ref<boolean>
 }
 
+/**
+ * 날씨 데이터를 서버에서 불러오고 Cesium 지도 위에 행정구역별 날씨 레이어를 렌더링하는 sideeffect composable.
+ * GeoJSON 행정경계를 DataSource로 로드하고, 선택된 날짜·시간·레이어에 따라 폴리곤 색상을 갱신한다.
+ *
+ * @param options - 뷰어·날짜·날씨 데이터·레이어 상태 ref를 포함한 의존성 옵션
+ */
 export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     const {
         viewer,
@@ -35,8 +41,11 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         isVisible
     } = options
 
+    /** 행정경계 GeoJSON을 Cesium DataSource로 로드한 인스턴스 */
     let weatherDataSource: GeoJsonDataSourceInstance | null = null
+    /** 행정경계 외곽선 렌더링을 위한 GroundPolylinePrimitive 인스턴스 */
     let weatherOutlinePrimitive: GroundPolylinePrimitiveInstance | null = null
+    /** 외곽선 색상 업데이트를 위한 구역 코드·인스턴스 ID 매핑 목록 */
     const weatherOutlineInstances = shallowRef<Array<{ code: string; id: string }>>([])
 
     const getCesium = (): CesiumRuntime => (window as unknown as { Cesium: CesiumRuntime }).Cesium
@@ -139,6 +148,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         v.scene.primitives.add(weatherOutlinePrimitive)
     }
 
+    /** 서울 행정경계 GeoJSON을 서버에서 가져와 `boundaryGeojson`에 저장한다. */
     const fetchBoundary = async () => {
         try {
             const data = await $fetch('/api/boundary/seoul')
@@ -148,6 +158,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         }
     }
 
+    /** 선택된 날짜의 월별 날씨 데이터를 서버에서 가져와 `monthlyData`에 저장한다. */
     const fetchMonthlyWeather = async () => {
         isLoading.value = true
         try {
@@ -163,6 +174,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     // 데이터 없는 구역 표시색
     const NO_DATA_COLOR = 'rgba(80, 80, 80, 0.3)'
 
+    /** 행정경계 GeoJSON을 Cesium DataSource로 로드하고 초기 폴리곤 색상을 적용한다. */
     const loadBoundaryDataSource = async () => {
         const v = viewer.value
         if (!v || !boundaryGeojson.value) return
@@ -185,6 +197,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         }
     }
 
+    /** 선택된 날짜·시간·레이어에 따라 Cesium 폴리곤과 외곽선 색상을 갱신한다. */
     const updateCesiumPolygons = () => {
         if (!weatherDataSource || !isVisible.value) return
         const Cesium = getCesium()
@@ -218,6 +231,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         })
     }
 
+    /** 지도에서 날씨 DataSource와 외곽선 Primitive를 모두 제거한다. */
     const clearWeatherLayer = () => {
         const v = viewer.value
         if (!v) return
@@ -236,6 +250,10 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         weatherOutlineInstances.value = []
     }
 
+    /**
+     * 날씨 레이어를 초기화한다.
+     * 행정경계·날씨 데이터를 병렬로 불러온 뒤 DataSource를 로드하고 폴리곤 색상을 적용한다.
+     */
     const init = async () => {
         await Promise.all([fetchBoundary(), fetchMonthlyWeather()])
         await loadBoundaryDataSource()

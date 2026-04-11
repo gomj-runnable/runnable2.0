@@ -3,9 +3,11 @@ import type { WeatherLayer } from '#shared/types/weather'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 
 const props = defineProps<{
+    /** 현재 활성화된 날씨 레이어 타입 */
     modelValue: WeatherLayer
 }>()
 
+/** 날씨 레이어 변경 이벤트 */
 const emit = defineEmits<{
     'update:modelValue': [value: WeatherLayer]
 }>()

@@ -16,8 +16,11 @@ import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
  */
 withDefaults(
     defineProps<{
+        /** 헤더에 표시할 로고 아이콘 클래스 */
         logoIcon?: string
+        /** 헤더에 표시할 로고 레이블 텍스트 */
         logoLabel?: string
+        /** 사이드바 접힘 상태 여부 */
         collapsed?: boolean
     }>(),
     {

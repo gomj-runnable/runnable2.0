@@ -3,10 +3,13 @@ import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 
 defineProps<{
+    /** 현재 활성화된 경로 닫기 모드 (loop-close | round-trip | null) */
     closingMode: RouteClosingMode
+    /** 칩 버튼 전체 비활성화 여부 */
     disabled?: boolean
 }>()
 
+/** 경로 닫기 모드 변경 이벤트 (같은 모드 재클릭 시 null로 해제) */
 defineEmits<{
     'update:closingMode': [mode: RouteClosingMode]
 }>()

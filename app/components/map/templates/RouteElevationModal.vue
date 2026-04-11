@@ -21,15 +21,20 @@ const CHART_DIMENSIONS = {
 }
 
 const props = defineProps<{
+    /** 팝업 표시 여부 */
     open: boolean
+    /** 모달 헤더에 표시할 경로 제목 */
     title: string
+    /** 표시할 고도 프로필 데이터 (없으면 팝업 미표시) */
     profile: RouteElevationProfile | null
 }>()
 
 defineEmits<{
+    /** 팝업 열림/닫힘 상태 변경 시 새 상태 값을 전달 */
     'update:open': [value: boolean]
 }>()
 
+/** 거리 값을 m/km 단위 문자열로 변환한다 */
 const formatDistance = (distanceKm?: number) => {
     if (typeof distanceKm !== 'number' || Number.isNaN(distanceKm)) {
         return '0.0km'
@@ -38,15 +43,18 @@ const formatDistance = (distanceKm?: number) => {
     return distanceKm < 1 ? `${Math.round(distanceKm * 1000)}m` : `${distanceKm.toFixed(1)}km`
 }
 
+/** 고도 값을 m 단위 문자열로 변환한다 (유효하지 않으면 '-' 반환) */
 const formatElevation = (elevation?: number) =>
     typeof elevation === 'number' && !Number.isNaN(elevation) ? `${Math.round(elevation)}m` : '-'
 
+/** 거리 눈금 값을 표시용 문자열로 변환한다 */
 const formatTickLabel = (km: number) => {
     if (km === 0) return '0'
     if (km < 1) return `${Math.round(km * 1000)}m`
     return Number.isInteger(km) ? `${km}km` : `${km.toFixed(1)}km`
 }
 
+/** 요약 카드에 표시할 총 거리·최고·최저 고도 항목 목록을 반환한다 */
 const summaryItems = computed(() => {
     if (!props.profile) {
         return []
@@ -59,11 +67,13 @@ const summaryItems = computed(() => {
     ]
 })
 
+/** 고도 SVG 차트 렌더링에 필요한 좌표·경로 기하 데이터를 계산한다 */
 const chartGeometry = computed(() => {
     if (!props.profile) {
         return null
     }
 
+    // 거리 눈금 생성 후 차트 기하 계산
     return calcChartGeometry(
         props.profile,
         createDistanceTicks(props.profile.distanceKm),

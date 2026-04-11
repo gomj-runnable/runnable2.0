@@ -5,15 +5,22 @@ import PopupModal from '~/components/map/templates/PopupModal.vue'
 import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
 
 const props = defineProps<{
+    /** 팝업 표시 여부 */
     open: boolean
+    /** 현재 모달 모드 (로그인 또는 회원가입) */
     mode: 'login' | 'signup'
 }>()
 
 const emit = defineEmits<{
+    /** 팝업 열림/닫힘 상태 변경 시 새 상태 값을 전달 */
     'update:open': [value: boolean]
+    /** 모달 모드 전환 시 새 모드를 전달 */
     'update:mode': [value: 'login' | 'signup']
+    /** 로그인 폼 제출 시 이메일·비밀번호를 전달 */
     login: [email: string, password: string]
+    /** 회원가입 폼 제출 시 이름·이메일·비밀번호를 전달 */
     signup: [name: string, email: string, password: string]
+    /** 인증 성공 시 발생 */
     success: []
 }>()
 
@@ -23,6 +30,7 @@ const password = ref('')
 const errorMessage = ref('')
 const isLoading = ref(false)
 
+/** 폼 입력값과 에러 메시지를 초기화한다 */
 const resetForm = () => {
     name.value = ''
     email.value = ''
@@ -31,19 +39,24 @@ const resetForm = () => {
 }
 
 watch(() => props.open, (open) => {
+    // 팝업이 열릴 때 폼 초기화
     if (open) resetForm()
 })
 
 watch(() => props.mode, () => {
+    // 모드 전환 시 폼 초기화
     resetForm()
 })
 
 const authEffect = useAuthSideeffect()
 
+/** 모드에 따라 로그인 또는 회원가입을 요청하고 결과를 처리한다 */
 const handleSubmit = async () => {
+    // 에러 초기화 후 로딩 시작
     errorMessage.value = ''
     isLoading.value = true
     try {
+        // 모드에 따라 로그인 또는 회원가입 실행
         if (props.mode === 'login') {
             await authEffect.login(email.value, password.value)
         } else {
@@ -57,6 +70,7 @@ const handleSubmit = async () => {
     }
 }
 
+/** 로그인↔회원가입 모드를 전환한다 */
 const toggleMode = () => {
     emit('update:mode', props.mode === 'login' ? 'signup' : 'login')
 }

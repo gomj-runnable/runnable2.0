@@ -63,7 +63,9 @@ export interface CesiumViewer extends Viewer {
 
 declare global {
     interface Window {
+        /** 동적으로 로드된 Cesium 라이브러리 전역 참조 */
         Cesium: typeof import('cesium')
+        /** `useMapInit`에서 초기화한 Cesium Viewer 전역 인스턴스 */
         viewer: CesiumViewer
     }
 }

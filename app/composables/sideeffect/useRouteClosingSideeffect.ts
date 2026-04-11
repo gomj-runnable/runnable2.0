@@ -19,8 +19,10 @@ interface UseRouteClosingSideeffectOptions {
  * - round-trip: 역순 경로에 점선 + 외곽선 효과
  */
 export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOptions) => {
+    /** 마감 모드 미리보기로 지도에 추가한 엔티티 목록 */
     const previewEntities = shallowRef<CesiumEntity[]>([])
 
+    /** 현재 마감 미리보기 엔티티를 모두 지도에서 제거한다. */
     const clearClosingPreview = () => {
         if (!options.viewer.value) return
 
@@ -28,6 +30,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         previewEntities.value = []
     }
 
+    /** loop-close 모드: 마지막 점에서 첫 점을 잇는 반투명 직선을 그린다. */
     const renderLoopClosePreview = () => {
         const positions = options.drawnPositions.value
         if (!options.viewer.value || !positions || positions.length < 2) return
@@ -47,6 +50,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         previewEntities.value = [entity]
     }
 
+    /** round-trip 모드: 역순 경로에 외곽 스트로크와 내부 점선을 겹쳐 그린다. */
     const renderRoundTripPreview = () => {
         const positions = options.drawnPositions.value
         if (!options.viewer.value || !positions || positions.length < 2) return

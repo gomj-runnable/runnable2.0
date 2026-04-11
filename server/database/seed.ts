@@ -1,9 +1,15 @@
 import 'dotenv/config'
-import { db } from '../utils/db'
-import { users, userAccounts } from './schema/users'
-import { hashPassword } from 'better-auth/crypto'
 
 async function seed() {
+  if (process.env.USE_DATABASE_MODE === 'MEMORY') {
+    console.log('MEMORY 모드에서는 seed를 실행하지 않습니다.')
+    process.exit(0)
+  }
+
+  const { db } = await import('../utils/db')
+  const { users, userAccounts } = await import('./schema/users')
+  const { hashPassword } = await import('better-auth/crypto')
+
   console.log('🌱 Seed 작업 시작...')
 
   const ADMIN_ID = 'admin_master_01'

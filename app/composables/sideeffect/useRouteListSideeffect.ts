@@ -11,9 +11,13 @@ import {
     toCesiumColor
 } from '~/composables/action/useRouteDrawUtils'
 
+/** `useRouteListSideeffect`에 주입하는 의존성 옵션 */
 interface UseRouteListSideeffectOptions {
+    /** 초기화된 Cesium 뷰어 인스턴스 ref */
     viewer: ShallowRef<CesiumViewer | null>
+    /** 서버에서 불러온 전체 경로 목록 ref */
     routes: Ref<SavedRoute[]>
+    /** 현재 선택된 경로 ID ref. 선택 없음이면 `null`. */
     selectedRouteId: Ref<string | null>
 }
 
@@ -22,7 +26,9 @@ interface UseRouteListSideeffectOptions {
  * 선택 해제 또는 드로잉 모드 진입 전 `clearPreview()`를 호출해 지도를 정리한다.
  */
 export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) => {
+    /** 지도에 표시 중인 미리보기 폴리라인 엔티티 목록 */
     const previewPolylines = shallowRef<CesiumEntity[]>([])
+    /** 지도에 표시 중인 미리보기 포인트 마커 엔티티 목록 */
     const previewPoints = shallowRef<CesiumEntity[]>([])
 
     const toPreviewSegments = (sections: RouteSectionBase[]) =>
