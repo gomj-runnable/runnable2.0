@@ -3,9 +3,13 @@ import type { RouteElevationProfile, RouteElevationSection, SavedSection } from 
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import { geomToRouteDrawPositions, getSectionColor } from '~/composables/action/useRouteDrawUtils'
 
+/** 고도 프로필 생성 시 구간 하나를 표현하는 입력 데이터 */
 export interface RouteElevationSectionInput {
+    /** 구간 레이블 (사이드바 구간명 또는 기본값 `'구간 N'`) */
     label: string
+    /** 그래프에서 이 구간을 표시할 색상 (CSS 문자열) */
     color: string
+    /** 구간에 포함된 WGS84 좌표 배열 */
     positions: GeoJsonPosition[]
 }
 
@@ -95,6 +99,14 @@ export const buildSavedSectionInputs = (sections: SavedSection[]): RouteElevatio
 const normalizeSectionInputs = (sections: RouteElevationSectionInput[]) =>
     sections.filter((section) => section.positions.length > 0)
 
+/**
+ * 구간 입력 배열로부터 전체 경로의 거리-고도 프로필을 계산한다.
+ * 누적 거리·고도 변화량·최고·최저 포인트를 포함한 프로필 객체를 반환한다.
+ * 유효한 포인트가 없으면 `null`을 반환한다.
+ *
+ * @param sections - 고도 프로필을 계산할 구간 입력 배열
+ * @returns 거리·고도 통계가 포함된 프로필 객체, 포인트가 없으면 `null`
+ */
 export const createRouteElevationProfile = (
     sections: RouteElevationSectionInput[]
 ): RouteElevationProfile | null => {
@@ -178,6 +190,15 @@ export const createRouteElevationProfile = (
     }
 }
 
+/**
+ * 드래프트 드로잉 포인트와 구간 범위로부터 고도 프로필을 생성한다.
+ * `createRouteElevationProfile`의 편의 래퍼로, 범위 슬라이싱을 내부에서 처리한다.
+ *
+ * @param positions - 전체 드로잉 포인트 배열
+ * @param ranges - 구간별 포인트 인덱스 범위 배열
+ * @param sectionNames - 구간명 배열 (없으면 기본값 `'구간 N'` 사용)
+ * @returns 거리·고도 프로필 객체 또는 `null`
+ */
 export const createRouteElevationProfileFromDraft = (
     positions: GeoJsonPosition[],
     ranges: SectionPointRange[],
@@ -191,6 +212,13 @@ export const createRouteElevationProfileFromDraft = (
         }))
     )
 
+/**
+ * 저장된 구간 목록으로부터 고도 프로필을 생성한다.
+ * 각 구간의 `geom`에서 좌표를 추출하여 `createRouteElevationProfile`에 전달한다.
+ *
+ * @param sections - 서버에서 불러온 저장된 구간 배열
+ * @returns 거리·고도 프로필 객체 또는 `null`
+ */
 export const createRouteElevationProfileFromSections = (sections: SavedSection[]) =>
     createRouteElevationProfile(
         sections.map((section, index) => ({
@@ -200,6 +228,13 @@ export const createRouteElevationProfileFromSections = (sections: SavedSection[]
         }))
     )
 
+/**
+ * 고도 그래프 X축에 표시할 거리 눈금 배열을 생성한다.
+ * `DISTANCE_STEP_KM`(0.5km) 간격으로 0부터 `distanceKm`까지 생성한다.
+ *
+ * @param distanceKm - 전체 경로 거리 (km)
+ * @returns 눈금 거리값 배열 (km 단위, 소수점 1자리)
+ */
 export const createDistanceTicks = (distanceKm: number) => {
     if (distanceKm <= 0) {
         return [0]

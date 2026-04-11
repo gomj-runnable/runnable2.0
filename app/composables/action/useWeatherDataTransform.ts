@@ -5,6 +5,13 @@ import type {
     WeatherLayer
 } from '#shared/types/weather'
 
+/**
+ * 기상청 강수형태(PTY)와 하늘상태(SKY) 코드를 앱 내부 날씨 상태로 변환한다.
+ *
+ * @param pty - 강수형태 코드 (0: 없음, 1·4: 비, 2·3: 눈)
+ * @param sky - 하늘상태 코드 (1: 맑음, 3: 구름많음, 4: 흐림)
+ * @returns 앱에서 사용하는 `WeatherCondition` 문자열
+ */
 export const toWeatherCondition = (pty: number, sky: number): WeatherCondition => {
     if (pty === 1 || pty === 4) return 'rainy'
     if (pty === 2 || pty === 3) return 'snowy'
@@ -13,6 +20,12 @@ export const toWeatherCondition = (pty: number, sky: number): WeatherCondition =
     return 'cloudy'
 }
 
+/**
+ * PM10 미세먼지 수치를 등급으로 변환한다.
+ *
+ * @param pm10 - PM10 농도 (µg/m³)
+ * @returns `'good'` | `'moderate'` | `'bad'` | `'very-bad'`
+ */
 export const toPm10Grade = (pm10: number): Pm10Grade => {
     if (pm10 <= 30) return 'good'
     if (pm10 <= 80) return 'moderate'
@@ -20,6 +33,12 @@ export const toPm10Grade = (pm10: number): Pm10Grade => {
     return 'very-bad'
 }
 
+/**
+ * 날씨 상태를 지도 폴리곤 채우기 색상으로 변환한다.
+ *
+ * @param condition - 앱 내부 날씨 상태 값
+ * @returns 반투명 RGBA 색상 문자열
+ */
 export const conditionToColor = (condition: WeatherCondition): string => {
     switch (condition) {
         case 'clear':
@@ -35,6 +54,13 @@ export const conditionToColor = (condition: WeatherCondition): string => {
     }
 }
 
+/**
+ * 평균 기온을 온도 단계별 그라데이션 색상으로 변환한다.
+ * -10°C(파랑)에서 40°C(빨강)까지 색상 정지점을 선형 보간한다.
+ *
+ * @param tempAvg - 평균 기온 (°C). -10~40 범위 외에는 경계값으로 클램프된다.
+ * @returns 반투명 RGBA 색상 문자열
+ */
 export const tempToColor = (tempAvg: number): string => {
     // -10 ~ 40°C 범위를 blue -> cyan -> yellow -> red 그라데이션으로 매핑
     const clamped = Math.max(-10, Math.min(40, tempAvg))
@@ -70,6 +96,12 @@ export const tempToColor = (tempAvg: number): string => {
     return `rgba(${r}, ${g}, ${b}, 0.5)`
 }
 
+/**
+ * PM10 미세먼지 등급을 지도 폴리곤 색상으로 변환한다.
+ *
+ * @param grade - PM10 등급 (`'good'` | `'moderate'` | `'bad'` | `'very-bad'`)
+ * @returns 반투명 RGBA 색상 문자열
+ */
 export const pm10GradeToColor = (grade: Pm10Grade): string => {
     switch (grade) {
         case 'good':
@@ -83,6 +115,13 @@ export const pm10GradeToColor = (grade: Pm10Grade): string => {
     }
 }
 
+/**
+ * 반투명 RGBA 색상 문자열을 완전 불투명(알파=1)으로 변환한다.
+ * 외곽선 프리미티브처럼 투명도 없이 선명하게 표시해야 할 때 사용한다.
+ *
+ * @param color - 반투명 RGBA 색상 문자열
+ * @returns 알파가 1로 고정된 RGBA 색상 문자열
+ */
 export const toOpaqueColor = (color: string): string =>
     color.replace(
         /rgba\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\)/i,
@@ -91,6 +130,13 @@ export const toOpaqueColor = (color: string): string =>
 
 const PM10_NO_DATA_COLOR = 'rgba(80, 80, 80, 0.3)'
 
+/**
+ * 시간별 날씨 데이터와 활성 레이어에 따라 지도 폴리곤 색상을 결정한다.
+ *
+ * @param weather - 해당 동의 시간별 날씨 데이터
+ * @param layer - 현재 활성 날씨 레이어 (`'weather'` | `'temperature'` | `'pm10'`)
+ * @returns 레이어에 맞는 반투명 RGBA 색상 문자열
+ */
 export const resolvePolygonColor = (weather: HourlyWeather, layer: WeatherLayer): string => {
     switch (layer) {
         case 'weather':
@@ -102,6 +148,12 @@ export const resolvePolygonColor = (weather: HourlyWeather, layer: WeatherLayer)
     }
 }
 
+/**
+ * 날씨 상태를 Iconify 아이콘 클래스명으로 변환한다.
+ *
+ * @param condition - 앱 내부 날씨 상태 값
+ * @returns `i-lucide-*` 형식의 아이콘 클래스 문자열
+ */
 export const conditionToIcon = (condition: WeatherCondition): string => {
     switch (condition) {
         case 'clear':
@@ -117,6 +169,12 @@ export const conditionToIcon = (condition: WeatherCondition): string => {
     }
 }
 
+/**
+ * 날씨 상태를 한국어 레이블 문자열로 변환한다.
+ *
+ * @param condition - 앱 내부 날씨 상태 값
+ * @returns 날씨 상태 한국어 레이블 (예: `'맑음'`, `'비'`)
+ */
 export const conditionLabel = (condition: WeatherCondition): string => {
     switch (condition) {
         case 'clear':

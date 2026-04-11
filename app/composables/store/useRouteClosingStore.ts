@@ -6,9 +6,12 @@
 export type RouteClosingMode = 'loop-close' | 'round-trip' | null
 
 export const useRouteClosingStore = () => {
+    /** 현재 활성화된 마감 모드. 비활성 상태이면 `null`. */
     const closingMode = useState<RouteClosingMode>('route-closing-mode', () => null)
 
+    /** loop-close 모드가 활성인지 여부 */
     const isLoopClose = computed(() => closingMode.value === 'loop-close')
+    /** round-trip 모드가 활성인지 여부 */
     const isRoundTrip = computed(() => closingMode.value === 'round-trip')
 
     /**
@@ -19,6 +22,7 @@ export const useRouteClosingStore = () => {
         closingMode.value = closingMode.value === mode ? null : mode
     }
 
+    /** 마감 모드를 비활성(`null`) 상태로 초기화한다. */
     const resetClosingMode = () => {
         closingMode.value = null
     }

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 withDefaults(
     defineProps<{
+        /** 표시할 사용자 이름 (미지정 시 '로그인' 표시) */
         username?: string
+        /** 사용자 아바타 이미지 URL */
         image?: string
+        /** 사용자 이름 아래 표시할 부제목 텍스트 */
         subtitle?: string
     }>(),
     {
@@ -12,6 +15,7 @@ withDefaults(
     }
 )
 
+/** 프로필 버튼 클릭 이벤트 / 로그아웃 메뉴 선택 이벤트 */
 const emit = defineEmits<{ click: []; logout: [] }>()
 
 const menuItems = [

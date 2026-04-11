@@ -8,8 +8,11 @@ type SidebarTabItem = {
 
 const props = withDefaults(
     defineProps<{
+        /** 탭 목록 (아이콘·레이블 쌍) */
         items: readonly SidebarTabItem[]
+        /** 현재 선택된 탭 레이블 */
         modelValue: string
+        /** 사이드바 접힘 상태 여부 (접히면 레이블 숨김) */
         collapsed?: boolean
     }>(),
     {
@@ -18,9 +21,11 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
+    /** 탭 선택 시 선택된 레이블 값을 전달 */
     'update:modelValue': [value: string]
 }>()
 
+/** 탭을 선택하고 부모에 선택 값을 emit 한다 */
 const handleSelect = (label: string) => {
     emit('update:modelValue', label)
 }

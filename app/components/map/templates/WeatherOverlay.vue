@@ -7,25 +7,38 @@ import WeatherLegend from '~/components/map/molecules/weather/WeatherLegend.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
 
 const props = defineProps<{
+    /** 현재 선택된 날짜 (YYYY-MM-DD) */
     selectedDate: string
+    /** 현재 선택된 시간 (HH:mm) */
     selectedHour: string
+    /** 현재 선택된 월 (YYYY-MM) */
     selectedMonth: string
+    /** 현재 활성화된 날씨 레이어 타입 */
     activeLayer: WeatherLayer
+    /** 서울 월별 날씨 데이터 (없으면 null) */
     monthlyData: SeoulMonthlyWeather | null
+    /** 날씨 데이터 로딩 중 여부 */
     isLoading: boolean
 }>()
 
 const emit = defineEmits<{
+    /** 날짜 선택 변경 시 새 날짜를 전달 */
     'update:selectedDate': [date: string]
+    /** 시간 선택 변경 시 새 시간을 전달 */
     'update:selectedHour': [hour: string]
+    /** 월 선택 변경 시 새 월을 전달 */
     'update:selectedMonth': [month: string]
+    /** 날씨 레이어 전환 시 새 레이어 타입을 전달 */
     'update:activeLayer': [layer: WeatherLayer]
 }>()
 
 const isCalendarOpen = ref(false)
 
+/** 날짜를 선택하고 캘린더 팝업을 닫는다 */
 const handleDateSelect = (date: string) => {
+    // 선택한 날짜를 부모에 전달
     emit('update:selectedDate', date)
+    // 캘린더 팝업 닫기
     isCalendarOpen.value = false
 }
 
@@ -41,9 +54,11 @@ const dateLabel = computed(() => {
     return parts.length === 3 ? `${parts[1]}.${parts[2]}` : props.selectedDate
 })
 
+/** 선택된 날짜에 해당하는 시간 옵션 목록을 반환한다 (데이터가 없으면 현재 시각 기본값) */
 const hourOptions = computed(() => {
     const source = new Set<string>()
 
+    // 월별 데이터에서 선택 날짜에 해당하는 시간 슬롯 수집
     if (props.monthlyData) {
         for (const dong of props.monthlyData.dongs) {
             for (const slot of dong.hourly) {
@@ -54,18 +69,23 @@ const hourOptions = computed(() => {
         }
     }
 
+    // 오름차순 정렬 후 반환
     const sorted = Array.from(source).sort((a, b) => a.localeCompare(b))
     if (sorted.length > 0) {
         return sorted
     }
 
+    // 데이터가 없으면 현재 시각을 기본값으로 제공
     return [`${new Date().getHours().toString().padStart(2, '0')}:00`]
 })
 
 const isHourOpen = ref(false)
 
+/** 시간을 선택하고 드롭다운을 닫는다 */
 const selectHour = (hour: string) => {
+    // 선택한 시간을 부모에 전달
     emit('update:selectedHour', hour)
+    // 시간 드롭다운 닫기
     isHourOpen.value = false
 }
 

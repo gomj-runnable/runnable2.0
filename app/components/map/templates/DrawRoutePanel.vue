@@ -4,15 +4,20 @@ import TextfieldCard from '~/components/map/organizations/cards/TextfieldCard.vu
 import Button from '~/components/map/molecules/buttons/Button.vue'
 
 defineProps<{
+    /** 경로 구간별 속성 목록 (제목·요약·설명) */
     sectionAttrs: SectionAttrSchema[]
 }>()
 
 defineEmits<{
+    /** 경로 초기화 버튼 클릭 시 발생 */
     reset: []
+    /** 경로 저장 버튼 클릭 시 발생 */
     save: []
+    /** 특정 구간의 필드 값이 변경될 때 인덱스·필드명·값을 전달 */
     updateSectionAttr: [
         payload: { index: number; field: 'name' | 'comment' | 'description'; value: string }
     ]
+    /** 특정 구간을 삭제할 때 해당 인덱스를 전달 */
     removeSection: [payload: { index: number }]
 }>()
 </script>

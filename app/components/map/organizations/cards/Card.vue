@@ -3,14 +3,23 @@ import { computed, useSlots } from 'vue'
 
 const props = withDefaults(
     defineProps<{
+        /** 카드 헤더 타이틀 텍스트 */
         title?: string
+        /** 타이틀 위에 표시할 소제목(eyebrow) 텍스트 */
         eyebrow?: string
+        /** 카드 본문에 표시할 설명 텍스트 */
         description?: string
+        /** 카드 푸터에 표시할 메타 정보 텍스트 */
         meta?: string
+        /** 클릭 가능한 인터랙티브 카드 여부 (button 태그로 렌더링) */
         interactive?: boolean
+        /** 선택 상태 여부 */
         selected?: boolean
+        /** 비활성화 여부 */
         disabled?: boolean
+        /** 링크 URL 지정 시 a 태그로 렌더링 */
         href?: string
+        /** 기본 렌더링 태그 (interactive/href 미지정 시 사용) */
         as?: 'article' | 'section' | 'div'
     }>(),
     {
@@ -26,17 +35,21 @@ const props = withDefaults(
     }
 )
 
+/** 카드 클릭 이벤트 */
 defineEmits<{
     click: [event: MouseEvent]
 }>()
 
 const slots = useSlots()
 
+/** href·interactive·disabled 조합에 따라 실제 렌더링 태그를 결정한다 */
 const tagName = computed(() => {
+    // href가 있고 활성 상태면 링크로 렌더링
     if (props.href && !props.disabled) {
         return 'a'
     }
 
+    // interactive이고 활성 상태면 버튼으로 렌더링
     if (props.interactive && !props.disabled) {
         return 'button'
     }
@@ -44,6 +57,7 @@ const tagName = computed(() => {
     return props.as
 })
 
+/** 카드 상태에 따른 CSS 클래스를 반환한다 */
 const cardTypeClass = computed(() => {
     if (props.disabled) {
         return 'is-disabled'
@@ -60,14 +74,17 @@ const cardTypeClass = computed(() => {
     return null
 })
 
+/** 헤더 영역 표시 여부 (eyebrow, title, 관련 슬롯 중 하나라도 있으면 표시) */
 const hasHeader = computed(() => {
     return Boolean(props.eyebrow || props.title || slots.eyebrow || slots.title || slots.header)
 })
 
+/** 본문 영역 표시 여부 (description 또는 default 슬롯이 있으면 표시) */
 const hasBody = computed(() => {
     return Boolean(props.description || slots.default)
 })
 
+/** 푸터 영역 표시 여부 (meta 또는 관련 슬롯이 있으면 표시) */
 const hasFooter = computed(() => {
     return Boolean(props.meta || slots.meta || slots.footer)
 })

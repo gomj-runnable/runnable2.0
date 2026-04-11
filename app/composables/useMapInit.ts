@@ -21,6 +21,7 @@ interface CesiumDrawState {
  * SSR 비활성화(`ssr: false`) 페이지의 `onMounted`에서 `init()`을 호출해야 한다.
  */
 export const useMapInit = () => {
+    /** 현재 진행 중인 드로잉 세션 상태. 드로잉이 없으면 `null`. */
     let activeDrawState: CesiumDrawState | null = null
 
     const getHiddenCreditContainer = () => {
