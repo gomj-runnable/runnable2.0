@@ -7,8 +7,11 @@ import type {
     SavedSection,
     CreateSectionInput
 } from './route.repository'
-import { db } from '../utils/db'
+import { db as _db } from '../utils/db'
 import { routes, routeSections } from '../database/schema/routes'
+
+if (!_db) throw new Error('DrizzleRouteRepository requires a database connection')
+const db = _db
 import { users } from '../database/schema/users'
 
 const toSavedRoute = (
@@ -27,11 +30,24 @@ const toSavedRoute = (
     authorName
 })
 
+const safeParseJson = <T>(raw: string | null, fallback: T, label: string): T => {
+    if (!raw) return fallback
+    try {
+        return JSON.parse(raw) as T
+    } catch {
+        console.warn(`[route.repository.drizzle] JSON.parse failed for ${label}`)
+        return fallback
+    }
+}
+
+const escapeLikePattern = (str: string): string =>
+    str.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+
 const toSavedSection = (row: typeof routeSections.$inferSelect): SavedSection => ({
     sectionId: row.sectionId,
     routeId: row.routeId,
-    geom: row.geom ? (JSON.parse(row.geom) as GeoJsonLineString) : undefined,
-    attrs: row.attrs ? (JSON.parse(row.attrs) as SectionAttr[]) : undefined
+    geom: safeParseJson<GeoJsonLineString | undefined>(row.geom, undefined, 'geom'),
+    attrs: safeParseJson<SectionAttr[] | undefined>(row.attrs, undefined, 'attrs')
 })
 
 class DrizzleRouteRepository implements IRouteRepository {
@@ -92,7 +108,7 @@ class DrizzleRouteRepository implements IRouteRepository {
         const conditions = [eq(routes.isPublic, true)]
 
         if (query?.trim()) {
-            const pattern = `%${query.trim()}%`
+            const pattern = `%${escapeLikePattern(query.trim())}%`
             conditions.push(
                 or(
                     ilike(routes.title, pattern),
@@ -116,7 +132,7 @@ class DrizzleRouteRepository implements IRouteRepository {
         routeId: string,
         input: Partial<RouteDraftInput>
     ): Promise<SavedRoute | null> {
-        const values: Record<string, unknown> = {}
+        const values: Partial<typeof routes.$inferInsert> = {}
         if (input.title !== undefined) values.title = input.title
         if (input.description !== undefined) values.description = input.description
         if (input.highHeight !== undefined) values.highHeight = input.highHeight?.toString()
@@ -153,6 +169,22 @@ class DrizzleRouteRepository implements IRouteRepository {
 
         if (!row) throw new Error('Failed to create section')
         return toSavedSection(row)
+    }
+
+    async createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]> {
+        if (inputs.length === 0) return []
+        const rows = await db
+            .insert(routeSections)
+            .values(
+                inputs.map((input) => ({
+                    sectionId: randomUUID(),
+                    routeId,
+                    geom: input.geom ? JSON.stringify(input.geom) : null,
+                    attrs: input.attrs ? JSON.stringify(input.attrs) : null
+                }))
+            )
+            .returning()
+        return rows.map(toSavedSection)
     }
 
     async getSectionsByRouteId(routeId: string): Promise<SavedSection[]> {

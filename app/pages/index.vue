@@ -5,6 +5,7 @@ import MapSidebar from '~/components/map/templates/MapSidebar.vue'
 import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
 import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
 import RouteElevationModal from '~/components/map/templates/RouteElevationModal.vue'
+import RouteOverlayBottomBar from '~/components/map/templates/RouteOverlayBottomBar.vue'
 import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
 import RouteFeedbackModal from '~/components/map/templates/RouteFeedbackModal.vue'
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
@@ -33,7 +34,7 @@ useHead({
 const { init } = useMapInit()
 const viewer = shallowRef<CesiumViewer | null>(null)
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, feedback, exploreSelectRoute } =
+const { activeNav, drawing, saveModal, routeList, elevationChart, closing, feedback, exploreSelectRoute } =
     useRouteMapFacade(viewer)
 
 const authStore = useAuthStore()
@@ -51,6 +52,14 @@ onMounted(async () => {
     await Promise.all([initWeather(), authEffect.fetchSession()])
 })
 
+const navItems = [
+    { icon: 'i-lucide-list', label: '목록' },
+    { icon: 'i-lucide-pencil', label: '그리기' },
+    { icon: 'i-lucide-search', label: '탐색' }
+] as const
+
+const explore = useExploreSearchSideeffect()
+
 const handleAuthSuccess = async () => {
     authStore.closeAuthModal()
 }
@@ -65,20 +74,12 @@ const handleExploreSelect = async (routeId: string) => {
     await exploreSelectRoute(routeId, route?.title)
 }
 
-// 탐색 탭 진입 시 공개 경로 자동 로드
+// 탐색 탭 진입 시 공개 경로 자동 로드 (미로드 상태일 때만 실행)
 watch(activeNav, (next) => {
-    if (next === '탐색') {
+    if (next === '탐색' && explore.searchResults.value.length === 0 && !explore.isSearching.value) {
         explore.search(explore.searchQuery.value)
     }
 })
-
-const explore = useExploreSearchSideeffect()
-
-const navItems = [
-    { icon: 'i-lucide-list', label: '목록' },
-    { icon: 'i-lucide-pencil', label: '그리기' },
-    { icon: 'i-lucide-search', label: '탐색' }
-] as const
 </script>
 
 <template>
@@ -184,6 +185,15 @@ const navItems = [
                     :active-types="facility.activeTypes.value"
                     :is-loading="facility.isLoading.value"
                     @toggle="facility.toggleType"
+                />
+                <RouteOverlayBottomBar
+                    :elevation-chip-label="elevationChart.title"
+                    :elevation-chip-active="elevationChart.open"
+                    :elevation-profile="elevationChart.profile"
+                    :closing-mode="closing.mode"
+                    :closing-disabled="!drawing.sectionDraft"
+                    @toggle-elevation="elevationChart.setOpen(!elevationChart.open)"
+                    @update:closing-mode="closing.setMode($event)"
                 />
                 <RouteElevationModal
                     :open="elevationChart.open"

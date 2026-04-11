@@ -1,4 +1,4 @@
-import { routeRepository } from '../../repositories/route.repository.drizzle'
+import { routeRepository } from '../../repositories'
 import { getSessionUser } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {

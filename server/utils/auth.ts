@@ -3,8 +3,12 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db'
 import { users, userSessions, userAccounts, userVerifications } from '../database/schema/users'
 
-export const auth = betterAuth({
-    database: drizzleAdapter(db, {
+const isMemoryMode = process.env.USE_DATABASE_MODE === 'MEMORY'
+
+export const auth = isMemoryMode ? null : betterAuth({
+    secret: process.env.BETTER_AUTH_SECRET,
+    baseURL: process.env.BETTER_AUTH_URL,
+    database: drizzleAdapter(db!, {
         provider: 'pg',
         schema: {
             user: users,

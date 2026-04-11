@@ -4,14 +4,6 @@
     border-radius: var(--radius-surface-lg);
 }
 
-.route-elevation-modal__chip-trigger {
-    position: absolute;
-    left: 50%;
-    bottom: var(--gap-section-lg);
-    transform: translateX(-50%);
-    z-index: 4;
-}
-
 .route-elevation-modal__popup-panel {
     width: min(820px, calc(100vw - var(--gap-section-xl)));
 }
@@ -210,10 +202,6 @@
 }
 
 @media (max-width: 540px) {
-    .route-elevation-modal__chip-trigger {
-        width: calc(100vw - var(--gap-section-lg));
-    }
-
     .route-elevation-modal__summary {
         grid-template-columns: 1fr;
     }

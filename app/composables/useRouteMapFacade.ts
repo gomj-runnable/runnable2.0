@@ -15,6 +15,7 @@ import {
     createSectionDraftsFromRanges
 } from '~/composables/action/useRouteDrawDraft'
 import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
+import { useRouteClosingSideeffect } from '~/composables/sideeffect/useRouteClosingSideeffect'
 import { useRouteDownloadSideeffect } from '~/composables/sideeffect/useRouteDownloadSideeffect'
 import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
 import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
@@ -41,6 +42,12 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         sectionPointRanges: store.sectionPointRanges,
         isRouteSaveModalOpen: store.isRouteSaveModalOpen,
         resetRouteDrawState: store.resetRouteDrawState
+    })
+
+    useRouteClosingSideeffect({
+        viewer,
+        drawnPositions: store.drawnPositions,
+        closingMode: store.closingMode
     })
 
     const saveEffect = useRouteSaveSideeffect()
@@ -151,16 +158,13 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
 
     /** 탐색 탭에서 공개 경로를 선택해 지도에 미리보기 + 고도 그래프를 표시한다 */
     const exploreSelectRoute = async (routeId: string, routeTitle?: string) => {
-        const sections = await listEffect.fetchRouteSections(routeId)
-
+        // selectRoute는 내부에서 fetchRouteSections를 호출하므로 별도 호출 불필요
+        listEffect.clearPreview()
+        const sections = await listEffect.selectRoute(routeId)
         if (!sections?.length) {
             closeElevationChart()
             return
         }
-
-        // 지도에 미리보기 표시
-        listEffect.clearPreview()
-        await listEffect.selectRoute(routeId)
 
         const sectionInputs = buildSavedSectionInputs(sections)
         const densified = await densifyAndSample(sectionInputs)
@@ -349,6 +353,13 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         close: closeElevationChart
     })
 
+    const closing = proxyRefs({
+        mode: store.closingMode,
+        setMode: store.setClosingMode,
+        isLoopClose: store.isLoopClose,
+        isRoundTrip: store.isRoundTrip
+    })
+
     const feedback = proxyRefs({
         open: computed(() => feedbackModal.value.open),
         title: computed(() => feedbackModal.value.title),
@@ -365,6 +376,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         saveModal,
         routeList,
         elevationChart,
+        closing,
         feedback,
         exploreSelectRoute
     }
