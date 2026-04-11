@@ -11,6 +11,7 @@ import { useTerrainSampler } from '~/composables/sideeffect/useTerrainSampler'
 import { createRouteGpx, toGpxFileName } from '~/composables/action/useRouteGpx'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import {
+    createDefaultSectionAttr,
     createHeightAwareRouteGeom,
     createSectionDraftsFromRanges
 } from '~/composables/action/useRouteDrawDraft'
@@ -20,6 +21,7 @@ import { useRouteDownloadSideeffect } from '~/composables/sideeffect/useRouteDow
 import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
 import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
 import { useAuthStore } from '~/composables/store/useAuthStore'
+import { useNotificationStore } from '~/composables/store/useNotificationStore'
 
 /**
  * 경로 지도 화면의 모든 기능을 단일 진입점으로 제공하는 Facade.
@@ -33,6 +35,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
     // ─── 내부 의존성 조합 ─────────────────────────────────────────
 
     const store = useRouteDrawStore()
+    const notification = useNotificationStore()
 
     const drawEffect = useRouteDrawSideeffect({
         viewer,
@@ -42,7 +45,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         sectionPointRanges: store.sectionPointRanges,
         isRouteSaveModalOpen: store.isRouteSaveModalOpen,
         resetRouteDrawState: store.resetRouteDrawState,
-        closingMode: store.closingMode
+        closingMode: store.closingMode,
+        notify: notification.notify
     })
 
     useRouteClosingSideeffect({
@@ -69,30 +73,6 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         routes: store.routes,
         selectedRouteId: store.selectedRouteId
     })
-
-    const feedbackModal = ref({
-        open: false,
-        title: '',
-        message: '',
-        tone: 'info' as 'success' | 'error' | 'info'
-    })
-
-    const openFeedbackModal = (payload: {
-        title: string
-        message: string
-        tone?: 'success' | 'error' | 'info'
-    }) => {
-        feedbackModal.value = {
-            open: true,
-            title: payload.title,
-            message: payload.message,
-            tone: payload.tone ?? 'info'
-        }
-    }
-
-    const closeFeedbackModal = () => {
-        feedbackModal.value.open = false
-    }
 
     const closeElevationChart = () => {
         store.isElevationChartOpen.value = false
@@ -132,10 +112,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         )
         const densified = await densifyAndSample(sectionInputs)
 
-        openElevationChart(
-            '경로 고도 그래프',
-            createRouteElevationProfile(densified)
-        )
+        openElevationChart('경로 고도 그래프', createRouteElevationProfile(densified))
     }
 
     const selectRoute = async (routeId: string) => {
@@ -170,10 +147,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         const sectionInputs = buildSavedSectionInputs(sections)
         const densified = await densifyAndSample(sectionInputs)
 
-        openElevationChart(
-            routeTitle ?? '경로 고도 그래프',
-            createRouteElevationProfile(densified)
-        )
+        openElevationChart(routeTitle ?? '경로 고도 그래프', createRouteElevationProfile(densified))
     }
 
     // ─── 내부 오케스트레이션 ──────────────────────────────────────
@@ -225,19 +199,57 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             throw new Error('경로 포인트가 없습니다.')
         }
 
+        const originalPositions = store.drawnPositions.value
+        const closingMode = store.closingMode.value
+        const sectionPayload = createSectionSchema.parse(store.sectionDraft.value)
+
+        let positions = originalPositions
+        let ranges = store.sectionPointRanges.value
+        let attrs = sectionPayload.attrs ?? []
+
+        // 도착지 연결: 마지막점 → 첫점을 1개 구간으로 추가
+        if (closingMode === 'loop-close' && originalPositions.length >= 2) {
+            positions = [...originalPositions, originalPositions[0]!]
+            ranges = [
+                ...ranges,
+                { start: originalPositions.length - 1, end: originalPositions.length }
+            ]
+            attrs = [...attrs, createDefaultSectionAttr(attrs.length)]
+        }
+
+        // 왕복 코스: 역순 경로를 원래 구간 수만큼 미러링하여 추가
+        if (closingMode === 'round-trip' && originalPositions.length >= 2) {
+            const returnPositions = [...originalPositions].reverse()
+            positions = [...originalPositions, ...returnPositions]
+
+            const originalLength = originalPositions.length
+            const reversedRanges = [...ranges].reverse()
+            let cursor = originalLength
+            const returnRanges = reversedRanges.map((r) => {
+                const size = r.end - r.start + 1
+                const range = { start: cursor, end: cursor + size - 1 }
+                cursor = range.end
+                return range
+            })
+            ranges = [...ranges, ...returnRanges]
+            attrs = [
+                ...attrs,
+                ...returnRanges.map((_, i) => createDefaultSectionAttr(attrs.length + i))
+            ]
+        }
+
         const routeGeom = createHeightAwareRouteGeom(
             store.drawMetrics.value ?? undefined,
-            store.drawnPositions.value
+            positions
         )
         const routeDraftPayload = new RouteDraftBuilder({
             ...(store.drawMetrics.value ?? {}),
             geoJson: routeGeom
         }).toRoute(store.routeForm.value)
-        const sectionPayload = createSectionSchema.parse(store.sectionDraft.value)
         const sectionPayloads = createSectionDraftsFromRanges(
-            sectionPayload.attrs ?? [],
-            store.sectionPointRanges.value,
-            store.drawnPositions.value,
+            attrs,
+            ranges,
+            positions,
             undefined,
             routeGeom
         )
@@ -258,7 +270,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         if (!authStore.isLoggedIn.value) {
             store.isRouteSaveModalOpen.value = false
             authStore.openLoginModal()
-            openFeedbackModal({
+            notification.notify({
                 title: '로그인 필요',
                 message: '경로를 저장하려면 먼저 로그인해주세요.',
                 tone: 'info'
@@ -275,13 +287,13 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             store.isRouteSaveModalOpen.value = false
             store.resetRouteDrawState()
             store.activeNav.value = '목록'
-            openFeedbackModal({
+            notification.notify({
                 title: '저장 완료',
                 message: '경로가 저장되었습니다.',
                 tone: 'success'
             })
         } catch (error) {
-            openFeedbackModal({
+            notification.notify({
                 title: '저장 실패',
                 message: error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.',
                 tone: 'error'
@@ -308,13 +320,13 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
                 createRouteGpx(route, sections),
                 'application/gpx+xml;charset=utf-8'
             )
-            openFeedbackModal({
+            notification.notify({
                 title: '다운로드 준비 완료',
                 message: `${route.title} GPX 다운로드를 시작했습니다.`,
                 tone: 'success'
             })
         } catch (error) {
-            openFeedbackModal({
+            notification.notify({
                 title: '다운로드 실패',
                 message:
                     error instanceof Error ? error.message : 'GPX 다운로드 중 오류가 발생했습니다.',
@@ -361,14 +373,6 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         isRoundTrip: store.isRoundTrip
     })
 
-    const feedback = proxyRefs({
-        open: computed(() => feedbackModal.value.open),
-        title: computed(() => feedbackModal.value.title),
-        message: computed(() => feedbackModal.value.message),
-        tone: computed(() => feedbackModal.value.tone),
-        close: closeFeedbackModal
-    })
-
     // ─── 공개 인터페이스 ──────────────────────────────────────────
 
     return {
@@ -378,7 +382,6 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         routeList,
         elevationChart,
         closing,
-        feedback,
         exploreSelectRoute
     }
 }

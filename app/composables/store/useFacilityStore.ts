@@ -1,10 +1,16 @@
 import type { Facility, FacilityType, FacilityLayerConfig } from '#shared/types/facility'
 
+/** 시설물 칩 (상단 행) */
 export const FACILITY_LAYERS: FacilityLayerConfig[] = [
     { type: 'crosswalk', label: '횡단보도', icon: 'i-lucide-footprints', color: '#4CAF50' },
     { type: 'fountain', label: '음수대', icon: 'i-lucide-droplets', color: '#2196F3' },
     { type: 'locker', label: '보관함', icon: 'i-lucide-package', color: '#9C27B0' },
     { type: 'hospital', label: '병원', icon: 'i-lucide-cross', color: '#F44336' }
+]
+
+/** 오버레이 칩 (하단 행) */
+export const OVERLAY_LAYERS: FacilityLayerConfig[] = [
+    { type: 'sidewalk', label: '인도 표시', icon: 'i-lucide-route', color: '#78909C' }
 ]
 
 /**
@@ -51,8 +57,7 @@ export const useFacilityStore = () => {
      * @param type - 필터링할 시설물 유형
      * @returns 해당 유형의 시설물 배열
      */
-    const facilitiesByType = (type: FacilityType) =>
-        facilities.value.filter((f) => f.type === type)
+    const facilitiesByType = (type: FacilityType) => facilities.value.filter((f) => f.type === type)
 
     return {
         facilities,

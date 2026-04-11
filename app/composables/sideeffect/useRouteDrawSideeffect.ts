@@ -20,6 +20,7 @@ import {
     toCesiumColor
 } from '~/composables/action/useRouteDrawUtils'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
+import type { NotificationOptions } from '~/composables/store/useNotificationStore'
 
 /**
  * `useRouteDrawSideeffect`에 주입하는 의존성 옵션.
@@ -42,6 +43,8 @@ interface UseRouteDrawSideeffectOptions {
     resetRouteDrawState: () => void
     /** 경로 닫기 모드 ref */
     closingMode?: Ref<string | null>
+    /** 알림 표시 콜백. alert() 대신 모달로 메시지를 표시한다. */
+    notify: (options: NotificationOptions) => void
 }
 
 /**
@@ -145,14 +148,14 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         }
 
         const isRoundTrip = options.closingMode?.value === 'round-trip'
-        const lastIndex = ranges.length - 1
 
         drawnSectionPolylines.value = ranges
             .map((range, index) => {
                 const sectionPoints = positions.slice(range.start, range.end + 1)
-                const isDashed = isRoundTrip && index === lastIndex
 
-                return sectionPoints.length >= 2 ? drawSection(sectionPoints, index, isDashed) : null
+                return sectionPoints.length >= 2
+                    ? drawSection(sectionPoints, index, isRoundTrip)
+                    : null
             })
             .filter((entity): entity is CesiumEntity => entity !== null)
 
@@ -192,14 +195,18 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      */
     const handleDrawReset = async (): Promise<GeoJsonPosition[] | null> => {
         if (!options.viewer.value) {
-            alert('지도를 아직 불러오는 중입니다.')
+            options.notify({
+                title: '지도 로딩 중',
+                message: '지도를 아직 불러오는 중입니다.',
+                tone: 'warning'
+            })
             return null
         }
 
         clearSectionGraphics()
         options.resetRouteDrawState()
 
-        alert('좌클릭: 구간 추가\n우클릭: 완료')
+        options.notify({ title: '경로 그리기', message: '좌클릭: 구간 추가\n우클릭: 완료' })
 
         const result = await options.viewer.value._drawAction({
             shapeType: 1,
@@ -208,7 +215,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
         if (!result || !('data' in result) || !result.data) {
             if (result && 'message' in result && result.message) {
-                alert(result.message)
+                options.notify({ title: '알림', message: result.message, tone: 'warning' })
             }
             return null
         }
@@ -250,7 +257,11 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      */
     const handleDrawSave = () => {
         if (!options.drawnPositions.value?.length || !options.sectionDraft.value) {
-            alert('먼저 구간을 그려주세요.')
+            options.notify({
+                title: '구간 없음',
+                message: '먼저 구간을 그려주세요.',
+                tone: 'warning'
+            })
             return
         }
 
@@ -301,6 +312,12 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             attrs: syncSectionAttrs(nextDraft.attrs ?? [], options.sectionPointRanges.value)
         }
         redrawSectionGraphics()
+    }
+
+    if (options.closingMode) {
+        watch(options.closingMode, () => {
+            redrawSectionGraphics()
+        })
     }
 
     return {
