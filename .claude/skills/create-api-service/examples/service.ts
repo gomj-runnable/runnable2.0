@@ -1,8 +1,5 @@
 // server/utils/example/example.service.ts
-import {
-    ExampleApiOriginalResponse,
-    type ExampleLocalResponse,
-} from '#shared/types/example'
+import { ExampleApiOriginalResponse, type ExampleLocalResponse } from '#shared/types/example'
 
 const API_BASE = 'https://api.example.com/v1'
 
