@@ -1,5 +1,7 @@
 import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
 
+type ActiveWeatherLayer = WeatherLayer | null
+
 /**
  * 날씨 패널의 날짜·시간·레이어 선택 상태와 날씨 데이터를 관리하는 store composable.
  * `dailySnapshot`은 선택된 날짜+시간의 동별 날씨 데이터를 computed로 제공한다.
@@ -22,8 +24,8 @@ export const useWeatherStore = () => {
     const boundaryGeojson = useState<unknown>('weather.boundaryGeojson', () => null)
     /** 날씨 데이터 로딩 중 여부 */
     const isLoading = useState<boolean>('weather.isLoading', () => false)
-    /** 현재 활성 날씨 레이어 (`'weather'` | `'temperature'` | `'pm10'`) */
-    const activeLayer = useState<WeatherLayer>('weather.activeLayer', () => 'weather')
+    /** 현재 활성 날씨 레이어 (`'weather'` | `'temperature'` | `'pm10'` | `null`) */
+    const activeLayer = useState<ActiveWeatherLayer>('weather.activeLayer', () => 'weather')
     /** 날씨 레이어 지도 표시 여부 */
     const isVisible = useState<boolean>('weather.isVisible', () => true)
 

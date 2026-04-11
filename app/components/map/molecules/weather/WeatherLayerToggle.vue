@@ -4,12 +4,12 @@ import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 */
-    modelValue: WeatherLayer
+    modelValue: WeatherLayer | null
 }>()
 
 /** 날씨 레이어 변경 이벤트 */
 const emit = defineEmits<{
-    'update:modelValue': [value: WeatherLayer]
+    'update:modelValue': [value: WeatherLayer | null]
 }>()
 
 const layers: { value: WeatherLayer; label: string; icon: string }[] = [
@@ -17,6 +17,10 @@ const layers: { value: WeatherLayer; label: string; icon: string }[] = [
     { value: 'temperature', label: '온도', icon: 'i-lucide-thermometer' },
     { value: 'pm10', label: '미세먼지', icon: 'i-lucide-wind' },
 ]
+
+const handleClick = (layer: WeatherLayer) => {
+    emit('update:modelValue', props.modelValue === layer ? null : layer)
+}
 </script>
 
 <template>
@@ -29,7 +33,7 @@ const layers: { value: WeatherLayer; label: string; icon: string }[] = [
             size="sm"
             appearance="elevated"
             :active="modelValue === layer.value"
-            @click="emit('update:modelValue', layer.value)"
+            @click="handleClick(layer.value)"
         />
     </div>
 </template>

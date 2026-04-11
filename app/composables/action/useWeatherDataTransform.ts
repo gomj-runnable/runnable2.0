@@ -42,15 +42,15 @@ export const toPm10Grade = (pm10: number): Pm10Grade => {
 export const conditionToColor = (condition: WeatherCondition): string => {
     switch (condition) {
         case 'clear':
-            return 'rgba(255, 230, 50, 0.5)'
+            return 'rgba(255, 230, 50, 0.2)'
         case 'partly-cloudy':
-            return 'rgba(200, 185, 155, 0.5)'
+            return 'rgba(200, 185, 155, 0.2)'
         case 'cloudy':
-            return 'rgba(120, 120, 160, 0.5)'
+            return 'rgba(120, 120, 160, 0.2)'
         case 'rainy':
-            return 'rgba(60, 150, 220, 0.5)'
+            return 'rgba(60, 150, 220, 0.2)'
         case 'snowy':
-            return 'rgba(150, 210, 250, 0.6)'
+            return 'rgba(150, 210, 250, 0.2)'
     }
 }
 
@@ -93,7 +93,7 @@ export const tempToColor = (tempAvg: number): string => {
     const r = Math.round(left.rgb[0] + (right.rgb[0] - left.rgb[0]) * ratio)
     const g = Math.round(left.rgb[1] + (right.rgb[1] - left.rgb[1]) * ratio)
     const b = Math.round(left.rgb[2] + (right.rgb[2] - left.rgb[2]) * ratio)
-    return `rgba(${r}, ${g}, ${b}, 0.5)`
+    return `rgba(${r}, ${g}, ${b}, 0.2)`
 }
 
 /**
@@ -105,13 +105,13 @@ export const tempToColor = (tempAvg: number): string => {
 export const pm10GradeToColor = (grade: Pm10Grade): string => {
     switch (grade) {
         case 'good':
-            return 'rgba(100, 200, 100, 0.5)'
+            return 'rgba(100, 200, 100, 0.2)'
         case 'moderate':
-            return 'rgba(250, 220, 50, 0.5)'
+            return 'rgba(250, 220, 50, 0.2)'
         case 'bad':
-            return 'rgba(255, 150, 50, 0.5)'
+            return 'rgba(255, 150, 50, 0.2)'
         case 'very-bad':
-            return 'rgba(220, 60, 60, 0.5)'
+            return 'rgba(220, 60, 60, 0.2)'
     }
 }
 
