@@ -50,7 +50,11 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         }
     }
 
-    const addCrosswalkEntity = (v: CesiumViewer, C: typeof import('cesium'), facility: Facility) => {
+    const addCrosswalkEntity = (
+        v: CesiumViewer,
+        C: typeof import('cesium'),
+        facility: Facility
+    ) => {
         if (facility.polyline && facility.polyline.length >= 2) {
             const flatCoords = facility.polyline.flatMap(([lng, lat]) => [lng, lat])
             const color = facility.hasSignal ? CROSSWALK_SIGNAL_COLOR : CROSSWALK_NO_SIGNAL_COLOR
@@ -60,7 +64,9 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                 polyline: {
                     positions: C.Cartesian3.fromDegreesArray(flatCoords),
                     width: 6,
-                    material: C.Color.fromCssColorString(color).withAlpha(0.9) as unknown as undefined,
+                    material: C.Color.fromCssColorString(color).withAlpha(
+                        0.9
+                    ) as unknown as undefined,
                     clampToGround: true
                 }
             })

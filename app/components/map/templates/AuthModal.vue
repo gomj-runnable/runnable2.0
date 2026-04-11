@@ -38,15 +38,21 @@ const resetForm = () => {
     errorMessage.value = ''
 }
 
-watch(() => props.open, (open) => {
-    // 팝업이 열릴 때 폼 초기화
-    if (open) resetForm()
-})
+watch(
+    () => props.open,
+    (open) => {
+        // 팝업이 열릴 때 폼 초기화
+        if (open) resetForm()
+    }
+)
 
-watch(() => props.mode, () => {
-    // 모드 전환 시 폼 초기화
-    resetForm()
-})
+watch(
+    () => props.mode,
+    () => {
+        // 모드 전환 시 폼 초기화
+        resetForm()
+    }
+)
 
 const authEffect = useAuthSideeffect()
 
@@ -96,11 +102,7 @@ const toggleMode = () => {
             <form class="auth-modal__fields" @submit.prevent="handleSubmit">
                 <label v-if="mode === 'signup'" class="auth-modal__field map-form-field">
                     <span class="map-form-label">이름</span>
-                    <Textfield
-                        v-model="name"
-                        placeholder="사용자 이름"
-                        autocomplete="name"
-                    />
+                    <Textfield v-model="name" placeholder="사용자 이름" autocomplete="name" />
                 </label>
 
                 <label class="auth-modal__field map-form-field">
@@ -124,6 +126,7 @@ const toggleMode = () => {
                 </label>
 
                 <div v-if="errorMessage" class="auth-modal__error">
+                    <UIcon name="i-lucide-alert-circle" />
                     {{ errorMessage }}
                 </div>
 

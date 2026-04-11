@@ -55,7 +55,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         const positions = options.drawnPositions.value
         if (!options.viewer.value || !positions || positions.length < 2) return
 
-        const reversedPositions = positions.slice(0, -1).reverse()
+        const reversedPositions = [...positions].reverse()
         const cartesianPositions = reversedPositions.map(toCartesianPosition)
         const entities: CesiumEntity[] = []
 
