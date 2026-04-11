@@ -7,6 +7,8 @@ import type {
 } from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
 import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
+
+type ActiveWeatherLayer = WeatherLayer | null
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
 
@@ -17,7 +19,7 @@ interface UseWeatherSideeffectOptions {
     monthlyData: Ref<SeoulMonthlyWeather | null>
     boundaryGeojson: Ref<unknown>
     dailySnapshot: ComputedRef<Map<string, HourlyWeather>>
-    activeLayer: Ref<WeatherLayer>
+    activeLayer: Ref<ActiveWeatherLayer>
     isLoading: Ref<boolean>
     isVisible: Ref<boolean>
 }
@@ -65,9 +67,10 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
 
     const getLayerColor = (
         snapshot: Map<string, HourlyWeather>,
-        layer: WeatherLayer,
+        layer: ActiveWeatherLayer,
         code: string
     ): string => {
+        if (!layer) return NO_DATA_COLOR
         const weather = resolveWeatherByCode(snapshot, code)
         return weather ? resolvePolygonColor(weather, layer) : NO_DATA_COLOR
     }
@@ -200,6 +203,19 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     /** 선택된 날짜·시간·레이어에 따라 Cesium 폴리곤과 외곽선 색상을 갱신한다. */
     const updateCesiumPolygons = () => {
         if (!weatherDataSource || !isVisible.value) return
+        if (!activeLayer.value) {
+            if (weatherDataSource) {
+                ;(weatherDataSource as unknown as { show: boolean }).show = false
+            }
+            if (weatherOutlinePrimitive) {
+                weatherOutlinePrimitive.show = false
+            }
+            return
+        }
+        ;(weatherDataSource as unknown as { show: boolean }).show = true
+        if (weatherOutlinePrimitive) {
+            weatherOutlinePrimitive.show = true
+        }
         const Cesium = getCesium()
         const snapshot = dailySnapshot.value
         const layer = activeLayer.value

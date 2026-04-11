@@ -40,6 +40,8 @@ interface UseRouteDrawSideeffectOptions {
     isRouteSaveModalOpen: Ref<boolean>
     /** 드로잉 관련 상태 전체를 초기화하는 함수 */
     resetRouteDrawState: () => void
+    /** 경로 닫기 모드 ref */
+    closingMode?: Ref<string | null>
 }
 
 /**
@@ -67,20 +69,28 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
      */
     const drawSection = (
         positions: GeoJsonPosition[],
-        sectionIndex: number
+        sectionIndex: number,
+        isDashed = false
     ): CesiumEntity | null => {
         if (!options.viewer.value) {
             return null
         }
 
         const color = getSectionColor(sectionIndex)
+        const Cesium = window.Cesium
+        const material = isDashed
+            ? new Cesium.PolylineDashMaterialProperty({
+                  color: toCesiumColor(color, 0.7),
+                  dashLength: 16
+              })
+            : toCesiumColor(color, 0.95)
 
         return options.viewer.value.entities.add({
             polyline: {
                 positions: positions.map(toCartesianPosition),
                 width: 4,
                 clampToGround: true,
-                material: toCesiumColor(color, 0.95)
+                material
             }
         })
     }
@@ -134,11 +144,15 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return
         }
 
+        const isRoundTrip = options.closingMode?.value === 'round-trip'
+        const lastIndex = ranges.length - 1
+
         drawnSectionPolylines.value = ranges
             .map((range, index) => {
                 const sectionPoints = positions.slice(range.start, range.end + 1)
+                const isDashed = isRoundTrip && index === lastIndex
 
-                return sectionPoints.length >= 2 ? drawSection(sectionPoints, index) : null
+                return sectionPoints.length >= 2 ? drawSection(sectionPoints, index, isDashed) : null
             })
             .filter((entity): entity is CesiumEntity => entity !== null)
 

@@ -41,7 +41,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         sectionDraft: store.sectionDraft,
         sectionPointRanges: store.sectionPointRanges,
         isRouteSaveModalOpen: store.isRouteSaveModalOpen,
-        resetRouteDrawState: store.resetRouteDrawState
+        resetRouteDrawState: store.resetRouteDrawState,
+        closingMode: store.closingMode
     })
 
     useRouteClosingSideeffect({

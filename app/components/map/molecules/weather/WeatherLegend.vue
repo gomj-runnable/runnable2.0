@@ -3,7 +3,7 @@ import type { WeatherLayer } from '#shared/types/weather'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 (표시할 범례 결정에 사용) */
-    activeLayer: WeatherLayer
+    activeLayer: WeatherLayer | null
     /** 온도 레이어 활성 시 표시할 현재 온도 값 (°C) */
     currentTemperature?: number | null
 }>()
