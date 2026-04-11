@@ -4,7 +4,7 @@ import {
     geoJsonLineStringSchema,
     sectionAttrSchema
 } from '#shared/schemas/route.schema'
-import { routeRepository } from '../../repositories/route.repository.drizzle'
+import { routeRepository } from '../../repositories'
 import { requireSession } from '../../utils/session'
 
 const requestSchema = z.object({
@@ -23,11 +23,7 @@ export default defineEventHandler(async (event) => {
     const { route: routeInput, sections: sectionInputs } = requestSchema.parse(body)
 
     const storedRoute = await routeRepository.createRoute(routeInput, user.userId)
-    const storedSections = await Promise.all(
-        sectionInputs.map((sectionInput) =>
-            routeRepository.createSection(storedRoute.routeId, sectionInput)
-        )
-    )
+    const storedSections = await routeRepository.createSections(storedRoute.routeId, sectionInputs)
 
     return { route: storedRoute, sections: storedSections }
 })

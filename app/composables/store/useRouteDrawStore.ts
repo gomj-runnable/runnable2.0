@@ -5,6 +5,7 @@ import type { RouteElevationProfile } from '#shared/types/route'
 import { RouteDraftBuilder } from '#shared/schemas/route.schema'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import type { SavedRoute } from '#shared/types/route'
+import { useRouteClosingStore } from '~/composables/store/useRouteClosingStore'
 
 /**
  * 경로 드로잉 화면 전반의 공유 상태를 관리하는 store composable.
@@ -13,6 +14,8 @@ import type { SavedRoute } from '#shared/types/route'
  * 이 store는 상태 노출과 초기화만 담당한다.
  */
 export const useRouteDrawStore = () => {
+    const closingStore = useRouteClosingStore()
+
     /** 사이드바 경로 목록의 검색 입력값 */
     const searchQuery = ref('')
 
@@ -72,6 +75,7 @@ export const useRouteDrawStore = () => {
         sectionPointRanges.value = []
         isRouteSaveModalOpen.value = false
         isElevationChartOpen.value = false
+        closingStore.resetClosingMode()
         elevationChartTitle.value = '경로 고도 그래프'
         elevationProfile.value = null
         routeForm.value = {
@@ -95,6 +99,11 @@ export const useRouteDrawStore = () => {
         elevationProfile,
         routeForm,
         routeDistance,
-        resetRouteDrawState
+        resetRouteDrawState,
+        closingMode: closingStore.closingMode,
+        isLoopClose: closingStore.isLoopClose,
+        isRoundTrip: closingStore.isRoundTrip,
+        setClosingMode: closingStore.setClosingMode,
+        resetClosingMode: closingStore.resetClosingMode
     }
 }

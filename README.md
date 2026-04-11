@@ -279,6 +279,111 @@ GitHub Actions로 자동화된 파이프라인이 구성되어 있다.
 
 ---
 
+## AI 에이전트 팀 운영 (OMC Team)
+
+iTerm2 + zsh 환경에서 Claude Code 네이티브 팀을 사용한다. tmux 의존 없이 동작한다.
+
+### 환경
+
+- **터미널**: iTerm2 (zsh)
+- **팀 런타임**: Claude Code Native Team (`/oh-my-claudecode:team`)
+- **tmux 기반 `/omc-teams`는 사용하지 않는다.**
+
+### 팀 시작
+
+```bash
+# 기본: 자동 에이전트 수 + 자동 라우팅
+/team "경로 저장 API 리팩터링"
+
+# 에이전트 수 지정 (N:역할)
+/team 3:executor "TypeScript 에러 전체 수정"
+
+# 역할별 지정
+/team 2:debugger "빌드 에러 수정"
+/team 4:designer "반응형 레이아웃 구현"
+
+# Ralph 래핑 (실패 시 자동 재시도 + Architect 검증)
+/team ralph "사용자 관리 REST API 구축"
+```
+
+### 팀 파이프라인
+
+팀은 아래 단계를 순차적으로 진행한다.
+
+```
+team-plan → team-prd → team-exec → team-verify → team-fix (반복)
+```
+
+| 단계 | 에이전트 | 역할 |
+|------|----------|------|
+| **plan** | `explore` (haiku), `planner` (opus) | 작업 분석, 하위 태스크 분해 |
+| **prd** | `analyst` (opus) | 요구사항 정리, 스코프 확정 |
+| **exec** | `executor` (sonnet) | 코드 구현 (사용자 지정 가능) |
+| **verify** | `verifier` (sonnet) | 품질 검증, 보안 리뷰 |
+| **fix** | `executor` / `debugger` | 검증 실패 항목 수정 |
+
+### 에이전트 역할 목록
+
+| 역할 | 모델 | 용도 |
+|------|------|------|
+| `executor` | sonnet / opus | 코드 구현 (opus는 복잡한 작업) |
+| `debugger` | sonnet | 빌드/타입 에러 수정, 회귀 분석 |
+| `designer` | sonnet | UI/UX 구현 |
+| `architect` | opus | 시스템 경계 설계 (읽기 전용) |
+| `code-reviewer` | opus | 코드 리뷰, 스타일 검사 |
+| `security-reviewer` | sonnet | 보안 취약점 탐지 |
+| `test-engineer` | sonnet | 테스트 작성, TDD |
+| `writer` | haiku | 문서 작성 |
+| `verifier` | sonnet | 변경 검증 |
+| `planner` | opus | 전략 계획 |
+
+### 모니터링 및 제어
+
+팀 실행 중 리더(Lead)가 자동으로 모니터링하며, 필요시 아래 도구로 개입한다.
+
+```bash
+# 팀 내 메시지 전송
+SendMessage(to: "worker-1", body: "sections.get.ts 수정 완료 후 알려줘")
+
+# 태스크 목록 확인
+TaskList(team_name: "refactor-api")
+
+# 태스크 상태 갱신
+TaskUpdate(task_id: "1", status: "completed")
+```
+
+### 프로젝트 전용 팀 구성 (3-에이전트)
+
+이 프로젝트의 비trivial 작업은 아래 구조로 진행한다.
+
+| 역할 | 모델 | 책임 |
+|------|------|------|
+| **설계 (Architect)** | Claude Opus 4.6 | 시스템 분석, 구현 계획, 브리프 작성 |
+| **코딩 (Builder)** | Claude Sonnet 4.5 | 브리프 기반 코드 구현 |
+| **테스트 (Tester)** | Claude Sonnet 4.5 | 품질 검증, 성능 테스트 |
+
+작업 순서: **Architect → Builder → Tester → Architect(최종 확인)**
+
+```bash
+# 예: 3-에이전트 팀으로 경로 검색 기능 구현
+/team 3:executor "경로 검색 기능 구현 - Architect가 설계, Builder가 구현, Tester가 검증"
+
+# 또는 Ralph로 자동 반복
+/team ralph "날씨 API 캐싱 최적화"
+```
+
+### 가이드라인
+
+1. **tmux를 사용하지 않는다.** `/omc-teams`(tmux 기반) 대신 `/team`(네이티브)을 사용한다.
+2. **iTerm2 분할로 모니터링한다.** 필요시 iTerm2 `Cmd+D` / `Cmd+Shift+D`로 탭/패널을 분할해 별도 Claude 세션을 열 수 있다.
+3. **에이전트 수는 작업 규모에 맞춘다.** 소규모(1-2), 중규모(3-5), 대규모(5-10).
+4. **`ralph`는 안정성이 중요한 작업에 사용한다.** 실패 시 자동 재시도 + Architect 검증을 포함한다.
+5. **exec 단계 에이전트만 사용자가 지정한다.** plan/verify 등 다른 단계는 리더가 자동 라우팅한다.
+6. **보안/인증 관련 변경은 `security-reviewer`가 verify 단계에 자동 포함된다.**
+7. **20개 이상 파일 변경 시 `code-reviewer` (opus)가 자동 투입된다.**
+
+---
+
 ## 기여 가이드
 
 1. 이슈를 먼저 확인하거나 새 이슈를 등록한다.

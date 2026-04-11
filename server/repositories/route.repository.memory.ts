@@ -67,6 +67,10 @@ class InMemoryRouteRepository implements IRouteRepository {
         return section
     }
 
+    async createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]> {
+        return Promise.all(inputs.map((input) => this.createSection(routeId, input)))
+    }
+
     async getSectionsByRouteId(routeId: string): Promise<SavedSection[]> {
         return Array.from(this.sections.values()).filter((s) => s.routeId === routeId)
     }
