@@ -21,6 +21,10 @@ lib/
 # Codex
 .codex/
 
+# Environment variables
+.env
+.env.*
+
 # Logs & cache
 logs/
 *.log
