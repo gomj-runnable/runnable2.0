@@ -14,7 +14,7 @@ const props = defineProps<{
     /** 현재 선택된 월 (YYYY-MM) */
     selectedMonth: string
     /** 현재 활성화된 날씨 레이어 타입 */
-    activeLayer: WeatherLayer
+    activeLayer: WeatherLayer | null
     /** 서울 월별 날씨 데이터 (없으면 null) */
     monthlyData: SeoulMonthlyWeather | null
     /** 날씨 데이터 로딩 중 여부 */
@@ -29,7 +29,7 @@ const emit = defineEmits<{
     /** 월 선택 변경 시 새 월을 전달 */
     'update:selectedMonth': [month: string]
     /** 날씨 레이어 전환 시 새 레이어 타입을 전달 */
-    'update:activeLayer': [layer: WeatherLayer]
+    'update:activeLayer': [layer: WeatherLayer | null]
 }>()
 
 const isCalendarOpen = ref(false)
