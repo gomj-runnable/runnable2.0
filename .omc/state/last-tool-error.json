@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"gh auth status 2>&1\",\"description\":\"Check gh CLI auth status\"}",
-  "error": "Exit code 1\nYou are not logged into any GitHub hosts. To log in, run: gh auth login",
-  "timestamp": "2026-04-10T05:54:39.901Z",
-  "retry_count": 1
-}
