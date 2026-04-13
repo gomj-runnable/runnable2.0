@@ -4,6 +4,20 @@ import type {
     RouteDraftInput,
     RouteSectionDraftInput
 } from '#shared/types/route'
+import type { PoiDraftInput } from '#shared/types/facility'
+
+export const geoJsonPointSchema = z.object({
+    type: z.literal('Point'),
+    coordinates: z.tuple([z.number(), z.number()])
+})
+
+export const poiSchema: z.ZodType<PoiDraftInput> = z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+    type: z.enum(['HOSPITAL', 'CROSSWALK', 'WATER']),
+    geom: geoJsonPointSchema,
+    attribute: z.record(z.unknown()).optional()
+})
 
 export const geoJsonLineStringPositionSchema = z.tuple([z.number(), z.number(), z.number()])
 export const geoJsonLineStringSchema = z.object({
@@ -21,7 +35,8 @@ export const sectionAttrSchema = z.object({
 export const createSectionSchema: z.ZodType<RouteSectionDraftInput> = z.object({
     routeId: z.string().min(1),
     geom: geoJsonLineStringSchema.optional(),
-    attrs: z.array(sectionAttrSchema).optional()
+    attrs: z.array(sectionAttrSchema).optional(),
+    pois: z.array(poiSchema).optional()
 })
 
 export const createRouteSchema: z.ZodType<RouteDraftInput> = z.object({
@@ -35,19 +50,40 @@ export const createRouteSchema: z.ZodType<RouteDraftInput> = z.object({
     distance: z.number().nonnegative().optional()
 })
 
+export type RouteClosingMode = 'loop-close' | 'round-trip' | null
+
 export interface RouteDrawMetricsInput {
     distance?: number | null
     heights?: Array<number | null | undefined> | null
     geoJson?: GeoJsonLineString | null
+    /** 마감 모드. round-trip이면 거리 × 2, loop-close이면 거리 + loopCloseDistance */
+    closingMode?: RouteClosingMode
+    /** loop-close 모드에서 출발지-도착지 간 거리 (meters) */
+    loopCloseDistance?: number | null
 }
 
 export class RouteDraftBuilder {
     constructor(private readonly drawMetrics?: RouteDrawMetricsInput | null) {}
 
     getDistance() {
-        return typeof this.drawMetrics?.distance === 'number'
+        const base = typeof this.drawMetrics?.distance === 'number'
             ? this.drawMetrics.distance
             : undefined
+
+        if (base === undefined) return undefined
+
+        const mode = this.drawMetrics?.closingMode
+        if (mode === 'round-trip') {
+            return base * 2
+        }
+        if (mode === 'loop-close') {
+            const extra = typeof this.drawMetrics?.loopCloseDistance === 'number'
+                ? this.drawMetrics.loopCloseDistance
+                : 0
+            return base + extra
+        }
+
+        return base
     }
 
     getHeights() {

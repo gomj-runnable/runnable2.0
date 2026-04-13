@@ -17,7 +17,11 @@ export const useRouteSaveSideeffect = () => {
             method: 'POST',
             body: {
                 route,
-                sections: sections.map((section) => ({ geom: section.geom, attrs: section.attrs }))
+                sections: sections.map((section) => ({
+                    geom: section.geom,
+                    attrs: section.attrs,
+                    pois: section.pois
+                }))
             }
         })
 

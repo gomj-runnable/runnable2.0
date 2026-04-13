@@ -24,6 +24,8 @@ export const useFacilityStore = () => {
     const activeTypes = useState<Set<FacilityType>>('facility.activeTypes', () => new Set())
     /** 시설물 데이터 로딩 중 여부 */
     const isLoading = useState<boolean>('facility.isLoading', () => false)
+    /** 현재 위치 기반 POI 검색 진행 중 여부 */
+    const isSearching = useState<boolean>('facility.isSearching', () => false)
 
     /**
      * 특정 유형이 현재 활성 상태인지 확인한다.
@@ -63,6 +65,7 @@ export const useFacilityStore = () => {
         facilities,
         activeTypes,
         isLoading,
+        isSearching,
         isTypeActive,
         toggleType,
         facilitiesByType

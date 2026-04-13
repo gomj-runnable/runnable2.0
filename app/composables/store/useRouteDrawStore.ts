@@ -5,6 +5,7 @@ import type { RouteElevationProfile } from '#shared/types/route'
 import { RouteDraftBuilder } from '#shared/schemas/route.schema'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import type { SavedRoute } from '#shared/types/route'
+import type { PoiDraftInput } from '#shared/types/facility'
 import { useRouteClosingStore } from '~/composables/store/useRouteClosingStore'
 
 /**
@@ -33,6 +34,10 @@ export const useRouteDrawStore = () => {
 
     /** 각 구간이 담당하는 포인트 인덱스 범위 배열. 구간 추가·삭제 시 갱신된다. */
     const sectionPointRanges = ref<SectionPointRange[]>([])
+    /** 구간 인덱스별 연결된 POI 배열. key = 구간 인덱스 */
+    const sectionPois = ref<Record<number, PoiDraftInput[]>>({})
+    /** 현재 POI 연결 대상 구간 인덱스. null이면 POI 클릭 시 연결 비활성 */
+    const activeSectionIndex = ref<number | null>(null)
 
     /** 저장된 경로 목록 */
     const routes = ref<SavedRoute[]>([])
@@ -59,10 +64,40 @@ export const useRouteDrawStore = () => {
     })
 
     /**
-     * `drawMetrics`에서 추출한 경로 총 거리 (km 단위).
+     * loop-close 모드에서 마지막 포인트 → 첫 포인트 간 거리 (meters).
+     * Haversine 공식으로 계산한다.
+     */
+    const loopCloseDistance = computed(() => {
+        const positions = drawnPositions.value
+        if (!positions || positions.length < 2) return 0
+
+        const first = positions[0]!
+        const last = positions[positions.length - 1]!
+
+        const EARTH_RADIUS_METERS = 6_371_000
+        const toRad = (deg: number) => (deg * Math.PI) / 180
+
+        const dLat = toRad(first[1] - last[1])
+        const dLon = toRad(first[0] - last[0])
+        const h =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(last[1])) * Math.cos(toRad(first[1])) * Math.sin(dLon / 2) ** 2
+
+        return 2 * EARTH_RADIUS_METERS * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+    })
+
+    /**
+     * `drawMetrics`에서 추출한 경로 총 거리 (meters 단위).
+     * closingMode에 따라 왕복(×2) 또는 도착지 연결(+loopCloseDistance)이 적용된다.
      * `drawMetrics`가 없거나 거리 값이 유효하지 않으면 `undefined`를 반환한다.
      */
-    const routeDistance = computed(() => new RouteDraftBuilder(drawMetrics.value).getDistance())
+    const routeDistance = computed(() =>
+        new RouteDraftBuilder({
+            ...drawMetrics.value,
+            closingMode: closingStore.closingMode.value,
+            loopCloseDistance: loopCloseDistance.value
+        }).getDistance()
+    )
 
     /**
      * 드로잉 관련 모든 상태를 초기값으로 되돌린다.
@@ -73,6 +108,8 @@ export const useRouteDrawStore = () => {
         drawMetrics.value = null
         sectionDraft.value = null
         sectionPointRanges.value = []
+        sectionPois.value = {}
+        activeSectionIndex.value = null
         isRouteSaveModalOpen.value = false
         isElevationChartOpen.value = false
         closingStore.resetClosingMode()
@@ -93,6 +130,8 @@ export const useRouteDrawStore = () => {
         drawMetrics,
         sectionDraft,
         sectionPointRanges,
+        sectionPois,
+        activeSectionIndex,
         isRouteSaveModalOpen,
         isElevationChartOpen,
         elevationChartTitle,
