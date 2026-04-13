@@ -223,8 +223,11 @@ primitive.css  →  semantic.css  →  컴포넌트 CSS
 
 ### Git 컨벤션
 
-- 커밋 메시지는 한글로 작성하며, 변경 사항의 **이유**를 간결하게 기술한다.
+- 커밋 메시지 형식: `<type>(<unit>): <설명>` — 상세 규칙은 [커밋 컨벤션 문서](.github/COMMIT_CONVENTION.md) 참조
+- type: `feat`, `fix`, `bug`, `log`, `test`, `temp`
 - 브랜치: `master` (프로덕션), `develop` (개발), `feature/*`, `fix/*`
+- PR 템플릿: [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)
+- Issue 템플릿: [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/)
 
 ---
 
