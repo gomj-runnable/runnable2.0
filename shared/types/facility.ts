@@ -1,5 +1,21 @@
 export type FacilityType = 'crosswalk' | 'fountain' | 'locker' | 'hospital' | 'sidewalk'
 
+/** POI 저장용 타입 (경로 구간에 연결되는 관심지점) */
+export type PoiType = 'HOSPITAL' | 'CROSSWALK' | 'WATER'
+
+export interface GeoJsonPoint {
+    type: 'Point'
+    coordinates: [number, number]
+}
+
+export interface PoiDraftInput {
+    name: string
+    description?: string
+    type: PoiType
+    geom: GeoJsonPoint
+    attribute?: Record<string, unknown>
+}
+
 export interface Facility {
     id: string
     type: FacilityType

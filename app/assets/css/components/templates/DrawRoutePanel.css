@@ -16,3 +16,53 @@
     flex-direction: column;
     gap: var(--gap-section-sm);
 }
+
+.draw-route-panel__section-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-2xs);
+}
+
+.draw-route-panel__poi-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 4px;
+}
+
+.draw-route-panel__poi-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--color-surface-tinted, rgba(var(--color-primary-rgb, 33 150 243) / 0.12));
+    font-size: var(--text-xs, 11px);
+    color: var(--color-text-secondary);
+    max-width: 120px;
+}
+
+.draw-route-panel__poi-icon {
+    flex-shrink: 0;
+    font-size: 12px;
+}
+
+.draw-route-panel__poi-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.draw-route-panel__poi-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: var(--color-text-tertiary);
+    font-size: 10px;
+    line-height: 1;
+}

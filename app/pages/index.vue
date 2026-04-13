@@ -32,6 +32,9 @@ import { useSidewalkSideeffect } from '~/composables/sideeffect/useSidewalkSidee
 import { useAuthStore } from '~/composables/store/useAuthStore'
 import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
 import { useExploreSearchSideeffect } from '~/composables/sideeffect/useExploreSearchSideeffect'
+import { useCameraStore } from '~/composables/store/useCameraStore'
+import { useCameraSideeffect } from '~/composables/sideeffect/useCameraSideeffect'
+import MapFooter from '~/components/map/molecules/MapFooter.vue'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -62,15 +65,30 @@ const weather = useWeatherStore()
 const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
 
 const facility = useFacilityStore()
-useFacilitySideeffect({ viewer, ...facility })
+const facilityEffect = useFacilitySideeffect({
+    viewer,
+    ...facility,
+    onPoiClick: (poi) => {
+        const sectionIndex = drawing.activeSectionIndex
+
+        if (sectionIndex !== null) {
+            drawing.addPoiToSection(sectionIndex, poi)
+        }
+    }
+})
 useSidewalkSideeffect({ viewer })
+
+// ─── 카메라 정보 ─────────────────────────────────────────────────
+
+const camera = useCameraStore()
+const cameraEffect = useCameraSideeffect({ viewer, ...camera })
 
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
     await init()
     viewer.value = window.viewer
-    await Promise.all([initWeather(), authEffect.fetchSession()])
+    await Promise.all([initWeather(), authEffect.fetchSession(), cameraEffect.init()])
 })
 
 // ─── 사이드바 탭 구성 ────────────────────────────────────────────
@@ -159,10 +177,14 @@ watch(activeNav, (next) => {
                         <DrawRoutePanel
                             v-else-if="activeNav === '그리기'"
                             :section-attrs="drawing.sectionDraft?.attrs ?? []"
+                            :section-pois="drawing.sectionPois"
+                            :active-section-index="drawing.activeSectionIndex"
                             @reset="drawing.start"
                             @save="drawing.openSaveModal"
                             @update-section-attr="drawing.updateSectionAttr"
                             @remove-section="drawing.removeSection"
+                            @remove-poi="drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)"
+                            @select-section="drawing.activeSectionIndex = $event.index"
                         />
                         <template v-else-if="activeNav === '탐색'">
                             <Textfield
@@ -199,6 +221,10 @@ watch(activeNav, (next) => {
                 <div id="map" class="map-view" />
             </template>
 
+            <template #footer>
+                <MapFooter :label="camera.footerLabel.value" />
+            </template>
+
             <template #overlay>
                 <WeatherOverlay
                     :selected-date="weather.selectedDate.value"
@@ -215,7 +241,9 @@ watch(activeNav, (next) => {
                 <FacilityOverlay
                     :active-types="facility.activeTypes.value"
                     :is-loading="facility.isLoading.value"
+                    :is-searching="facility.isSearching.value"
                     @toggle="facility.toggleType"
+                    @search-nearby="facilityEffect.searchNearby"
                 />
                 <RouteOverlayBottomBar
                     v-if="activeNav === '그리기' || elevationChart.profile"

@@ -252,7 +252,10 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             positions,
             undefined,
             routeGeom
-        )
+        ).map((section, index) => ({
+            ...section,
+            pois: store.sectionPois.value[index] ?? []
+        }))
 
         return {
             routeDraftPayload,
@@ -335,12 +338,32 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         }
     }
 
+    const addPoiToSection = (sectionIndex: number, poi: import('#shared/types/facility').PoiDraftInput) => {
+        const current = store.sectionPois.value[sectionIndex] ?? []
+        store.sectionPois.value = {
+            ...store.sectionPois.value,
+            [sectionIndex]: [...current, poi]
+        }
+    }
+
+    const removePoiFromSection = (sectionIndex: number, poiIndex: number) => {
+        const current = store.sectionPois.value[sectionIndex] ?? []
+        store.sectionPois.value = {
+            ...store.sectionPois.value,
+            [sectionIndex]: current.filter((_, i) => i !== poiIndex)
+        }
+    }
+
     const drawing = proxyRefs({
         sectionDraft: store.sectionDraft,
+        sectionPois: store.sectionPois,
+        activeSectionIndex: store.activeSectionIndex,
         start: restartDrawing,
         openSaveModal: () => drawEffect.handleDrawSave(),
         updateSectionAttr: drawEffect.handleUpdateSectionAttr,
-        removeSection: drawEffect.handleRemoveSection
+        removeSection: drawEffect.handleRemoveSection,
+        addPoiToSection,
+        removePoiFromSection
     })
 
     const saveModal = proxyRefs({

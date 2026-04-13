@@ -1,8 +1,9 @@
 import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
-import type { Facility, FacilityType } from '#shared/types/facility'
+import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FACILITY_LAYERS } from '~/composables/store/useFacilityStore'
+import { useCameraStore } from '~/composables/store/useCameraStore'
 
 /** 시설물 유형별 Cesium Entity 색상 (신호 횡단보도 / 무신호 횡단보도 구분) */
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
@@ -13,11 +14,17 @@ const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', '
 const getLayerColor = (type: FacilityType) =>
     FACILITY_LAYERS.find((l) => l.type === type)?.color ?? '#FFFFFF'
 
+/** POI 현재 위치 검색 대상 유형 */
+const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital']
+
 interface UseFacilitySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
     facilities: Ref<Facility[]>
     activeTypes: Ref<Set<FacilityType>>
     isLoading: Ref<boolean>
+    isSearching: Ref<boolean>
+    /** POI 엔티티 클릭 시 호출되는 콜백. 활성 구간 연결에 사용한다. */
+    onPoiClick?: (poi: PoiDraftInput) => void
 }
 
 /**
@@ -28,10 +35,13 @@ interface UseFacilitySideeffectOptions {
  * @param options - 뷰어·시설물 데이터·활성 유형 상태 ref를 포함한 의존성 옵션
  */
 export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => {
-    const { viewer, facilities, activeTypes, isLoading } = options
+    const { viewer, facilities, activeTypes, isLoading, isSearching, onPoiClick } = options
+    const camera = useCameraStore()
 
     /** 유형별 추가된 Entity 참조 보관 (제거 시 사용) */
     const entityMap = new Map<FacilityType, Entity[]>()
+    /** Entity → Facility 역참조 맵 (클릭 시 POI 데이터 추출에 사용) */
+    const entityToFacilityMap = new Map<Entity, Facility>()
 
     /**
      * 시설물 목록을 서버에서 한 번만 가져온다.
@@ -129,6 +139,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
             if (entity) {
                 entities.push(entity)
+                entityToFacilityMap.set(entity, facility)
             }
         }
 
@@ -150,6 +161,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         if (entities) {
             for (const entity of entities) {
                 v.entities.remove(entity)
+                entityToFacilityMap.delete(entity)
             }
 
             entityMap.delete(type)
@@ -162,6 +174,69 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             removeLayer(type)
         }
     }
+
+    /**
+     * Facility 엔티티 → PoiDraftInput 변환 헬퍼.
+     * FacilityType → PoiType 매핑 및 geom 생성을 담당한다.
+     */
+    const facilityToPoiDraft = (facility: Facility): PoiDraftInput | null => {
+        const typeMap: Partial<Record<FacilityType, PoiDraftInput['type']>> = {
+            crosswalk: 'CROSSWALK',
+            fountain: 'WATER',
+            hospital: 'HOSPITAL'
+        }
+        const poiType = typeMap[facility.type]
+
+        if (!poiType) return null
+
+        return {
+            name: facility.name,
+            type: poiType,
+            geom: {
+                type: 'Point',
+                coordinates: [facility.lng, facility.lat]
+            }
+        }
+    }
+
+    /** Cesium 화면 클릭 → 시설물 엔티티 감지 → onPoiClick 콜백 호출 */
+    let clickHandler: import('cesium').ScreenSpaceEventHandler | null = null
+
+    watch(
+        viewer,
+        (v) => {
+            clickHandler?.destroy()
+            clickHandler = null
+
+            if (!v || !onPoiClick) return
+
+            const C = window.Cesium
+
+            if (!C) return
+
+            const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
+
+            handler.setInputAction((movement: { position: unknown }) => {
+                const picked = v.scene.pick(movement.position)
+
+                if (!picked?.id) return
+
+                const entity = picked.id as Entity
+                const facility = entityToFacilityMap.get(entity)
+
+                if (!facility) return
+
+                const poi = facilityToPoiDraft(facility)
+
+                if (poi) {
+                    onPoiClick(poi)
+                }
+            }, C.ScreenSpaceEventType.LEFT_CLICK)
+
+            clickHandler = handler
+        },
+        { immediate: true }
+    )
 
     /**
      * activeTypes 변화 감지 → entityMap 상태와 비교하여 레이어 동기화.
@@ -186,12 +261,53 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         { deep: true }
     )
 
+    /**
+     * 현재 뷰어 중심 좌표 기반으로 인근 POI를 검색하고 시설물 데이터를 교체한다.
+     * crosswalk / fountain / hospital 유형만 검색 대상으로 포함한다.
+     */
+    const searchNearby = async () => {
+        const lat = camera.centerLat.value
+        const lng = camera.centerLng.value
+
+        if (lat === null || lng === null) return
+
+        isSearching.value = true
+
+        try {
+            const activeSearchTypes = SEARCHABLE_FACILITY_TYPES.filter((t) =>
+                activeTypes.value.has(t)
+            )
+
+            const data = await $fetch<Facility[]>('/api/facilities/nearby', {
+                query: { lat, lng, types: activeSearchTypes.join(',') }
+            })
+
+            // 검색 결과로 교체: 검색 대상 유형만 교체하고 나머지(locker 등)는 유지
+            const unchanged = facilities.value.filter(
+                (f) => !SEARCHABLE_FACILITY_TYPES.includes(f.type)
+            )
+            facilities.value = [...unchanged, ...data]
+
+            // 활성 레이어 재렌더링
+            for (const type of activeSearchTypes) {
+                if (activeTypes.value.has(type)) {
+                    showLayer(type)
+                }
+            }
+        } finally {
+            isSearching.value = false
+        }
+    }
+
     onBeforeUnmount(() => {
         removeAllLayers()
+        clickHandler?.destroy()
+        clickHandler = null
     })
 
     return {
         fetchFacilities,
+        searchNearby,
         removeAllLayers
     }
 }

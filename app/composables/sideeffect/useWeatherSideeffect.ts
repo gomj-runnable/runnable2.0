@@ -237,8 +237,9 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         }
 
         weatherOutlineInstances.value.forEach(({ code, id }) => {
+            if (!weatherOutlinePrimitive || !weatherOutlinePrimitive.ready) return
             const outlineColor = toOpaqueColor(getLayerColor(snapshot, layer, code))
-            const attributes = weatherOutlinePrimitive?.getGeometryInstanceAttributes(id)
+            const attributes = weatherOutlinePrimitive.getGeometryInstanceAttributes(id)
             if (!attributes) return
 
             attributes.color = Cesium.ColorGeometryInstanceAttribute.toValue(

@@ -82,6 +82,15 @@
     height: 100%;
 }
 
+.map-shell__footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-panel);
+    pointer-events: none;
+}
+
 .map-shell__overlay {
     position: absolute;
     top: var(--gap-section-xl);

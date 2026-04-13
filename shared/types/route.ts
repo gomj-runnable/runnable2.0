@@ -1,5 +1,6 @@
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonLineString } from '#shared/types/geojson'
+import type { PoiDraftInput } from '#shared/types/facility'
 
 export type SectionAttr = SectionAttrSchema
 export type { GeoJsonLineString }
@@ -58,6 +59,8 @@ export interface RouteSectionBase {
     /** GeoJSON LineString - 경도/위도/고도 */
     geom?: GeoJsonLineString
     attrs?: SectionAttr[]
+    /** 구간에 연결된 POI 목록 */
+    pois?: PoiDraftInput[]
 }
 
 export interface RouteSectionDraftInput extends RouteSectionBase {

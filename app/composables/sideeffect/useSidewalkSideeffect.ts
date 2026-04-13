@@ -8,7 +8,7 @@ interface UseSidewalkSideeffectOptions {
 
 /**
  * 구별 인도 데이터를 로드하고 Cesium GroundPolylinePrimitive로 렌더링하는 sideeffect composable.
- * `useSidewalkStore`의 selectedDistricts 변화를 감지해 구별로 fetch·렌더·제거를 처리한다.
+ * `useSidewalkStore`의 selectedDistrict 변화를 감지해 구별로 fetch·렌더·제거를 처리한다.
  */
 export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => {
     const { viewer } = options
@@ -98,26 +98,16 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
         }
     }
 
-    /** selectedDistricts 변화 감지 → 추가/제거 동기화 */
-    watch(
-        store.selectedDistricts,
-        async (current) => {
-            const rendered = new Set(primitiveMap.keys())
+    /** selectedDistrict 변화 감지 → 렌더/제거 동기화 */
+    watch(store.selectedDistrict, async (current, previous) => {
+        if (previous && previous !== current) {
+            removeDistrict(previous)
+        }
 
-            for (const name of current) {
-                if (!rendered.has(name)) {
-                    await renderDistrict(name)
-                }
-            }
-
-            for (const name of rendered) {
-                if (!current.has(name)) {
-                    removeDistrict(name)
-                }
-            }
-        },
-        { deep: true }
-    )
+        if (current) {
+            await renderDistrict(current)
+        }
+    })
 
     onMounted(async () => {
         await loadDistricts()

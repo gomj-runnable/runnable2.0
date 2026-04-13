@@ -3,7 +3,8 @@
  * 하나가 활성화되면 다른 하나는 자동으로 꺼지며, 둘 다 꺼진 상태도 허용한다.
  */
 
-export type RouteClosingMode = 'loop-close' | 'round-trip' | null
+export type { RouteClosingMode } from '#shared/schemas/route.schema'
+import type { RouteClosingMode } from '#shared/schemas/route.schema'
 
 export const useRouteClosingStore = () => {
     /** 현재 활성화된 마감 모드. 비활성 상태이면 `null`. */
