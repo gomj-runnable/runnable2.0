@@ -2,7 +2,8 @@ import { z } from 'zod'
 import {
     createRouteSchema,
     geoJsonLineStringSchema,
-    sectionAttrSchema
+    sectionAttrSchema,
+    poiSchema
 } from '#shared/schemas/route.schema'
 import { routeRepository } from '../../repositories'
 import { requireSession } from '../../utils/session'
@@ -12,7 +13,8 @@ const requestSchema = z.object({
     sections: z.array(
         z.object({
             geom: geoJsonLineStringSchema.optional(),
-            attrs: z.array(sectionAttrSchema).optional()
+            attrs: z.array(sectionAttrSchema).optional(),
+            pois: z.array(poiSchema).optional()
         })
     )
 })

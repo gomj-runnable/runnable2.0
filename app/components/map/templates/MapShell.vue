@@ -48,6 +48,10 @@ const toggleSidebar = () => {
                 <div class="map-shell__chatbot-body map-shell__map-wrapper">
                     <slot />
                 </div>
+
+                <div v-if="$slots.footer" class="map-shell__footer">
+                    <slot name="footer" />
+                </div>
             </section>
 
             <div v-if="$slots.overlay" class="map-shell__overlay">
