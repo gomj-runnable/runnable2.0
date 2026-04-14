@@ -7,10 +7,10 @@ import type {
 } from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
 import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
-
-type ActiveWeatherLayer = WeatherLayer | null
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
+
+type ActiveWeatherLayer = WeatherLayer | null
 
 interface UseWeatherSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -194,6 +194,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
                 v as unknown as { dataSources: { add(ds: unknown): Promise<void> } }
             ).dataSources.add(ds)
             weatherDataSource = ds
+            ;(ds as unknown as { show: boolean }).show = false
             buildBoundaryOutlinePrimitive()
         } catch (err) {
             console.error('[WeatherSideeffect] GeoJsonDataSource load failed', err)
@@ -202,8 +203,8 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
 
     /** 선택된 날짜·시간·레이어에 따라 Cesium 폴리곤과 외곽선 색상을 갱신한다. */
     const updateCesiumPolygons = () => {
-        if (!weatherDataSource || !isVisible.value) return
-        if (!activeLayer.value) {
+        if (!weatherDataSource) return
+        if (!isVisible.value || !activeLayer.value) {
             if (weatherDataSource) {
                 ;(weatherDataSource as unknown as { show: boolean }).show = false
             }
