@@ -1,3 +1,4 @@
+import { centroid, polygon } from '@turf/turf'
 import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
@@ -44,13 +45,8 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     }
 
     const calcCentroid = (coords: number[][]): [number, number] => {
-        let lngSum = 0
-        let latSum = 0
-        for (const [lng, lat] of coords) {
-            lngSum += lng!
-            latSum += lat!
-        }
-        return [lngSum / coords.length, latSum / coords.length]
+        const [lng, lat] = centroid(polygon([coords])).geometry.coordinates
+        return [lng!, lat!]
     }
 
     type GeoFeature = {

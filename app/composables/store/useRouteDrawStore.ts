@@ -1,3 +1,4 @@
+import { distance, point } from '@turf/turf'
 import type { DrawActionData } from '~/composables/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
@@ -65,7 +66,6 @@ export const useRouteDrawStore = () => {
 
     /**
      * loop-close 모드에서 마지막 포인트 → 첫 포인트 간 거리 (meters).
-     * Haversine 공식으로 계산한다.
      */
     const loopCloseDistance = computed(() => {
         const positions = drawnPositions.value
@@ -74,16 +74,7 @@ export const useRouteDrawStore = () => {
         const first = positions[0]!
         const last = positions[positions.length - 1]!
 
-        const EARTH_RADIUS_METERS = 6_371_000
-        const toRad = (deg: number) => (deg * Math.PI) / 180
-
-        const dLat = toRad(first[1] - last[1])
-        const dLon = toRad(first[0] - last[0])
-        const h =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(last[1])) * Math.cos(toRad(first[1])) * Math.sin(dLon / 2) ** 2
-
-        return 2 * EARTH_RADIUS_METERS * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+        return distance(point([first[0], first[1]]), point([last[0], last[1]]), { units: 'meters' })
     })
 
     /**

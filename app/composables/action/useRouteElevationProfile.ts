@@ -1,3 +1,4 @@
+import { distance, point, lineString, along, length } from '@turf/turf'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteElevationProfile, RouteElevationSection, SavedSection } from '#shared/types/route'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
@@ -13,27 +14,13 @@ export interface RouteElevationSectionInput {
     positions: GeoJsonPosition[]
 }
 
-const EARTH_RADIUS_METERS = 6371008.8
 const DISTANCE_STEP_KM = 0.5
-
-const toRadians = (degrees: number) => (degrees * Math.PI) / 180
 
 const isSamePosition = (left: GeoJsonPosition, right: GeoJsonPosition) =>
     left[0] === right[0] && left[1] === right[1] && (left[2] ?? 0) === (right[2] ?? 0)
 
-const calculateDistanceMeters = (start: GeoJsonPosition, end: GeoJsonPosition) => {
-    const [startLng, startLat] = start
-    const [endLng, endLat] = end
-    const latitudeDelta = toRadians(endLat - startLat)
-    const longitudeDelta = toRadians(endLng - startLng)
-    const startLatitude = toRadians(startLat)
-    const endLatitude = toRadians(endLat)
-    const haversine =
-        Math.sin(latitudeDelta / 2) ** 2 +
-        Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2
-
-    return 2 * EARTH_RADIUS_METERS * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine))
-}
+const calculateDistanceMeters = (start: GeoJsonPosition, end: GeoJsonPosition) =>
+    distance(point([start[0], start[1]]), point([end[0], end[1]]), { units: 'meters' })
 
 const roundMetric = (value: number, precision = 1) => Number(value.toFixed(precision))
 
@@ -50,25 +37,21 @@ export const densifyPositions = (
 ): GeoJsonPosition[] => {
     if (positions.length < 2) return [...positions]
 
+    const coords = positions.map(([lng, lat]) => [lng, lat] as [number, number])
+    const line = lineString(coords)
+    const totalLengthMeters = length(line, { units: 'meters' })
     const result: GeoJsonPosition[] = []
 
-    for (let i = 0; i < positions.length - 1; i++) {
-        const start = positions[i]!
-        const end = positions[i + 1]!
-        const distance = calculateDistanceMeters(start, end)
-        const steps = Math.max(1, Math.ceil(distance / stepMeters))
-
-        for (let j = 0; j < steps; j++) {
-            const t = j / steps
-            result.push([
-                start[0] + t * (end[0] - start[0]),
-                start[1] + t * (end[1] - start[1]),
-                0
-            ])
-        }
+    let cursor = 0
+    while (cursor < totalLengthMeters) {
+        const pt = along(line, cursor, { units: 'meters' })
+        const [lng, lat] = pt.geometry.coordinates
+        result.push([lng!, lat!, 0])
+        cursor += stepMeters
     }
 
-    result.push([...positions[positions.length - 1]!])
+    const last = positions[positions.length - 1]!
+    result.push([last[0], last[1], 0])
     return result
 }
 

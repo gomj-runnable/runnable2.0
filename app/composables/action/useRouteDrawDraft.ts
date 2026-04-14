@@ -74,7 +74,7 @@ export const createHeightAwareRouteGeom = (
             coordinate[0],
             coordinate[1],
             positions[index]?.[2] ?? coordinate[2] ?? data?.heights?.[index] ?? 0
-        ])
+        ] as GeoJsonPosition)
     }
 }
 
