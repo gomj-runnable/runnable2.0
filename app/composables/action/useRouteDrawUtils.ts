@@ -196,5 +196,5 @@ export const geomToRouteDrawPositions = (geom?: GeoJsonLineString): GeoJsonPosit
         }
     }
 
-    return coordinates.map(([longitude, latitude, height]) => [longitude, latitude, height])
+    return coordinates.map(([longitude, latitude, height]) => [longitude, latitude, height] as GeoJsonPosition)
 }

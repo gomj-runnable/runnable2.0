@@ -79,10 +79,10 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         geometry: GeoJsonPolygon | GeoJsonMultiPolygon
     ): GeoJsonPosition[][] => {
         if (geometry.type === 'Polygon') {
-            return geometry.coordinates
+            return geometry.coordinates as GeoJsonPosition[][]
         }
 
-        return geometry.coordinates.flatMap((polygon) => polygon)
+        return geometry.coordinates.flatMap((polygon) => polygon) as GeoJsonPosition[][]
     }
 
     const buildBoundaryOutlinePrimitive = () => {
