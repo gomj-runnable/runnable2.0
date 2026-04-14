@@ -256,6 +256,10 @@
 - `create-map-overlay` : MapShell `#overlay` 슬롯에 배치되는 부유 UI(지도 위 컨트롤 패널)의 공통 구조·CSS 패턴을 따르기 위한 프로젝트 전용 스킬
 - `create-api-service` : 외부 API 연동 시 원본 Response Class + 추상화 Local Response 분리, `service.requestBy{기준}()` 네이밍 규칙을 따르기 위한 프로젝트 전용 스킬
 - `create-unified-api-response` : 한 기능에서 2개 이상 API 사용 시 공통 Local Response를 정의하고, 호출부 외 모든 후속 로직을 통일하는 프로젝트 전용 스킬
+- `create-map-layer-sideeffect` : Cesium Entity 생명주기(add/remove/clear) + Options DI + Init/Destroy 패턴으로 지도 레이어 sideeffect를 구현하기 위한 프로젝트 전용 스킬
+- `create-store-composable` : `useState` + `computed` + mutation 함수의 3단 구조와 토글/데이터 2가지 유형의 store composable을 생성하기 위한 프로젝트 전용 스킬
+- `create-server-crud` : Nitro API 핸들러 4종(GET/POST/PUT/DELETE) + Repository 인터페이스/InMemory/Drizzle/팩토리 4파일 세트를 생성하기 위한 프로젝트 전용 스킬
+- `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
 
 ## 현재 .claude Command
 
