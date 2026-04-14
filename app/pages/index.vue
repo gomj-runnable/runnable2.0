@@ -34,6 +34,8 @@ import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
 import { useExploreSearchSideeffect } from '~/composables/sideeffect/useExploreSearchSideeffect'
 import { useCameraStore } from '~/composables/store/useCameraStore'
 import { useCameraSideeffect } from '~/composables/sideeffect/useCameraSideeffect'
+import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
+import { useBoundarySideeffect } from '~/composables/sideeffect/useBoundarySideeffect'
 import MapFooter from '~/components/map/molecules/MapFooter.vue'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
@@ -83,12 +85,22 @@ useSidewalkSideeffect({ viewer })
 const camera = useCameraStore()
 const cameraEffect = useCameraSideeffect({ viewer, ...camera })
 
+// ─── 행정경계 ────────────────────────────────────────────────────
+
+useBoundaryStore()
+const boundaryEffect = useBoundarySideeffect({ viewer })
+
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
     await init()
     viewer.value = window.viewer
-    await Promise.all([initWeather(), authEffect.fetchSession(), cameraEffect.init()])
+    await Promise.all([
+        initWeather(),
+        authEffect.fetchSession(),
+        cameraEffect.init(),
+        boundaryEffect.init()
+    ])
 })
 
 // ─── 사이드바 탭 구성 ────────────────────────────────────────────
@@ -183,7 +195,9 @@ watch(activeNav, (next) => {
                             @save="drawing.openSaveModal"
                             @update-section-attr="drawing.updateSectionAttr"
                             @remove-section="drawing.removeSection"
-                            @remove-poi="drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)"
+                            @remove-poi="
+                                drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)
+                            "
                             @select-section="drawing.activeSectionIndex = $event.index"
                         />
                         <template v-else-if="activeNav === '탐색'">

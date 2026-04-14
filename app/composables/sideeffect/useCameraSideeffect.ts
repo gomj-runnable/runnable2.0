@@ -24,6 +24,8 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
 
     /** 캐시된 행정경계 GeoJSON — 초기 로드 이후 재사용 */
     let cachedGeojson: unknown = null
+    /** 캐시된 동 경계 GeoJSON */
+    let cachedDongGeojson: unknown = null
 
     /** 서울 행정경계 GeoJSON을 서버에서 가져와 캐시에 저장한다. */
     const fetchBoundary = async () => {
@@ -32,6 +34,16 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
             cachedGeojson = await $fetch('/api/boundary/seoul')
         } catch {
             cachedGeojson = null
+        }
+    }
+
+    /** 서울 동 경계 GeoJSON을 서버에서 가져와 캐시에 저장한다. */
+    const fetchDongBoundary = async () => {
+        if (cachedDongGeojson) return
+        try {
+            cachedDongGeojson = await $fetch('/api/boundary/seoul-dong')
+        } catch {
+            cachedDongGeojson = null
         }
     }
 
@@ -57,20 +69,22 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
 
     /**
      * 위경도를 이용해 서울 행정구역 이름을 반환한다.
+     * 동 경계가 로드되어 있으면 "서울특별시 {구} {동}" 형식, 아니면 "서울특별시 {구}" 형식.
      * 매칭 실패 시 빈 문자열을 반환한다.
      */
     const reverseGeocode = (lng: number, lat: number): string => {
         if (!cachedGeojson) return ''
 
-        const geojson = cachedGeojson as {
-            features?: Array<{
-                properties?: Record<string, unknown>
-                geometry?: {
-                    type: string
-                    coordinates: number[][][] | number[][][][]
-                } | null
-            }>
+        type GeoFeature = {
+            properties?: Record<string, unknown>
+            geometry?: {
+                type: string
+                coordinates: number[][][] | number[][][][]
+            } | null
         }
+
+        const geojson = cachedGeojson as { features?: GeoFeature[] }
+        let guName = ''
 
         for (const feature of geojson.features ?? []) {
             const geo = feature.geometry
@@ -82,19 +96,50 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
             if (geo.type === 'Polygon') {
                 const rings = geo.coordinates as number[][][]
                 if (rings[0] && pointInPolygon(lng, lat, rings[0])) {
-                    return `서울특별시 ${name}`
+                    guName = name
+                    break
                 }
             } else if (geo.type === 'MultiPolygon') {
                 const polys = geo.coordinates as number[][][][]
                 for (const poly of polys) {
                     if (poly[0] && pointInPolygon(lng, lat, poly[0])) {
-                        return `서울특별시 ${name}`
+                        guName = name
+                        break
+                    }
+                }
+                if (guName) break
+            }
+        }
+
+        if (!guName) return '서울특별시'
+
+        // 동 경계에서 동 이름 매칭
+        if (cachedDongGeojson) {
+            const dongGeojson = cachedDongGeojson as { features?: GeoFeature[] }
+            for (const feature of dongGeojson.features ?? []) {
+                const geo = feature.geometry
+                if (!geo) continue
+
+                const dongName = String(feature.properties?.name ?? '')
+                if (!dongName) continue
+
+                if (geo.type === 'Polygon') {
+                    const rings = geo.coordinates as number[][][]
+                    if (rings[0] && pointInPolygon(lng, lat, rings[0])) {
+                        return `서울특별시 ${guName} ${dongName}`
+                    }
+                } else if (geo.type === 'MultiPolygon') {
+                    const polys = geo.coordinates as number[][][][]
+                    for (const poly of polys) {
+                        if (poly[0] && pointInPolygon(lng, lat, poly[0])) {
+                            return `서울특별시 ${guName} ${dongName}`
+                        }
                     }
                 }
             }
         }
 
-        return '서울특별시'
+        return `서울특별시 ${guName}`
     }
 
     /** moveEnd 이벤트 핸들러. 카메라 상태를 읽어 store를 갱신하고 역지오코딩을 수행한다. */
@@ -146,7 +191,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
      * 행정경계를 로드하고 moveEnd 이벤트를 구독한다.
      */
     const init = async () => {
-        await fetchBoundary()
+        await Promise.all([fetchBoundary(), fetchDongBoundary()])
 
         const v = viewer.value
         if (!v) return

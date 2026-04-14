@@ -4,6 +4,7 @@ import type { CesiumViewer } from '~/composables/useWindow'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FACILITY_LAYERS } from '~/composables/store/useFacilityStore'
 import { useCameraStore } from '~/composables/store/useCameraStore'
+import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
 
 /** 시설물 유형별 Cesium Entity 색상 (신호 횡단보도 / 무신호 횡단보도 구분) */
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
@@ -293,6 +294,12 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                 if (activeTypes.value.has(type)) {
                     showLayer(type)
                 }
+            }
+
+            // sidewalk 칩이 활성화된 경우 카메라 위치 기반 구 선택 트리거
+            const sidewalk = useSidewalkStore()
+            if (sidewalk.isActive.value) {
+                sidewalk.setDistrictFromLocation(camera.locationLabel.value)
             }
         } finally {
             isSearching.value = false
