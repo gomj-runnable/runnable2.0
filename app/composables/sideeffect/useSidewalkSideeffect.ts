@@ -1,22 +1,24 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
+import { useCameraStore } from '~/composables/store/useCameraStore'
 
 interface UseSidewalkSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
 }
 
 /**
- * 구별 인도 데이터를 로드하고 Cesium GroundPolylinePrimitive로 렌더링하는 sideeffect composable.
- * `useSidewalkStore`의 selectedDistrict 변화를 감지해 구별로 fetch·렌더·제거를 처리한다.
+ * 동별 인도 데이터를 로드하고 Cesium GroundPolylinePrimitive로 렌더링하는 sideeffect composable.
+ * `useSidewalkStore`의 selectedDistrict·selectedDong 변화를 감지해 동별로 fetch·렌더·제거를 처리한다.
  */
 export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => {
     const { viewer } = options
     const store = useSidewalkStore()
+    const camera = useCameraStore()
 
-    /** 구별 Primitive 참조 */
+    /** 현재 렌더링된 Primitive의 키 ("구/동") */
     const primitiveMap = new Map<string, unknown>()
-    /** 구별 좌표 데이터 캐시 (재로드 방지) */
+    /** 좌표 데이터 캐시 (재로드 방지) */
     const dataCache = new Map<string, [number, number][][]>()
 
     /** index.json을 fetch하여 districts 상태를 초기화한다. */
@@ -24,34 +26,43 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
         if (store.districts.value.length > 0) return
 
         try {
-            const data =
-                await $fetch<{ name: string; code: string; count: number }[]>(
-                    '/sidewalk/index.json'
-                )
+            const data = await $fetch<
+                {
+                    name: string
+                    code: string
+                    count: number
+                    dongs: { name: string; count: number }[]
+                }[]
+            >('/sidewalk/index.json')
             store.districts.value = data
         } catch (e) {
             console.error('[useSidewalkSideeffect] index.json 로드 실패', e)
         }
     }
 
-    /** 구 이름으로 좌표 데이터를 fetch하고 캐시한다. */
-    const fetchDistrict = async (name: string): Promise<[number, number][][]> => {
-        if (dataCache.has(name)) return dataCache.get(name)!
+    /** 동 데이터를 fetch하고 캐시한다. */
+    const fetchDong = async (district: string, dong: string): Promise<[number, number][][]> => {
+        const key = `${district}/${dong}`
+        if (dataCache.has(key)) return dataCache.get(key)!
 
-        const data = await $fetch<[number, number][][]>(`/sidewalk/${name}.json`)
-        dataCache.set(name, data)
+        const data = await $fetch<[number, number][][]>(
+            `/sidewalk/${encodeURIComponent(district)}/${encodeURIComponent(dong)}.json`
+        )
+        dataCache.set(key, data)
         return data
     }
 
-    /** 구 인도 데이터를 GroundPolylinePrimitive로 지도에 추가한다. */
-    const renderDistrict = async (name: string) => {
+    /** 동 인도 데이터를 GroundPolylinePrimitive로 지도에 추가한다. */
+    const renderDong = async (district: string, dong: string) => {
+        const key = `${district}/${dong}`
+        if (primitiveMap.has(key)) return
+
         const v = viewer.value
         const C = window.Cesium
-
         if (!v || !C) return
 
-        const coords = await fetchDistrict(name)
-        const color = C.Color.fromCssColorString('#78909C').withAlpha(0.6)
+        const coords = await fetchDong(district, dong)
+        const color = C.Color.fromCssColorString('#FF7043').withAlpha(0.85)
 
         const instances = coords
             .filter((line) => line.length >= 2)
@@ -60,7 +71,7 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
                     new C.GeometryInstance({
                         geometry: new C.GroundPolylineGeometry({
                             positions: C.Cartesian3.fromDegreesArray(line.flat()),
-                            width: 3
+                            width: 4
                         })
                     })
             )
@@ -77,43 +88,69 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
             })
         )
 
-        primitiveMap.set(name, primitive)
+        primitiveMap.set(key, primitive)
     }
 
-    /** 구 인도 Primitive를 지도에서 제거한다. */
-    const removeDistrict = (name: string) => {
+    /** 특정 키의 Primitive를 지도에서 제거한다. */
+    const removePrimitive = (key: string) => {
         const v = viewer.value
-        const primitive = primitiveMap.get(name)
-
+        const primitive = primitiveMap.get(key)
         if (!v || !primitive) return
 
         v.scene.groundPrimitives.remove(primitive)
-        primitiveMap.delete(name)
+        primitiveMap.delete(key)
     }
 
-    /** 모든 구 Primitive를 제거한다. */
-    const removeAllDistricts = () => {
-        for (const name of [...primitiveMap.keys()]) {
-            removeDistrict(name)
+    /** 모든 Primitive를 제거한다. */
+    const removeAll = () => {
+        for (const key of [...primitiveMap.keys()]) {
+            removePrimitive(key)
         }
     }
 
-    /** selectedDistrict 변화 감지 → 렌더/제거 동기화 */
-    watch(store.selectedDistrict, async (current, previous) => {
-        if (previous && previous !== current) {
-            removeDistrict(previous)
-        }
+    /** selectedDistrict + selectedDong 변화 감지 → 렌더/제거 동기화 */
+    watch(
+        [store.selectedDistrict, store.selectedDong],
+        async ([district, dong], [prevDistrict, prevDong]) => {
+            // 이전 렌더링 제거
+            if (prevDistrict && (prevDistrict !== district || prevDong !== dong)) {
+                if (prevDong) {
+                    removePrimitive(`${prevDistrict}/${prevDong}`)
+                }
+            }
 
-        if (current) {
-            await renderDistrict(current)
+            // 동이 선택되면 해당 동만 렌더링
+            if (district && dong) {
+                await renderDong(district, dong)
+                return
+            }
+
+            // 구만 선택되고 동은 미선택이면 기타 포함 전체 동 렌더링
+            if (district && !dong) {
+                removeAll()
+                const gu = store.districts.value.find((d) => d.name === district)
+                if (gu) {
+                    await Promise.all(gu.dongs.map((d) => renderDong(district, d.name)))
+                }
+            }
         }
-    })
+    )
+
+    /**
+     * 카메라 중심 위치(locationLabel)에서 구·동 이름을 추출해 상태를 업데이트한다.
+     * watch가 변경을 감지해 렌더링을 실행한다.
+     */
+    const searchByCurrentLocation = () => {
+        store.setDistrictFromLocation(camera.locationLabel.value)
+    }
 
     onMounted(async () => {
         await loadDistricts()
     })
 
     onBeforeUnmount(() => {
-        removeAllDistricts()
+        removeAll()
     })
+
+    return { searchByCurrentLocation }
 }
