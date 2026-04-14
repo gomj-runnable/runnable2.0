@@ -1,3 +1,4 @@
+import type { Feature } from 'geojson'
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonLineString } from '#shared/types/geojson'
 import type { PoiDraftInput } from '#shared/types/facility'
@@ -5,13 +6,7 @@ import type { PoiDraftInput } from '#shared/types/facility'
 export type SectionAttr = SectionAttrSchema
 export type { GeoJsonLineString }
 
-export interface GeoJsonFeature<TGeometry> {
-    type: 'Feature'
-    properties: Record<string, unknown>
-    geometry: TGeometry
-}
-
-export type RouteGeoJson = GeoJsonLineString | GeoJsonFeature<GeoJsonLineString>
+export type RouteGeoJson = GeoJsonLineString | Feature<GeoJsonLineString, Record<string, unknown>>
 
 export interface RouteElevationPoint {
     distanceKm: number

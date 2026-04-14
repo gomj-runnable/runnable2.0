@@ -1,3 +1,4 @@
+import { booleanPointInPolygon, point, polygon } from '@turf/turf'
 import type { ShallowRef, Ref } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
 
@@ -48,24 +49,13 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
     }
 
     /**
-     * 점이 폴리곤 내부에 있는지 ray-casting 알고리즘으로 판단한다.
+     * 점이 폴리곤 내부에 있는지 판단한다.
      * @param lng - 경도
      * @param lat - 위도
      * @param ring - 폴리곤 외곽 좌표 배열 ([lng, lat] 형식)
      */
-    const pointInPolygon = (lng: number, lat: number, ring: number[][]): boolean => {
-        let inside = false
-        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-            const xi = ring[i]![0]!
-            const yi = ring[i]![1]!
-            const xj = ring[j]![0]!
-            const yj = ring[j]![1]!
-            const intersect =
-                yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
-            if (intersect) inside = !inside
-        }
-        return inside
-    }
+    const pointInPolygon = (lng: number, lat: number, ring: number[][]): boolean =>
+        booleanPointInPolygon(point([lng, lat]), polygon([ring]))
 
     /**
      * 위경도를 이용해 서울 행정구역 이름을 반환한다.

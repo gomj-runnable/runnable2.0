@@ -21,7 +21,7 @@ const toTrackPoint = ([longitude, latitude, elevation]: [number, number, number]
 </trkpt>`
 
 const toTrackSegment = (section: GpxSectionSource, index: number) => {
-    const points = section.geom?.coordinates ?? []
+    const points = (section.geom?.coordinates ?? []) as [number, number, number][]
 
     if (points.length === 0) {
         return ''
