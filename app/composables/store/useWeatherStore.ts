@@ -25,7 +25,7 @@ export const useWeatherStore = () => {
     /** 날씨 데이터 로딩 중 여부 */
     const isLoading = useState<boolean>('weather.isLoading', () => false)
     /** 현재 활성 날씨 레이어 (`'weather'` | `'temperature'` | `'pm10'` | `null`) */
-    const activeLayer = useState<ActiveWeatherLayer>('weather.activeLayer', () => 'weather')
+    const activeLayer = useState<ActiveWeatherLayer>('weather.activeLayer', () => null)
     /** 날씨 레이어 지도 표시 여부 */
     const isVisible = useState<boolean>('weather.isVisible', () => true)
 

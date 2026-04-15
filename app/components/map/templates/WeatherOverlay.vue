@@ -4,6 +4,7 @@ import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import WeatherLayerToggle from '~/components/map/molecules/weather/WeatherLayerToggle.vue'
 import WeatherDatePicker from '~/components/map/molecules/weather/WeatherDatePicker.vue'
 import WeatherLegend from '~/components/map/molecules/weather/WeatherLegend.vue'
+import ElevationLegend from '~/components/map/molecules/weather/ElevationLegend.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
 
 const props = defineProps<{
@@ -19,6 +20,8 @@ const props = defineProps<{
     monthlyData: SeoulMonthlyWeather | null
     /** 날씨 데이터 로딩 중 여부 */
     isLoading: boolean
+    /** 고도 레이어 활성화 여부 */
+    isElevationActive: boolean
 }>()
 
 const emit = defineEmits<{
@@ -30,9 +33,28 @@ const emit = defineEmits<{
     'update:selectedMonth': [month: string]
     /** 날씨 레이어 전환 시 새 레이어 타입을 전달 */
     'update:activeLayer': [layer: WeatherLayer | null]
+    /** 고도 레이어 활성화 상태 변경 시 전달 */
+    'update:elevationActive': [active: boolean]
 }>()
 
 const isCalendarOpen = ref(false)
+
+/** 고도 레이어 토글: 활성화 시 날씨 레이어를 끈다 */
+const handleElevationToggle = () => {
+    const next = !props.isElevationActive
+    emit('update:elevationActive', next)
+    if (next) {
+        emit('update:activeLayer', null)
+    }
+}
+
+/** 날씨 레이어 변경: 레이어 선택 시 고도 레이어를 끈다 */
+const handleLayerChange = (layer: WeatherLayer | null) => {
+    emit('update:activeLayer', layer)
+    if (layer !== null && props.isElevationActive) {
+        emit('update:elevationActive', false)
+    }
+}
 
 /** 날짜를 선택하고 캘린더 팝업을 닫는다 */
 const handleDateSelect = (date: string) => {
@@ -94,17 +116,6 @@ const hourLabel = computed(() => {
     const h = props.selectedHour.split(':')[0]
     return `${h}시`
 })
-
-/** 선택된 날짜/시간의 현재 온도 (서울 대표 구 기준) */
-const currentTemperature = computed<number | null>(() => {
-    if (!props.monthlyData) return null
-    const dong = props.monthlyData.dongs[0]
-    if (!dong) return null
-    const slot = dong.hourly.find(
-        (s) => s.date === props.selectedDate && s.time === props.selectedHour
-    )
-    return slot?.temperature ?? null
-})
 </script>
 
 <template>
@@ -113,7 +124,15 @@ const currentTemperature = computed<number | null>(() => {
             <div class="weather-overlay__controls">
                 <WeatherLayerToggle
                     :model-value="activeLayer"
-                    @update:model-value="emit('update:activeLayer', $event)"
+                    @update:model-value="handleLayerChange"
+                />
+                <ChipButton
+                    label="지역 고도"
+                    icon="i-lucide-mountain"
+                    size="sm"
+                    appearance="elevated"
+                    :active="isElevationActive"
+                    @click="handleElevationToggle"
                 />
                 <div class="weather-overlay__datetime-row">
                     <div class="weather-overlay__calendar-wrap">
@@ -186,8 +205,11 @@ const currentTemperature = computed<number | null>(() => {
                 </div>
             </div>
         </div>
-        <div class="weather-overlay__bottombar">
-            <WeatherLegend :active-layer="activeLayer" :current-temperature="currentTemperature" />
+        <div v-if="activeLayer" class="weather-overlay__bottombar">
+            <WeatherLegend :active-layer="activeLayer" />
+        </div>
+        <div v-else-if="isElevationActive" class="weather-overlay__bottombar">
+            <ElevationLegend />
         </div>
     </div>
 </template>
