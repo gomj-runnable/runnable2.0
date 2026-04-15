@@ -24,6 +24,13 @@ import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserP
 import AuthModal from '~/components/map/templates/AuthModal.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
+import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
+import { useNotificationStore } from '~/composables/store/useNotificationStore'
+import {
+    findNearestSection,
+    validatePoiDistance,
+    generatePoiComment
+} from '~/composables/action/usePoiSnapping'
 import { useWeatherStore } from '~/composables/store/useWeatherStore'
 import { useWeatherSideeffect } from '~/composables/sideeffect/useWeatherSideeffect'
 import { useFacilityStore } from '~/composables/store/useFacilityStore'
@@ -56,7 +63,17 @@ useHead({
 
 // ─── 지도 초기화 ─────────────────────────────────────────────────
 
-const { init } = useMapInit()
+const notification = useNotificationStore()
+
+const { init } = useMapInit({
+    onBuildingCorrected: () => {
+        notification.notify({
+            title: '위치 보정',
+            message: '건물 위를 선택하여 인근 지면으로 위치가 보정되었습니다.',
+            tone: 'info'
+        })
+    }
+})
 /** Cesium 뷰어 인스턴스. `onMounted` 이후 `window.viewer`로 할당된다. */
 const viewer = shallowRef<CesiumViewer | null>(null)
 
@@ -64,6 +81,8 @@ const viewer = shallowRef<CesiumViewer | null>(null)
 
 const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute } =
     useRouteMapFacade(viewer)
+
+const routeDrawStore = useRouteDrawStore()
 
 // ─── 인증 ────────────────────────────────────────────────────────
 
@@ -80,11 +99,48 @@ const facilityEffect = useFacilitySideeffect({
     viewer,
     ...facility,
     onPoiClick: (poi) => {
-        const sectionIndex = drawing.activeSectionIndex
+        // 드로잉 상태가 아니면 무시
+        if (!drawing.sectionDraft.value) return
 
-        if (sectionIndex !== null) {
-            drawing.addPoiToSection(sectionIndex, poi)
+        const ranges = routeDrawStore.sectionPointRanges.value
+        const positions = routeDrawStore.drawnPositions.value
+        if (!positions?.length || !ranges.length) return
+
+        // 구간별 좌표 추출
+        const sectionGeometries = ranges.map((range) => ({
+            geom: {
+                coordinates: positions.slice(range.start, range.end + 1)
+            }
+        }))
+
+        const result = findNearestSection(poi.geom, sectionGeometries)
+        if (!result) return
+
+        const status = validatePoiDistance(result.distanceMeters)
+
+        if (status === 'blocked') {
+            notification.notify({
+                title: '연결 불가',
+                message: `선택한 시설물이 경로에서 ${Math.round(result.distanceMeters)}m 떨어져 있어 연결할 수 없습니다. (최대 500m)`,
+                tone: 'error'
+            })
+            return
         }
+
+        if (status === 'warning') {
+            notification.notify({
+                title: '거리 경고',
+                message: `선택한 시설물이 경로에서 ${Math.round(result.distanceMeters)}m 떨어져 있습니다.`,
+                tone: 'warning'
+            })
+        }
+
+        const enrichedPoi = {
+            ...poi,
+            description: generatePoiComment(poi.name, result.distanceMeters)
+        }
+
+        drawing.addPoiToSection(result.sectionIndex, enrichedPoi)
     }
 })
 useSidewalkSideeffect({ viewer })
