@@ -3,6 +3,10 @@ import type { CommonResponse } from '#shared/types/common'
 import type { CesiumDrawHandler, CesiumRuntime, CesiumViewerRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { DrawActionData, DrawActionResult, CesiumViewer } from '~/composables/useWindow'
+import {
+    isBuildingPick,
+    findNearestGroundPosition
+} from '~/composables/action/useBuildingDetection'
 
 type ViewerEntityHandle = Parameters<CesiumViewer['entities']['remove']>[0]
 
@@ -15,14 +19,19 @@ interface CesiumDrawState {
     resolve: (result: DrawActionResult) => void
 }
 
+interface MapInitOptions {
+    onBuildingCorrected?: () => void
+}
+
 /**
  * Cesium 3D 지도 뷰어를 초기화하는 sideeffect composable.
  * Cesium 스크립트를 동적 로드한 뒤 viewer를 만들고, 앱에서 쓰는 드로잉 helper를 부착한다.
  * SSR 비활성화(`ssr: false`) 페이지의 `onMounted`에서 `init()`을 호출해야 한다.
  */
-export const useMapInit = () => {
+export const useMapInit = (options?: MapInitOptions) => {
     /** 현재 진행 중인 드로잉 세션 상태. 드로잉이 없으면 `null`. */
     let activeDrawState: CesiumDrawState | null = null
+    let lastPickWasCorrected = false
 
     const getHiddenCreditContainer = () => {
         const existing = document.getElementById('cesium-credit-hidden')
@@ -167,6 +176,20 @@ export const useMapInit = () => {
             return null
         }
 
+        // 건물(3DTileset) 감지
+        const pickResult = scene.pick(windowPosition)
+        if (isBuildingPick(pickResult)) {
+            const { snappedPosition, corrected } = findNearestGroundPosition(
+                rawViewer,
+                CesiumLib,
+                windowPosition
+            )
+            lastPickWasCorrected = corrected
+            if (snappedPosition) return snappedPosition as Cartesian3
+        }
+
+        lastPickWasCorrected = false
+
         if (scene.pickPositionSupported) {
             const picked = scene.pickPosition(windowPosition)
 
@@ -201,9 +224,9 @@ export const useMapInit = () => {
             current.resolve(null)
         }
 
-        viewer._drawAction = (options) =>
+        viewer._drawAction = (drawOptions) =>
             new Promise((resolve) => {
-                if (options.shapeType !== 1) {
+                if (drawOptions.shapeType !== 1) {
                     resolve({
                         state: 'fail',
                         message: '현재는 폴리라인 드로잉만 지원합니다.'
@@ -262,6 +285,10 @@ export const useMapInit = () => {
                             }
                         })
                     })
+
+                    if (lastPickWasCorrected) {
+                        options?.onBuildingCorrected?.()
+                    }
                 }, CesiumLib.ScreenSpaceEventType.LEFT_CLICK)
 
                 handler.setInputAction((movement: { endPosition?: unknown }) => {
