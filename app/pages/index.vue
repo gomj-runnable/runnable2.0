@@ -37,6 +37,15 @@ import { useCameraSideeffect } from '~/composables/sideeffect/useCameraSideeffec
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 import { useBoundarySideeffect } from '~/composables/sideeffect/useBoundarySideeffect'
 import MapFooter from '~/components/map/molecules/MapFooter.vue'
+import SecondPanel from '~/components/map/templates/SecondPanel.vue'
+import { useSectionInfoStore } from '~/composables/store/useSectionInfoStore'
+import {
+    calculateTotalDistance,
+    calculateTotalTime,
+    formatTime
+} from '~/composables/action/usePaceCalculator'
+import { useElevationLayerStore } from '~/composables/store/useElevationLayerStore'
+import { useElevationLayerSideeffect } from '~/composables/sideeffect/useElevationLayerSideeffect'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -90,6 +99,31 @@ const cameraEffect = useCameraSideeffect({ viewer, ...camera })
 useBoundaryStore()
 const boundaryEffect = useBoundarySideeffect({ viewer })
 
+// ─── 구간 정보 ──────────────────────────────────────────────────
+const sectionInfo = useSectionInfoStore()
+
+const sectionTotalDistance = computed(() => calculateTotalDistance(sectionInfo.sections.value))
+const sectionTotalTime = computed(() =>
+    formatTime(calculateTotalTime(sectionInfo.sections.value, sectionInfo.userPaces.value))
+)
+
+const handleRouteSelect = async (routeId: string) => {
+    await routeList.select(routeId)
+    try {
+        const sections = await $fetch(`/api/routes/${routeId}/sections`)
+        sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
+    } catch {
+        // 구간 데이터를 가져오지 못하면 SecondPanel을 열지 않는다
+    }
+}
+
+// ─── 고도 시각화 ────────────────────────────────────────────────
+const elevation = useElevationLayerStore()
+const elevationEffect = useElevationLayerSideeffect({
+    viewer,
+    isElevationVisible: elevation.isElevationVisible
+})
+
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
@@ -99,7 +133,8 @@ onMounted(async () => {
         initWeather(),
         authEffect.fetchSession(),
         cameraEffect.init(),
-        boundaryEffect.init()
+        boundaryEffect.init(),
+        elevationEffect.init()
     ])
 })
 
@@ -135,6 +170,9 @@ const handleExploreSelect = async (routeId: string) => {
 
 /** 탐색 탭 진입 시 공개 경로 자동 로드 (미로드 상태일 때만 실행) */
 watch(activeNav, (next) => {
+    if (next !== '목록') {
+        sectionInfo.close()
+    }
     if (next === '탐색' && explore.searchResults.value.length === 0 && !explore.isSearching.value) {
         explore.search(explore.searchQuery.value)
     }
@@ -143,7 +181,7 @@ watch(activeNav, (next) => {
 
 <template>
     <div class="index-page">
-        <MapShell>
+        <MapShell :show-second-panel="sectionInfo.isOpen.value">
             <template #sidebar="{ collapsed, toggleSidebar }">
                 <MapSidebar :collapsed="collapsed">
                     <template #header>
@@ -182,7 +220,7 @@ watch(activeNav, (next) => {
                             <RouteListPanel
                                 :routes="routeList.filteredRoutes"
                                 :selected-route-id="routeList.selectedRouteId"
-                                @select="routeList.select"
+                                @select="handleRouteSelect"
                                 @download="routeList.download"
                             />
                         </template>
@@ -231,6 +269,22 @@ watch(activeNav, (next) => {
                 </MapSidebar>
             </template>
 
+            <template #secondPanel>
+                <SecondPanel
+                    :panel-title="sectionInfo.panelTitle.value"
+                    :sections="sectionInfo.sections.value"
+                    :user-paces="sectionInfo.userPaces.value"
+                    :total-distance="sectionTotalDistance"
+                    :total-time="sectionTotalTime"
+                    :is-edit-mode="sectionInfo.isEditMode.value"
+                    @update:edit-mode="sectionInfo.isEditMode.value = $event"
+                    @update:pace="sectionInfo.updatePace"
+                    @update:weight="sectionInfo.updateWeight"
+                    @update:strategy="sectionInfo.updateStrategy"
+                    @close="sectionInfo.close"
+                />
+            </template>
+
             <template #default>
                 <div id="map" class="map-view" />
             </template>
@@ -247,10 +301,12 @@ watch(activeNav, (next) => {
                     :active-layer="weather.activeLayer.value"
                     :monthly-data="weather.monthlyData.value"
                     :is-loading="weather.isLoading.value"
+                    :is-elevation-active="elevation.isElevationVisible.value"
                     @update:selected-date="weather.selectedDate.value = $event"
                     @update:selected-hour="weather.selectedHour.value = $event"
                     @update:selected-month="weather.selectedMonth.value = $event"
                     @update:active-layer="weather.activeLayer.value = $event"
+                    @update:elevation-active="elevation.isElevationVisible.value = $event"
                 />
                 <FacilityOverlay
                     :active-types="facility.activeTypes.value"

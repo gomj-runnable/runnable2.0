@@ -10,5 +10,6 @@ export interface UserPace {
     userRouteId: string
     sectionId: string
     pace?: number // integer (초 단위)
+    weight?: number // kg 단위, 0.5 단위 조절
     strategy?: string
 }
