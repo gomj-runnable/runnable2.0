@@ -7,9 +7,9 @@ import {
     addRoutePointEntity,
     geomToRouteDrawPositions,
     getSectionColor,
-    toCartesianPosition,
     toCesiumColor
 } from '~/composables/action/useRouteDrawUtils'
+import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 
 /** `useRouteListSideeffect`에 주입하는 의존성 옵션 */
 interface UseRouteListSideeffectOptions {
@@ -91,12 +91,11 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             const color = getSectionColor(index)
 
             return options.viewer.value!.entities.add({
-                polyline: {
-                    positions: positions.map(toCartesianPosition),
+                polyline: createClampedPolyline({
+                    positions,
                     width: 4,
-                    clampToGround: true,
                     material: toCesiumColor(color, 0.95)
-                }
+                })
             })
         })
 
