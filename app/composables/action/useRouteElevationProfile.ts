@@ -1,8 +1,10 @@
-import { distance, point, lineString, along, length } from '@turf/turf'
+import { distance, point } from '@turf/turf'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteElevationProfile, RouteElevationSection, SavedSection } from '#shared/types/route'
 import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import { geomToRouteDrawPositions, getSectionColor } from '~/composables/action/useRouteDrawUtils'
+
+export { densifyPositions } from '~/composables/action/usePositionDensify'
 
 /** 고도 프로필 생성 시 구간 하나를 표현하는 입력 데이터 */
 export interface RouteElevationSectionInput {
@@ -23,37 +25,6 @@ const calculateDistanceMeters = (start: GeoJsonPosition, end: GeoJsonPosition) =
     distance(point([start[0], start[1]]), point([end[0], end[1]]), { units: 'meters' })
 
 const roundMetric = (value: number, precision = 1) => Number(value.toFixed(precision))
-
-
-const DENSIFY_STEP_METERS = 50
-
-/**
- * 경로 위치 배열을 일정 간격(기본 50m)으로 보간하여 밀도를 높인다.
- * 고도는 0으로 초기화되며, 이후 지형 샘플링으로 채워진다.
- */
-export const densifyPositions = (
-    positions: GeoJsonPosition[],
-    stepMeters: number = DENSIFY_STEP_METERS
-): GeoJsonPosition[] => {
-    if (positions.length < 2) return [...positions]
-
-    const coords = positions.map(([lng, lat]) => [lng, lat] as [number, number])
-    const line = lineString(coords)
-    const totalLengthMeters = length(line, { units: 'meters' })
-    const result: GeoJsonPosition[] = []
-
-    let cursor = 0
-    while (cursor < totalLengthMeters) {
-        const pt = along(line, cursor, { units: 'meters' })
-        const [lng, lat] = pt.geometry.coordinates
-        result.push([lng!, lat!, 0])
-        cursor += stepMeters
-    }
-
-    const last = positions[positions.length - 1]!
-    result.push([last[0], last[1], 0])
-    return result
-}
 
 /**
  * 드래프트 드로잉에서 섹션 입력을 빌드한다.

@@ -2,7 +2,8 @@ import type { Ref, ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/composables/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
-import { toCartesianPosition, toCesiumColor } from '~/composables/action/useRouteDrawUtils'
+import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
+import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 
 /**
  * `useRouteClosingSideeffect`에 주입하는 의존성 옵션.
@@ -39,12 +40,11 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         const lastPoint = positions[positions.length - 1]!
 
         const entity = options.viewer.value.entities.add({
-            polyline: {
-                positions: [lastPoint, firstPoint].map(toCartesianPosition),
+            polyline: createClampedPolyline({
+                positions: [lastPoint, firstPoint],
                 width: 4,
-                clampToGround: true,
                 material: toCesiumColor('#FFFFFF', 0.3)
-            }
+            })
         })
 
         previewEntities.value = [entity]
@@ -56,32 +56,29 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         if (!options.viewer.value || !positions || positions.length < 2) return
 
         const reversedPositions = [...positions].reverse()
-        const cartesianPositions = reversedPositions.map(toCartesianPosition)
         const entities: CesiumEntity[] = []
 
         // 외곽 스트로크 (넓고 반투명 — 감싸는 효과)
         const outerEntity = options.viewer.value.entities.add({
-            polyline: {
-                positions: cartesianPositions,
+            polyline: createClampedPolyline({
+                positions: reversedPositions,
                 width: 8,
-                clampToGround: true,
                 material: toCesiumColor('#FFFFFF', 0.2)
-            }
+            })
         })
         entities.push(outerEntity)
 
         // 내부 점선
         const Cesium = window.Cesium
         const innerEntity = options.viewer.value.entities.add({
-            polyline: {
-                positions: cartesianPositions,
+            polyline: createClampedPolyline({
+                positions: reversedPositions,
                 width: 4,
-                clampToGround: true,
                 material: new Cesium.PolylineDashMaterialProperty({
                     color: toCesiumColor('#FFFFFF', 0.7),
                     dashLength: 16
                 })
-            }
+            })
         })
         entities.push(innerEntity)
 
