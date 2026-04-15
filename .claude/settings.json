@@ -23,7 +23,18 @@
             "WebFetch(domain:www.data.go.kr)",
             "WebFetch(domain:velog.io)",
             "Bash(grep:*)",
-            "Bash(bash \"/Users/kmj/.claude/plugins/marketplaces/omc//scripts/setup-progress.sh\" resume)"
+            "Bash(bash \"/Users/kmj/.claude/plugins/marketplaces/omc//scripts/setup-progress.sh\" resume)",
+            "Read(**)",
+            "Edit(**)",
+            "Write(**)"
+        ],
+        "deny": [
+            "mcp__*",
+            "Read(./.env)",
+            "Read(./.env.*)",
+            "Read(./secrets/**)",
+            "Edit(./.env)",
+            "Write(./.env)"
         ]
     }
 }
