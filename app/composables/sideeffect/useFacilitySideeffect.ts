@@ -1,10 +1,13 @@
 import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
+import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FACILITY_LAYERS } from '~/composables/store/useFacilityStore'
 import { useCameraStore } from '~/composables/store/useCameraStore'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
+import { createClampedPoint, createClampedLabel, createClampedPolyline } from '~/composables/action/useGroundClamping'
+import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
 
 /** 시설물 유형별 Cesium Entity 색상 (신호 횡단보도 / 무신호 횡단보도 구분) */
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
@@ -63,23 +66,22 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
     const addCrosswalkEntity = (
         v: CesiumViewer,
-        C: typeof import('cesium'),
+        _C: typeof import('cesium'),
         facility: Facility
     ) => {
         if (facility.polyline && facility.polyline.length >= 2) {
-            const flatCoords = facility.polyline.flatMap(([lng, lat]) => [lng, lat])
             const color = facility.hasSignal ? CROSSWALK_SIGNAL_COLOR : CROSSWALK_NO_SIGNAL_COLOR
+            const positions = facility.polyline.map(
+                ([lng, lat]) => [lng, lat, 0] as GeoJsonPosition
+            )
 
             return v.entities.add({
                 name: facility.name,
-                polyline: {
-                    positions: C.Cartesian3.fromDegreesArray(flatCoords),
+                polyline: createClampedPolyline({
+                    positions,
                     width: 6,
-                    material: C.Color.fromCssColorString(color).withAlpha(
-                        0.9
-                    ) as unknown as undefined,
-                    clampToGround: true
-                }
+                    material: toCesiumColor(color, 0.9)
+                })
             })
         }
 
@@ -92,26 +94,12 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         return v.entities.add({
             name: facility.name,
             position: C.Cartesian3.fromDegrees(facility.lng, facility.lat),
-            point: {
-                pixelSize: 10,
-                color: C.Color.fromCssColorString(color),
-                outlineColor: C.Color.WHITE,
-                outlineWidth: 2,
-                heightReference: C.HeightReference.CLAMP_TO_GROUND,
-                disableDepthTestDistance: Number.POSITIVE_INFINITY
-            },
-            label: {
-                text: facility.name,
-                font: '12px sans-serif',
-                style: C.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 3,
-                outlineColor: C.Color.BLACK,
-                verticalOrigin: C.VerticalOrigin.BOTTOM,
-                pixelOffset: new C.Cartesian2(0, -14),
-                heightReference: C.HeightReference.CLAMP_TO_GROUND,
-                disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                scale: 0.9
-            }
+            point: createClampedPoint({
+                color: toCesiumColor(color)
+            }),
+            label: createClampedLabel({
+                text: facility.name
+            })
         })
     }
 

@@ -3,7 +3,6 @@ import type { CesiumViewer } from '~/composables/useWindow'
 import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
 import {
     createRouteElevationProfile,
-    densifyPositions,
     buildDraftSectionInputs,
     buildSavedSectionInputs
 } from '~/composables/action/useRouteElevationProfile'
@@ -60,14 +59,6 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
 
     const terrainSampler = useTerrainSampler(viewer)
 
-    const densifyAndSample = async (sections: ReturnType<typeof buildDraftSectionInputs>) =>
-        Promise.all(
-            sections.map(async (s) => ({
-                ...s,
-                positions: await terrainSampler.sampleTerrain(densifyPositions(s.positions))
-            }))
-        )
-
     const listEffect = useRouteListSideeffect({
         viewer,
         routes: store.routes,
@@ -110,7 +101,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             store.sectionPointRanges.value,
             store.sectionDraft.value?.attrs
         )
-        const densified = await densifyAndSample(sectionInputs)
+        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
 
         openElevationChart('경로 고도 그래프', createRouteElevationProfile(densified))
     }
@@ -126,7 +117,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         const selectedRoute = store.routes.value.find((route) => route.routeId === routeId)
 
         const sectionInputs = buildSavedSectionInputs(sections)
-        const densified = await densifyAndSample(sectionInputs)
+        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
 
         openElevationChart(
             selectedRoute?.title ?? '경로 고도 그래프',
@@ -145,7 +136,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         }
 
         const sectionInputs = buildSavedSectionInputs(sections)
-        const densified = await densifyAndSample(sectionInputs)
+        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
 
         openElevationChart(routeTitle ?? '경로 고도 그래프', createRouteElevationProfile(densified))
     }

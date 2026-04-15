@@ -16,9 +16,9 @@ import {
     addRoutePointEntity,
     getSectionColor,
     normalizeDrawPositions,
-    toCartesianPosition,
     toCesiumColor
 } from '~/composables/action/useRouteDrawUtils'
+import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import type { NotificationOptions } from '~/composables/store/useNotificationStore'
 
@@ -89,12 +89,11 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             : toCesiumColor(color, 0.95)
 
         return options.viewer.value.entities.add({
-            polyline: {
-                positions: positions.map(toCartesianPosition),
+            polyline: createClampedPolyline({
+                positions,
                 width: 4,
-                clampToGround: true,
                 material
-            }
+            })
         })
     }
 

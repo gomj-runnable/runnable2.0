@@ -3,6 +3,7 @@ import type { DrawActionData } from '~/composables/useWindow'
 import type { GeoJsonLineString, RouteGeoJson } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { SECTION_COLORS } from '#shared/constants/route'
+import { createClampedPoint } from '~/composables/action/useGroundClamping'
 
 /**
  * 구간 인덱스에 대응하는 색상 문자열을 반환한다.
@@ -127,13 +128,9 @@ export const addRoutePointEntity = (
 ) =>
     viewer.entities.add({
         position: toCartesianPosition(position),
-        point: {
-            pixelSize: 10,
-            color: toCesiumColor(color, 0.95),
-            outlineColor: window.Cesium.Color.WHITE,
-            outlineWidth: 2,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-        }
+        point: createClampedPoint({
+            color: toCesiumColor(color, 0.95)
+        })
     })
 
 /**
