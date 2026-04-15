@@ -9,7 +9,11 @@
     flex: 1;
     height: 12px;
     border-radius: var(--radius-control-sm);
-    background: linear-gradient(to right, #0000FF, #00CC00, #FFFF00, #FF6600, #FF0000);
+    background: linear-gradient(to right,
+        #0000FF 0%, #0066FF 2.2%, #00CC00 4.0%, #66FF00 5.4%,
+        #FFFF00 7.0%, #FFAA00 8.4%, #FF6600 10.2%, #FF3300 12.8%,
+        #FF0000 100%
+    );
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
