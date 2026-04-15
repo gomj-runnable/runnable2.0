@@ -108,6 +108,16 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
         }
     }
 
+    /** isActive 토글: ON → 현재 위치 인도 표시, OFF → 모든 Primitive 제거 */
+    watch(store.isActive, (active) => {
+        if (active) {
+            searchByCurrentLocation()
+        } else {
+            removeAll()
+            store.clearSelection()
+        }
+    })
+
     /** selectedDistrict + selectedDong 변화 감지 → 렌더/제거 동기화 */
     watch(
         [store.selectedDistrict, store.selectedDong],

@@ -16,9 +16,12 @@ const props = withDefaults(
     defineProps<{
         /** 사이드바를 완전히 숨길지 여부 */
         hideSidebar?: boolean
+        /** SecondPanel 표시 여부 */
+        showSecondPanel?: boolean
     }>(),
     {
-        hideSidebar: false
+        hideSidebar: false,
+        showSecondPanel: false
     }
 )
 
@@ -41,6 +44,10 @@ const toggleSidebar = () => {
             :class="{ 'is-collapsed': isSidebarCollapsed }"
         >
             <slot name="sidebar" :collapsed="isSidebarCollapsed" :toggle-sidebar="toggleSidebar" />
+        </aside>
+
+        <aside v-if="props.showSecondPanel && $slots.secondPanel" class="map-shell__second-panel">
+            <slot name="secondPanel" />
         </aside>
 
         <div class="map-shell__viewer">
