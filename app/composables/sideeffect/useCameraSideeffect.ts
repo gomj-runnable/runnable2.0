@@ -1,6 +1,7 @@
 import { booleanPointInPolygon, point, polygon } from '@turf/turf'
 import type { ShallowRef, Ref } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
+import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 
 interface UseCameraSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -20,33 +21,9 @@ interface UseCameraSideeffectOptions {
  */
 export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
     const { viewer, centerLat, centerLng, altitude, heading, pitch, locationLabel } = options
+    const { guGeojson, dongGeojson, ensureGuLoaded, ensureDongLoaded } = useBoundaryStore()
 
     const getCesium = () => window.Cesium
-
-    /** 캐시된 행정경계 GeoJSON — 초기 로드 이후 재사용 */
-    let cachedGeojson: unknown = null
-    /** 캐시된 동 경계 GeoJSON */
-    let cachedDongGeojson: unknown = null
-
-    /** 서울 행정경계 GeoJSON을 서버에서 가져와 캐시에 저장한다. */
-    const fetchBoundary = async () => {
-        if (cachedGeojson) return
-        try {
-            cachedGeojson = await $fetch('/api/boundary/seoul')
-        } catch {
-            cachedGeojson = null
-        }
-    }
-
-    /** 서울 동 경계 GeoJSON을 서버에서 가져와 캐시에 저장한다. */
-    const fetchDongBoundary = async () => {
-        if (cachedDongGeojson) return
-        try {
-            cachedDongGeojson = await $fetch('/api/boundary/seoul-dong')
-        } catch {
-            cachedDongGeojson = null
-        }
-    }
 
     /**
      * 점이 폴리곤 내부에 있는지 판단한다.
@@ -63,7 +40,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
      * 매칭 실패 시 빈 문자열을 반환한다.
      */
     const reverseGeocode = (lng: number, lat: number): string => {
-        if (!cachedGeojson) return ''
+        if (!guGeojson.value) return ''
 
         type GeoFeature = {
             properties?: Record<string, unknown>
@@ -73,7 +50,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
             } | null
         }
 
-        const geojson = cachedGeojson as { features?: GeoFeature[] }
+        const geojson = guGeojson.value as { features?: GeoFeature[] }
         let guName = ''
 
         for (const feature of geojson.features ?? []) {
@@ -104,8 +81,8 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
         if (!guName) return '서울특별시'
 
         // 동 경계에서 동 이름 매칭
-        if (cachedDongGeojson) {
-            const dongGeojson = cachedDongGeojson as { features?: GeoFeature[] }
+        if (dongGeojson.value) {
+            const dongGeojson = dongGeojson.value as { features?: GeoFeature[] }
             for (const feature of dongGeojson.features ?? []) {
                 const geo = feature.geometry
                 if (!geo) continue
@@ -181,7 +158,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
      * 행정경계를 로드하고 moveEnd 이벤트를 구독한다.
      */
     const init = async () => {
-        await Promise.all([fetchBoundary(), fetchDongBoundary()])
+        await Promise.all([ensureGuLoaded(), ensureDongLoaded()])
 
         const v = viewer.value
         if (!v) return

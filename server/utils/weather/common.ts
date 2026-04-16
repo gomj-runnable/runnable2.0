@@ -1,4 +1,5 @@
 import type { HourlyWeather, Pm10Grade, WeatherCondition } from '#shared/types/weather'
+import { Pm10GradeEnum } from '#shared/types/pm10-grade.enum'
 
 export interface SeoulGridEntry {
     name: string
@@ -152,12 +153,8 @@ export const parseSlotDateTime = (slot: Pick<HourlyWeather, 'date' | 'time'>): D
     return fromKstParts(year, month, day, hour, 0)
 }
 
-export const mapPm10Grade = (pm10: number): Pm10Grade => {
-    if (pm10 <= 30) return 'good'
-    if (pm10 <= 80) return 'moderate'
-    if (pm10 <= 150) return 'bad'
-    return 'very-bad'
-}
+export const mapPm10Grade = (pm10: number): Pm10Grade =>
+    Pm10GradeEnum.fromValue(pm10).key as Pm10Grade
 
 export const mapConditionByCloudAndRain = (
     temperature: number,
