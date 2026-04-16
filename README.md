@@ -116,45 +116,115 @@ pnpm dev
 ## 디렉터리 구조
 
 ```
-runnable/
-├── app/                        # 프론트엔드
-│   ├── pages/                  # 라우트 페이지 (화면 조합만 담당)
-│   ├── components/map/         # 지도 UI 컴포넌트
-│   │   ├── atoms/              #   최소 단위 입력 (Textfield)
-│   │   ├── molecules/          #   조합형 컴포넌트 (Button, ChipButton, Profile)
-│   │   ├── organizations/      #   조직 단위 (Card)
-│   │   └── templates/          #   페이지 조합 (MapShell, AuthModal, ExplorePanel)
-│   ├── composables/            # 상태·로직·부수효과 분리
-│   │   ├── action/             #   순수 계산 (변환, 포맷, 트리 탐색)
-│   │   ├── sideeffect/         #   외부 연동 (API, 지도 엔진, 브라우저)
-│   │   └── store/              #   공유 상태 관리 (useState 기반)
-│   └── assets/css/             # 디자인 토큰·컴포넌트 CSS
-│       ├── base/               #   primitive.css → semantic.css → main.css
-│       ├── components/         #   컴포넌트별 외부 CSS
-│       └── pages/              #   페이지 조합 CSS
+Runnable/
+├── app/                                    # 프론트엔드
+│   ├── pages/
+│   │   └── index.vue                       # 메인 지도 페이지 (SSR: false)
+│   │
+│   ├── components/map/
+│   │   ├── atoms/inputs/                   # 최소 단위 입력 (Textfield)
+│   │   ├── molecules/                      # 중간 단위 UI
+│   │   │   ├── buttons/                    #   Button, ChipButton, FabButton 등 9종
+│   │   │   ├── weather/                    #   WeatherDatePicker, Legend, LayerToggle
+│   │   │   ├── chips/                      #   RouteClosingChipBar
+│   │   │   └── profiles/                   #   SidebarUserProfile
+│   │   ├── organizations/cards/            # Card, TextfieldCard
+│   │   └── templates/                      # 페이지 조합 단위
+│   │       ├── MapShell.vue                #   지도 + 오버레이 컨테이너
+│   │       ├── MapSidebar.vue              #   사이드바 레이아웃
+│   │       ├── RouteListPanel.vue          #   경로 목록
+│   │       ├── DrawRoutePanel.vue          #   경로 드로잉
+│   │       ├── WeatherOverlay.vue          #   날씨 오버레이
+│   │       ├── FacilityOverlay.vue         #   시설물 오버레이
+│   │       └── ...                         #   모달, 패널 등 15종
+│   │
+│   ├── composables/
+│   │   ├── action/                         # 순수 계산 (13종)
+│   │   │   ├── useWeatherDataTransform.ts  #   날씨 데이터 변환 (enum 위임)
+│   │   │   ├── useRouteDrawDraft.ts        #   구간 초안 관리
+│   │   │   ├── useRouteDrawUtils.ts        #   드로잉 유틸
+│   │   │   ├── useGroundClamping.ts        #   지형 클램핑
+│   │   │   └── ...
+│   │   ├── sideeffect/                     # 부수 효과 — API, 브라우저 IO (15종)
+│   │   │   ├── useRouteDrawSideeffect.ts   #   경로 드로잉 렌더링
+│   │   │   ├── useWeatherSideeffect.ts     #   날씨 레이어
+│   │   │   ├── useFacilitySideeffect.ts    #   시설물 마커 (enum 위임)
+│   │   │   ├── useRouteOptimizationSideeffect.ts  # 경로 보정 (enum 위임)
+│   │   │   └── ...
+│   │   ├── store/                          # 공유 상태 관리 (11종)
+│   │   │   ├── useRouteDrawStore.ts        #   드로잉 상태 + 최적화 모드 (env 연동)
+│   │   │   ├── useWeatherStore.ts          #   날씨 상태
+│   │   │   ├── useFacilityStore.ts         #   시설물 상태 (enum 자동 도출)
+│   │   │   └── ...
+│   │   ├── useRouteMapFacade.ts            # 지도 기능 통합 파사드
+│   │   ├── useMapInit.ts                   # Cesium 초기화
+│   │   └── useWindow.ts                    # window 전역 타입
+│   │
+│   └── assets/css/
+│       ├── base/                           # 디자인 토큰
+│       │   ├── primitive.css               #   원시값 토큰
+│       │   ├── semantic.css                #   의미 토큰
+│       │   └── main.css                    #   엔트리 (import 순서 관리)
+│       ├── components/                     # 컴포넌트별 CSS
+│       └── pages/                          # 페이지별 CSS
 │
-├── server/                     # 백엔드
-│   ├── api/                    # API 엔드포인트
-│   │   ├── auth/               #   better-auth 핸들러
-│   │   ├── routes/             #   경로 CRUD + 검색
-│   │   ├── weather/            #   날씨 API
-│   │   └── boundary/           #   행정경계 GeoJSON
+├── server/                                 # 백엔드
+│   ├── api/
+│   │   ├── routes/                         # 경로 CRUD + 최적화
+│   │   │   ├── index.get.ts               #   목록 조회
+│   │   │   ├── index.post.ts              #   경로 저장
+│   │   │   ├── optimize.post.ts           #   경로 보정 (TMAP/OSRM)
+│   │   │   ├── search.get.ts              #   공개 경로 검색
+│   │   │   └── [routeId]/                 #   경로별 수정/삭제/구간
+│   │   ├── facilities/                     # 시설물 조회 + 주변 검색
+│   │   ├── weather/                        # 날씨 API
+│   │   ├── boundary/                       # 서울 행정경계 GeoJSON
+│   │   └── auth/                           # better-auth 핸들러
+│   │
 │   ├── database/
-│   │   ├── schema/             #   Drizzle 테이블 정의 (users, routes, route_sections)
-│   │   └── migrations/         #   DB 마이그레이션 파일
-│   ├── repositories/           # 데이터 접근 계층 (인터페이스 + 구현체)
-│   └── utils/                  # 공통 유틸리티
-│       └── weather/            #   날씨 파이프라인 (observed, forecast, airquality, merge)
+│   │   ├── schema/                         # Drizzle 테이블 정의
+│   │   ├── migrations/                     # DB 마이그레이션
+│   │   ├── schema.ts                       # 스키마 진입점
+│   │   └── seed.ts                         # 시드 데이터
+│   │
+│   ├── repositories/                       # 데이터 접근 계층
+│   │   ├── route.repository.ts             #   인터페이스
+│   │   ├── route.repository.drizzle.ts     #   Drizzle 구현체
+│   │   └── route.repository.memory.ts      #   인메모리 구현체
+│   │
+│   └── utils/
+│       ├── weather/                        # 날씨 파이프라인
+│       │   ├── weather.service.ts          #   메인 서비스
+│       │   ├── observed.adapter.ts         #   관측 데이터 정규화
+│       │   ├── forecast.adapter.ts         #   예보 데이터 정규화
+│       │   ├── airquality.adapter.ts       #   대기질 데이터
+│       │   ├── merge.service.ts            #   관측+예보 병합
+│       │   └── common.ts                   #   공통 유틸
+│       ├── routing/                        # 경로 최적화
+│       │   ├── index.ts                    #   팩토리 (TMAP/OSRM 직접 생성)
+│       │   ├── tmap.service.ts             #   TMap 보행자 라우팅
+│       │   ├── osrm.service.ts             #   OSRM 보행자 라우팅
+│       │   └── common.ts                   #   공통 인터페이스
+│       ├── auth.ts                         # 인증 설정
+│       ├── db.ts                           # DB 연결
+│       └── error.ts                        # 에러 처리
 │
-├── shared/                     # 프론트/백 공용 코드
-│   ├── types/                  #   도메인 타입 (route, weather, geojson)
-│   ├── schemas/                #   Zod 런타임 검증 스키마
-│   ├── constants/              #   상수 정의
-│   └── data/                   #   샘플·시드 데이터
+├── shared/                                 # Frontend + Backend 공용
+│   ├── types/                              # 도메인 타입
+│   │   ├── enum-base.ts                    #   Java enum 스타일 베이스 클래스
+│   │   ├── weather-condition.enum.ts       #   날씨 상태 enum (color/icon/label)
+│   │   ├── pm10-grade.enum.ts              #   미세먼지 등급 enum (color)
+│   │   ├── facility-type.enum.ts           #   시설물 유형 enum (icon/color/poiType)
+│   │   ├── route-optimization-mode.enum.ts #   경로 최적화 모드 enum (requiresServer)
+│   │   ├── route.ts, weather.ts, facility.ts, geojson.ts, ...
+│   │   └── route-optimization.ts           #   최적화 모드 레지스트리 + 타입
+│   ├── schemas/                            # Zod 런타임 검증 스키마
+│   ├── constants/                          # 상수 정의
+│   └── data/                               # 샘플 데이터
 │
-├── lib/                        # 외부 라이브러리 (Cesium 정적 자산)
-├── .github/workflows/          # CI/CD 파이프라인
-└── public/                     # 정적 자료
+├── lib/cesium/                             # Cesium 정적 자산 (수정 금지)
+├── .github/workflows/                      # CI/CD 파이프라인
+└── public/                                 # 정적 자료
 ```
 
 ---

@@ -17,7 +17,7 @@ const CROSSWALK_NO_SIGNAL_COLOR = '#FF9800'
 const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', 'hospital']
 
 const getLayerColor = (type: FacilityType) =>
-    FACILITY_LAYERS.find((l) => l.type === type)?.color ?? '#FFFFFF'
+    FacilityTypeEnum.from(type)?.color ?? '#FFFFFF'
 
 /** POI 현재 위치 검색 대상 유형 */
 const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital']
