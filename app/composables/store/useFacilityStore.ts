@@ -1,13 +1,10 @@
 import type { Facility, FacilityType, FacilityLayerConfig } from '#shared/types/facility'
+import { EnumBase } from '#shared/types/enum-base'
+import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 
-/** 시설물 칩 */
-export const FACILITY_LAYERS: FacilityLayerConfig[] = [
-    { type: 'sidewalk', label: '인도 표시', icon: 'i-lucide-route', color: '#78909C' },
-    { type: 'crosswalk', label: '횡단보도', icon: 'i-lucide-footprints', color: '#4CAF50' },
-    { type: 'fountain', label: '음수대', icon: 'i-lucide-droplets', color: '#2196F3' },
-    { type: 'locker', label: '보관함', icon: 'i-lucide-package', color: '#9C27B0' },
-    { type: 'hospital', label: '병원', icon: 'i-lucide-cross', color: '#F44336' }
-]
+/** 시설물 칩 — FacilityTypeEnum에서 자동 도출 */
+export const FACILITY_LAYERS: FacilityLayerConfig[] =
+    EnumBase.values<FacilityTypeEnum>(FacilityTypeEnum).map((e) => e.toLayerConfig())
 
 /**
  * 시설물 데이터와 활성 유형 상태를 관리하는 store composable.

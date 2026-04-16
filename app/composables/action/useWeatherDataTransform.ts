@@ -1,58 +1,28 @@
 import type {
-    WeatherCondition,
     HourlyWeather,
-    Pm10Grade,
     WeatherLayer
 } from '#shared/types/weather'
+import type { WeatherCondition, Pm10Grade } from '#shared/types/weather'
+import { WeatherConditionEnum } from '#shared/types/weather-condition.enum'
+import { Pm10GradeEnum } from '#shared/types/pm10-grade.enum'
 
 /**
  * 기상청 강수형태(PTY)와 하늘상태(SKY) 코드를 앱 내부 날씨 상태로 변환한다.
- *
- * @param pty - 강수형태 코드 (0: 없음, 1·4: 비, 2·3: 눈)
- * @param sky - 하늘상태 코드 (1: 맑음, 3: 구름많음, 4: 흐림)
- * @returns 앱에서 사용하는 `WeatherCondition` 문자열
  */
-export const toWeatherCondition = (pty: number, sky: number): WeatherCondition => {
-    if (pty === 1 || pty === 4) return 'rainy'
-    if (pty === 2 || pty === 3) return 'snowy'
-    if (sky === 1) return 'clear'
-    if (sky === 3) return 'partly-cloudy'
-    return 'cloudy'
-}
+export const toWeatherCondition = (pty: number, sky: number): WeatherCondition =>
+    WeatherConditionEnum.fromKmaCode(pty, sky).key as WeatherCondition
 
 /**
  * PM10 미세먼지 수치를 등급으로 변환한다.
- *
- * @param pm10 - PM10 농도 (µg/m³)
- * @returns `'good'` | `'moderate'` | `'bad'` | `'very-bad'`
  */
-export const toPm10Grade = (pm10: number): Pm10Grade => {
-    if (pm10 <= 30) return 'good'
-    if (pm10 <= 80) return 'moderate'
-    if (pm10 <= 150) return 'bad'
-    return 'very-bad'
-}
+export const toPm10Grade = (pm10: number): Pm10Grade =>
+    Pm10GradeEnum.fromValue(pm10).key as Pm10Grade
 
 /**
  * 날씨 상태를 지도 폴리곤 채우기 색상으로 변환한다.
- *
- * @param condition - 앱 내부 날씨 상태 값
- * @returns 반투명 RGBA 색상 문자열
  */
-export const conditionToColor = (condition: WeatherCondition): string => {
-    switch (condition) {
-        case 'clear':
-            return 'rgba(255, 230, 50, 0.2)'
-        case 'partly-cloudy':
-            return 'rgba(200, 185, 155, 0.2)'
-        case 'cloudy':
-            return 'rgba(120, 120, 160, 0.2)'
-        case 'rainy':
-            return 'rgba(60, 150, 220, 0.2)'
-        case 'snowy':
-            return 'rgba(150, 210, 250, 0.2)'
-    }
-}
+export const conditionToColor = (condition: WeatherCondition): string =>
+    WeatherConditionEnum.from(condition).color
 
 /**
  * 평균 기온을 온도 단계별 그라데이션 색상으로 변환한다.
@@ -98,22 +68,9 @@ export const tempToColor = (tempAvg: number): string => {
 
 /**
  * PM10 미세먼지 등급을 지도 폴리곤 색상으로 변환한다.
- *
- * @param grade - PM10 등급 (`'good'` | `'moderate'` | `'bad'` | `'very-bad'`)
- * @returns 반투명 RGBA 색상 문자열
  */
-export const pm10GradeToColor = (grade: Pm10Grade): string => {
-    switch (grade) {
-        case 'good':
-            return 'rgba(100, 200, 100, 0.2)'
-        case 'moderate':
-            return 'rgba(250, 220, 50, 0.2)'
-        case 'bad':
-            return 'rgba(255, 150, 50, 0.2)'
-        case 'very-bad':
-            return 'rgba(220, 60, 60, 0.2)'
-    }
-}
+export const pm10GradeToColor = (grade: Pm10Grade): string =>
+    Pm10GradeEnum.from(grade).color
 
 /**
  * 반투명 RGBA 색상 문자열을 완전 불투명(알파=1)으로 변환한다.
@@ -150,42 +107,12 @@ export const resolvePolygonColor = (weather: HourlyWeather, layer: WeatherLayer)
 
 /**
  * 날씨 상태를 Iconify 아이콘 클래스명으로 변환한다.
- *
- * @param condition - 앱 내부 날씨 상태 값
- * @returns `i-lucide-*` 형식의 아이콘 클래스 문자열
  */
-export const conditionToIcon = (condition: WeatherCondition): string => {
-    switch (condition) {
-        case 'clear':
-            return 'i-lucide-sun'
-        case 'partly-cloudy':
-            return 'i-lucide-cloud-sun'
-        case 'cloudy':
-            return 'i-lucide-cloud'
-        case 'rainy':
-            return 'i-lucide-cloud-rain'
-        case 'snowy':
-            return 'i-lucide-snowflake'
-    }
-}
+export const conditionToIcon = (condition: WeatherCondition): string =>
+    WeatherConditionEnum.from(condition).icon
 
 /**
  * 날씨 상태를 한국어 레이블 문자열로 변환한다.
- *
- * @param condition - 앱 내부 날씨 상태 값
- * @returns 날씨 상태 한국어 레이블 (예: `'맑음'`, `'비'`)
  */
-export const conditionLabel = (condition: WeatherCondition): string => {
-    switch (condition) {
-        case 'clear':
-            return '맑음'
-        case 'partly-cloudy':
-            return '구름많음'
-        case 'cloudy':
-            return '흐림'
-        case 'rainy':
-            return '비'
-        case 'snowy':
-            return '눈'
-    }
-}
+export const conditionLabel = (condition: WeatherCondition): string =>
+    WeatherConditionEnum.from(condition).label
