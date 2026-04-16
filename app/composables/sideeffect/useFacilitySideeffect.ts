@@ -3,6 +3,7 @@ import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
+import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 import { FACILITY_LAYERS } from '~/composables/store/useFacilityStore'
 import { useCameraStore } from '~/composables/store/useCameraStore'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
@@ -169,12 +170,8 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
      * FacilityType → PoiType 매핑 및 geom 생성을 담당한다.
      */
     const facilityToPoiDraft = (facility: Facility): PoiDraftInput | null => {
-        const typeMap: Partial<Record<FacilityType, PoiDraftInput['type']>> = {
-            crosswalk: 'CROSSWALK',
-            fountain: 'WATER',
-            hospital: 'HOSPITAL'
-        }
-        const poiType = typeMap[facility.type]
+        const enumInstance = FacilityTypeEnum.from(facility.type)
+        const poiType = enumInstance?.poiType
 
         if (!poiType) return null
 
