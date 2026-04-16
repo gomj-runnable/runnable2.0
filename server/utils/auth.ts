@@ -2,8 +2,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db'
 import { users, userSessions, userAccounts, userVerifications } from '../database/schema/users'
-
-const isMemoryMode = process.env.USE_DATABASE_MODE === 'MEMORY'
+import { isMemoryMode } from './config'
 
 export const auth = isMemoryMode ? null : betterAuth({
     secret: process.env.BETTER_AUTH_SECRET,

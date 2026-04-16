@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { RouteBase, SavedRoute } from '#shared/types/route'
+import type { SavedRoute } from '#shared/types/route'
 import Card from '~/components/map/organizations/cards/Card.vue'
+import { formatDistance } from '~/composables/action/useFormatUtils'
 
 defineProps<{
     /** 공개 경로 목록 */
@@ -16,11 +17,6 @@ defineEmits<{
     select: [routeId: string]
 }>()
 
-/** 거리 값을 m/km 단위 문자열로 변환한다 */
-const formatDistance = (distance?: RouteBase['distance']) => {
-    if (typeof distance !== 'number') return null
-    return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`
-}
 </script>
 
 <template>
@@ -58,7 +54,7 @@ const formatDistance = (distance?: RouteBase['distance']) => {
 
                     <template #meta>
                         <span class="explore-panel__card-meta">
-                            {{ formatDistance(route.distance) ?? '' }}
+                            {{ formatDistance(route.distance) }}
                         </span>
                     </template>
                 </Card>

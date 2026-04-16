@@ -2,14 +2,13 @@ import { fromWebHandler, getCookie, setCookie, deleteCookie, getRequestURL, read
 import type { H3Event } from 'h3'
 import { auth } from '#server/utils/auth'
 import { memoryUsers } from '#server/utils/memoryStore'
+import { isMemoryMode } from '#server/utils/config'
 
 /**
  * better-auth는 url을 임의로 조작하는데, 이를 위한 url 개방
  *
  * TODO: (추가확인 필요)
  */
-
-const isMemoryMode = process.env.USE_DATABASE_MODE === 'MEMORY'
 
 async function handleMemoryAuth(event: H3Event) {
     const url = getRequestURL(event)

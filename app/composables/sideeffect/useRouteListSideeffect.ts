@@ -1,5 +1,6 @@
 import type { Ref, ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/composables/useWindow'
+import { createEntityGroup } from '~/composables/action/useEntityCleanup'
 import type { RouteSectionBase, SavedRoute, SavedSection } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
@@ -27,9 +28,9 @@ interface UseRouteListSideeffectOptions {
  */
 export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) => {
     /** 지도에 표시 중인 미리보기 폴리라인 엔티티 목록 */
-    const previewPolylines = shallowRef<CesiumEntity[]>([])
+    const polylines = createEntityGroup(options.viewer)
     /** 지도에 표시 중인 미리보기 포인트 마커 엔티티 목록 */
-    const previewPoints = shallowRef<CesiumEntity[]>([])
+    const points = createEntityGroup(options.viewer)
 
     const toPreviewSegments = (sections: RouteSectionBase[]) =>
         sections
@@ -46,10 +47,8 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
 
     /** 지도에 그려진 미리보기 폴리라인을 모두 제거한다. */
     const clearPreview = () => {
-        previewPolylines.value.forEach((entity) => options.viewer.value?.entities.remove(entity))
-        previewPoints.value.forEach((entity) => options.viewer.value?.entities.remove(entity))
-        previewPolylines.value = []
-        previewPoints.value = []
+        polylines.clear()
+        points.clear()
     }
 
     /** 목록에서 선택된 경로와 section 상세 상태를 초기화한다. */
@@ -87,7 +86,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
 
         const previewSegments = toPreviewSegments(sections)
 
-        previewPolylines.value = previewSegments.map((positions, index) => {
+        polylines.set(previewSegments.map((positions, index) => {
             const color = getSectionColor(index)
 
             return options.viewer.value!.entities.add({
@@ -97,7 +96,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
                     material: toCesiumColor(color, 0.95)
                 })
             })
-        })
+        }))
 
         const routePointEntities: CesiumEntity[] = []
         const firstPoint = previewSegments[0]?.[0]
@@ -125,7 +124,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             }
         })
 
-        previewPoints.value = routePointEntities
+        points.set(routePointEntities)
 
         return sections
     }
