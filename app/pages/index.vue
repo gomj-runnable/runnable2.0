@@ -53,6 +53,9 @@ import {
 } from '~/composables/action/usePaceCalculator'
 import { useElevationLayerStore } from '~/composables/store/useElevationLayerStore'
 import { useElevationLayerSideeffect } from '~/composables/sideeffect/useElevationLayerSideeffect'
+import { useGradientStore } from '~/composables/store/useGradientStore'
+import { useGradientSideeffect } from '~/composables/sideeffect/useGradientSideeffect'
+import GradientToggle from '~/components/map/molecules/GradientToggle.vue'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -177,6 +180,16 @@ const elevationEffect = useElevationLayerSideeffect({
     isElevationVisible: elevation.isElevationVisible
 })
 
+// ─── 경사도 시각화 ───────────────────────────────────────────────
+const gradient = useGradientStore()
+const gradientEffect = useGradientSideeffect({
+    viewer,
+    isGradientVisible: gradient.isGradientVisible,
+    drawnPositions: routeDrawStore.drawnPositions,
+    setSegments: gradient.setSegments,
+    setDifficulty: gradient.setDifficulty
+})
+
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
@@ -187,7 +200,8 @@ onMounted(async () => {
         authEffect.fetchSession(),
         cameraEffect.init(),
         boundaryEffect.init(),
-        elevationEffect.init()
+        elevationEffect.init(),
+        gradientEffect.init()
     ])
 })
 
@@ -367,6 +381,11 @@ watch(activeNav, (next) => {
                     :is-searching="facility.isSearching.value"
                     @toggle="facility.toggleType"
                     @search-nearby="facilityEffect.searchNearby"
+                />
+                <GradientToggle
+                    :active="gradient.isGradientVisible.value"
+                    :difficulty="gradient.currentDifficulty.value"
+                    @toggle="gradient.toggleGradient"
                 />
                 <RouteOverlayBottomBar
                     v-if="activeNav === '그리기' || elevationChart.profile"
