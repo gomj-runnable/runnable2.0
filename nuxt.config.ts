@@ -27,6 +27,9 @@ export default defineNuxtConfig({
     airKoreaKey: process.env.OPEN_DATA ?? '',
     routeMode: process.env.ROUTE_MODE ?? 'NONE',
     tmapApi: process.env.TMAP_API ?? '',
+    public: {
+      routeMode: process.env.ROUTE_MODE ?? 'NONE',
+    },
   },
 
   vite: {

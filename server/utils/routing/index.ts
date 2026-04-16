@@ -1,9 +1,22 @@
-import type { RoutingServiceConfig } from './registry'
-import { getRoutingService } from './registry'
+import type { RoutingService } from './common'
+import type { RouteOptimizationMode } from '#shared/types/route-optimization'
+import { TMapRoutingService } from './tmap.service'
+import { OsrmRoutingService } from './osrm.service'
 
-// 서비스 자가 등록을 위한 사이드 이펙트 import
-import './tmap.service'
-import './osrm.service'
+export interface RoutingServiceConfig {
+  tmapApi?: string
+}
 
-export type { RoutingServiceConfig }
-export { getRoutingService as createRoutingService }
+export const createRoutingService = (
+  mode: RouteOptimizationMode,
+  config: RoutingServiceConfig = {}
+): RoutingService | null => {
+  switch (mode) {
+    case 'TMAP':
+      return new TMapRoutingService(config.tmapApi ?? '')
+    case 'OSRM':
+      return new OsrmRoutingService()
+    default:
+      return null
+  }
+}
