@@ -1,0 +1,107 @@
+.weather-recommend-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-xs);
+    width: 100%;
+    padding: var(--gap-section-sm) var(--gap-section-md);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-surface-md);
+    background: var(--color-surface-soft);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.weather-recommend-card:hover {
+    background: var(--color-surface-soft-hover);
+}
+
+.weather-recommend-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-section-sm);
+}
+
+.weather-recommend-card__title {
+    font-size: var(--text-label-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.weather-recommend-card__score {
+    flex-shrink: 0;
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.weather-recommend-card__score.is-score-good {
+    color: #4caf72;
+}
+
+.weather-recommend-card__score.is-score-moderate {
+    color: #f0a030;
+}
+
+.weather-recommend-card__score.is-score-low {
+    color: #e05050;
+}
+
+.weather-recommend-card__score-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border-default);
+    overflow: hidden;
+}
+
+.weather-recommend-card__score-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.weather-recommend-card__score-fill.is-score-good {
+    background: #4caf72;
+}
+
+.weather-recommend-card__score-fill.is-score-moderate {
+    background: #f0a030;
+}
+
+.weather-recommend-card__score-fill.is-score-low {
+    background: #e05050;
+}
+
+.weather-recommend-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-section-md);
+}
+
+.weather-recommend-card__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-section-2xs);
+    font-size: var(--text-label-xs);
+    color: var(--text-secondary);
+}
+
+.weather-recommend-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-section-2xs);
+}
+
+.weather-recommend-card__tag {
+    padding: 2px var(--gap-section-xs);
+    border-radius: var(--radius-control-sm);
+    background: var(--nav-active-bg);
+    color: var(--primary-color);
+    font-size: var(--text-label-xs);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+}
