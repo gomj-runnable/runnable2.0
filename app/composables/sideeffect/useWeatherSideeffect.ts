@@ -9,6 +9,7 @@ import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shar
 import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
+import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 
 type ActiveWeatherLayer = WeatherLayer | null
 
@@ -151,15 +152,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         v.scene.primitives.add(weatherOutlinePrimitive)
     }
 
-    /** 서울 행정경계 GeoJSON을 서버에서 가져와 `boundaryGeojson`에 저장한다. */
-    const fetchBoundary = async () => {
-        try {
-            const data = await $fetch('/api/boundary/seoul')
-            boundaryGeojson.value = data
-        } catch (err) {
-            console.error('[WeatherSideeffect] boundary fetch failed', err)
-        }
-    }
+    const { ensureGuLoaded } = useBoundaryStore()
 
     /** 선택된 날짜의 월별 날씨 데이터를 서버에서 가져와 `monthlyData`에 저장한다. */
     const fetchMonthlyWeather = async () => {
@@ -273,7 +266,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
      * 행정경계·날씨 데이터를 병렬로 불러온 뒤 DataSource를 로드하고 폴리곤 색상을 적용한다.
      */
     const init = async () => {
-        await Promise.all([fetchBoundary(), fetchMonthlyWeather()])
+        await Promise.all([ensureGuLoaded(), fetchMonthlyWeather()])
         await loadBoundaryDataSource()
         updateCesiumPolygons()
     }

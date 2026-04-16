@@ -1,5 +1,6 @@
 import type { HourlyWeather } from '#shared/types/weather'
 import { VilageFcstOriginalResponse, type VilageFcstOriginalItem } from '#shared/types/weather'
+import { WeatherConditionEnum } from '#shared/types/weather-condition.enum'
 import {
     addDays,
     fromKstParts,
@@ -89,13 +90,12 @@ const mapConditionByPtySky = (
     sky: number | null,
     tmp: number
 ): HourlyWeather['condition'] => {
-    if (pty === 1 || pty === 4) return 'rainy'
-    if (pty === 2 || pty === 3) return tmp <= 0 ? 'snowy' : 'rainy'
-
-    if (sky === 1) return 'clear'
-    if (sky === 3) return 'partly-cloudy'
-    if (sky === 4) return 'cloudy'
-
+    if (pty !== null && pty > 0) {
+        return WeatherConditionEnum.fromKmaCode(pty, sky ?? 4, tmp).key as HourlyWeather['condition']
+    }
+    if (sky !== null) {
+        return WeatherConditionEnum.fromKmaCode(0, sky).key as HourlyWeather['condition']
+    }
     return mapConditionByCloudAndRain(tmp, null, null)
 }
 

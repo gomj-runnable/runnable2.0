@@ -14,35 +14,12 @@ interface UseBoundarySideeffectOptions {
  */
 export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => {
     const { viewer } = options
-    const { isGuActive, isDongActive } = useBoundaryStore()
-
-    /** 로드된 시군구 GeoJSON 캐시 */
-    let cachedGuGeojson: unknown = null
-    /** 로드된 행정동 GeoJSON 캐시 */
-    let cachedDongGeojson: unknown = null
+    const { isGuActive, isDongActive, guGeojson, dongGeojson, ensureGuLoaded, ensureDongLoaded } = useBoundaryStore()
 
     /** 시군구 Entity 목록 */
     const guEntities: Entity[] = []
     /** 행정동 Entity 목록 */
     const dongEntities: Entity[] = []
-
-    const fetchGuGeojson = async () => {
-        if (cachedGuGeojson) return
-        try {
-            cachedGuGeojson = await $fetch('/api/boundary/seoul')
-        } catch {
-            cachedGuGeojson = null
-        }
-    }
-
-    const fetchDongGeojson = async () => {
-        if (cachedDongGeojson) return
-        try {
-            cachedDongGeojson = await $fetch('/api/boundary/seoul-dong')
-        } catch {
-            cachedDongGeojson = null
-        }
-    }
 
     const calcCentroid = (coords: number[][]): [number, number] => {
         const [lng, lat] = centroid(polygon([coords])).geometry.coordinates
@@ -61,9 +38,9 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     const showGu = () => {
         const v = viewer.value
         const C = window.Cesium
-        if (!v || !C || !cachedGuGeojson) return
+        if (!v || !C || !guGeojson.value) return
 
-        const geojson = cachedGuGeojson as { features?: GeoFeature[] }
+        const geojson = guGeojson.value as { features?: GeoFeature[] }
         const fillColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.08)
         const lineColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.4)
 
@@ -128,9 +105,9 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     const showDong = () => {
         const v = viewer.value
         const C = window.Cesium
-        if (!v || !C || !cachedDongGeojson) return
+        if (!v || !C || !dongGeojson.value) return
 
-        const geojson = cachedDongGeojson as { features?: GeoFeature[] }
+        const geojson = dongGeojson.value as { features?: GeoFeature[] }
         const lineColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.25)
         const labelColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.5)
 
@@ -187,7 +164,7 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     }
 
     const init = async () => {
-        await Promise.all([fetchGuGeojson(), fetchDongGeojson()])
+        await Promise.all([ensureGuLoaded(), ensureDongLoaded()])
 
         watch(
             isGuActive,

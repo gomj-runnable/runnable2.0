@@ -20,10 +20,17 @@ export class WeatherConditionEnum extends EnumBase {
         super(key, label)
     }
 
-    /** 기상청 강수형태(PTY) + 하늘상태(SKY) 코드로부터 변환 */
-    static fromKmaCode(pty: number, sky: number): WeatherConditionEnum {
+    /**
+     * 기상청 강수형태(PTY) + 하늘상태(SKY) 코드로부터 변환.
+     * @param pty - 강수형태 (0: 없음, 1/4: 비, 2: 비/눈, 3: 눈)
+     * @param sky - 하늘상태 (1: 맑음, 3: 구름많음, 4: 흐림)
+     * @param tmp - 기온 (°C). PTY 2/3일 때 눈/비 구분에 사용. 생략 시 눈으로 판정.
+     */
+    static fromKmaCode(pty: number, sky: number, tmp?: number): WeatherConditionEnum {
         if (pty === 1 || pty === 4) return WeatherConditionEnum.RAINY
-        if (pty === 2 || pty === 3) return WeatherConditionEnum.SNOWY
+        if (pty === 2 || pty === 3) {
+            return (tmp !== undefined && tmp > 0) ? WeatherConditionEnum.RAINY : WeatherConditionEnum.SNOWY
+        }
         if (sky === 1) return WeatherConditionEnum.CLEAR
         if (sky === 3) return WeatherConditionEnum.PARTLY_CLOUDY
         return WeatherConditionEnum.CLOUDY
