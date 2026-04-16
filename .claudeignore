@@ -23,7 +23,7 @@ lib/
 
 # Environment variables
 .env
-.env.*
+!.env.example
 
 # Logs & cache
 logs/

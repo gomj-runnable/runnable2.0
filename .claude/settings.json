@@ -31,7 +31,8 @@
         "deny": [
             "mcp__*",
             "Read(./.env)",
-            "Read(./.env.*)",
+            "Read(./.env.local)",
+            "Read(./.env.production)",
             "Read(./secrets/**)",
             "Edit(./.env)",
             "Write(./.env)"
