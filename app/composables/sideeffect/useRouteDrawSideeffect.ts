@@ -1,5 +1,6 @@
 import type { Ref, ShallowRef } from 'vue'
 import type { DrawActionData, CesiumEntity, CesiumViewer } from '~/composables/useWindow'
+import { createEntityGroup } from '~/composables/action/useEntityCleanup'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { createSectionSchema } from '#shared/schemas/route.schema'
@@ -57,10 +58,10 @@ interface UseRouteDrawSideeffectOptions {
  */
 const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
     /** 현재 지도에 그려진 구간 폴리라인 엔티티 목록 */
-    const drawnSectionPolylines = shallowRef<CesiumEntity[]>([])
+    const sectionPolylines = createEntityGroup(options.viewer)
 
     /** 현재 지도에 그려진 구간 경계 포인트 엔티티 목록 */
-    const drawnSectionPoints = shallowRef<CesiumEntity[]>([])
+    const sectionPoints = createEntityGroup(options.viewer)
 
     /**
      * 단일 구간의 폴리라인을 지도에 그린다.
@@ -106,27 +107,12 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
     }
 
     /**
-     * 지도에서 그래픽(폴리라인) 엔티티 목록을 일괄 제거한다.
-     *
-     * @param entities - 제거할 Cesium 그래픽 엔티티 배열
-     */
-    const removeGraphics = (entities: CesiumEntity[]) => {
-        if (!options.viewer.value) {
-            return
-        }
-
-        entities.forEach((entity) => options.viewer.value?.entities.remove(entity))
-    }
-
-    /**
      * 현재 지도에 그려진 모든 구간 폴리라인과 포인트 마커를 제거한다.
      * 새 드로잉 시작 또는 상태 리셋 전에 호출한다.
      */
     const clearSectionGraphics = () => {
-        removeGraphics(drawnSectionPolylines.value)
-        removeGraphics(drawnSectionPoints.value)
-        drawnSectionPolylines.value = []
-        drawnSectionPoints.value = []
+        sectionPolylines.clear()
+        sectionPoints.clear()
     }
 
     /**
@@ -148,15 +134,17 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
         const isRoundTrip = options.closingMode?.value === 'round-trip'
 
-        drawnSectionPolylines.value = ranges
-            .map((range, index) => {
-                const sectionPoints = positions.slice(range.start, range.end + 1)
+        sectionPolylines.set(
+            ranges
+                .map((range, index) => {
+                    const sectionPoints = positions.slice(range.start, range.end + 1)
 
-                return sectionPoints.length >= 2
-                    ? drawSection(sectionPoints, index, isRoundTrip)
-                    : null
-            })
-            .filter((entity): entity is CesiumEntity => entity !== null)
+                    return sectionPoints.length >= 2
+                        ? drawSection(sectionPoints, index, isRoundTrip)
+                        : null
+                })
+                .filter((entity): entity is CesiumEntity => entity !== null)
+        )
 
         const routePointEntities: CesiumEntity[] = []
         const firstPoint = positions[0]
@@ -183,7 +171,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             }
         })
 
-        drawnSectionPoints.value = routePointEntities
+        sectionPoints.set(routePointEntities)
     }
 
     /**

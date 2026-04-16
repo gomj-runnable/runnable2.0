@@ -4,6 +4,7 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
 import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
+import { createEntityGroup } from '~/composables/action/useEntityCleanup'
 
 /**
  * `useRouteClosingSideeffect`에 주입하는 의존성 옵션.
@@ -21,14 +22,11 @@ interface UseRouteClosingSideeffectOptions {
  */
 export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOptions) => {
     /** 마감 모드 미리보기로 지도에 추가한 엔티티 목록 */
-    const previewEntities = shallowRef<CesiumEntity[]>([])
+    const preview = createEntityGroup(options.viewer)
 
     /** 현재 마감 미리보기 엔티티를 모두 지도에서 제거한다. */
     const clearClosingPreview = () => {
-        if (!options.viewer.value) return
-
-        previewEntities.value.forEach((entity) => options.viewer.value?.entities.remove(entity))
-        previewEntities.value = []
+        preview.clear()
     }
 
     /** loop-close 모드: 마지막 점에서 첫 점을 잇는 반투명 직선을 그린다. */
@@ -47,7 +45,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
             })
         })
 
-        previewEntities.value = [entity]
+        preview.set([entity])
     }
 
     /** round-trip 모드: 역순 경로에 외곽 스트로크와 내부 점선을 겹쳐 그린다. */
@@ -82,7 +80,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         })
         entities.push(innerEntity)
 
-        previewEntities.value = entities
+        preview.set(entities)
     }
 
     watchEffect(() => {
