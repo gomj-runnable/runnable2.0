@@ -1,0 +1,48 @@
+.route-discover-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-section-sm);
+}
+
+.route-discover-card__title {
+    margin: 0;
+    font-size: var(--text-heading-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-primary);
+}
+
+.route-discover-card__district {
+    flex-shrink: 0;
+    font-size: var(--text-label-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.route-discover-card__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-section-xs);
+    margin-top: var(--gap-section-xs);
+}
+
+.route-discover-card__stat {
+    font-size: var(--text-body-sm);
+    color: var(--text-secondary);
+}
+
+.route-discover-card__stat + .route-discover-card__stat::before {
+    content: '·';
+    margin-right: var(--gap-section-xs);
+    color: var(--text-secondary);
+}
+
+.route-discover-card__author {
+    font-size: var(--text-label-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-label);
+    color: color-mix(in srgb, var(--text-primary) 72%, transparent);
+}
