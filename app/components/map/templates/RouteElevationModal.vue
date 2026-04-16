@@ -4,6 +4,7 @@ import Button from '~/components/map/molecules/buttons/Button.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
 import { createDistanceTicks } from '~/composables/action/useRouteElevationProfile'
 import { calcChartGeometry } from '~/composables/action/useElevationChartAction'
+import { formatDistance } from '~/composables/action/useFormatUtils'
 
 const CHART_WIDTH = 720
 const CHART_HEIGHT = 260
@@ -34,15 +35,6 @@ defineEmits<{
     'update:open': [value: boolean]
 }>()
 
-/** 거리 값을 m/km 단위 문자열로 변환한다 */
-const formatDistance = (distanceKm?: number) => {
-    if (typeof distanceKm !== 'number' || Number.isNaN(distanceKm)) {
-        return '0.0km'
-    }
-
-    return distanceKm < 1 ? `${Math.round(distanceKm * 1000)}m` : `${distanceKm.toFixed(1)}km`
-}
-
 /** 고도 값을 m 단위 문자열로 변환한다 (유효하지 않으면 '-' 반환) */
 const formatElevation = (elevation?: number) =>
     typeof elevation === 'number' && !Number.isNaN(elevation) ? `${Math.round(elevation)}m` : '-'
@@ -61,7 +53,7 @@ const summaryItems = computed(() => {
     }
 
     return [
-        { label: '총 거리', value: formatDistance(props.profile.distanceKm) },
+        { label: '총 거리', value: formatDistance(props.profile.distanceKm, '0.0km') },
         { label: '최고 고도', value: formatElevation(props.profile.maxElevation) },
         { label: '최저 고도', value: formatElevation(props.profile.minElevation) }
     ]

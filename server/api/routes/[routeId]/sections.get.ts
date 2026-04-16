@@ -1,7 +1,7 @@
 import { routeRepository } from '../../../repositories'
+import { requireRouteIdParam } from '../../../utils/params'
 
 export default defineEventHandler(async (event) => {
-    const routeId = getRouterParam(event, 'routeId')
-    if (!routeId) throw createError({ statusCode: 400, message: 'routeId is required' })
+    const routeId = requireRouteIdParam(event)
     return routeRepository.getSectionsByRouteId(routeId)
 })

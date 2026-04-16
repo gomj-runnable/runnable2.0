@@ -2,6 +2,7 @@
 import Button from '~/components/map/molecules/buttons/Button.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import PopupModal from '~/components/map/templates/PopupModal.vue'
+import { formatDistance } from '~/composables/action/useFormatUtils'
 
 defineProps<{
     /** 팝업 표시 여부 */
@@ -25,17 +26,6 @@ defineEmits<{
     submit: []
 }>()
 
-/** 거리 값을 m/km 단위 문자열로 변환한다 */
-const formatDistance = (distance?: number) => {
-    if (typeof distance !== 'number' || Number.isNaN(distance)) {
-        return ''
-    }
-
-    if (distance < 1) {
-        return `${Math.round(distance * 1000)}m`
-    }
-    return `${distance.toFixed(1)}km`
-}
 </script>
 
 <template>

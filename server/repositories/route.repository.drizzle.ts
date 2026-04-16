@@ -16,6 +16,10 @@ function getDb() {
     return _db
 }
 
+/** routes 테이블에 users를 조인하는 공통 쿼리 베이스를 생성한다. */
+const routesWithAuthor = () =>
+    getDb().select().from(routes).leftJoin(users, eq(routes.userId, users.id))
+
 const toSavedRoute = (
     row: typeof routes.$inferSelect,
     authorName?: string
@@ -74,10 +78,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async getRoute(routeId: string): Promise<SavedRoute | null> {
-        const rows = await getDb()
-            .select()
-            .from(routes)
-            .leftJoin(users, eq(routes.userId, users.id))
+        const rows = await routesWithAuthor()
             .where(eq(routes.routeId, routeId))
             .limit(1)
 
@@ -87,10 +88,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async listRoutes(): Promise<SavedRoute[]> {
-        const rows = await getDb()
-            .select()
-            .from(routes)
-            .leftJoin(users, eq(routes.userId, users.id))
+        const rows = await routesWithAuthor()
             .orderBy(desc(routes.createdAt))
 
         return rows.map((r) => toSavedRoute(r.routes, r.users?.name))
@@ -119,10 +117,7 @@ class DrizzleRouteRepository implements IRouteRepository {
             )
         }
 
-        const rows = await getDb()
-            .select()
-            .from(routes)
-            .leftJoin(users, eq(routes.userId, users.id))
+        const rows = await routesWithAuthor()
             .where(and(...conditions))
             .orderBy(desc(routes.createdAt))
             .limit(50)

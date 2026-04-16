@@ -4,8 +4,7 @@ import { auth } from './auth'
 import { memoryUsers } from './memoryStore'
 import { routeRepository } from '../repositories'
 import type { SavedRoute } from '../repositories/route.repository'
-
-const isMemoryMode = process.env.USE_DATABASE_MODE === 'MEMORY'
+import { isMemoryMode } from './config'
 const DEV_USER = { userId: 'dev-user', name: 'Dev User', email: 'dev@localhost' }
 
 /** 현재 요청의 인증 세션에서 userId를 추출한다. 미인증이면 null을 반환한다. */
