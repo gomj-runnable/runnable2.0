@@ -66,7 +66,8 @@ export const useRouteDrawStore = () => {
     })
 
     /** 경로 최적화 모드. 'NONE'이면 최적화를 건너뛴다. */
-    const optimizationMode = useState<RouteOptimizationMode>('route-optimization-mode', () => 'NONE')
+    const { routeMode } = useRuntimeConfig().public
+    const optimizationMode = useState<RouteOptimizationMode>('route-optimization-mode', () => (routeMode as RouteOptimizationMode) ?? 'NONE')
 
     /** 경로 최적화 요청 진행 중 여부 */
     const isOptimizing = useState('route-is-optimizing', () => false)
