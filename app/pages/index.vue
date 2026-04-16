@@ -164,12 +164,9 @@ const sectionTotalTime = computed(() =>
 )
 
 const handleRouteSelect = async (routeId: string) => {
-    await routeList.select(routeId)
-    try {
-        const sections = await $fetch(`/api/routes/${routeId}/sections`)
+    const sections = await routeList.select(routeId)
+    if (sections) {
         sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
-    } catch {
-        // 구간 데이터를 가져오지 못하면 SecondPanel을 열지 않는다
     }
 }
 
