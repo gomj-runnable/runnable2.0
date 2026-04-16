@@ -1,0 +1,38 @@
+.discover-district-selector {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-sm);
+    width: 100%;
+}
+
+.discover-district-selector__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-section-xs);
+}
+
+.discover-district-selector__chip {
+    padding: 4px 10px;
+    font-size: var(--text-label-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-label);
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    white-space: nowrap;
+}
+
+.discover-district-selector__chip:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--color-border-active);
+}
+
+.discover-district-selector__chip.is-active {
+    background: var(--nav-active-bg);
+    color: var(--nav-active-color);
+    border-color: var(--nav-active-color);
+}
