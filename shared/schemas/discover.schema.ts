@@ -1,0 +1,10 @@
+import { z } from 'zod'
+import type { RouteDiscoverFilter } from '#shared/types/discover'
+
+export const routeDiscoverFilterSchema: z.ZodType<RouteDiscoverFilter> = z.object({
+    district: z.string().optional(),
+    sortBy: z.enum(['distance', 'elevation', 'recent', 'popular']).optional(),
+    limit: z.coerce.number().int().positive().max(100).optional()
+})
+
+export type RouteDiscoverFilterSchema = z.infer<typeof routeDiscoverFilterSchema>
