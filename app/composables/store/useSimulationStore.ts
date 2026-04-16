@@ -1,0 +1,76 @@
+import type { PlaybackSpeed, PlaybackState, ProgressInfo } from '#shared/types/simulation'
+
+/**
+ * 3D 경로 시뮬레이션 재생 상태를 관리하는 store composable.
+ * 재생 상태, 속도, 진행률, 진행 정보를 보유한다.
+ * 실제 재생 제어 로직은 `useSimulationSideeffect`에 위임한다.
+ */
+export const useSimulationStore = () => {
+    /** 재생 상태 (stopped / playing / paused) */
+    const playbackState = useState<PlaybackState>('simulation.playbackState', () => 'stopped')
+
+    /** 재생 속도 배율 */
+    const playbackSpeed = useState<PlaybackSpeed>('simulation.playbackSpeed', () => 1)
+
+    /** 전체 진행률 (0~1) */
+    const progress = useState<number>('simulation.progress', () => 0)
+
+    /** 현재 진행 정보 (거리, 고도, 경사도) */
+    const progressInfo = useState<ProgressInfo | null>('simulation.progressInfo', () => null)
+
+    /** 재생 중 여부 */
+    const isPlaying = computed(() => playbackState.value === 'playing')
+
+    /** 일시정지 여부 */
+    const isPaused = computed(() => playbackState.value === 'paused')
+
+    /** 정지 여부 */
+    const isStopped = computed(() => playbackState.value === 'stopped')
+
+    /** 활성 상태 여부 (재생 또는 일시정지) */
+    const isActive = computed(() => playbackState.value !== 'stopped')
+
+    /** 재생 상태를 변경한다. */
+    const setPlaybackState = (state: PlaybackState) => {
+        playbackState.value = state
+    }
+
+    /** 재생 속도를 변경한다. */
+    const setPlaybackSpeed = (speed: PlaybackSpeed) => {
+        playbackSpeed.value = speed
+    }
+
+    /** 진행률을 갱신한다 (0~1 범위로 클램프). */
+    const setProgress = (value: number) => {
+        progress.value = Math.max(0, Math.min(1, value))
+    }
+
+    /** 진행 정보를 갱신한다. */
+    const setProgressInfo = (info: ProgressInfo | null) => {
+        progressInfo.value = info
+    }
+
+    /** 시뮬레이션 상태 전체를 초기값으로 되돌린다. */
+    const reset = () => {
+        playbackState.value = 'stopped'
+        playbackSpeed.value = 1
+        progress.value = 0
+        progressInfo.value = null
+    }
+
+    return {
+        playbackState,
+        playbackSpeed,
+        progress,
+        progressInfo,
+        isPlaying,
+        isPaused,
+        isStopped,
+        isActive,
+        setPlaybackState,
+        setPlaybackSpeed,
+        setProgress,
+        setProgressInfo,
+        reset
+    }
+}
