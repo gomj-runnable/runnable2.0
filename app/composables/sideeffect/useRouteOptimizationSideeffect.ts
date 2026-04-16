@@ -1,8 +1,8 @@
-import {
-  type RouteOptimizationMode,
-  type RouteOptimizeResponse,
-  isServerRoutedMode
+import type {
+  RouteOptimizationMode,
+  RouteOptimizeResponse
 } from '#shared/types/route-optimization'
+import { RouteOptimizationModeEnum } from '#shared/types/route-optimization-mode.enum'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Ref } from 'vue'
 
@@ -15,7 +15,7 @@ export const useRouteOptimizationSideeffect = (options: UseRouteOptimizationOpti
     positions: GeoJsonPosition[],
     mode: RouteOptimizationMode
   ): Promise<RouteOptimizeResponse> => {
-    if (!isServerRoutedMode(mode)) {
+    if (!RouteOptimizationModeEnum.from(mode).isServerRouted) {
       return { positions, mode, optimized: false }
     }
 
