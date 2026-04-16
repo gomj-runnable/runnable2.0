@@ -1,0 +1,124 @@
+name: Proposal
+description: 새로운 기능을 기획·제안합니다
+labels: ["enhancement", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        기능 제안서를 작성해주셔서 감사합니다.
+        아래 양식에 맞춰 가능한 한 구체적으로 작성해주세요.
+
+  - type: input
+    id: title
+    attributes:
+      label: 기능 한줄 요약
+      description: 제안하는 기능을 한 문장으로 요약해주세요.
+      placeholder: "예: 3D 지도 위에서 실시간 경사도 시각화"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 기능 분류
+      description: 제안 기능이 속하는 카테고리를 선택해주세요.
+      options:
+        - 경로 제작 (Route Creation)
+        - 경로 탐색 (Route Discovery)
+        - 소셜/협업 (Social/Collaboration)
+        - 분석/시각화 (Analytics/Visualization)
+        - 외부 연동 (Integration)
+        - UX/UI 개선 (UX/UI)
+        - 기타 (Other)
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: 배경 및 목적
+      description: 이 기능이 왜 필요한지, 어떤 사용자 문제를 해결하는지 설명해주세요.
+      placeholder: |
+        - 현재 상황 (As-Is)
+        - 문제점 또는 기회
+        - 기대 효과
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: 사용자 시나리오
+      description: 이 기능을 사용하는 구체적인 시나리오를 작성해주세요.
+      placeholder: |
+        1. 사용자가 경로 제작 화면에 진입한다.
+        2. 경사도 레이어 토글을 활성화한다.
+        3. 3D 지도 위에 구간별 경사도가 색상으로 표시된다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec
+    attributes:
+      label: 기능 상세
+      description: 주요 기능, 화면 구성, 데이터 흐름 등을 구체적으로 기술해주세요.
+      placeholder: |
+        ## 주요 기능
+        - 기능 A: ...
+        - 기능 B: ...
+
+        ## 화면 구성
+        - 화면 1: ...
+
+        ## 데이터 흐름
+        - 입력 → 처리 → 출력
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: 참고 서비스 및 레퍼런스
+      description: 벤치마킹한 서비스, 스크린샷, 링크 등을 첨부해주세요.
+      placeholder: |
+        - Strava: 세그먼트 리더보드 (https://...)
+        - 스크린샷 첨부
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위 제안
+      description: 이 기능의 중요도를 선택해주세요.
+      options:
+        - "P0: 핵심 (Must-have)"
+        - "P1: 중요 (Should-have)"
+        - "P2: 권장 (Nice-to-have)"
+        - "P3: 미래 (Future)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 영향 범위 및 리스크
+      description: 기존 시스템에 미치는 영향, 기술적 리스크, 의존성 등을 기술해주세요.
+      placeholder: |
+        - 영향받는 모듈: app/composables/*, server/api/*
+        - 외부 의존성: 추가 API 키 필요 여부
+        - 리스크: 성능 부하, 데이터 마이그레이션 등
+    validations:
+      required: false
+
+  - type: textarea
+    id: milestones
+    attributes:
+      label: 구현 단계 (선택)
+      description: 단계별 구현 계획이 있다면 작성해주세요.
+      placeholder: |
+        - Phase 1: MVP (핵심 기능만)
+        - Phase 2: 고도화 (소셜 연동, 분석)
+        - Phase 3: 최적화 (성능, UX)
+    validations:
+      required: false
