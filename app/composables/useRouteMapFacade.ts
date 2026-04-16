@@ -12,6 +12,8 @@ import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import {
     createDefaultSectionAttr,
     createHeightAwareRouteGeom,
+    createInitialSectionDraft,
+    createInitialSectionPointRanges,
     createSectionDraftsFromRanges
 } from '~/composables/action/useRouteDrawDraft'
 import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
@@ -19,6 +21,7 @@ import { useRouteClosingSideeffect } from '~/composables/sideeffect/useRouteClos
 import { useRouteDownloadSideeffect } from '~/composables/sideeffect/useRouteDownloadSideeffect'
 import { useRouteSaveSideeffect } from '~/composables/sideeffect/useRouteSaveSideeffect'
 import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSideeffect'
+import { useRouteOptimizationSideeffect } from '~/composables/sideeffect/useRouteOptimizationSideeffect'
 import { useAuthStore } from '~/composables/store/useAuthStore'
 import { useNotificationStore } from '~/composables/store/useNotificationStore'
 
@@ -65,6 +68,10 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         selectedRouteId: store.selectedRouteId
     })
 
+    const optimizationEffect = useRouteOptimizationSideeffect({
+        isOptimizing: store.isOptimizing
+    })
+
     const closeElevationChart = () => {
         store.isElevationChartOpen.value = false
         store.elevationProfile.value = null
@@ -90,10 +97,35 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
 
     const startDrawing = async () => {
         closeElevationChart()
-        const positions = await drawEffect.handleDrawReset()
+        let positions = await drawEffect.handleDrawReset()
 
         if (!positions?.length) {
             return
+        }
+
+        if (store.optimizationMode.value !== 'NONE') {
+            const result = await optimizationEffect.optimizeRoute(positions, store.optimizationMode.value)
+            if (result.optimized) {
+                positions = result.positions
+                store.drawnPositions.value = positions
+                store.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
+                store.sectionDraft.value = createInitialSectionDraft(
+                    positions,
+                    createHeightAwareRouteGeom(store.drawMetrics.value ?? undefined, positions)
+                )
+                drawEffect.redrawSectionGraphics()
+                notification.notify({
+                    title: '경로 보정 완료',
+                    message: '보행자 경로로 자동 보정되었습니다.',
+                    tone: 'success'
+                })
+            } else if (result.message) {
+                notification.notify({
+                    title: '경로 보정 건너뜀',
+                    message: result.message,
+                    tone: 'info'
+                })
+            }
         }
 
         const sectionInputs = buildDraftSectionInputs(
@@ -396,6 +428,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         routeList,
         elevationChart,
         closing,
-        exploreSelectRoute
+        exploreSelectRoute,
+        optimizationMode: store.optimizationMode,
+        isOptimizing: store.isOptimizing
     }
 }

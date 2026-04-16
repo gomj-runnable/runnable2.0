@@ -324,7 +324,8 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         handleDrawReset,
         handleDrawSave,
         handleUpdateSectionAttr,
-        handleRemoveSection
+        handleRemoveSection,
+        redrawSectionGraphics
     }
 }
 export default useRouteDrawSideeffect

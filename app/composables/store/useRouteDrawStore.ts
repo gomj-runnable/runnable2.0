@@ -8,6 +8,7 @@ import type { SectionPointRange } from '~/composables/action/useRouteDrawDraft'
 import type { SavedRoute } from '#shared/types/route'
 import type { PoiDraftInput } from '#shared/types/facility'
 import { useRouteClosingStore } from '~/composables/store/useRouteClosingStore'
+import type { RouteOptimizationMode } from '#shared/types/route-optimization'
 
 /**
  * 경로 드로잉 화면 전반의 공유 상태를 관리하는 store composable.
@@ -63,6 +64,12 @@ export const useRouteDrawStore = () => {
         title: '',
         description: ''
     })
+
+    /** 경로 최적화 모드. 'NONE'이면 최적화를 건너뛴다. */
+    const optimizationMode = useState<RouteOptimizationMode>('route-optimization-mode', () => 'NONE')
+
+    /** 경로 최적화 요청 진행 중 여부 */
+    const isOptimizing = useState('route-is-optimizing', () => false)
 
     /**
      * loop-close 모드에서 마지막 포인트 → 첫 포인트 간 거리 (meters).
@@ -134,6 +141,8 @@ export const useRouteDrawStore = () => {
         isLoopClose: closingStore.isLoopClose,
         isRoundTrip: closingStore.isRoundTrip,
         setClosingMode: closingStore.setClosingMode,
-        resetClosingMode: closingStore.resetClosingMode
+        resetClosingMode: closingStore.resetClosingMode,
+        optimizationMode,
+        isOptimizing
     }
 }
