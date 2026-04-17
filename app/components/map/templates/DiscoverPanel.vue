@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RouteDiscoverCard } from '#shared/types/discover'
+import type { RouteDiscoverCard as RouteDiscoverCardData } from '#shared/types/discover'
 import DiscoverDistrictSelector from '~/components/map/molecules/DiscoverDistrictSelector.vue'
 import RouteDiscoverCard from '~/components/map/organizations/cards/RouteDiscoverCard.vue'
 
@@ -7,7 +7,7 @@ defineProps<{
     /** 현재 선택된 구 이름. 선택 없음이면 `null`. */
     selectedDistrict: string | null
     /** 탐색 결과 경로 카드 목록 */
-    routes: RouteDiscoverCard[]
+    routes: RouteDiscoverCardData[]
     /** 경로 로딩 중 여부 */
     isLoading: boolean
 }>()

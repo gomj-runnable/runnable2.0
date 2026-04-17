@@ -1,10 +1,12 @@
 import type { SavedFeedback, FeedbackDraftInput } from '#shared/types/feedback'
+import type { CesiumViewer, CesiumEntity } from '~/composables/useWindow'
+import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
 
 /**
  * 피드백 데이터 페칭과 Cesium 마커 렌더링을 담당하는 sideeffect.
  * useFeedbackStore를 구독하여 피드백 마커를 지도에 동기화한다.
  */
-export const useFeedbackSideeffect = (viewer: Ref<InstanceType<typeof Cesium.Viewer> | null>) => {
+export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
     const store = useFeedbackStore()
     let entityGroup: ReturnType<typeof createEntityGroup> | null = null
 
@@ -106,8 +108,8 @@ export const useFeedbackSideeffect = (viewer: Ref<InstanceType<typeof Cesium.Vie
 }
 
 /** Cesium entity 그룹을 생성하여 일괄 관리한다 */
-function createEntityGroup(viewer: InstanceType<typeof Cesium.Viewer>) {
-    const entities: InstanceType<typeof Cesium.Entity>[] = []
+function createEntityGroup(viewer: CesiumViewer) {
+    const entities: CesiumEntity[] = []
 
     return {
         add(options: Record<string, unknown>) {

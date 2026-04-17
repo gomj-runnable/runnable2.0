@@ -155,6 +155,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
             selectedRoute?.title ?? '경로 고도 그래프',
             createRouteElevationProfile(densified)
         )
+
+        return sections
     }
 
     /** 탐색 탭에서 공개 경로를 선택해 지도에 미리보기 + 고도 그래프를 표시한다 */
