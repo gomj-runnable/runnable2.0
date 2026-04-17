@@ -82,8 +82,8 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
 
         // 동 경계에서 동 이름 매칭
         if (dongGeojson.value) {
-            const dongGeojson = dongGeojson.value as { features?: GeoFeature[] }
-            for (const feature of dongGeojson.features ?? []) {
+            const dongData = dongGeojson.value as { features?: GeoFeature[] }
+            for (const feature of dongData.features ?? []) {
                 const geo = feature.geometry
                 if (!geo) continue
 

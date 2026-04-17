@@ -51,6 +51,10 @@ export default defineNuxtConfig({
     }
   },
 
+  routeRules: {
+    '/': { ssr: false }
+  },
+
   nitro: {
     publicAssets: [
       { dir: resolve(__dirname, 'lib'), baseURL: '/lib' },

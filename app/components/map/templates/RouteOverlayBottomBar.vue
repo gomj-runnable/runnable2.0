@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
 import type { RouteElevationProfile } from '#shared/types/route'
+import type { DifficultyLevel } from '#shared/types/gradient'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import RouteClosingChipBar from '~/components/map/molecules/chips/RouteClosingChipBar.vue'
+import GradientToggle from '~/components/map/molecules/GradientToggle.vue'
 
 withDefaults(
     defineProps<{
@@ -18,8 +20,12 @@ withDefaults(
         closingDisabled: boolean
         /** 경로 닫기 칩 바 표시 여부 (그리기 탭에서만 true) */
         showClosing?: boolean
+        /** 경사도 레이어 활성 여부 */
+        gradientActive?: boolean
+        /** 현재 경로 난이도 */
+        gradientDifficulty?: DifficultyLevel | null
     }>(),
-    { showClosing: true }
+    { showClosing: true, gradientActive: false, gradientDifficulty: null }
 )
 
 defineEmits<{
@@ -27,6 +33,8 @@ defineEmits<{
     'toggle-elevation': []
     /** 경로 닫기 모드 변경 시 새 모드를 전달 */
     'update:closingMode': [mode: RouteClosingMode]
+    /** 경사도 토글 클릭 시 발생 */
+    'toggle-gradient': []
 }>()
 </script>
 
@@ -40,6 +48,11 @@ defineEmits<{
             size="md"
             :active="elevationChipActive"
             @click="$emit('toggle-elevation')"
+        />
+        <GradientToggle
+            :active="gradientActive"
+            :difficulty="gradientDifficulty ?? null"
+            @toggle="$emit('toggle-gradient')"
         />
         <RouteClosingChipBar
             v-if="showClosing"

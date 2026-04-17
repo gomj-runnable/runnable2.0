@@ -55,7 +55,19 @@ import { useElevationLayerStore } from '~/composables/store/useElevationLayerSto
 import { useElevationLayerSideeffect } from '~/composables/sideeffect/useElevationLayerSideeffect'
 import { useGradientStore } from '~/composables/store/useGradientStore'
 import { useGradientSideeffect } from '~/composables/sideeffect/useGradientSideeffect'
-import GradientToggle from '~/components/map/molecules/GradientToggle.vue'
+import { useRightPanelStore } from '~/composables/store/useRightPanelStore'
+import { useDiscoverStore } from '~/composables/store/useDiscoverStore'
+import { useDiscoverSideeffect } from '~/composables/sideeffect/useDiscoverSideeffect'
+import { useFeedbackSideeffect } from '~/composables/sideeffect/useFeedbackSideeffect'
+import { useSimulationStore } from '~/composables/store/useSimulationStore'
+import { useSimulationSideeffect } from '~/composables/sideeffect/useSimulationSideeffect'
+import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommendStore'
+import { useWeatherRecommendSideeffect } from '~/composables/sideeffect/useWeatherRecommendSideeffect'
+import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
+import FeedbackPanel from '~/components/map/templates/FeedbackPanel.vue'
+import SimulationController from '~/components/map/molecules/SimulationController.vue'
+import WeatherRecommendPanel from '~/components/map/templates/WeatherRecommendPanel.vue'
+import RightPanelToggleGroup from '~/components/map/molecules/RightPanelToggleGroup.vue'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -190,6 +202,21 @@ const gradientEffect = useGradientSideeffect({
     setDifficulty: gradient.setDifficulty
 })
 
+// ─── 우측 패널 (Discover·Feedback·Simulation·WeatherRecommend) ──
+
+const rightPanel = useRightPanelStore()
+
+const discover = useDiscoverStore()
+const discoverEffect = useDiscoverSideeffect({ viewer })
+
+const feedbackEffect = useFeedbackSideeffect(viewer)
+
+const simulation = useSimulationStore()
+const simulationEffect = useSimulationSideeffect({ viewer })
+
+const weatherRecommend = useWeatherRecommendStore()
+const weatherRecommendEffect = useWeatherRecommendSideeffect()
+
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
@@ -201,7 +228,9 @@ onMounted(async () => {
         cameraEffect.init(),
         boundaryEffect.init(),
         elevationEffect.init(),
-        gradientEffect.init()
+        gradientEffect.init(),
+        discoverEffect.init(),
+        weatherRecommendEffect.fetchRecommendedRoutes()
     ])
 })
 
@@ -248,7 +277,7 @@ watch(activeNav, (next) => {
 
 <template>
     <div class="index-page">
-        <MapShell :show-second-panel="sectionInfo.isOpen.value">
+        <MapShell :show-second-panel="sectionInfo.isOpen.value" :show-right-panel="rightPanel.isOpen.value">
             <template #sidebar="{ collapsed, toggleSidebar }">
                 <MapSidebar :collapsed="collapsed">
                     <template #header>
@@ -352,6 +381,35 @@ watch(activeNav, (next) => {
                 />
             </template>
 
+            <template #rightPanel>
+                <DiscoverPanel
+                    v-if="rightPanel.activePanel.value === 'discover'"
+                    :selected-district="discover.selectedDistrict.value"
+                    :routes="discover.discoverRoutes.value"
+                    :is-loading="discover.isLoading.value"
+                    @update:selected-district="discover.selectedDistrict.value = $event"
+                    @select-route="handleRouteSelect"
+                />
+                <FeedbackPanel
+                    v-else-if="rightPanel.activePanel.value === 'feedback'"
+                    :route-id="routeList.selectedRouteId ?? ''"
+                />
+                <SimulationController
+                    v-else-if="rightPanel.activePanel.value === 'simulation'"
+                    @play="simulationEffect.startPlayback(routeDrawStore.drawnPositions.value ?? [])"
+                    @pause="simulationEffect.pausePlayback()"
+                    @stop="simulationEffect.stopPlayback()"
+                    @seek="simulationEffect.seekTo($event)"
+                    @speed-change="simulation.setPlaybackSpeed($event)"
+                />
+                <WeatherRecommendPanel
+                    v-else-if="rightPanel.activePanel.value === 'weather-recommend'"
+                    :routes="weatherRecommend.recommendedRoutes.value"
+                    :is-loading="weatherRecommend.isLoading.value"
+                    @select="handleRouteSelect"
+                />
+            </template>
+
             <template #default>
                 <div id="map" class="map-view" />
             </template>
@@ -382,11 +440,6 @@ watch(activeNav, (next) => {
                     @toggle="facility.toggleType"
                     @search-nearby="facilityEffect.searchNearby"
                 />
-                <GradientToggle
-                    :active="gradient.isGradientVisible.value"
-                    :difficulty="gradient.currentDifficulty.value"
-                    @toggle="gradient.toggleGradient"
-                />
                 <RouteOverlayBottomBar
                     v-if="activeNav === '그리기' || elevationChart.profile"
                     :elevation-chip-label="elevationChart.title"
@@ -395,8 +448,11 @@ watch(activeNav, (next) => {
                     :closing-mode="closing.mode"
                     :closing-disabled="!drawing.sectionDraft"
                     :show-closing="activeNav === '그리기'"
+                    :gradient-active="gradient.isGradientVisible.value"
+                    :gradient-difficulty="gradient.currentDifficulty.value"
                     @toggle-elevation="elevationChart.setOpen(!elevationChart.open)"
                     @update:closing-mode="closing.setMode($event)"
+                    @toggle-gradient="gradient.toggleGradient"
                 />
                 <RouteElevationModal
                     :open="elevationChart.open"
@@ -404,6 +460,7 @@ watch(activeNav, (next) => {
                     :profile="elevationChart.profile"
                     @update:open="elevationChart.setOpen($event)"
                 />
+                <RightPanelToggleGroup />
             </template>
         </MapShell>
 
