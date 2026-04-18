@@ -50,3 +50,15 @@
     line-height: var(--line-height-label);
     color: color-mix(in srgb, var(--text-primary) 72%, transparent);
 }
+
+.route-list-panel__card-meta-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-section-sm);
+}
+
+.route-list-panel__card-district {
+    font-size: var(--text-label-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+}

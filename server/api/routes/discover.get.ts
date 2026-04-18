@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         distance: r.distance ? Number(r.distance) : undefined,
         highHeight: r.highHeight ? Number(r.highHeight) : undefined,
         lowHeight: r.lowHeight ? Number(r.lowHeight) : undefined,
-        district: r.sgg?.[0],
+        districts: r.sgg?.length ? r.sgg : undefined,
         createdAt: r.createdAt,
         authorName: r.authorName
     }))

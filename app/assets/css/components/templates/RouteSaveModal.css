@@ -68,6 +68,12 @@
     min-width: 88px;
 }
 
+.route-save-modal__districts {
+    font-size: var(--text-body-sm);
+    color: var(--text-secondary);
+    line-height: var(--line-height-body);
+}
+
 .route-save-modal__button--primary {
     --map-button-border: 1px solid var(--color-border-active-strong);
     --map-button-bg: var(--color-surface-emphasis);
