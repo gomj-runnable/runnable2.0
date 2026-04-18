@@ -23,39 +23,8 @@ export const useDistrictStore = () => {
     /** 특정 시군구의 법정동 목록 반환 */
     const getDongList = (guName: string): string[] => dongMap.value[guName] ?? []
 
-    /** 메타데이터가 미로드 상태면 서버에서 fetch한다. */
-    const ensureLoaded = async () => {
-        if (data.value) return
-        try {
-            data.value = await $fetch<SeoulDistrictData>('/api/district')
-        } catch (e) {
-            console.error('[useDistrictStore] district data load failed', e)
-        }
-    }
-
-    /** 시군구 boundary GeoJSON이 없으면 fetch하고 캐시한다. */
-    const ensureGuBoundaryLoaded = async () => {
-        if (guGeojson.value) return
-        try {
-            guGeojson.value = await $fetch('/api/boundary/seoul')
-        } catch {
-            guGeojson.value = null
-        }
-    }
-
-    /** 법정동 boundary GeoJSON이 없으면 fetch하고 캐시한다. */
-    const ensureDongBoundaryLoaded = async () => {
-        if (dongGeojson.value) return
-        try {
-            dongGeojson.value = await $fetch('/api/boundary/seoul-dong')
-        } catch {
-            dongGeojson.value = null
-        }
-    }
-
     return {
         data, guList, guNames, guByName, dongMap, getDongList,
-        guGeojson, dongGeojson,
-        ensureLoaded, ensureGuBoundaryLoaded, ensureDongBoundaryLoaded
+        guGeojson, dongGeojson
     }
 }

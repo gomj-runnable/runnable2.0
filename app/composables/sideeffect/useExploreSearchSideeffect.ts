@@ -1,38 +1,31 @@
 import type { SavedRoute, SavedSection } from '#shared/types/route'
 import { useExploreFilterStore } from '~/composables/store/useExploreFilterStore'
+import { useExploreSearchStore } from '~/composables/store/useExploreSearchStore'
 
 /**
  * 탐색 탭에서 공개 경로를 검색하고 결과를 관리하는 sideeffect composable.
- * 검색어·로딩 상태·선택 경로 ID를 `useState`로 공유하여 탐색 UI 전반에서 접근 가능하다.
+ * 상태는 `useExploreSearchStore`에 위임하고, 이 composable은 API 통신만 담당한다.
  */
 export const useExploreSearchSideeffect = () => {
-    /** 검색 결과로 반환된 공개 경로 목록 */
-    const searchResults = useState<SavedRoute[]>('explore-search-results', () => [])
-    /** 현재 검색 입력값 */
-    const searchQuery = useState('explore-search-query', () => '')
-    /** 검색 API 호출 중 여부 */
-    const isSearching = useState('explore-is-searching', () => false)
-    /** 탐색 탭에서 현재 선택된 경로 ID. 선택 없음이면 `null`. */
-    const selectedRouteId = useState<string | null>('explore-selected-route', () => null)
-
+    const store = useExploreSearchStore()
     const filter = useExploreFilterStore()
 
     /** 시군구/읍면동 필터가 적용된 검색 결과 */
-    const filteredResults = computed(() => filter.applyFilter(searchResults.value))
+    const filteredResults = computed(() => filter.applyFilter(store.searchResults.value))
 
     /**
      * 공개 경로를 검색하여 `searchResults`를 갱신한다.
      * 쿼리가 없거나 빈 문자열이면 전체 목록을 반환한다.
      */
     const search = async (query?: string) => {
-        isSearching.value = true
+        store.isSearching.value = true
         try {
             const params = query?.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''
-            searchResults.value = await $fetch<SavedRoute[]>(`/api/routes/search${params}`)
+            store.searchResults.value = await $fetch<SavedRoute[]>(`/api/routes/search${params}`)
         } catch {
-            searchResults.value = []
+            store.searchResults.value = []
         } finally {
-            isSearching.value = false
+            store.isSearching.value = false
         }
     }
 
@@ -41,20 +34,11 @@ export const useExploreSearchSideeffect = () => {
         return $fetch<SavedSection[]>(`/api/routes/${routeId}/sections`)
     }
 
-    /** 경로를 선택하거나 이미 선택된 경로를 클릭하면 선택을 해제한다. */
-    const selectRoute = (routeId: string) => {
-        selectedRouteId.value = selectedRouteId.value === routeId ? null : routeId
-    }
-
     return {
-        searchResults,
-        searchQuery,
-        isSearching,
-        selectedRouteId,
+        ...store,
         filteredResults,
         filter,
         search,
-        fetchSections,
-        selectRoute
+        fetchSections
     }
 }
