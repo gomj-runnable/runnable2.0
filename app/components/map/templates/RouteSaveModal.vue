@@ -13,6 +13,8 @@ defineProps<{
     description: string
     /** 경로 총 거리 (km 단위, 없으면 미표시) */
     distance?: number
+    /** 경로가 통과하는 행정구역 (자동 감지) */
+    districts?: string[]
 }>()
 
 defineEmits<{
@@ -77,6 +79,13 @@ defineEmits<{
                         disabled
                     />
                 </label>
+
+                <div v-if="districts?.length" class="route-save-modal__field map-form-field">
+                    <span class="map-form-label">행정구역</span>
+                    <div class="route-save-modal__districts">
+                        {{ districts.join(', ') }}
+                    </div>
+                </div>
             </div>
 
             <div class="route-save-modal__actions">

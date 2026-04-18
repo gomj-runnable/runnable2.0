@@ -10,7 +10,7 @@ export interface RouteDiscoverCard {
     distance?: number
     highHeight?: number
     lowHeight?: number
-    district?: string
+    districts?: string[]
     createdAt?: string
     authorName?: string
 }

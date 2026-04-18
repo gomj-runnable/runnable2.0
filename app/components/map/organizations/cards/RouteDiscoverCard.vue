@@ -39,8 +39,8 @@ const formatElevation = (high?: number, low?: number): string => {
         <template #header>
             <div class="route-discover-card__header">
                 <h3 class="route-discover-card__title">{{ route.title }}</h3>
-                <span v-if="route.district" class="route-discover-card__district">
-                    {{ route.district }}
+                <span v-if="route.districts?.length" class="route-discover-card__district">
+                    {{ route.districts.join(' · ') }}
                 </span>
             </div>
         </template>

@@ -82,7 +82,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
                 const geo = feature.geometry
                 if (!geo) continue
 
-                const dongName = String(feature.properties?.name ?? '')
+                const dongName = String(feature.properties?.EMD_KOR_NM ?? feature.properties?.name ?? '')
                 if (!dongName) continue
 
                 if (geo.type === 'Polygon') {

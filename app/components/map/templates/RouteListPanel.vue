@@ -53,9 +53,14 @@ defineEmits<{
                     </p>
 
                     <template #meta>
-                        <span class="route-list-panel__card-meta">
-                            {{ formatDistance(route.distance) }}
-                        </span>
+                        <div class="route-list-panel__card-meta-row">
+                            <span class="route-list-panel__card-meta">
+                                {{ formatDistance(route.distance) }}
+                            </span>
+                            <span v-if="route.sgg?.length" class="route-list-panel__card-district">
+                                {{ route.sgg.join(' · ') }}
+                            </span>
+                        </div>
                     </template>
                 </Card>
             </li>
