@@ -88,7 +88,7 @@ const emit = defineEmits<{
                     <span class="second-panel__slider-value">
                         {{
                             userPaces[section.sectionId]?.pace != null
-                                ? formatPace(userPaces[section.sectionId].pace!)
+                                ? formatPace(userPaces[section.sectionId]?.pace!)
                                 : '-'
                         }}
                     </span>
@@ -100,7 +100,7 @@ const emit = defineEmits<{
                     :max="600"
                     :step="5"
                     class="second-panel__slider"
-                    @update:model-value="emit('update:pace', section.sectionId, $event)"
+                    @update:model-value="emit('update:pace', section.sectionId, $event as number)"
                 />
 
                 <div class="second-panel__slider-row">
@@ -108,7 +108,7 @@ const emit = defineEmits<{
                     <span class="second-panel__slider-value">
                         {{
                             userPaces[section.sectionId]?.weight != null
-                                ? `${userPaces[section.sectionId].weight}kg`
+                                ? `${userPaces[section.sectionId]?.weight}kg`
                                 : '-'
                         }}
                     </span>
@@ -120,7 +120,7 @@ const emit = defineEmits<{
                     :max="30"
                     :step="0.5"
                     class="second-panel__slider"
-                    @update:model-value="emit('update:weight', section.sectionId, $event)"
+                    @update:model-value="emit('update:weight', section.sectionId, $event as number)"
                 />
 
                 <textarea

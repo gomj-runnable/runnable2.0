@@ -48,8 +48,8 @@ onMounted(async () => {
             </div>
 
             <div class="share-page__info">
-                <span v-if="(sharedData.route as Record<string, number>).distance">
-                    거리: {{ ((sharedData.route as Record<string, number>).distance / 1000).toFixed(2) }}km
+                <span v-if="sharedData.route?.['distance']">
+                    거리: {{ (Number(sharedData.route['distance']) / 1000).toFixed(2) }}km
                 </span>
                 <span>피드백 {{ sharedData.feedbacks.length }}개</span>
             </div>

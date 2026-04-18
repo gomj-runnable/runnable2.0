@@ -44,7 +44,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             return null
         }
 
-        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color)
+        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color) as CesiumEntity
     }
 
     /** 지도에 그려진 미리보기 폴리라인을 모두 제거한다. */

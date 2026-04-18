@@ -114,7 +114,7 @@ export const createHeightAwareRouteGeom = (
     const baseCoordinates =
         lineString?.coordinates.length === positions.length
             ? lineString.coordinates
-            : positions.map(toLineStringCoordinate)
+            : positions.map((c) => toLineStringCoordinate(c))
 
     if (baseCoordinates.length === 0) {
         return undefined
@@ -143,7 +143,7 @@ export const toSectionGeom = (
     wgs84Array?: GeoJsonPosition[]
 ): GeoJsonLineString => ({
     type: 'LineString',
-    coordinates: (wgs84Array?.length ? wgs84Array : positions).map(toLineStringCoordinate)
+    coordinates: (wgs84Array?.length ? wgs84Array : positions).map((c) => toLineStringCoordinate(c))
 })
 
 export const createSectionDraftsFromRanges = (

@@ -97,10 +97,10 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             position: C.Cartesian3.fromDegrees(facility.lng, facility.lat),
             point: createClampedPoint(window.Cesium, {
                 color: toCesiumColor(window.Cesium, color)
-            }),
+            }) as any,
             label: createClampedLabel(window.Cesium, {
                 text: facility.name
-            })
+            }) as any
         })
     }
 
@@ -203,7 +203,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
 
             handler.setInputAction((movement: { position: unknown }) => {
-                const picked = v.scene.pick(movement.position)
+                const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
 
                 if (!picked?.id) return
 
