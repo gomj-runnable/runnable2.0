@@ -84,13 +84,13 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         const Cesium = window.Cesium
         const material = isDashed
             ? new Cesium.PolylineDashMaterialProperty({
-                  color: toCesiumColor(color, 0.7),
+                  color: toCesiumColor(Cesium, color, 0.7),
                   dashLength: 16
               })
-            : toCesiumColor(color, 0.95)
+            : toCesiumColor(Cesium, color, 0.95)
 
         return options.viewer.value.entities.add({
-            polyline: createClampedPolyline({
+            polyline: createClampedPolyline(Cesium, {
                 positions,
                 width: 4,
                 material
@@ -103,7 +103,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return null
         }
 
-        return addRoutePointEntity(options.viewer.value, position, color) as CesiumEntity
+        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color) as CesiumEntity
     }
 
     /**
@@ -207,7 +207,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return null
         }
         const data = result.data
-        const positions = normalizeDrawPositions(data)
+        const positions = normalizeDrawPositions(window.Cesium, data)
         const routeGeom = createHeightAwareRouteGeom(data, positions)
 
         if (positions.length === 0) {

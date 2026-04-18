@@ -1,5 +1,6 @@
 import type { Cartesian3, Color, MaterialProperty, Property } from 'cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
+import type { CesiumRuntime } from '#shared/types/cesium'
 
 /**
  * 지면 고정(Ground Clamping) 모드.
@@ -25,15 +26,18 @@ export interface ClampedPolylineParams {
 /**
  * 지면 고정 폴리라인 옵션을 생성한다.
  * `clampToGround` 설정과 좌표 변환을 캡슐화한다.
+ *
+ * @param cesium - Cesium 런타임 객체 (DI)
+ * @param params - 폴리라인 파라미터
  */
-export const createClampedPolyline = (params: ClampedPolylineParams): {
+export const createClampedPolyline = (cesium: CesiumRuntime, params: ClampedPolylineParams): {
     positions: Cartesian3[]
     width: number
     clampToGround: boolean
     material: Color | MaterialProperty | undefined
 } => ({
     positions: params.positions.map(([lng, lat, h = 0]) =>
-        window.Cesium.Cartesian3.fromDegrees(lng, lat, h)
+        cesium.Cartesian3.fromDegrees(lng, lat, h)
     ),
     width: params.width ?? 4,
     clampToGround: (params.mode ?? 'clamp') !== 'none',
@@ -58,19 +62,21 @@ export interface ClampedPointParams {
 /**
  * 지면 고정 포인트 옵션을 생성한다.
  * `heightReference`와 `disableDepthTestDistance`를 캡슐화한다.
+ *
+ * @param cesium - Cesium 런타임 객체 (DI)
+ * @param params - 포인트 파라미터
  */
-export const createClampedPoint = (params: ClampedPointParams) => {
-    const C = window.Cesium
+export const createClampedPoint = (cesium: CesiumRuntime, params: ClampedPointParams) => {
     const mode = params.mode ?? 'clamp'
 
     return {
         pixelSize: params.pixelSize ?? 10,
         color: params.color,
-        outlineColor: params.outlineColor ?? C.Color.WHITE,
+        outlineColor: params.outlineColor ?? cesium.Color.WHITE,
         outlineWidth: params.outlineWidth ?? 2,
         heightReference: mode === 'none'
-            ? C.HeightReference.NONE
-            : C.HeightReference.CLAMP_TO_GROUND,
+            ? cesium.HeightReference.NONE
+            : cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY
     }
 }
@@ -91,22 +97,24 @@ export interface ClampedLabelParams {
 /**
  * 지면 고정 라벨 옵션을 생성한다.
  * `heightReference`, 외곽선, 수직 정렬, 깊이 테스트 비활성을 캡슐화한다.
+ *
+ * @param cesium - Cesium 런타임 객체 (DI)
+ * @param params - 라벨 파라미터
  */
-export const createClampedLabel = (params: ClampedLabelParams) => {
-    const C = window.Cesium
+export const createClampedLabel = (cesium: CesiumRuntime, params: ClampedLabelParams) => {
     const mode = params.mode ?? 'clamp'
 
     return {
         text: params.text,
         font: params.font ?? '12px sans-serif',
-        style: C.LabelStyle.FILL_AND_OUTLINE,
+        style: cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 3,
-        outlineColor: C.Color.BLACK,
-        verticalOrigin: C.VerticalOrigin.BOTTOM,
-        pixelOffset: new C.Cartesian2(0, -14),
+        outlineColor: cesium.Color.BLACK,
+        verticalOrigin: cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new cesium.Cartesian2(0, -14),
         heightReference: mode === 'none'
-            ? C.HeightReference.NONE
-            : C.HeightReference.CLAMP_TO_GROUND,
+            ? cesium.HeightReference.NONE
+            : cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
         scale: params.scale ?? 0.9
     }
@@ -117,17 +125,20 @@ export const createClampedLabel = (params: ClampedLabelParams) => {
 /**
  * CSS 색상 + 알파로 지면 고정 폴리라인 옵션을 한 번에 생성한다.
  * 구간 렌더링처럼 color string → Cesium material 변환이 빈번한 경우의 단축 함수.
+ *
+ * @param cesium - Cesium 런타임 객체 (DI)
  */
 export const createClampedColorPolyline = (
+    cesium: CesiumRuntime,
     positions: GeoJsonPosition[],
     color: string,
     alpha = 0.95,
     width = 4,
     mode: GroundClampMode = 'clamp'
 ) =>
-    createClampedPolyline({
+    createClampedPolyline(cesium, {
         positions,
         width,
-        material: window.Cesium.Color.fromCssColorString(color).withAlpha(alpha),
+        material: cesium.Color.fromCssColorString(color).withAlpha(alpha),
         mode
     })

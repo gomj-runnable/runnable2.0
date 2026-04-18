@@ -37,11 +37,12 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         const firstPoint = positions[0]!
         const lastPoint = positions[positions.length - 1]!
 
+        const Cesium = window.Cesium
         const entity = options.viewer.value.entities.add({
-            polyline: createClampedPolyline({
+            polyline: createClampedPolyline(Cesium, {
                 positions: [lastPoint, firstPoint],
                 width: 4,
-                material: toCesiumColor('#FFFFFF', 0.3)
+                material: toCesiumColor(Cesium, '#FFFFFF', 0.3)
             })
         })
 
@@ -56,24 +57,24 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         const reversedPositions = [...positions].reverse()
         const entities: CesiumEntity[] = []
 
+        const Cesium = window.Cesium
         // 외곽 스트로크 (넓고 반투명 — 감싸는 효과)
         const outerEntity = options.viewer.value.entities.add({
-            polyline: createClampedPolyline({
+            polyline: createClampedPolyline(Cesium, {
                 positions: reversedPositions,
                 width: 8,
-                material: toCesiumColor('#FFFFFF', 0.2)
+                material: toCesiumColor(Cesium, '#FFFFFF', 0.2)
             })
         })
         entities.push(outerEntity)
 
         // 내부 점선
-        const Cesium = window.Cesium
         const innerEntity = options.viewer.value.entities.add({
-            polyline: createClampedPolyline({
+            polyline: createClampedPolyline(Cesium, {
                 positions: reversedPositions,
                 width: 4,
                 material: new Cesium.PolylineDashMaterialProperty({
-                    color: toCesiumColor('#FFFFFF', 0.7),
+                    color: toCesiumColor(Cesium, '#FFFFFF', 0.7),
                     dashLength: 16
                 })
             })

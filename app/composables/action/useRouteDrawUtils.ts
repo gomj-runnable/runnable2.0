@@ -2,6 +2,7 @@ import type { Cartesian3 } from 'cesium'
 import type { DrawActionData } from '~/composables/useWindow'
 import type { RouteGeoJson } from '#shared/types/route'
 import type { GeoJsonLineString, GeoJsonPosition } from '#shared/types/geojson'
+import type { CesiumRuntime } from '#shared/types/cesium'
 import { SECTION_COLORS } from '#shared/constants/route'
 import { createClampedPoint } from '~/composables/action/useGroundClamping'
 
@@ -17,17 +18,17 @@ export const getSectionColor = (sectionIndex: number): string =>
 
 /**
  * Cesium Cartesian3 좌표를 GeoJSON Position(경도·위도·고도) 배열로 변환한다.
- * `window.Cesium`을 직접 사용하므로 브라우저 환경에서만 호출한다.
  *
+ * @param cesium - Cesium 런타임 객체 (DI)
  * @param position - Cesium 내부 3D 좌표
  * @returns `[longitude, latitude, height]` 형태의 WGS84 좌표 배열
  */
-export const cartesianToRouteDrawPosition = (position: Cartesian3): GeoJsonPosition => {
-    const cartographic = window.Cesium.Cartographic.fromCartesian(position)
+export const cartesianToRouteDrawPosition = (cesium: CesiumRuntime, position: Cartesian3): GeoJsonPosition => {
+    const cartographic = cesium.Cartographic.fromCartesian(position)
 
     return [
-        window.Cesium.Math.toDegrees(cartographic.longitude),
-        window.Cesium.Math.toDegrees(cartographic.latitude),
+        cesium.Math.toDegrees(cartographic.longitude),
+        cesium.Math.toDegrees(cartographic.latitude),
         cartographic.height
     ]
 }
@@ -36,10 +37,11 @@ export const cartesianToRouteDrawPosition = (position: Cartesian3): GeoJsonPosit
  * 드로잉 결과에서 GeoJSON Position 배열을 정규화하여 반환한다.
  * `wgs84Array`가 있으면 우선 사용하고, 없으면 Cartesian3 `positions`를 변환한다.
  *
+ * @param cesium - Cesium 런타임 객체 (DI)
  * @param data - Cesium 드로잉 helper가 반환한 측정값
  * @returns 정규화된 `[longitude, latitude, height]` 배열. 데이터가 없으면 빈 배열.
  */
-export const normalizeDrawPositions = (data?: DrawActionData): GeoJsonPosition[] => {
+export const normalizeDrawPositions = (cesium: CesiumRuntime, data?: DrawActionData): GeoJsonPosition[] => {
     if (!data) {
         return []
     }
@@ -56,80 +58,88 @@ export const normalizeDrawPositions = (data?: DrawActionData): GeoJsonPosition[]
         return []
     }
 
-    return data.positions.map(cartesianToRouteDrawPosition)
+    return data.positions.map((pos) => cartesianToRouteDrawPosition(cesium, pos))
 }
 
 /**
  * GeoJSON Position을 Cesium Cartesian3 좌표로 변환한다.
  *
+ * @param cesium - Cesium 런타임 객체 (DI)
  * @param position - `[longitude, latitude, height?]` 형태의 WGS84 좌표
  * @returns Cesium 내부 3D 좌표
  */
-export const toCartesianPosition = ([
+export const toCartesianPosition = (cesium: CesiumRuntime, [
     longitude,
     latitude,
     height = 0
-]: GeoJsonPosition): Cartesian3 => window.Cesium.Cartesian3.fromDegrees(longitude, latitude, height)
+]: GeoJsonPosition): Cartesian3 => cesium.Cartesian3.fromDegrees(longitude, latitude, height)
 
 /**
  * CSS 색상 문자열과 알파값을 Cesium Color 객체로 변환한다.
  *
+ * @param cesium - Cesium 런타임 객체 (DI)
  * @param color - CSS 색상 문자열 (예: `'#FF0000'`, `'rgba(255,0,0,1)'`)
  * @param alpha - 불투명도 (0~1, 기본값 1)
  * @returns 알파가 적용된 Cesium Color 객체
  */
-export const toCesiumColor = (color: string, alpha = 1) =>
-    window.Cesium.Color.fromCssColorString(color).withAlpha(alpha)
+export const toCesiumColor = (cesium: CesiumRuntime, color: string, alpha = 1) =>
+    cesium.Color.fromCssColorString(color).withAlpha(alpha)
 
 /**
  * Cesium Cartesian3 좌표를 고도 0으로 평탄화된 WGS84 좌표로 변환한다.
  * 고도 정보가 불필요한 GeoJSON 직렬화에 사용한다.
  *
+ * @param cesium - Cesium 런타임 객체 (DI)
  * @param position - Cesium 내부 3D 좌표
  * @returns `[longitude, latitude, 0]` 형태의 WGS84 좌표 배열
  */
-export const cartesianToWgs84Coordinate = (position: Cartesian3): GeoJsonPosition => {
-    const cartographic = window.Cesium.Cartographic.fromCartesian(position)
+export const cartesianToWgs84Coordinate = (cesium: CesiumRuntime, position: Cartesian3): GeoJsonPosition => {
+    const cartographic = cesium.Cartographic.fromCartesian(position)
 
     return [
-        window.Cesium.Math.toDegrees(cartographic.longitude),
-        window.Cesium.Math.toDegrees(cartographic.latitude),
+        cesium.Math.toDegrees(cartographic.longitude),
+        cesium.Math.toDegrees(cartographic.latitude),
         0
     ]
 }
 
 /**
  * GeoJSON Position 또는 Cartesian3를 LineString 좌표(`[lng, lat, height]`)로 정규화한다.
+ * 배열 입력은 순수 변환이므로 Cesium이 불필요하다.
  * Cartesian3 입력은 `cartesianToWgs84Coordinate`를 통해 변환된다.
  *
  * @param coordinate - GeoJSON Position 배열 또는 Cesium Cartesian3 좌표
+ * @param cesium - Cesium 런타임 객체 (Cartesian3 입력 시 필수)
  * @returns `[longitude, latitude, height]` 형태의 GeoJSON Position
  */
 export const toLineStringCoordinate = (
-    coordinate: GeoJsonPosition | Cartesian3
+    coordinate: GeoJsonPosition | Cartesian3,
+    cesium?: CesiumRuntime
 ): GeoJsonPosition =>
     Array.isArray(coordinate)
         ? [coordinate[0], coordinate[1], coordinate[2] ?? 0]
-        : cartesianToWgs84Coordinate(coordinate)
+        : cartesianToWgs84Coordinate(cesium!, coordinate)
 
 /**
  * 지도 위에 경로 포인트 마커 엔티티를 추가한다.
  * 흰색 외곽선이 있는 원형 포인트로 렌더링되며 깊이 테스트를 비활성화해 항상 표시된다.
  *
+ * @param cesium - Cesium 런타임 객체 (DI)
  * @param viewer - Cesium viewer (또는 entities.add를 가진 객체)
  * @param position - 마커를 표시할 WGS84 좌표
  * @param color - 마커 채우기 색상 (CSS 문자열)
  * @returns 추가된 Cesium Entity
  */
 export const addRoutePointEntity = (
+    cesium: CesiumRuntime,
     viewer: { entities: { add(options: unknown): unknown } },
     position: GeoJsonPosition,
     color: string
 ) =>
     viewer.entities.add({
-        position: toCartesianPosition(position),
-        point: createClampedPoint({
-            color: toCesiumColor(color, 0.95)
+        position: toCartesianPosition(cesium, position),
+        point: createClampedPoint(cesium, {
+            color: toCesiumColor(cesium, color, 0.95)
         })
     })
 

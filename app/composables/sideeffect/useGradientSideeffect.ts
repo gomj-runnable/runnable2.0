@@ -55,10 +55,10 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
         const entities = segments.map((seg) => {
             const segPositions = [positions[seg.startIndex]!, positions[seg.endIndex]!]
             return v.entities.add({
-                polyline: createClampedPolyline({
+                polyline: createClampedPolyline(window.Cesium, {
                     positions: segPositions,
                     width: 5,
-                    material: toCesiumColor(seg.color, 0.9)
+                    material: toCesiumColor(window.Cesium, seg.color, 0.9)
                 })
             })
         })
