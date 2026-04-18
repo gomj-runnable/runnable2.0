@@ -20,50 +20,50 @@ export const useRouteDrawStore = () => {
     const closingStore = useRouteClosingStore()
 
     /** 사이드바 경로 목록의 검색 입력값 */
-    const searchQuery = ref('')
+    const searchQuery = useState('routeDraw.searchQuery', () => '')
 
     /** 현재 활성화된 사이드바 탭 이름 */
-    const activeNav = ref('목록')
+    const activeNav = useState('routeDraw.activeNav', () => '목록')
 
     /** 지도 드로잉 완료 후 저장된 경도/위도/고도 포인트 배열. 드로잉 전이면 `null`. */
     const drawnPositions = useState<GeoJsonPosition[] | null>('routeDraw.drawnPositions', () => null)
 
     /** 지도 드로잉 완료 후 저장된 거리·면적 등 측정값. 드로잉 전이면 `null`. */
-    const drawMetrics = ref<DrawActionData | null>(null)
+    const drawMetrics = useState<DrawActionData | null>('routeDraw.drawMetrics', () => null)
 
     /** 현재 편집 중인 구간 초안. 드로잉 완료 시 생성되고, 저장 완료 또는 리셋 시 `null`로 초기화된다. */
-    const sectionDraft = ref<CreateSectionSchema | null>(null)
+    const sectionDraft = useState<CreateSectionSchema | null>('routeDraw.sectionDraft', () => null)
 
     /** 각 구간이 담당하는 포인트 인덱스 범위 배열. 구간 추가·삭제 시 갱신된다. */
-    const sectionPointRanges = ref<SectionPointRange[]>([])
+    const sectionPointRanges = useState<SectionPointRange[]>('routeDraw.sectionPointRanges', () => [])
     /** 구간 인덱스별 연결된 POI 배열. key = 구간 인덱스 */
-    const sectionPois = ref<Record<number, PoiDraftInput[]>>({})
+    const sectionPois = useState<Record<number, PoiDraftInput[]>>('routeDraw.sectionPois', () => ({}))
     /** 현재 POI 연결 대상 구간 인덱스. null이면 POI 클릭 시 연결 비활성 */
-    const activeSectionIndex = ref<number | null>(null)
+    const activeSectionIndex = useState<number | null>('routeDraw.activeSectionIndex', () => null)
 
     /** 저장된 경로 목록 */
-    const routes = ref<SavedRoute[]>([])
+    const routes = useState<SavedRoute[]>('routeDraw.routes', () => [])
 
     /** 목록에서 현재 선택된 경로 ID */
-    const selectedRouteId = ref<string | null>(null)
+    const selectedRouteId = useState<string | null>('routeDraw.selectedRouteId', () => null)
 
     /** 저장 모달(RouteSaveModal)의 열림 상태 */
-    const isRouteSaveModalOpen = ref(false)
+    const isRouteSaveModalOpen = useState('routeDraw.isRouteSaveModalOpen', () => false)
 
     /** 지도 내부 고도 그래프 모달 열림 상태 */
-    const isElevationChartOpen = ref(false)
+    const isElevationChartOpen = useState('routeDraw.isElevationChartOpen', () => false)
 
     /** 현재 표시 중인 고도 그래프 제목 */
-    const elevationChartTitle = ref('경로 고도 그래프')
+    const elevationChartTitle = useState('routeDraw.elevationChartTitle', () => '경로 고도 그래프')
 
     /** 현재 표시 중인 거리-고도 프로필 데이터 */
-    const elevationProfile = ref<RouteElevationProfile | null>(null)
+    const elevationProfile = useState<RouteElevationProfile | null>('routeDraw.elevationProfile', () => null)
 
     /** 저장 모달에서 입력하는 경로 제목과 설명 */
-    const routeForm = ref({
+    const routeForm = useState('routeDraw.routeForm', () => ({
         title: '',
         description: ''
-    })
+    }))
 
     /** 경로 최적화 모드. 'NONE'이면 최적화를 건너뛴다. */
     const { routeMode } = useRuntimeConfig().public
