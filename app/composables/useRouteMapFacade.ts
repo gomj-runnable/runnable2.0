@@ -73,6 +73,18 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         isOptimizing: store.isOptimizing
     })
 
+    /** 경로 폴리라인을 숨긴다 (경사도 등 오버레이 표시 시 사용) */
+    const hideRoutePolylines = () => {
+        drawEffect.hideSectionPolylines()
+        listEffect.hidePreviewPolylines()
+    }
+
+    /** 숨긴 경로 폴리라인을 복원한다 */
+    const showRoutePolylines = () => {
+        drawEffect.showSectionPolylines()
+        listEffect.showPreviewPolylines()
+    }
+
     const closeElevationChart = () => {
         store.isElevationChartOpen.value = false
         store.elevationProfile.value = null
@@ -433,6 +445,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         closing,
         exploreSelectRoute,
         optimizationMode: store.optimizationMode,
-        isOptimizing: store.isOptimizing
+        isOptimizing: store.isOptimizing,
+        hideRoutePolylines,
+        showRoutePolylines
     }
 }
