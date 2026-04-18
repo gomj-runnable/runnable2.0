@@ -30,6 +30,11 @@ const props = withDefaults(
 
 const isSidebarCollapsed = ref(false)
 
+/** SecondPanel이 열릴 때 사이드바를 축소하여 SecondPanel을 강조한다 */
+watch(() => props.showSecondPanel, (open) => {
+    if (open) isSidebarCollapsed.value = true
+})
+
 /** 사이드바 접힘 상태를 토글한다 */
 const toggleSidebar = () => {
     // hideSidebar가 true이면 토글 불가

@@ -4,6 +4,7 @@ import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import { FACILITY_LAYERS } from '~/composables/store/useFacilityStore'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
+import { useElevationLayerStore } from '~/composables/store/useElevationLayerStore'
 import { useRightPanelStore, type RightPanelType } from '~/composables/store/useRightPanelStore'
 
 /** POI 검색 대상 유형 (현재 위치 검색 버튼 표시 기준) */
@@ -33,6 +34,7 @@ defineEmits<{
 
 const sidewalk = useSidewalkStore()
 const boundary = useBoundaryStore()
+const elevation = useElevationLayerStore()
 const rightPanel = useRightPanelStore()
 
 /** crosswalk / fountain / hospital / sidewalk 중 하나라도 활성화되어 있으면 검색 버튼 표시 */
@@ -43,7 +45,6 @@ const hasSearchableActive = computed(() =>
 )
 
 const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
-    { key: 'discover', label: '탐색', icon: 'i-lucide-compass' },
     { key: 'feedback', label: '피드백', icon: 'i-lucide-message-circle' },
     { key: 'weather-recommend', label: '추천', icon: 'i-lucide-cloud-sun' },
 ]
@@ -88,6 +89,14 @@ const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
             </ChipButton>
         </div>
         <div class="facility-overlay__chips">
+            <ChipButton
+                label="지역 고도"
+                icon="i-lucide-mountain"
+                size="sm"
+                appearance="elevated"
+                :active="elevation.isElevationVisible.value"
+                @click="elevation.toggleElevation"
+            />
             <ChipButton
                 label="시군구"
                 icon="i-lucide-map"
