@@ -73,3 +73,4 @@
 - `GeoJsonLineString` — `route.ts`의 re-export 제거, 소비자들이 `geojson.ts`에서 직접 import
 - `RoutingServiceConfig` — `routing/index.ts`의 중복 정의 제거, `registry.ts`에서 import
 - `DiscoverDistrictSelector.vue` — 하드코딩된 `DISTRICTS` 배열 제거, `SIGUNGU_LIST` import
+/
