@@ -1,7 +1,9 @@
 import { booleanPointInPolygon, point, polygon } from '@turf/turf'
 import type { ShallowRef, Ref } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
+import type { GeoFeature } from '#shared/types/geojson'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
+import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
 
 interface UseCameraSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -21,7 +23,8 @@ interface UseCameraSideeffectOptions {
  */
 export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
     const { viewer, centerLat, centerLng, altitude, heading, pitch, locationLabel } = options
-    const { guGeojson, dongGeojson, ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictStore()
+    const { guGeojson, dongGeojson } = useDistrictStore()
+    const { ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictSideeffect()
 
     const getCesium = () => window.Cesium
 
@@ -41,14 +44,6 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
      */
     const reverseGeocode = (lng: number, lat: number): string => {
         if (!guGeojson.value) return ''
-
-        type GeoFeature = {
-            properties?: Record<string, unknown>
-            geometry?: {
-                type: string
-                coordinates: number[][][] | number[][][][]
-            } | null
-        }
 
         const geojson = guGeojson.value as { features?: GeoFeature[] }
         let guName = ''

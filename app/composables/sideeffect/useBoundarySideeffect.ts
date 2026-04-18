@@ -2,8 +2,10 @@ import { centroid, polygon } from '@turf/turf'
 import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
+import type { GeoFeature } from '#shared/types/geojson'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
+import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
 
 interface UseBoundarySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -16,7 +18,8 @@ interface UseBoundarySideeffectOptions {
 export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => {
     const { viewer } = options
     const { isGuActive, isDongActive } = useBoundaryStore()
-    const { guGeojson, dongGeojson, ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictStore()
+    const { guGeojson, dongGeojson } = useDistrictStore()
+    const { ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictSideeffect()
 
     /** 시군구 Entity 목록 */
     const guEntities: Entity[] = []
@@ -26,14 +29,6 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     const calcCentroid = (coords: number[][]): [number, number] => {
         const [lng, lat] = centroid(polygon([coords])).geometry.coordinates
         return [lng!, lat!]
-    }
-
-    type GeoFeature = {
-        properties?: Record<string, unknown>
-        geometry?: {
-            type: string
-            coordinates: number[][][] | number[][][][]
-        } | null
     }
 
     /** 시군구 엔티티를 추가한다. */
