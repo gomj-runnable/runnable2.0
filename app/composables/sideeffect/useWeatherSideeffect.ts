@@ -9,7 +9,7 @@ import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shar
 import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
-import { useDistrictStore } from '~/composables/store/useDistrictStore'
+import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
 
 type ActiveWeatherLayer = WeatherLayer | null
 
@@ -125,7 +125,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
                         new Cesium.GeometryInstance({
                             id,
                             geometry: new Cesium.GroundPolylineGeometry({
-                                positions: ring.map(toCartesianPosition),
+                                positions: ring.map((pos) => toCartesianPosition(Cesium, pos)),
                                 width: 2
                             }),
                             attributes: {
@@ -152,7 +152,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         v.scene.primitives.add(weatherOutlinePrimitive)
     }
 
-    const { ensureGuBoundaryLoaded } = useDistrictStore()
+    const { ensureGuBoundaryLoaded } = useDistrictSideeffect()
 
     /** 선택된 날짜의 월별 날씨 데이터를 서버에서 가져와 `monthlyData`에 저장한다. */
     const fetchMonthlyWeather = async () => {
