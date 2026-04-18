@@ -276,6 +276,7 @@
 - `create-store-composable` : `useState` + `computed` + mutation 함수의 3단 구조와 토글/데이터 2가지 유형의 store composable을 생성하기 위한 프로젝트 전용 스킬
 - `create-server-crud` : Nitro API 핸들러 4종(GET/POST/PUT/DELETE) + Repository 인터페이스/InMemory/Drizzle/팩토리 4파일 세트를 생성하기 위한 프로젝트 전용 스킬
 - `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
+- `create-bottom-drawer` : `BottomDrawer` 래퍼 컴포넌트를 감싸 하단 Drawer UI를 구현하기 위한 프로젝트 전용 스킬
 
 ## 현재 .claude Command
 

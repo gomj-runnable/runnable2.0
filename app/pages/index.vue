@@ -66,9 +66,8 @@ import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommen
 import { useWeatherRecommendSideeffect } from '~/composables/sideeffect/useWeatherRecommendSideeffect'
 import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
 import FeedbackPanel from '~/components/map/templates/FeedbackPanel.vue'
-import SimulationController from '~/components/map/molecules/SimulationController.vue'
+import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/components/map/templates/WeatherRecommendPanel.vue'
-import RightPanelToggleGroup from '~/components/map/molecules/RightPanelToggleGroup.vue'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -220,6 +219,17 @@ const simulationEffect = useSimulationSideeffect({ viewer })
 const weatherRecommend = useWeatherRecommendStore()
 const weatherRecommendEffect = useWeatherRecommendSideeffect()
 
+// ─── 시뮬레이션 Drawer ──────────────────────────────────────────
+const isSimDrawerOpen = ref(false)
+
+/** 시뮬레이션 Chip 표출 조건 */
+const showSimulationChip = computed(() => {
+    if (activeNav.value === '그리기') return true
+    if (activeNav.value === '목록' && routeList.selectedRouteId && sectionInfo.isOpen.value) return true
+    if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
+    return false
+})
+
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
@@ -274,6 +284,16 @@ watch(activeNav, (next) => {
     }
     if (next === '탐색' && explore.searchResults.value.length === 0 && !explore.isSearching.value) {
         explore.search(explore.searchQuery.value)
+    }
+})
+
+/** 시뮬레이션 Chip 조건이 해제되면 Drawer를 닫고 시뮬레이션을 정지한다. */
+watch(showSimulationChip, (visible) => {
+    if (!visible) {
+        isSimDrawerOpen.value = false
+        if (simulation.playbackState.value !== 'stopped') {
+            simulationEffect.stopPlayback()
+        }
     }
 })
 </script>
@@ -397,14 +417,6 @@ watch(activeNav, (next) => {
                     v-else-if="rightPanel.activePanel.value === 'feedback'"
                     :route-id="routeList.selectedRouteId ?? ''"
                 />
-                <SimulationController
-                    v-else-if="rightPanel.activePanel.value === 'simulation'"
-                    @play="simulationEffect.startPlayback(routeDrawStore.drawnPositions.value ?? [])"
-                    @pause="simulationEffect.pausePlayback()"
-                    @stop="simulationEffect.stopPlayback()"
-                    @seek="simulationEffect.seekTo($event)"
-                    @speed-change="simulation.setPlaybackSpeed($event)"
-                />
                 <WeatherRecommendPanel
                     v-else-if="rightPanel.activePanel.value === 'weather-recommend'"
                     :routes="weatherRecommend.recommendedRoutes.value"
@@ -440,8 +452,11 @@ watch(activeNav, (next) => {
                     :active-types="facility.activeTypes.value"
                     :is-loading="facility.isLoading.value"
                     :is-searching="facility.isSearching.value"
+                    :show-simulation="showSimulationChip"
+                    :simulation-active="isSimDrawerOpen"
                     @toggle="facility.toggleType"
                     @search-nearby="facilityEffect.searchNearby"
+                    @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"
                 />
                 <RouteOverlayBottomBar
                     v-if="activeNav === '그리기' || elevationChart.profile"
@@ -467,9 +482,17 @@ watch(activeNav, (next) => {
                     :profile="elevationChart.profile"
                     @update:open="elevationChart.setOpen($event)"
                 />
-                <RightPanelToggleGroup />
             </template>
         </MapShell>
+
+        <SimulationDrawer
+            v-model:open="isSimDrawerOpen"
+            @play="simulationEffect.startPlayback(routeDrawStore.drawnPositions.value ?? [])"
+            @pause="simulationEffect.pausePlayback()"
+            @stop="simulationEffect.stopPlayback()"
+            @seek="simulationEffect.seekTo($event)"
+            @speed-change="simulation.setPlaybackSpeed($event)"
+        />
 
         <RouteSaveModal
             :open="saveModal.open"

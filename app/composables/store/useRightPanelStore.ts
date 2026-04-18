@@ -1,4 +1,4 @@
-export type RightPanelType = 'discover' | 'feedback' | 'simulation' | 'weather-recommend'
+export type RightPanelType = 'discover' | 'feedback' | 'weather-recommend'
 
 /**
  * 우측 패널의 활성 기능 상태를 관리하는 store composable.

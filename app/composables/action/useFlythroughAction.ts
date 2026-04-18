@@ -1,7 +1,7 @@
 import type { CameraPosition, ProgressInfo } from '#shared/types/simulation'
 
 /** 두 좌표 간 haversine 거리 (미터) */
-const haversineDistance = (a: number[], b: number[]): number => {
+export const haversineDistance = (a: number[], b: number[]): number => {
     const R = 6371000 // 지구 반지름 (미터)
     const toRad = (deg: number) => (deg * Math.PI) / 180
 
