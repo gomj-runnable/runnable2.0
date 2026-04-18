@@ -40,6 +40,7 @@ export const routeSections = pgTable(
       .references(() => routes.routeId, { onDelete: 'cascade' }),
     geom: text('geom'), // GeoJSON LineString as JSON string
     attrs: text('attrs'), // SectionAttr[] as JSON string
+    pois: text('pois'), // PoiDraftInput[] as JSON string
     createdAt: timestamp('created_at').notNull().defaultNow()
   },
   (table) => [

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { eq, and, ilike, or, desc } from 'drizzle-orm'
 import type { RouteDraftInput, SectionAttr } from '#shared/types/route'
 import type { GeoJsonLineString } from '#shared/types/geojson'
+import type { PoiDraftInput } from '#shared/types/facility'
 import type {
     IRouteRepository,
     SavedRoute,
@@ -56,7 +57,8 @@ const toSavedSection = (row: typeof routeSections.$inferSelect): SavedSection =>
     sectionId: row.sectionId,
     routeId: row.routeId,
     geom: safeParseJson<GeoJsonLineString | undefined>(row.geom, undefined, 'geom'),
-    attrs: safeParseJson<SectionAttr[] | undefined>(row.attrs, undefined, 'attrs')
+    attrs: safeParseJson<SectionAttr[] | undefined>(row.attrs, undefined, 'attrs'),
+    pois: safeParseJson<PoiDraftInput[] | undefined>(row.pois, undefined, 'pois')
 })
 
 class DrizzleRouteRepository implements IRouteRepository {
@@ -165,7 +167,8 @@ class DrizzleRouteRepository implements IRouteRepository {
                 sectionId,
                 routeId,
                 geom: input.geom ? JSON.stringify(input.geom) : null,
-                attrs: input.attrs ? JSON.stringify(input.attrs) : null
+                attrs: input.attrs ? JSON.stringify(input.attrs) : null,
+                pois: input.pois ? JSON.stringify(input.pois) : null
             })
             .returning()
 
@@ -182,7 +185,8 @@ class DrizzleRouteRepository implements IRouteRepository {
                     sectionId: randomUUID(),
                     routeId,
                     geom: input.geom ? JSON.stringify(input.geom) : null,
-                    attrs: input.attrs ? JSON.stringify(input.attrs) : null
+                    attrs: input.attrs ? JSON.stringify(input.attrs) : null,
+                    pois: input.pois ? JSON.stringify(input.pois) : null
                 }))
             )
             .returning()

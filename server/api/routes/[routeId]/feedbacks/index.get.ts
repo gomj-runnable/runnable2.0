@@ -9,6 +9,8 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, message: '경로 ID가 필요합니다.' })
     }
 
+    if (!db) return []
+
     const feedbacks = await db
         .select()
         .from(routeFeedbacks)

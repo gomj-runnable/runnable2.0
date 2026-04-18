@@ -16,9 +16,9 @@ export default defineEventHandler(async (event) => {
     // 공개 경로 전체 조회
     const routes = await routeRepository.searchPublicRoutes()
 
-    // district 필터 적용 (district 필드가 없으면 모두 반환)
+    // district 필터 적용 (sgg 배열에 해당 구가 포함된 경로만 반환)
     const filtered = district
-        ? routes.filter((r) => r.district === district)
+        ? routes.filter((r) => r.sgg?.includes(district))
         : routes
 
     // 정렬
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         distance: r.distance ? Number(r.distance) : undefined,
         highHeight: r.highHeight ? Number(r.highHeight) : undefined,
         lowHeight: r.lowHeight ? Number(r.lowHeight) : undefined,
-        district: (r as typeof r & { district?: string }).district,
+        district: r.sgg?.[0],
         createdAt: r.createdAt,
         authorName: r.authorName
     }))

@@ -17,6 +17,10 @@ export default defineEventHandler(async (event) => {
     // 인증된 사용자라면 userId와 이름을 자동 설정
     const user = await getSessionUser(event)
 
+    if (!db) {
+        throw createError({ statusCode: 503, message: 'Memory 모드에서는 피드백 기능을 사용할 수 없습니다.' })
+    }
+
     const feedbackId = nanoid()
     const [feedback] = await db
         .insert(routeFeedbacks)
