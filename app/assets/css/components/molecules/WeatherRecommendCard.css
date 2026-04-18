@@ -40,15 +40,15 @@
 }
 
 .weather-recommend-card__score.is-score-good {
-    color: #4caf72;
+    color: var(--color-score-good);
 }
 
 .weather-recommend-card__score.is-score-moderate {
-    color: #f0a030;
+    color: var(--color-score-moderate);
 }
 
 .weather-recommend-card__score.is-score-low {
-    color: #e05050;
+    color: var(--color-score-low);
 }
 
 .weather-recommend-card__score-bar {
@@ -65,15 +65,15 @@
 }
 
 .weather-recommend-card__score-fill.is-score-good {
-    background: #4caf72;
+    background: var(--color-score-good);
 }
 
 .weather-recommend-card__score-fill.is-score-moderate {
-    background: #f0a030;
+    background: var(--color-score-moderate);
 }
 
 .weather-recommend-card__score-fill.is-score-low {
-    background: #e05050;
+    background: var(--color-score-low);
 }
 
 .weather-recommend-card__meta {

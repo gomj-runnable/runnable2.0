@@ -1,4 +1,21 @@
 :root {
+    /* text role tokens (semantic mappings of primitive gray scale) */
+    --color-text-strong: var(--color-gray-10);
+    --color-text-default: var(--color-gray-20);
+    --color-text-muted: var(--color-gray-40);
+    --color-text-on-brand: var(--color-gray-100);
+    --color-text-inverse: var(--color-gray-10);
+    --color-text-inverse-80: color-mix(in srgb, var(--color-gray-10) 80%, transparent);
+    --color-text-inverse-60: color-mix(in srgb, var(--color-gray-10) 60%, transparent);
+    --color-text-inverse-40: color-mix(in srgb, var(--color-gray-10) 40%, transparent);
+    --color-text-inverse-28: color-mix(in srgb, var(--color-gray-10) 28%, transparent);
+    --color-text-inverse-20: color-mix(in srgb, var(--color-gray-10) 20%, transparent);
+
+    /* surface role tokens */
+    --color-surface-canvas-base: var(--color-gray-90);
+    --color-surface-brand-900-92: color-mix(in srgb, var(--color-gray-90) 92%, transparent);
+    --color-surface-brand-900-86: color-mix(in srgb, var(--color-gray-90) 86%, transparent);
+
     --text-on-primary: var(--color-text-on-brand);
     --text-on-dark: var(--color-text-inverse);
 
@@ -195,5 +212,10 @@
     --color-pm10-very-bad: rgba(220, 60, 60, 0.5);
 
     --z-weather-overlay: 12;
+
+    /* score indicator tokens */
+    --color-score-good: #4caf72;
+    --color-score-moderate: #f0a030;
+    --color-score-low: #e05050;
 
 }
