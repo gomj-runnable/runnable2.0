@@ -126,14 +126,6 @@ const hourLabel = computed(() => {
                     :model-value="activeLayer"
                     @update:model-value="handleLayerChange"
                 />
-                <ChipButton
-                    label="지역 고도"
-                    icon="i-lucide-mountain"
-                    size="sm"
-                    appearance="elevated"
-                    :active="isElevationActive"
-                    @click="handleElevationToggle"
-                />
                 <div class="weather-overlay__datetime-row">
                     <div class="weather-overlay__calendar-wrap">
                         <ChipButton
