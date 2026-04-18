@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import type {
-    GeoJsonLineString,
     RouteDraftInput,
     RouteSectionDraftInput
 } from '#shared/types/route'
+import type { GeoJsonLineString } from '#shared/types/geojson'
 import type { PoiDraftInput } from '#shared/types/facility'
 
 export const geoJsonPointSchema = z.object({
@@ -47,7 +47,9 @@ export const createRouteSchema: z.ZodType<RouteDraftInput> = z.object({
     description: z.string().optional(),
     highHeight: z.number().optional(),
     lowHeight: z.number().optional(),
-    distance: z.number().nonnegative().optional()
+    distance: z.number().nonnegative().optional(),
+    sgg: z.array(z.string()).optional(),
+    emd: z.array(z.string()).optional()
 })
 
 export type RouteClosingMode = 'loop-close' | 'round-trip' | null

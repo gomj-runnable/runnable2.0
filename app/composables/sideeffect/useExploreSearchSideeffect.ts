@@ -1,4 +1,5 @@
 import type { SavedRoute, SavedSection } from '#shared/types/route'
+import { useExploreFilterStore } from '~/composables/store/useExploreFilterStore'
 
 /**
  * 탐색 탭에서 공개 경로를 검색하고 결과를 관리하는 sideeffect composable.
@@ -14,11 +15,14 @@ export const useExploreSearchSideeffect = () => {
     /** 탐색 탭에서 현재 선택된 경로 ID. 선택 없음이면 `null`. */
     const selectedRouteId = useState<string | null>('explore-selected-route', () => null)
 
+    const filter = useExploreFilterStore()
+
+    /** 시군구/읍면동 필터가 적용된 검색 결과 */
+    const filteredResults = computed(() => filter.applyFilter(searchResults.value))
+
     /**
      * 공개 경로를 검색하여 `searchResults`를 갱신한다.
      * 쿼리가 없거나 빈 문자열이면 전체 목록을 반환한다.
-     *
-     * @param query - 검색어. 없으면 전체 조회.
      */
     const search = async (query?: string) => {
         isSearching.value = true
@@ -32,21 +36,12 @@ export const useExploreSearchSideeffect = () => {
         }
     }
 
-    /**
-     * 특정 경로의 구간 목록을 서버에서 가져온다.
-     *
-     * @param routeId - 구간을 조회할 경로 ID
-     * @returns 저장된 구간 배열
-     */
+    /** 특정 경로의 구간 목록을 서버에서 가져온다. */
     const fetchSections = async (routeId: string): Promise<SavedSection[]> => {
         return $fetch<SavedSection[]>(`/api/routes/${routeId}/sections`)
     }
 
-    /**
-     * 경로를 선택하거나 이미 선택된 경로를 클릭하면 선택을 해제한다.
-     *
-     * @param routeId - 선택할 경로 ID
-     */
+    /** 경로를 선택하거나 이미 선택된 경로를 클릭하면 선택을 해제한다. */
     const selectRoute = (routeId: string) => {
         selectedRouteId.value = selectedRouteId.value === routeId ? null : routeId
     }
@@ -56,6 +51,8 @@ export const useExploreSearchSideeffect = () => {
         searchQuery,
         isSearching,
         selectedRouteId,
+        filteredResults,
+        filter,
         search,
         fetchSections,
         selectRoute

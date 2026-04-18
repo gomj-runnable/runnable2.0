@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { eq, and, ilike, or, desc } from 'drizzle-orm'
-import type { RouteDraftInput, GeoJsonLineString, SectionAttr } from '#shared/types/route'
+import type { RouteDraftInput, SectionAttr } from '#shared/types/route'
+import type { GeoJsonLineString } from '#shared/types/geojson'
 import type {
     IRouteRepository,
     SavedRoute,
@@ -32,6 +33,8 @@ const toSavedRoute = (
     lowHeight: row.lowHeight ? Number(row.lowHeight) : undefined,
     distance: row.distance ? Number(row.distance) : undefined,
     isPublic: row.isPublic,
+    sgg: safeParseJson<string[] | undefined>(row.sgg, undefined, 'sgg'),
+    emd: safeParseJson<string[] | undefined>(row.emd, undefined, 'emd'),
     createdAt: row.createdAt.toISOString(),
     authorName
 })
@@ -69,7 +72,9 @@ class DrizzleRouteRepository implements IRouteRepository {
                 highHeight: input.highHeight?.toString() ?? null,
                 lowHeight: input.lowHeight?.toString() ?? null,
                 distance: input.distance?.toString() ?? null,
-                isPublic: input.isPublic ?? true
+                isPublic: input.isPublic ?? true,
+                sgg: input.sgg ? JSON.stringify(input.sgg) : null,
+                emd: input.emd ? JSON.stringify(input.emd) : null
             })
             .returning()
 

@@ -1,7 +1,7 @@
 import type { Cartesian3 } from 'cesium'
 import type { DrawActionData } from '~/composables/useWindow'
-import type { GeoJsonLineString, RouteGeoJson } from '#shared/types/route'
-import type { GeoJsonPosition } from '#shared/types/geojson'
+import type { RouteGeoJson } from '#shared/types/route'
+import type { GeoJsonLineString, GeoJsonPosition } from '#shared/types/geojson'
 import { SECTION_COLORS } from '#shared/constants/route'
 import { createClampedPoint } from '~/composables/action/useGroundClamping'
 

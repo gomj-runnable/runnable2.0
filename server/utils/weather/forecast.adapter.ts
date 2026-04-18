@@ -11,9 +11,9 @@ import {
     mapConditionByCloudAndRain,
     parseNumber,
     parseYmd,
-    toDateOnly,
-    SEOUL_GU_GRID
+    toDateOnly
 } from './common'
+import { GU_BY_CODE } from '../district/seoul-gu-data'
 
 const FORECAST_BASE_TIMES = ['0200', '0500', '0800', '1100', '1400', '1700', '2000', '2300']
 
@@ -115,7 +115,7 @@ export const fetchForecastWeatherSlots = async (
     const base = isToday || isFuture ? now : (targetDate ?? now)
     const { baseDate, baseTime } = resolveForecastBase(base)
 
-    const seoulCenter = SEOUL_GU_GRID['11110']
+    const seoulCenter = GU_BY_CODE.get('11110')
     const nx = seoulCenter?.nx ?? 60
     const ny = seoulCenter?.ny ?? 127
 

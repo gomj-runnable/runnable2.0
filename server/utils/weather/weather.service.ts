@@ -3,8 +3,8 @@ import { fetchSeoulAirQuality } from './airquality.adapter'
 import { fetchForecastWeatherSlots } from './forecast.adapter'
 import { mergeWeatherSlots } from './merge.service'
 import { fetchObservedWeatherSlots } from './observed.adapter'
+import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 import {
-    SEOUL_GU_GRID,
     addDays,
     mapPm10Grade,
     parseYmd,
@@ -79,8 +79,8 @@ class WeatherService {
             forecastSlots
         })
 
-        const dongs: DongWeather[] = Object.entries(SEOUL_GU_GRID).map(([guCode, gu]) => {
-            const guAirSlots = airQualityByGu.get(guCode) ?? []
+        const dongs: DongWeather[] = SEOUL_GU_DATA.map((gu) => {
+            const guAirSlots = airQualityByGu.get(gu.code) ?? []
             const hourly = mergedSlots.map((slot) => {
                 if (slot.pm10 !== null) return { ...slot }
 
@@ -101,7 +101,7 @@ class WeatherService {
             })
 
             return {
-                dongCode: guCode,
+                dongCode: gu.code,
                 dongName: gu.name,
                 nx: gu.nx,
                 ny: gu.ny,

@@ -1,5 +1,5 @@
 import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
-import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
+import { useDistrictStore } from '~/composables/store/useDistrictStore'
 
 type ActiveWeatherLayer = WeatherLayer | null
 
@@ -21,8 +21,8 @@ export const useWeatherStore = () => {
     const selectedMonth = useState<string>('weather.selectedMonth', () => toMonth(todayStr))
     /** 서버에서 불러온 월별 날씨 데이터. 미로드 상태이면 `null`. */
     const monthlyData = useState<SeoulMonthlyWeather | null>('weather.monthlyData', () => null)
-    /** 서울 행정경계 GeoJSON — useBoundaryStore에서 공유 캐시 사용 */
-    const { guGeojson: boundaryGeojson } = useBoundaryStore()
+    /** 서울 행정경계 GeoJSON — useDistrictStore에서 공유 캐시 사용 */
+    const { guGeojson: boundaryGeojson } = useDistrictStore()
     /** 날씨 데이터 로딩 중 여부 */
     const isLoading = useState<boolean>('weather.isLoading', () => false)
     /** 현재 활성 날씨 레이어 (`'weather'` | `'temperature'` | `'pm10'` | `null`) */

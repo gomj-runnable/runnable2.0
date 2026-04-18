@@ -24,6 +24,7 @@ import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
 import AuthModal from '~/components/map/templates/AuthModal.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
+import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import { useNotificationStore } from '~/composables/store/useNotificationStore'
@@ -40,6 +41,7 @@ import { useSidewalkSideeffect } from '~/composables/sideeffect/useSidewalkSidee
 import { useAuthStore } from '~/composables/store/useAuthStore'
 import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
 import { useExploreSearchSideeffect } from '~/composables/sideeffect/useExploreSearchSideeffect'
+import { FILTER_ALL } from '~/composables/store/useExploreFilterStore'
 import { useCameraStore } from '~/composables/store/useCameraStore'
 import { useCameraSideeffect } from '~/composables/sideeffect/useCameraSideeffect'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
@@ -64,6 +66,8 @@ import { useSimulationStore } from '~/composables/store/useSimulationStore'
 import { useSimulationSideeffect } from '~/composables/sideeffect/useSimulationSideeffect'
 import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommendStore'
 import { useWeatherRecommendSideeffect } from '~/composables/sideeffect/useWeatherRecommendSideeffect'
+import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
+import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
 import FeedbackPanel from '~/components/map/templates/FeedbackPanel.vue'
 import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
@@ -236,6 +240,7 @@ onMounted(async () => {
     await init()
     viewer.value = window.viewer
     await Promise.all([
+        districtEffect.init(),
         initWeather(),
         authEffect.fetchSession(),
         cameraEffect.init(),
@@ -259,6 +264,17 @@ const navItems = [
 // ─── 탐색 ────────────────────────────────────────────────────────
 
 const explore = useExploreSearchSideeffect()
+const districtStore = useDistrictStore()
+const districtEffect = useDistrictSideeffect()
+
+/** 시군구 Select 옵션 */
+const sigunguOptions = computed(() => [FILTER_ALL, ...districtStore.guNames.value])
+
+/** 읍면동 Select 옵션 (선택된 시군구에 따라 동적 변경) */
+const dongOptions = computed(() => {
+    if (explore.filter.selectedSigungu.value === FILTER_ALL) return [FILTER_ALL]
+    return [FILTER_ALL, ...districtStore.getDongList(explore.filter.selectedSigungu.value)]
+})
 
 /** 인증 성공 시 모달을 닫는다. */
 const handleAuthSuccess = async () => {
@@ -365,8 +381,32 @@ watch(showSimulationChip, (visible) => {
                                 leading-icon="i-lucide-search"
                                 @keyup.enter="explore.search(explore.searchQuery.value)"
                             />
+                            <div class="explore-filter-row">
+                                <USelect
+                                    :model-value="explore.filter.selectedSigungu.value"
+                                    :items="sigunguOptions"
+                                    placeholder="시군구"
+                                    class="explore-filter-row__select"
+                                    @update:model-value="explore.filter.setSigungu($event)"
+                                />
+                                <USelect
+                                    :model-value="explore.filter.selectedDong.value"
+                                    :items="dongOptions"
+                                    placeholder="읍면동"
+                                    class="explore-filter-row__select"
+                                    :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
+                                    @update:model-value="explore.filter.selectedDong.value = $event"
+                                />
+                                <ChipButton
+                                    label="초기화"
+                                    icon="i-lucide-rotate-ccw"
+                                    size="sm"
+                                    appearance="outlined"
+                                    @click="explore.filter.resetFilters"
+                                />
+                            </div>
                             <ExplorePanel
-                                :routes="explore.searchResults.value"
+                                :routes="explore.filteredResults.value"
                                 :selected-route-id="explore.selectedRouteId.value"
                                 :is-loading="explore.isSearching.value"
                                 @select="handleExploreSelect"
