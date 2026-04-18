@@ -78,10 +78,10 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
             return v.entities.add({
                 name: facility.name,
-                polyline: createClampedPolyline({
+                polyline: createClampedPolyline(window.Cesium, {
                     positions,
                     width: 6,
-                    material: toCesiumColor(color, 0.9)
+                    material: toCesiumColor(window.Cesium, color, 0.9)
                 })
             })
         }
@@ -95,10 +95,10 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         return v.entities.add({
             name: facility.name,
             position: C.Cartesian3.fromDegrees(facility.lng, facility.lat),
-            point: createClampedPoint({
-                color: toCesiumColor(color)
+            point: createClampedPoint(window.Cesium, {
+                color: toCesiumColor(window.Cesium, color)
             }),
-            label: createClampedLabel({
+            label: createClampedLabel(window.Cesium, {
                 text: facility.name
             })
         })

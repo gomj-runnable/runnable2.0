@@ -44,7 +44,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             return null
         }
 
-        return addRoutePointEntity(options.viewer.value, position, color)
+        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color)
     }
 
     /** 지도에 그려진 미리보기 폴리라인을 모두 제거한다. */
@@ -97,10 +97,10 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             const color = getSectionColor(index)
 
             return options.viewer.value!.entities.add({
-                polyline: createClampedPolyline({
+                polyline: createClampedPolyline(window.Cesium, {
                     positions,
                     width: 4,
-                    material: toCesiumColor(color, 0.95)
+                    material: toCesiumColor(window.Cesium, color, 0.95)
                 })
             })
         }))

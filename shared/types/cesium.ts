@@ -34,8 +34,20 @@ export interface CesiumRuntime {
     CallbackProperty: new (callback: () => Cartesian3[], isConstant: boolean) => CallbackProperty
     Color: {
         WHITE: Color
+        BLACK: Color
         fromCssColorString(color: string): Color
     }
+    HeightReference: {
+        NONE: unknown
+        CLAMP_TO_GROUND: unknown
+    }
+    LabelStyle: {
+        FILL_AND_OUTLINE: unknown
+    }
+    VerticalOrigin: {
+        BOTTOM: unknown
+    }
+    Cartesian2: new (x: number, y: number) => unknown
     CesiumTerrainProvider: {
         fromUrl?: (url: string) => Promise<unknown>
         new (options: { url: string }): unknown
