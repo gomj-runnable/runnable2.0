@@ -141,6 +141,13 @@
 - `window` 전역 확장은 한 곳에서 타입 선언으로 관리한다.
 - 지도 엔진 리소스는 `/lib` 정적 자산과 `/proxy/**` 서버 프록시를 통해 연결한다.
 
+### 좌표 체계와 폴리라인
+
+- 프로젝트 전체에서 좌표 체계는 WGS84(`[longitude, latitude, elevation]` = `GeoJsonPosition`)로 통일한다.
+- 경로 좌표의 단일 진실 소스는 `drawnPositions: Ref<GeoJsonPosition[] | null>`이다. 경로 그리기(draw)와 경로 목록(select) 모두 좌표를 `drawnPositions`에 반영해야 한다.
+- 경사도, 고도 프로필 등 경로 좌표에 의존하는 공통 sideeffect는 `drawnPositions`를 watch하여 동작한다. 새로운 좌표 소스가 추가되더라도 `drawnPositions`에 반영하는 것으로 통합한다.
+- 지면 고정 폴리라인(`clampToGround: true`)이 겹칠 때는 `zIndex`로 렌더링 순서를 제어한다. 오버레이 레이어(경사도 등)는 기본 경로 폴리라인보다 높은 `zIndex`를 부여한다.
+
 ### 상태와 데이터 흐름
 
 - 페이지는 샘플 데이터나 서버 응답을 받아 `store`에 반영하고, 화면 동작은 composable을 조합해 수행한다.
