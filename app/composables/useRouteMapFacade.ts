@@ -65,7 +65,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
     const listEffect = useRouteListSideeffect({
         viewer,
         routes: store.routes,
-        selectedRouteId: store.selectedRouteId
+        selectedRouteId: store.selectedRouteId,
+        drawnPositions: store.drawnPositions
     })
 
     const optimizationEffect = useRouteOptimizationSideeffect({

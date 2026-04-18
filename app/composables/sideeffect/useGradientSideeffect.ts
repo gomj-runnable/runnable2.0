@@ -74,11 +74,14 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
             .map((seg) => {
                 const segPositions = [positions[seg.startIndex]!, positions[seg.endIndex]!]
                 return v.entities.add({
-                    polyline: createClampedPolyline({
-                        positions: segPositions,
-                        width: 5,
-                        material: toCesiumColor(seg.color, 0.9)
-                    })
+                    polyline: {
+                        ...createClampedPolyline({
+                            positions: segPositions,
+                            width: 5,
+                            material: toCesiumColor(seg.color, 0.9)
+                        }),
+                        zIndex: 10
+                    }
                 })
             })
 

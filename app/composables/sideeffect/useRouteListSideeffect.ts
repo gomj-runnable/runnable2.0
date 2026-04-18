@@ -20,6 +20,8 @@ interface UseRouteListSideeffectOptions {
     routes: Ref<SavedRoute[]>
     /** 현재 선택된 경로 ID ref. 선택 없음이면 `null`. */
     selectedRouteId: Ref<string | null>
+    /** 경로 좌표 배열 ref. 경사도 등 공통 sideeffect와 공유한다. */
+    drawnPositions: Ref<GeoJsonPosition[] | null>
 }
 
 /**
@@ -54,6 +56,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
     /** 목록에서 선택된 경로와 section 상세 상태를 초기화한다. */
     const clearSelection = () => {
         options.selectedRouteId.value = null
+        options.drawnPositions.value = null
     }
 
     /** 서버에서 전체 경로 목록을 가져와 store에 반영한다. */
@@ -80,11 +83,15 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
         const sections = await fetchRouteSections(routeId)
         options.selectedRouteId.value = routeId
 
+        const previewSegments = toPreviewSegments(sections)
+
+        // 모든 section 좌표를 합쳐 drawnPositions에 반영 (경사도 등 공통 sideeffect용)
+        const allPositions = previewSegments.flat()
+        options.drawnPositions.value = allPositions.length >= 2 ? allPositions : null
+
         if (!options.viewer.value) {
             return sections
         }
-
-        const previewSegments = toPreviewSegments(sections)
 
         polylines.set(previewSegments.map((positions, index) => {
             const color = getSectionColor(index)
