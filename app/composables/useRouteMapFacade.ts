@@ -14,6 +14,7 @@ import {
     createHeightAwareRouteGeom,
     createInitialSectionDraft,
     createInitialSectionPointRanges,
+    createWaypointBasedSectionRanges,
     createSectionDraftsFromRanges
 } from '~/composables/action/useRouteDrawDraft'
 import useRouteDrawSideeffect from '~/composables/sideeffect/useRouteDrawSideeffect'
@@ -117,11 +118,12 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         }
 
         if (store.optimizationMode.value !== 'NONE') {
+            const originalWaypoints = [...positions]
             const result = await optimizationEffect.optimizeRoute(positions, store.optimizationMode.value)
             if (result.optimized) {
                 positions = result.positions
                 store.drawnPositions.value = positions
-                store.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
+                store.sectionPointRanges.value = createWaypointBasedSectionRanges(positions, originalWaypoints)
                 store.sectionDraft.value = createInitialSectionDraft(
                     positions,
                     createHeightAwareRouteGeom(store.drawMetrics.value ?? undefined, positions)
