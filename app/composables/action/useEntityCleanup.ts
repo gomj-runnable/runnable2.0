@@ -21,5 +21,15 @@ export const createEntityGroup = (viewer: ShallowRef<CesiumViewer | null>) => {
         entities.value = newEntities
     }
 
-    return { entities, clear, set }
+    /** 모든 엔티티를 화면에서 숨긴다. 엔티티 자체는 유지된다. */
+    const hide = () => {
+        entities.value.forEach((entity) => { entity.show = false })
+    }
+
+    /** 숨긴 엔티티를 다시 표시한다. */
+    const show = () => {
+        entities.value.forEach((entity) => { entity.show = true })
+    }
+
+    return { entities, clear, set, hide, show }
 }

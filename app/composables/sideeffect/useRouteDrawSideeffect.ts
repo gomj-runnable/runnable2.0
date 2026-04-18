@@ -313,7 +313,9 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         handleDrawSave,
         handleUpdateSectionAttr,
         handleRemoveSection,
-        redrawSectionGraphics
+        redrawSectionGraphics,
+        hideSectionPolylines: () => sectionPolylines.hide(),
+        showSectionPolylines: () => sectionPolylines.show()
     }
 }
 export default useRouteDrawSideeffect

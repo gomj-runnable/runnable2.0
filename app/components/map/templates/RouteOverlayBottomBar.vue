@@ -49,16 +49,16 @@ defineEmits<{
             :active="elevationChipActive"
             @click="$emit('toggle-elevation')"
         />
-        <GradientToggle
-            :active="gradientActive"
-            :difficulty="gradientDifficulty ?? null"
-            @toggle="$emit('toggle-gradient')"
-        />
         <RouteClosingChipBar
             v-if="showClosing"
             :closing-mode="closingMode"
             :disabled="closingDisabled"
             @update:closing-mode="$emit('update:closingMode', $event)"
+        />
+        <GradientToggle
+            :active="gradientActive"
+            :difficulty="gradientDifficulty ?? null"
+            @toggle="$emit('toggle-gradient')"
         />
     </div>
 </template>

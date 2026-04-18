@@ -18,6 +18,7 @@ import NotificationModal from '~/components/map/templates/NotificationModal.vue'
 import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
 import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
 import FacilityOverlay from '~/components/map/templates/FacilityOverlay.vue'
+import GradientLegend from '~/components/map/molecules/GradientLegend.vue'
 import ExplorePanel from '~/components/map/templates/ExplorePanel.vue'
 import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
 import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
@@ -94,7 +95,7 @@ const viewer = shallowRef<CesiumViewer | null>(null)
 
 // ─── 경로 Facade (그리기·저장·목록·고도·닫기) ────────────────────
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute } =
+const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute, hideRoutePolylines, showRoutePolylines } =
     useRouteMapFacade(viewer)
 
 const routeDrawStore = useRouteDrawStore()
@@ -199,7 +200,9 @@ const gradientEffect = useGradientSideeffect({
     isGradientVisible: gradient.isGradientVisible,
     drawnPositions: routeDrawStore.drawnPositions,
     setSegments: gradient.setSegments,
-    setDifficulty: gradient.setDifficulty
+    setDifficulty: gradient.setDifficulty,
+    hideRoutePolylines,
+    showRoutePolylines
 })
 
 // ─── 우측 패널 (Discover·Feedback·Simulation·WeatherRecommend) ──
@@ -453,6 +456,10 @@ watch(activeNav, (next) => {
                     @toggle-elevation="elevationChart.setOpen(!elevationChart.open)"
                     @update:closing-mode="closing.setMode($event)"
                     @toggle-gradient="gradient.toggleGradient"
+                />
+                <GradientLegend
+                    v-if="gradient.isGradientVisible.value"
+                    :has-other-legend="!!weather.activeLayer.value || elevation.isElevationVisible.value"
                 />
                 <RouteElevationModal
                     :open="elevationChart.open"

@@ -26,7 +26,7 @@ export const useRouteDrawStore = () => {
     const activeNav = ref('목록')
 
     /** 지도 드로잉 완료 후 저장된 경도/위도/고도 포인트 배열. 드로잉 전이면 `null`. */
-    const drawnPositions = ref<GeoJsonPosition[] | null>(null)
+    const drawnPositions = useState<GeoJsonPosition[] | null>('routeDraw.drawnPositions', () => null)
 
     /** 지도 드로잉 완료 후 저장된 거리·면적 등 측정값. 드로잉 전이면 `null`. */
     const drawMetrics = ref<DrawActionData | null>(null)

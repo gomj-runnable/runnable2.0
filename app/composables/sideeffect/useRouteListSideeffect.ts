@@ -136,5 +136,13 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
         return sections
     }
 
-    return { fetchRoutes, fetchRouteSections, selectRoute, clearPreview, clearSelection }
+    return {
+        fetchRoutes,
+        fetchRouteSections,
+        selectRoute,
+        clearPreview,
+        clearSelection,
+        hidePreviewPolylines: () => polylines.hide(),
+        showPreviewPolylines: () => polylines.show()
+    }
 }
