@@ -18,6 +18,12 @@ export const useSimulationStore = () => {
     /** 현재 진행 정보 (거리, 고도, 경사도) */
     const progressInfo = useState<ProgressInfo | null>('simulation.progressInfo', () => null)
 
+    /** 전체 소요 시간 (ms) */
+    const totalDurationMs = useState<number>('simulation.totalDurationMs', () => 0)
+
+    /** 경과 시간 (초) — progress × totalDuration 기반 */
+    const elapsedSeconds = computed(() => Math.round((progress.value * totalDurationMs.value) / 1000))
+
     /** 재생 중 여부 */
     const isPlaying = computed(() => playbackState.value === 'playing')
 
@@ -50,12 +56,17 @@ export const useSimulationStore = () => {
         progressInfo.value = info
     }
 
+    const setTotalDurationMs = (ms: number) => {
+        totalDurationMs.value = ms
+    }
+
     /** 시뮬레이션 상태 전체를 초기값으로 되돌린다. */
     const reset = () => {
         playbackState.value = 'stopped'
         playbackSpeed.value = 1
         progress.value = 0
         progressInfo.value = null
+        totalDurationMs.value = 0
     }
 
     return {
@@ -71,6 +82,9 @@ export const useSimulationStore = () => {
         setPlaybackSpeed,
         setProgress,
         setProgressInfo,
+        setTotalDurationMs,
+        elapsedSeconds,
+        totalDurationMs,
         reset
     }
 }
