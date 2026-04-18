@@ -146,7 +146,14 @@
 - 프로젝트 전체에서 좌표 체계는 WGS84(`[longitude, latitude, elevation]` = `GeoJsonPosition`)로 통일한다.
 - 경로 좌표의 단일 진실 소스는 `drawnPositions: Ref<GeoJsonPosition[] | null>`이다. 경로 그리기(draw)와 경로 목록(select) 모두 좌표를 `drawnPositions`에 반영해야 한다.
 - 경사도, 고도 프로필 등 경로 좌표에 의존하는 공통 sideeffect는 `drawnPositions`를 watch하여 동작한다. 새로운 좌표 소스가 추가되더라도 `drawnPositions`에 반영하는 것으로 통합한다.
-- 지면 고정 폴리라인(`clampToGround: true`)이 겹칠 때는 `zIndex`로 렌더링 순서를 제어한다. 오버레이 레이어(경사도 등)는 기본 경로 폴리라인보다 높은 `zIndex`를 부여한다.
+- 지면 고정 폴리라인이 겹칠 때는 기존 폴리라인을 `entity.show = false`로 숨기고 오버레이 폴리라인을 그린다. 오버레이 해제 시 `entity.show = true`로 복원한다. `createEntityGroup`의 `hide()/show()`를 사용한다.
+- 경로 최적화(TMap/OSM 등) 후 section 분할은 API 반환 전체 포인트가 아니라 사용자가 클릭한 원본 waypoint 기준으로 한다. `createWaypointBasedSectionRanges(optimizedPositions, originalWaypoints)`를 사용한다.
+- 여러 composable이 공유해야 하는 상태는 `ref()`가 아닌 `useState()`를 사용한다. `ref()`는 호출마다 새 인스턴스를 생성하므로 교차 composable 공유에 적합하지 않다.
+
+### UI 공통 패턴
+
+- 호버 시 tooltip을 표시하려면 `app/components/map/atoms/HoverTooltip.vue`를 사용한다. `#trigger` 슬롯에 호버 대상, `#content` 슬롯에 tooltip 내용을 배치한다. `placement`(`top`/`bottom`/`left`/`right`)와 `offset`(px) props로 위치를 제어한다.
+- atoms 계층(`app/components/map/atoms/`)은 프로젝트 전역에서 재사용하는 최소 단위 UI 컴포넌트를 둔다.
 
 ### 상태와 데이터 흐름
 
@@ -254,6 +261,8 @@
 - 공유 상태: `app/composables/store/`
 - 공통 타입, 스키마, fixture: `shared/**`
 - API, 프록시, 인증, DB: `server/**`
+- 최소 단위 재사용 UI (tooltip 등): `app/components/map/atoms/`
+- 호버 tooltip 추가: `HoverTooltip.vue` 래퍼 사용
 
 ## 현재 .claude Skill
 

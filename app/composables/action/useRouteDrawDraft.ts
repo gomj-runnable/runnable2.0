@@ -47,6 +47,59 @@ export const createInitialSectionPointRanges = (pointCount: number): SectionPoin
     }))
 
 /**
+ * 최적화된 경로에서 원본 waypoint의 위치를 찾아 구간 범위를 생성한다.
+ * 사용자가 클릭한 N개 waypoint를 기준으로 N-1개 section을 만든다.
+ *
+ * @param optimizedPositions - 최적화 API가 반환한 전체 포인트 배열
+ * @param originalWaypoints - 사용자가 클릭한 원본 waypoint 배열
+ * @returns waypoint 기준 구간 범위 배열
+ */
+export const createWaypointBasedSectionRanges = (
+    optimizedPositions: GeoJsonPosition[],
+    originalWaypoints: GeoJsonPosition[]
+): SectionPointRange[] => {
+    if (originalWaypoints.length < 2 || optimizedPositions.length < 2) {
+        return createInitialSectionPointRanges(optimizedPositions.length)
+    }
+
+    const findClosestIndex = (target: GeoJsonPosition, from: number): number => {
+        let bestIndex = from
+        let bestDist = Infinity
+
+        for (let i = from; i < optimizedPositions.length; i++) {
+            const p = optimizedPositions[i]!
+            const dLon = p[0] - target[0]
+            const dLat = p[1] - target[1]
+            const dist = dLon * dLon + dLat * dLat
+
+            if (dist < bestDist) {
+                bestDist = dist
+                bestIndex = i
+            }
+        }
+
+        return bestIndex
+    }
+
+    const waypointIndices: number[] = [0]
+    let searchFrom = 1
+
+    for (let w = 1; w < originalWaypoints.length; w++) {
+        const idx = findClosestIndex(originalWaypoints[w]!, searchFrom)
+        waypointIndices.push(idx)
+        searchFrom = idx + 1
+    }
+
+    // 마지막 waypoint는 항상 마지막 포인트를 가리켜야 함
+    waypointIndices[waypointIndices.length - 1] = optimizedPositions.length - 1
+
+    return waypointIndices.slice(0, -1).map((startIdx, i) => ({
+        start: startIdx,
+        end: waypointIndices[i + 1]!
+    }))
+}
+
+/**
  * 드로잉 결과와 샘플링된 고도 포인트를 결합해 고도 정보가 포함된 LineString GeoJSON을 만든다.
  * 좌표 수가 일치하면 GeoJSON 원본 좌표를 기준으로 하고, 불일치 시 `positions`로 대체한다.
  *
