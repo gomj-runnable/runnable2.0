@@ -67,6 +67,7 @@ import { useSimulationSideeffect } from '~/composables/sideeffect/useSimulationS
 import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommendStore'
 import { useWeatherRecommendSideeffect } from '~/composables/sideeffect/useWeatherRecommendSideeffect'
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
+import { useMapInit } from '~/composables/sideeffect/useMapInit'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
 import FeedbackPanel from '~/components/map/templates/FeedbackPanel.vue'
@@ -119,7 +120,7 @@ const facilityEffect = useFacilitySideeffect({
     ...facility,
     onPoiClick: (poi) => {
         // 드로잉 상태가 아니면 무시
-        if (!drawing.sectionDraft.value) return
+        if (!drawing.sectionDraft) return
 
         const ranges = routeDrawStore.sectionPointRanges.value
         const positions = routeDrawStore.drawnPositions.value

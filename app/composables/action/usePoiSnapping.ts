@@ -26,7 +26,7 @@ export const findNearestSection = (
         const geom = sections[i]?.geom
         if (!geom?.coordinates || geom.coordinates.length < 2) continue
 
-        const line = lineString(geom.coordinates.map((c) => [c[0], c[1]]))
+        const line = lineString(geom.coordinates.map((c) => [c[0]!, c[1]!] as [number, number]))
         const snapped = nearestPointOnLine(line, poiPt, { units: 'meters' })
 
         const dist = snapped.properties.dist ?? 0

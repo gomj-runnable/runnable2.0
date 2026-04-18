@@ -11,13 +11,13 @@ export const geoJsonPointSchema = z.object({
     coordinates: z.tuple([z.number(), z.number()])
 })
 
-export const poiSchema: z.ZodType<PoiDraftInput> = z.object({
+export const poiSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
     type: z.enum(['HOSPITAL', 'CROSSWALK', 'WATER']),
     geom: geoJsonPointSchema,
-    attribute: z.record(z.unknown()).optional()
-})
+    attribute: z.record(z.string(), z.unknown()).optional()
+}) satisfies z.ZodType<PoiDraftInput>
 
 export const geoJsonLineStringPositionSchema = z.tuple([z.number(), z.number(), z.number()])
 export const geoJsonLineStringSchema = z.object({
@@ -32,14 +32,14 @@ export const sectionAttrSchema = z.object({
     description: z.string().optional()
 })
 
-export const createSectionSchema: z.ZodType<RouteSectionDraftInput> = z.object({
+export const createSectionSchema = z.object({
     routeId: z.string().min(1),
     geom: geoJsonLineStringSchema.optional(),
     attrs: z.array(sectionAttrSchema).optional(),
     pois: z.array(poiSchema).optional()
-})
+}) satisfies z.ZodType<RouteSectionDraftInput>
 
-export const createRouteSchema: z.ZodType<RouteDraftInput> = z.object({
+export const createRouteSchema = z.object({
     title: z
         .string()
         .min(1, '경로 제목을 입력해주세요')

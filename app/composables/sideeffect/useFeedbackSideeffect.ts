@@ -1,3 +1,4 @@
+import type { ShallowRef } from 'vue'
 import type { SavedFeedback, FeedbackDraftInput } from '#shared/types/feedback'
 import type { CesiumViewer, CesiumEntity } from '~/composables/useWindow'
 import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
@@ -42,7 +43,8 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
     /** 피드백 마커를 Cesium 지도에 렌더링한다 */
     const renderFeedbackMarkers = () => {
         const v = viewer.value
-        if (!v) return
+        const C = window.Cesium
+        if (!v || !C) return
 
         // 기존 마커 제거
         clearMarkers()
@@ -50,7 +52,7 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
         entityGroup = createEntityGroup(v)
 
         for (const fb of store.feedbacks.value) {
-            const position = Cesium.Cartesian3.fromDegrees(
+            const position = C.Cartesian3.fromDegrees(
                 Number(fb.longitude),
                 Number(fb.latitude),
                 fb.elevation != null ? Number(fb.elevation) + 2 : undefined
@@ -62,21 +64,21 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
                     image: '/images/feedback-pin.png',
                     width: 24,
                     height: 32,
-                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                    verticalOrigin: C.VerticalOrigin.BOTTOM,
+                    heightReference: C.HeightReference.CLAMP_TO_GROUND
                 },
                 label: {
                     text: fb.content.length > 20 ? `${fb.content.slice(0, 20)}...` : fb.content,
                     font: '12px sans-serif',
-                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    style: C.LabelStyle.FILL_AND_OUTLINE,
                     outlineWidth: 2,
-                    outlineColor: Cesium.Color.BLACK,
-                    fillColor: Cesium.Color.WHITE,
-                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                    pixelOffset: new Cesium.Cartesian2(0, -36),
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    outlineColor: C.Color.BLACK,
+                    fillColor: C.Color.WHITE,
+                    verticalOrigin: C.VerticalOrigin.BOTTOM,
+                    pixelOffset: new C.Cartesian2(0, -36),
+                    heightReference: C.HeightReference.CLAMP_TO_GROUND,
                     showBackground: true,
-                    backgroundColor: new Cesium.Color(0.165, 0.165, 0.165, 0.8)
+                    backgroundColor: new C.Color(0.165, 0.165, 0.165, 0.8)
                 },
                 properties: {
                     feedbackId: fb.feedbackId,

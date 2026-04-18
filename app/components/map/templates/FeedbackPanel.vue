@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
+import { useFeedbackAction } from '~/composables/action/useFeedbackAction'
 /** 피드백 패널 — 경로에 달린 피드백 목록 + 공유 링크 + 피드백 추가 버튼 */
 const props = defineProps<{
     routeId: string

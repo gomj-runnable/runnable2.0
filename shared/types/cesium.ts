@@ -18,7 +18,7 @@ export interface CesiumRuntime {
     }
     EllipsoidGeodesic: new (start: Cartographic, end: Cartographic) => EllipsoidGeodesic
     defined(value: unknown): boolean
-    ScreenSpaceEventHandler: new (canvas: unknown) => CesiumDrawHandler
+    ScreenSpaceEventHandler: new (...args: any[]) => CesiumDrawHandler
     ScreenSpaceEventType: {
         LEFT_CLICK: unknown
         MOUSE_MOVE: unknown
@@ -31,7 +31,7 @@ export interface CesiumRuntime {
         WHEEL: unknown
         PINCH: unknown
     }
-    CallbackProperty: new (callback: () => Cartesian3[], isConstant: boolean) => CallbackProperty
+    CallbackProperty: new (...args: any[]) => CallbackProperty
     Color: {
         WHITE: Color
         BLACK: Color
@@ -47,16 +47,16 @@ export interface CesiumRuntime {
     VerticalOrigin: {
         BOTTOM: unknown
     }
-    Cartesian2: new (x: number, y: number) => unknown
+    Cartesian2: new (...args: any[]) => unknown
     CesiumTerrainProvider: {
         fromUrl?: (url: string) => Promise<unknown>
-        new (options: { url: string }): unknown
+        new (...args: any[]): unknown
     }
-    EllipsoidTerrainProvider: new () => unknown
-    UrlTemplateImageryProvider: new (options: { url: string; maximumLevel?: number }) => unknown
+    EllipsoidTerrainProvider: new (...args: any[]) => unknown
+    UrlTemplateImageryProvider: new (...args: any[]) => unknown
     Cesium3DTileset: {
         fromUrl?: (url: string, options: { maximumScreenSpaceError: number }) => Promise<unknown>
-        new (options: { url: string; maximumScreenSpaceError: number }): unknown
+        new (...args: any[]): unknown
     }
     Cartesian3: {
         fromDegrees(longitude: number, latitude: number, height?: number): Cartesian3
@@ -72,24 +72,15 @@ export interface CesiumRuntime {
             }
         ): Promise<GeoJsonDataSourceInstance>
     }
-    GroundPolylineGeometry: new (options: { positions: Cartesian3[]; width: number }) => unknown
-    GeometryInstance: new (options: {
-        id?: string
-        geometry: unknown
-        attributes?: Record<string, unknown>
-    }) => unknown
-    GroundPolylinePrimitive: new (options: {
-        geometryInstances: unknown[]
-        appearance: unknown
-        asynchronous?: boolean
-        show?: boolean
-    }) => GroundPolylinePrimitiveInstance
-    PolylineColorAppearance: new () => unknown
+    GroundPolylineGeometry: new (...args: any[]) => unknown
+    GeometryInstance: new (...args: any[]) => unknown
+    GroundPolylinePrimitive: new (...args: any[]) => GroundPolylinePrimitiveInstance
+    PolylineColorAppearance: new (...args: any[]) => unknown
     ColorGeometryInstanceAttribute: {
         fromColor(color: Color): unknown
         toValue(color: Color): unknown
     }
-    ColorMaterialProperty: new (color: unknown) => unknown
+    ColorMaterialProperty: new (...args: any[]) => unknown
 }
 
 export interface GeoJsonDataSourceInstance {
@@ -99,7 +90,7 @@ export interface GeoJsonDataSourceInstance {
 }
 
 export interface GeoJsonEntityInstance {
-    properties: Record<string, { getValue(): unknown }> | null
+    properties: Record<string, { getValue(): unknown }> | null | undefined
     polygon:
         | {
               material: unknown
@@ -111,6 +102,7 @@ export interface GeoJsonEntityInstance {
 }
 
 export interface GroundPolylinePrimitiveInstance {
+    ready: boolean
     show: boolean
     getGeometryInstanceAttributes(id: string):
         | {
@@ -122,6 +114,7 @@ export interface GroundPolylinePrimitiveInstance {
 export interface CesiumSceneRuntime {
     pickPositionSupported?: boolean
     pickPosition(windowPosition: unknown): unknown
+    pick(windowPosition: unknown): unknown
     globe?: {
         depthTestAgainstTerrain: boolean
         pick(ray: unknown, scene: CesiumSceneRuntime): unknown

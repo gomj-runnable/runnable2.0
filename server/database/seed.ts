@@ -19,6 +19,11 @@ async function seed() {
     name: '최고관리자'
   }
 
+  if (!db) {
+    console.error('DB 연결 실패: db가 null입니다.')
+    process.exit(1)
+  }
+
   try {
     // 1. 관리자 계정 생성 (Upsert 방식: 있으면 업데이트, 없으면 삽입)
     const hashedPassword = await hashPassword(adminData.password)
