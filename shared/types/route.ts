@@ -4,7 +4,6 @@ import type { GeoJsonLineString } from '#shared/types/geojson'
 import type { PoiDraftInput } from '#shared/types/facility'
 
 export type SectionAttr = SectionAttrSchema
-export type { GeoJsonLineString }
 
 export type RouteGeoJson = GeoJsonLineString | Feature<GeoJsonLineString, Record<string, unknown>>
 
@@ -39,6 +38,10 @@ export interface RouteBase {
     lowHeight?: number
     distance?: number
     isPublic?: boolean
+    /** 경로가 통과하는 서울 시군구 목록 */
+    sgg?: string[]
+    /** 경로가 통과하는 서울 읍면동 목록 */
+    emd?: string[]
 }
 
 export type RouteDraftInput = RouteBase

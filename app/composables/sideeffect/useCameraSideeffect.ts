@@ -1,7 +1,7 @@
 import { booleanPointInPolygon, point, polygon } from '@turf/turf'
 import type { ShallowRef, Ref } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
-import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
+import { useDistrictStore } from '~/composables/store/useDistrictStore'
 
 interface UseCameraSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -21,7 +21,7 @@ interface UseCameraSideeffectOptions {
  */
 export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
     const { viewer, centerLat, centerLng, altitude, heading, pitch, locationLabel } = options
-    const { guGeojson, dongGeojson, ensureGuLoaded, ensureDongLoaded } = useBoundaryStore()
+    const { guGeojson, dongGeojson, ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictStore()
 
     const getCesium = () => window.Cesium
 
@@ -158,7 +158,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
      * 행정경계를 로드하고 moveEnd 이벤트를 구독한다.
      */
     const init = async () => {
-        await Promise.all([ensureGuLoaded(), ensureDongLoaded()])
+        await Promise.all([ensureGuBoundaryLoaded(), ensureDongBoundaryLoaded()])
 
         const v = viewer.value
         if (!v) return

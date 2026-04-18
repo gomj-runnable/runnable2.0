@@ -3,6 +3,7 @@ import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
+import { useDistrictStore } from '~/composables/store/useDistrictStore'
 
 interface UseBoundarySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -14,7 +15,8 @@ interface UseBoundarySideeffectOptions {
  */
 export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => {
     const { viewer } = options
-    const { isGuActive, isDongActive, guGeojson, dongGeojson, ensureGuLoaded, ensureDongLoaded } = useBoundaryStore()
+    const { isGuActive, isDongActive } = useBoundaryStore()
+    const { guGeojson, dongGeojson, ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictStore()
 
     /** 시군구 Entity 목록 */
     const guEntities: Entity[] = []
@@ -164,7 +166,7 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     }
 
     const init = async () => {
-        await Promise.all([ensureGuLoaded(), ensureDongLoaded()])
+        await Promise.all([ensureGuBoundaryLoaded(), ensureDongBoundaryLoaded()])
 
         watch(
             isGuActive,

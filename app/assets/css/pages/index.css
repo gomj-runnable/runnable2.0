@@ -9,3 +9,14 @@
     justify-content: center;
     margin-left: 0;
 }
+
+.explore-filter-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-section-2xs);
+}
+
+.explore-filter-row__select {
+    flex: 1;
+    min-width: 0;
+}

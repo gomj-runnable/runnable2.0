@@ -1,11 +1,8 @@
 import type { RoutingService } from './common'
 import type { RouteOptimizationMode } from '#shared/types/route-optimization'
+import type { RoutingServiceConfig } from './registry'
 import { TMapRoutingService } from './tmap.service'
 import { OsrmRoutingService } from './osrm.service'
-
-export interface RoutingServiceConfig {
-  tmapApi?: string
-}
 
 export const createRoutingService = (
   mode: RouteOptimizationMode,

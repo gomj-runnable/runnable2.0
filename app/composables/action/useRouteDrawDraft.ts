@@ -1,8 +1,7 @@
 import type { Cartesian3 } from 'cesium'
 import type { DrawActionData } from '~/composables/useWindow'
 import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
-import type { GeoJsonLineString } from '#shared/types/route'
-import type { GeoJsonPosition } from '#shared/types/geojson'
+import type { GeoJsonLineString, GeoJsonPosition } from '#shared/types/geojson'
 import { createSectionSchema } from '#shared/schemas/route.schema'
 import {
     extractLineStringGeometry,

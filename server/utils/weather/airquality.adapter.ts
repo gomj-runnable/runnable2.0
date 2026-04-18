@@ -1,6 +1,7 @@
 import type { AirKoreaRltmItem } from '#shared/types/weather'
 import { AirKoreaOriginalResponse } from '#shared/types/weather'
-import { parseNumber, mapPm10Grade, SEOUL_GU_GRID } from './common'
+import { parseNumber, mapPm10Grade } from './common'
+import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 
 const AIRKOREA_BASE_URL = 'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty'
 const CACHE_TTL_MS = 60 * 60 * 1000 // 1시간
@@ -69,7 +70,7 @@ const fetchStationRltm = async (
 }
 
 const guNameToCode = new Map<string, string>(
-    Object.entries(SEOUL_GU_GRID).map(([code, entry]) => [entry.name, code])
+    SEOUL_GU_DATA.map(gu => [gu.name, gu.code])
 )
 
 const parseAirKoreaItems = (items: AirKoreaRltmItem[]): AirQualitySlot[] => {
@@ -103,7 +104,7 @@ export const fetchSeoulAirQuality = async (
         return cachedResult!
     }
 
-    const guNames = Object.values(SEOUL_GU_GRID).map((entry) => entry.name)
+    const guNames = SEOUL_GU_DATA.map(gu => gu.name)
 
     const tasks = guNames.map((name) => async () => {
         const items = await fetchStationRltm(serviceKey, name)

@@ -1,41 +1,6 @@
 import type { HourlyWeather, Pm10Grade, WeatherCondition } from '#shared/types/weather'
 import { Pm10GradeEnum } from '#shared/types/pm10-grade.enum'
 
-export interface SeoulGridEntry {
-    name: string
-    nx: number
-    ny: number
-    guCode: string
-}
-
-export const SEOUL_GU_GRID: Record<string, SeoulGridEntry> = {
-    '11110': { name: '종로구', nx: 60, ny: 127, guCode: '11110' },
-    '11140': { name: '중구', nx: 60, ny: 127, guCode: '11140' },
-    '11170': { name: '용산구', nx: 60, ny: 126, guCode: '11170' },
-    '11200': { name: '성동구', nx: 61, ny: 127, guCode: '11200' },
-    '11215': { name: '광진구', nx: 62, ny: 127, guCode: '11215' },
-    '11230': { name: '동대문구', nx: 61, ny: 127, guCode: '11230' },
-    '11260': { name: '중랑구', nx: 62, ny: 128, guCode: '11260' },
-    '11290': { name: '성북구', nx: 61, ny: 127, guCode: '11290' },
-    '11305': { name: '강북구', nx: 61, ny: 128, guCode: '11305' },
-    '11320': { name: '도봉구', nx: 61, ny: 129, guCode: '11320' },
-    '11350': { name: '노원구', nx: 61, ny: 129, guCode: '11350' },
-    '11380': { name: '은평구', nx: 59, ny: 127, guCode: '11380' },
-    '11410': { name: '서대문구', nx: 59, ny: 127, guCode: '11410' },
-    '11440': { name: '마포구', nx: 59, ny: 127, guCode: '11440' },
-    '11470': { name: '양천구', nx: 58, ny: 126, guCode: '11470' },
-    '11500': { name: '강서구', nx: 58, ny: 126, guCode: '11500' },
-    '11530': { name: '구로구', nx: 58, ny: 125, guCode: '11530' },
-    '11545': { name: '금천구', nx: 59, ny: 124, guCode: '11545' },
-    '11560': { name: '영등포구', nx: 58, ny: 126, guCode: '11560' },
-    '11590': { name: '동작구', nx: 59, ny: 126, guCode: '11590' },
-    '11620': { name: '관악구', nx: 59, ny: 125, guCode: '11620' },
-    '11650': { name: '서초구', nx: 61, ny: 125, guCode: '11650' },
-    '11680': { name: '강남구', nx: 61, ny: 126, guCode: '11680' },
-    '11710': { name: '송파구', nx: 62, ny: 126, guCode: '11710' },
-    '11740': { name: '강동구', nx: 62, ny: 126, guCode: '11740' }
-}
-
 export const SEOUL_ASOS_STATION = 108
 export const KMA_TYP01_BASE_URL = 'https://apihub.kma.go.kr/api/typ01/url'
 const KST_OFFSET_MINUTES = 9 * 60
