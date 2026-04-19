@@ -47,11 +47,12 @@ const toggleSidebar = () => {
             v-if="!props.hideSidebar"
             class="map-shell__sidebar"
             :class="{ 'is-collapsed': isSidebarCollapsed }"
+            aria-label="메인 사이드바"
         >
             <slot name="sidebar" :collapsed="isSidebarCollapsed" :toggle-sidebar="toggleSidebar" />
         </aside>
 
-        <aside v-if="props.showSecondPanel && $slots.secondPanel" class="map-shell__second-panel">
+        <aside v-if="props.showSecondPanel && $slots.secondPanel" class="map-shell__second-panel" aria-label="상세 정보 패널">
             <slot name="secondPanel" />
         </aside>
 

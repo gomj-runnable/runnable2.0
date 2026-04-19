@@ -13,5 +13,3 @@ export const SECTION_COLORS = [
 
 /** 경로 시작점 마커 색상 */
 export const SECTION_START_MARKER_COLOR = '#FFFFFF'
-
-export const DEFAULT_ROUTE_OPTIMIZATION_MODE = 'NONE' as const
