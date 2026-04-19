@@ -199,8 +199,31 @@ const handleRouteSelect = async (routeId: string) => {
     if (sections) {
         sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
     }
-    feedbackEffect.fetchFeedbacks(routeId)
 }
+
+// 경로 선택/해제 시 피드백 로드/정리
+watch(
+    () => routeList.selectedRouteId,
+    (routeId) => {
+        if (routeId) {
+            feedbackEffect.fetchFeedbacks(routeId)
+        } else {
+            feedbackStore.clearFeedbacks()
+            feedbackEffect.clearMarkers()
+        }
+    }
+)
+
+// 경로 폴리라인이 지워지면 로컬 피드백도 함께 정리
+watch(
+    () => routeDrawStore.drawnPositions.value,
+    (positions) => {
+        if (!positions) {
+            feedbackStore.clearLocalFeedbacks()
+            feedbackEffect.clearMarkers()
+        }
+    }
+)
 
 // ─── 고도 시각화 ────────────────────────────────────────────────
 const elevation = useElevationLayerStore()
@@ -264,9 +287,17 @@ const weatherRecommendEffect = useWeatherRecommendSideeffect()
 // ─── 시뮬레이션 Drawer ──────────────────────────────────────────
 const isSimDrawerOpen = ref(false)
 
+/** 피드백 Chip 표출 조건: 그리기 완료 후 / 목록·탐색에서 경로 선택 후 */
+const showFeedbackChip = computed(() => {
+    if (activeNav.value === '그리기' && drawing.sectionDraft) return true
+    if (activeNav.value === '목록' && routeList.selectedRouteId) return true
+    if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
+    return false
+})
+
 /** 시뮬레이션 Chip 표출 조건 */
 const showSimulationChip = computed(() => {
-    if (activeNav.value === '그리기') return true
+    if (activeNav.value === '그리기' && drawing.sectionDraft) return true
     if (activeNav.value === '목록' && routeList.selectedRouteId && sectionInfo.isOpen.value) return true
     if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
     return false
@@ -338,6 +369,13 @@ watch(activeNav, (next) => {
     }
     if (next === '탐색' && explore.searchResults.value.length === 0 && !explore.isSearching.value) {
         explore.search(explore.searchQuery.value)
+    }
+})
+
+/** 피드백 Chip 조건이 해제되면 추가 모드를 끈다. */
+watch(showFeedbackChip, (visible) => {
+    if (!visible && feedbackStore.isAddingFeedback.value) {
+        feedbackEffect.cancelAdding()
     }
 })
 
@@ -528,6 +566,7 @@ watch(showSimulationChip, (visible) => {
                     :is-searching="facility.isSearching.value"
                     :show-simulation="showSimulationChip"
                     :simulation-active="isSimDrawerOpen"
+                    :show-feedback="showFeedbackChip"
                     @toggle="facility.toggleType"
                     @search-nearby="facilityEffect.searchNearby"
                     @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"

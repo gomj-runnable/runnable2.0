@@ -22,6 +22,8 @@ const props = defineProps<{
     showSimulation?: boolean
     /** 시뮬레이션 Drawer 열림 여부 */
     simulationActive?: boolean
+    /** 피드백 칩 표시 여부 */
+    showFeedback?: boolean
 }>()
 
 defineEmits<{
@@ -126,6 +128,7 @@ const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
                 @click="$emit('toggleSimulation')"
             />
             <ChipButton
+                v-if="showFeedback"
                 label="피드백"
                 icon="i-lucide-message-circle"
                 size="sm"
