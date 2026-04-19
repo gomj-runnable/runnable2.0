@@ -3,6 +3,12 @@ import type { SavedFeedback, FeedbackDraftInput } from '#shared/types/feedback'
 import type { CesiumViewer, CesiumEntity } from '~/composables/useWindow'
 import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
 
+export interface FeedbackClickedPosition {
+    longitude: number
+    latitude: number
+    elevation?: number
+}
+
 /**
  * 피드백 데이터 페칭과 Cesium 마커 렌더링을 담당하는 sideeffect.
  * useFeedbackStore를 구독하여 피드백 마커를 지도에 동기화한다.
@@ -10,6 +16,65 @@ import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
 export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
     const store = useFeedbackStore()
     let entityGroup: ReturnType<typeof createEntityGroup> | null = null
+
+    /** 지도 클릭으로 선택된 피드백 위치 */
+    const clickedPosition = ref<FeedbackClickedPosition | null>(null)
+    let clickHandler: import('cesium').ScreenSpaceEventHandler | null = null
+
+    /** isAddingFeedback 상태에 따라 지도 클릭 핸들러를 등록/해제한다 */
+    watch(
+        () => store.isAddingFeedback.value,
+        (isAdding) => {
+            clickHandler?.destroy()
+            clickHandler = null
+            clickedPosition.value = null
+
+            if (!isAdding) return
+
+            const v = viewer.value
+            const C = window.Cesium
+            if (!v || !C) return
+
+            const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
+
+            handler.setInputAction((movement: { position: unknown }) => {
+                const scene = (v as unknown as { scene: import('cesium').Scene }).scene
+                let cartesian: import('cesium').Cartesian3 | undefined
+
+                if (scene.pickPositionSupported) {
+                    const picked = scene.pickPosition(movement.position as import('cesium').Cartesian2)
+                    if (C.defined(picked)) cartesian = picked
+                }
+
+                if (!cartesian) {
+                    const ray = (v as unknown as { camera: import('cesium').Camera }).camera.getPickRay(
+                        movement.position as import('cesium').Cartesian2
+                    )
+                    if (ray) {
+                        const globePick = scene.globe?.pick(ray, scene)
+                        if (C.defined(globePick)) cartesian = globePick
+                    }
+                }
+
+                if (!cartesian) return
+
+                const carto = C.Cartographic.fromCartesian(cartesian)
+                clickedPosition.value = {
+                    longitude: C.Math.toDegrees(carto.longitude),
+                    latitude: C.Math.toDegrees(carto.latitude),
+                    elevation: carto.height > 0 ? carto.height : undefined
+                }
+            }, C.ScreenSpaceEventType.LEFT_CLICK)
+
+            clickHandler = handler
+        }
+    )
+
+    /** 피드백 추가 모드를 해제하고 클릭 위치를 초기화한다 */
+    const cancelAdding = () => {
+        store.isAddingFeedback.value = false
+        clickedPosition.value = null
+    }
 
     /** 특정 경로의 피드백 목록을 서버에서 불러온다 */
     const fetchFeedbacks = async (routeId: string) => {
@@ -60,22 +125,23 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
 
             entityGroup.add({
                 position,
-                billboard: {
-                    image: '/images/feedback-pin.png',
-                    width: 24,
-                    height: 32,
-                    verticalOrigin: C.VerticalOrigin.BOTTOM,
-                    heightReference: C.HeightReference.CLAMP_TO_GROUND
+                point: {
+                    pixelSize: 10,
+                    color: C.Color.YELLOW,
+                    outlineColor: C.Color.BLACK,
+                    outlineWidth: 2,
+                    heightReference: C.HeightReference.CLAMP_TO_GROUND,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY
                 },
                 label: {
-                    text: fb.content.length > 20 ? `${fb.content.slice(0, 20)}...` : fb.content,
-                    font: '12px sans-serif',
+                    text: fb.name,
+                    font: '13px sans-serif',
                     style: C.LabelStyle.FILL_AND_OUTLINE,
                     outlineWidth: 2,
                     outlineColor: C.Color.BLACK,
                     fillColor: C.Color.WHITE,
                     verticalOrigin: C.VerticalOrigin.BOTTOM,
-                    pixelOffset: new C.Cartesian2(0, -36),
+                    pixelOffset: new C.Cartesian2(0, -12),
                     heightReference: C.HeightReference.CLAMP_TO_GROUND,
                     showBackground: true,
                     backgroundColor: new C.Color(0.165, 0.165, 0.165, 0.8)
@@ -105,7 +171,9 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
         fetchFeedbacks,
         submitFeedback,
         renderFeedbackMarkers,
-        clearMarkers
+        clearMarkers,
+        clickedPosition,
+        cancelAdding
     }
 }
 

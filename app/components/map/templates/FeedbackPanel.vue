@@ -74,10 +74,11 @@ const copyShareLink = async () => {
                 @click="feedbackStore.selectedFeedback.value = fb"
             >
                 <div class="feedback-panel__item-header">
-                    <span class="feedback-panel__item-author">{{ fb.authorName || '익명' }}</span>
+                    <span class="feedback-panel__item-name">{{ fb.name }}</span>
                     <span class="feedback-panel__item-time">{{ fb.createdAt ? formatRelativeTime(fb.createdAt) : '' }}</span>
                 </div>
-                <p class="feedback-panel__item-content">{{ fb.content }}</p>
+                <p class="feedback-panel__item-content">{{ fb.description }}</p>
+                <span class="feedback-panel__item-author">{{ fb.authorName }}</span>
             </li>
         </ul>
     </div>
@@ -199,10 +200,15 @@ const copyShareLink = async () => {
     margin-bottom: 4px;
 }
 
-.feedback-panel__item-author {
-    font-size: 12px;
+.feedback-panel__item-name {
+    font-size: 13px;
     font-weight: 600;
     color: var(--color-text, #fff);
+}
+
+.feedback-panel__item-author {
+    font-size: 11px;
+    color: var(--color-text-muted, #888);
 }
 
 .feedback-panel__item-time {

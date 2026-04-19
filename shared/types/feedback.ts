@@ -1,15 +1,16 @@
 export interface FeedbackBase {
-    content: string
+    name: string
+    description: string
     longitude: number
     latitude: number
     elevation?: number
-    authorName?: string
 }
 
 export interface SavedFeedback extends FeedbackBase {
     feedbackId: string
     routeId: string
-    userId?: string
+    userId: string
+    authorName: string
     createdAt?: string
 }
 
