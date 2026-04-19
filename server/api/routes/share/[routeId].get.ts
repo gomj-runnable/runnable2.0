@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { routeFeedbacks } from '../../../database/schema'
+import { routeInfos } from '../../../database/schema'
 import { db } from '../../../utils/db'
 import { routeRepository } from '../../../repositories'
 
@@ -20,14 +20,14 @@ export default defineEventHandler(async (event) => {
 
     const sections = await routeRepository.getSectionsByRouteId(routeId)
 
-    // 피드백은 아직 repository 미구현 — db가 있을 때만 조회
-    const feedbacks = db
+    // 경로정보는 아직 repository 미구현 — db가 있을 때만 조회
+    const routeInfoItems = db
         ? await db
             .select()
-            .from(routeFeedbacks)
-            .where(eq(routeFeedbacks.routeId, routeId))
-            .orderBy(routeFeedbacks.createdAt)
+            .from(routeInfos)
+            .where(eq(routeInfos.routeId, routeId))
+            .orderBy(routeInfos.createdAt)
         : []
 
-    return { route, sections, feedbacks }
+    return { route, sections, feedbacks: routeInfoItems }
 })

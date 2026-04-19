@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
-import { useFeedbackAction } from '~/composables/action/useFeedbackAction'
-/** 피드백 패널 — 경로에 달린 피드백 목록 + 공유 링크 + 피드백 추가 버튼 */
+import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
+import { useRouteInfoAction } from '~/composables/action/useRouteInfoAction'
+/** 경로정보 패널 — 경로에 달린 경로정보 목록 + 공유 링크 + 경로정보 추가 버튼 */
 const props = defineProps<{
     routeId: string
 }>()
 
-const feedbackStore = useFeedbackStore()
-const { generateShareLink, formatRelativeTime } = useFeedbackAction()
+const routeInfoStore = useRouteInfoStore()
+const { generateShareLink, formatRelativeTime } = useRouteInfoAction()
 
 const shareLink = computed(() => generateShareLink(props.routeId))
 const isCopied = ref(false)
@@ -26,8 +26,8 @@ const copyShareLink = async () => {
 <template>
     <div class="feedback-panel">
         <div class="feedback-panel__header">
-            <h3 class="feedback-panel__title">피드백</h3>
-            <span class="feedback-panel__count">{{ feedbackStore.feedbacks.value.length }}개</span>
+            <h3 class="feedback-panel__title">경로정보</h3>
+            <span class="feedback-panel__count">{{ routeInfoStore.routeInfos.value.length }}개</span>
         </div>
 
         <!-- 공유 링크 -->
@@ -42,43 +42,43 @@ const copyShareLink = async () => {
             </button>
         </div>
 
-        <!-- 피드백 추가 버튼 -->
+        <!-- 경로정보 추가 버튼 -->
         <button
             class="feedback-panel__add-btn"
-            :class="{ 'is-active': feedbackStore.isAddingFeedback.value }"
-            @click="feedbackStore.toggleAddingMode()"
+            :class="{ 'is-active': routeInfoStore.isAddingRouteInfo.value }"
+            @click="routeInfoStore.toggleAddingMode()"
         >
-            <UIcon :name="feedbackStore.isAddingFeedback.value ? 'i-lucide-x' : 'i-lucide-message-circle-plus'" />
-            {{ feedbackStore.isAddingFeedback.value ? '취소' : '피드백 추가' }}
+            <UIcon :name="routeInfoStore.isAddingRouteInfo.value ? 'i-lucide-x' : 'i-lucide-message-circle-plus'" />
+            {{ routeInfoStore.isAddingRouteInfo.value ? '취소' : '경로정보 추가' }}
         </button>
 
-        <p v-if="feedbackStore.isAddingFeedback.value" class="feedback-panel__hint">
-            지도에서 피드백을 남길 위치를 클릭하세요
+        <p v-if="routeInfoStore.isAddingRouteInfo.value" class="feedback-panel__hint">
+            지도에서 경로정보를 남길 위치를 클릭하세요
         </p>
 
-        <!-- 피드백 목록 -->
-        <div v-if="feedbackStore.isLoading.value" class="feedback-panel__loading">
+        <!-- 경로정보 목록 -->
+        <div v-if="routeInfoStore.isLoading.value" class="feedback-panel__loading">
             불러오는 중...
         </div>
 
-        <div v-else-if="feedbackStore.feedbacks.value.length === 0" class="feedback-panel__empty">
-            아직 피드백이 없습니다.
+        <div v-else-if="routeInfoStore.routeInfos.value.length === 0" class="feedback-panel__empty">
+            아직 경로정보가 없습니다.
         </div>
 
         <ul v-else class="feedback-panel__list">
             <li
-                v-for="fb in feedbackStore.feedbacks.value"
-                :key="fb.feedbackId"
+                v-for="item in routeInfoStore.routeInfos.value"
+                :key="item.routeInfoId"
                 class="feedback-panel__item"
-                :class="{ 'is-selected': 'feedbackId' in (feedbackStore.selectedMarkerFeedback.value ?? {}) && (feedbackStore.selectedMarkerFeedback.value as any)?.feedbackId === fb.feedbackId }"
-                @click="feedbackStore.selectedMarkerFeedback.value = fb"
+                :class="{ 'is-selected': 'routeInfoId' in (routeInfoStore.selectedMarkerRouteInfo.value ?? {}) && (routeInfoStore.selectedMarkerRouteInfo.value as any)?.routeInfoId === item.routeInfoId }"
+                @click="routeInfoStore.selectedMarkerRouteInfo.value = item"
             >
                 <div class="feedback-panel__item-header">
-                    <span class="feedback-panel__item-name">{{ fb.name }}</span>
-                    <span class="feedback-panel__item-time">{{ fb.createdAt ? formatRelativeTime(fb.createdAt) : '' }}</span>
+                    <span class="feedback-panel__item-name">{{ item.name }}</span>
+                    <span class="feedback-panel__item-time">{{ item.createdAt ? formatRelativeTime(item.createdAt) : '' }}</span>
                 </div>
-                <p class="feedback-panel__item-content">{{ fb.description }}</p>
-                <span class="feedback-panel__item-author">{{ fb.authorName }}</span>
+                <p class="feedback-panel__item-content">{{ item.description }}</p>
+                <span class="feedback-panel__item-author">{{ item.authorName }}</span>
             </li>
         </ul>
     </div>

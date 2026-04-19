@@ -17,8 +17,11 @@ export interface Facility {
     id: string
     type: FacilityType
     name: string
+    description?: string
     lng: number
     lat: number
+    /** TODO: adminId 리팩토링 시 수정. 서버 기본 데이터는 '9999' */
+    userId?: string
     /** 횡단보도 전용: 신호등 유무 */
     hasSignal?: boolean
     /** 횡단보도 전용: 폴리라인 좌표 [lng, lat][] */

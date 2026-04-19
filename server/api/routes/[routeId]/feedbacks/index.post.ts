@@ -1,11 +1,11 @@
 import { nanoid } from 'nanoid'
-import { createFeedbackSchema } from '#shared/schemas/feedback.schema'
-import { routeFeedbacks } from '../../../../database/schema'
+import { createRouteInfoSchema } from '#shared/schemas/routeInfo.schema'
+import { routeInfos } from '../../../../database/schema'
 import { db } from '../../../../utils/db'
 import { requireSession } from '../../../../utils/session'
-import { memoryFeedbacks } from '../../../../utils/memoryStore'
+import { memoryRouteInfos } from '../../../../utils/memoryStore'
 
-/** POST /api/routes/:routeId/feedbacks — 피드백 추가 (로그인 필수) */
+/** POST /api/routes/:routeId/feedbacks — 경로정보 추가 (로그인 필수) */
 export default defineEventHandler(async (event) => {
     const routeId = getRouterParam(event, 'routeId')
     if (!routeId) {
@@ -15,14 +15,14 @@ export default defineEventHandler(async (event) => {
     const user = await requireSession(event)
 
     const body = await readBody(event)
-    const input = createFeedbackSchema.parse(body)
+    const input = createRouteInfoSchema.parse(body)
 
-    const feedbackId = nanoid()
+    const routeInfoId = nanoid()
     const authorName = user.name ?? '익명'
 
     if (!db) {
-        const memoryFeedback = {
-            feedbackId,
+        const memoryRouteInfo = {
+            routeInfoId,
             routeId,
             userId: user.userId,
             name: input.name,
@@ -33,14 +33,14 @@ export default defineEventHandler(async (event) => {
             authorName,
             createdAt: new Date().toISOString()
         }
-        memoryFeedbacks.push(memoryFeedback)
-        return memoryFeedback
+        memoryRouteInfos.push(memoryRouteInfo)
+        return memoryRouteInfo
     }
 
-    const [feedback] = await db
-        .insert(routeFeedbacks)
+    const [routeInfo] = await db
+        .insert(routeInfos)
         .values({
-            feedbackId,
+            routeInfoId,
             routeId,
             userId: user.userId,
             name: input.name,
@@ -52,5 +52,5 @@ export default defineEventHandler(async (event) => {
         })
         .returning()
 
-    return feedback
+    return routeInfo
 })
