@@ -5,6 +5,12 @@
     width: 100%;
 }
 
+.explore-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .explore-panel__list {
     display: flex;
     flex-direction: column;

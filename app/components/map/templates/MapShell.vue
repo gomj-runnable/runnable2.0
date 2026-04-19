@@ -18,13 +18,10 @@ const props = withDefaults(
         hideSidebar?: boolean
         /** SecondPanel 표시 여부 */
         showSecondPanel?: boolean
-        /** 우측 패널 표시 여부 */
-        showRightPanel?: boolean
     }>(),
     {
         hideSidebar: false,
-        showSecondPanel: false,
-        showRightPanel: false
+        showSecondPanel: false
     }
 )
 
@@ -74,9 +71,6 @@ const toggleSidebar = () => {
             </div>
         </div>
 
-        <aside v-if="props.showRightPanel && $slots.rightPanel" class="map-shell__right-panel">
-            <slot name="rightPanel" />
-        </aside>
     </div>
 </template>
 

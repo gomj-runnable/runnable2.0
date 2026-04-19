@@ -58,9 +58,6 @@ import { useElevationLayerStore } from '~/composables/store/useElevationLayerSto
 import { useElevationLayerSideeffect } from '~/composables/sideeffect/useElevationLayerSideeffect'
 import { useGradientStore } from '~/composables/store/useGradientStore'
 import { useGradientSideeffect } from '~/composables/sideeffect/useGradientSideeffect'
-import { useRightPanelStore } from '~/composables/store/useRightPanelStore'
-import { useDiscoverStore } from '~/composables/store/useDiscoverStore'
-import { useDiscoverSideeffect } from '~/composables/sideeffect/useDiscoverSideeffect'
 import { useRouteInfoSideeffect } from '~/composables/sideeffect/useRouteInfoSideeffect'
 import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
 import { useSimulationStore } from '~/composables/store/useSimulationStore'
@@ -70,7 +67,6 @@ import { useWeatherRecommendSideeffect } from '~/composables/sideeffect/useWeath
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
 import { useMapInit } from '~/composables/sideeffect/useMapInit'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
-import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
 import RouteInfoInputForm from '~/components/map/molecules/RouteInfoInputForm.vue'
 import RouteInfoMarkerPopup from '~/components/map/molecules/RouteInfoMarkerPopup.vue'
 import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
@@ -244,12 +240,8 @@ const gradientEffect = useGradientSideeffect({
     showRoutePolylines
 })
 
-// ─── 우측 패널 (Discover·Simulation·WeatherRecommend) ──────────
-
-const rightPanel = useRightPanelStore()
-
-const discover = useDiscoverStore()
-const discoverEffect = useDiscoverSideeffect({ viewer })
+// ─── 추천 경로 토글 ──────────────────────────────────────────────
+const showRecommend = ref(false)
 
 const handleRouteInfoSubmit = async (payload: { name: string; description: string }) => {
     const pos = routeInfoEffect.clickedPosition.value
@@ -318,7 +310,6 @@ onMounted(async () => {
         boundaryEffect.init(),
         elevationEffect.init(),
         gradientEffect.init(),
-        discoverEffect.init(),
         weatherRecommendEffect.fetchRecommendedRoutes()
     ])
 })
@@ -394,7 +385,7 @@ watch(showSimulationChip, (visible) => {
 
 <template>
     <div class="index-page">
-        <MapShell :show-second-panel="sectionInfo.isOpen.value" :show-right-panel="rightPanel.isOpen.value">
+        <MapShell :show-second-panel="sectionInfo.isOpen.value">
             <template #sidebar="{ collapsed, toggleSidebar }">
                 <MapSidebar :collapsed="collapsed">
                     <template #header>
@@ -487,8 +478,18 @@ watch(showSimulationChip, (visible) => {
                                 :routes="explore.filteredResults.value"
                                 :selected-route-id="explore.selectedRouteId.value"
                                 :is-loading="explore.isSearching.value"
+                                :recommend-active="showRecommend"
                                 @select="handleExploreSelect"
-                            />
+                                @recommend="showRecommend = !showRecommend"
+                            >
+                                <template #recommend>
+                                    <WeatherRecommendPanel
+                                        :routes="weatherRecommend.recommendedRoutes.value"
+                                        :is-loading="weatherRecommend.isLoading.value"
+                                        @select="handleRouteSelect"
+                                    />
+                                </template>
+                            </ExplorePanel>
                         </template>
                     </template>
 
@@ -519,23 +520,6 @@ watch(showSimulationChip, (visible) => {
                     @update:weight="sectionInfo.updateWeight"
                     @update:strategy="sectionInfo.updateStrategy"
                     @close="sectionInfo.close"
-                />
-            </template>
-
-            <template #rightPanel>
-                <DiscoverPanel
-                    v-if="rightPanel.activePanel.value === 'discover'"
-                    :selected-district="discover.selectedDistrict.value"
-                    :routes="discover.discoverRoutes.value"
-                    :is-loading="discover.isLoading.value"
-                    @update:selected-district="discover.selectedDistrict.value = $event"
-                    @select-route="handleRouteSelect"
-                />
-                <WeatherRecommendPanel
-                    v-else-if="rightPanel.activePanel.value === 'weather-recommend'"
-                    :routes="weatherRecommend.recommendedRoutes.value"
-                    :is-loading="weatherRecommend.isLoading.value"
-                    @select="handleRouteSelect"
                 />
             </template>
 
