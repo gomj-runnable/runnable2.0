@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 공유 경로 페이지 — 인증 없이 접근 가능한 경로 공유 뷰.
- * 3D 지도 위에 경로와 피드백 마커를 표시하고 피드백을 남길 수 있다.
+ * 3D 지도 위에 경로와 경로정보 마커를 표시하고 경로정보를 남길 수 있다.
  */
 definePageMeta({ ssr: false, layout: 'default' })
 
@@ -11,7 +11,7 @@ const routeId = route.params.routeId as string
 const sharedData = ref<{
     route: Record<string, unknown>
     sections: Array<Record<string, unknown>>
-    feedbacks: Array<Record<string, unknown>>
+    routeInfos: Array<Record<string, unknown>>
 } | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(true)
@@ -51,10 +51,10 @@ onMounted(async () => {
                 <span v-if="sharedData.route?.['distance']">
                     거리: {{ (Number(sharedData.route['distance']) / 1000).toFixed(2) }}km
                 </span>
-                <span>피드백 {{ sharedData.feedbacks.length }}개</span>
+                <span>경로정보 {{ sharedData.routeInfos.length }}개</span>
             </div>
 
-            <!-- TODO: 3D 지도 뷰어 + 피드백 마커 렌더링 -->
+            <!-- TODO: 3D 지도 뷰어 + 경로정보 마커 렌더링 -->
             <div class="share-page__map-placeholder">
                 3D 지도 뷰어 영역 (Phase 2에서 구현)
             </div>

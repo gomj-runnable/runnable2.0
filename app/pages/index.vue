@@ -244,7 +244,7 @@ const gradientEffect = useGradientSideeffect({
     showRoutePolylines
 })
 
-// ─── 우측 패널 (Discover·Feedback·Simulation·WeatherRecommend) ──
+// ─── 우측 패널 (Discover·Simulation·WeatherRecommend) ──────────
 
 const rightPanel = useRightPanelStore()
 
@@ -568,7 +568,7 @@ watch(showSimulationChip, (visible) => {
                     :is-searching="facility.isSearching.value"
                     :show-simulation="showSimulationChip"
                     :simulation-active="isSimDrawerOpen"
-                    :show-feedback="showRouteInfoChip"
+                    :show-route-info="showRouteInfoChip"
                     @toggle="facility.toggleType"
                     @search-nearby="facilityEffect.searchNearby"
                     @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"

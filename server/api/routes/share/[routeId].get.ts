@@ -3,7 +3,7 @@ import { routeInfos } from '../../../database/schema'
 import { db } from '../../../utils/db'
 import { routeRepository } from '../../../repositories'
 
-/** GET /api/routes/share/:routeId — 공개 경로 + 피드백 조회 (인증 불필요) */
+/** GET /api/routes/share/:routeId — 공개 경로 + 경로정보 조회 (인증 불필요) */
 export default defineEventHandler(async (event) => {
     const routeId = getRouterParam(event, 'routeId')
     if (!routeId) {
@@ -29,5 +29,5 @@ export default defineEventHandler(async (event) => {
             .orderBy(routeInfos.createdAt)
         : []
 
-    return { route, sections, feedbacks: routeInfoItems }
+    return { route, sections, routeInfos: routeInfoItems }
 })
