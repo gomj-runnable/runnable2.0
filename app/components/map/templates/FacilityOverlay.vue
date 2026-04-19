@@ -5,7 +5,6 @@ import { FACILITY_LAYERS } from '~/composables/store/useFacilityStore'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 import { useElevationLayerStore } from '~/composables/store/useElevationLayerStore'
-import { useRightPanelStore, type RightPanelType } from '~/composables/store/useRightPanelStore'
 import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
 
 /** POI 검색 대상 유형 (현재 위치 검색 버튼 표시 기준) */
@@ -38,7 +37,6 @@ defineEmits<{
 const sidewalk = useSidewalkStore()
 const boundary = useBoundaryStore()
 const elevation = useElevationLayerStore()
-const rightPanel = useRightPanelStore()
 const routeInfoStore = useRouteInfoStore()
 
 /** crosswalk / fountain / hospital / sidewalk 중 하나라도 활성화되어 있으면 검색 버튼 표시 */
@@ -48,9 +46,6 @@ const hasSearchableActive = computed(() =>
     )
 )
 
-const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
-    { key: 'weather-recommend', label: '추천', icon: 'i-lucide-cloud-sun' },
-]
 </script>
 
 <template>
@@ -135,16 +130,6 @@ const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
                 appearance="elevated"
                 :active="routeInfoStore.isAddingRouteInfo.value"
                 @click="routeInfoStore.toggleAddingMode()"
-            />
-            <ChipButton
-                v-for="btn in panelButtons"
-                :key="btn.key"
-                :label="btn.label"
-                :icon="btn.icon"
-                size="sm"
-                appearance="elevated"
-                :active="rightPanel.activePanel.value === btn.key"
-                @click="rightPanel.open(btn.key)"
             />
         </div>
     </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
 import Card from '~/components/map/organizations/cards/Card.vue'
+import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import { formatDistance } from '~/composables/action/useFormatUtils'
 
 defineProps<{
@@ -10,19 +11,38 @@ defineProps<{
     selectedRouteId: string | null
     /** 경로 로딩 중 여부 */
     isLoading: boolean
+    /** 추천 모드 활성 여부 */
+    recommendActive?: boolean
 }>()
 
 defineEmits<{
     /** 경로 카드 클릭 시 선택된 경로 ID를 전달 */
     select: [routeId: string]
+    /** 추천 모드 토글 */
+    recommend: []
 }>()
 
 </script>
 
 <template>
     <div class="explore-panel">
-        <div class="map-section-label">공개 경로</div>
+        <div class="explore-panel__header">
+            <div class="map-section-label">공개 경로</div>
+            <ChipButton
+                label="추천"
+                icon="i-lucide-cloud-sun"
+                size="sm"
+                appearance="elevated"
+                :active="recommendActive"
+                @click="$emit('recommend')"
+            />
+        </div>
 
+        <template v-if="recommendActive">
+            <slot name="recommend" />
+        </template>
+
+        <template v-else>
         <div v-if="isLoading" class="explore-panel__empty">검색 중...</div>
 
         <div v-else-if="routes.length === 0" class="explore-panel__empty">
@@ -60,6 +80,7 @@ defineEmits<{
                 </Card>
             </li>
         </ul>
+        </template>
     </div>
 </template>
 
