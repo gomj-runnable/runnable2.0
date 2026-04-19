@@ -22,7 +22,8 @@ export const useExploreSearchSideeffect = () => {
         try {
             const params = query?.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''
             store.searchResults.value = await $fetch<SavedRoute[]>(`/api/routes/search${params}`)
-        } catch {
+        } catch (e) {
+            console.error('[ExploreSearch] 검색 실패:', e)
             store.searchResults.value = []
         } finally {
             store.isSearching.value = false

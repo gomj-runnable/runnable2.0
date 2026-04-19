@@ -37,7 +37,7 @@ async function handleMemoryAuth(event: H3Event) {
         const user = { id, name: body.name || 'User', email: body.email, password: body.password }
         memoryUsers.set(body.email, user)
 
-        setCookie(event, 'better-auth.session_token', `memory-session-${id}`, { path: '/' })
+        setCookie(event, 'better-auth.session_token', `memory-session-${id}`, { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
         return {
             user: { id, name: user.name, email: user.email },
             session: { id: `session-${id}`, userId: id, token: `memory-session-${id}` }
@@ -54,7 +54,7 @@ async function handleMemoryAuth(event: H3Event) {
                 message: '이메일 또는 비밀번호가 올바르지 않습니다.'
             })
         }
-        setCookie(event, 'better-auth.session_token', `memory-session-${user.id}`, { path: '/' })
+        setCookie(event, 'better-auth.session_token', `memory-session-${user.id}`, { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
         return {
             user: { id: user.id, name: user.name, email: user.email },
             session: {
