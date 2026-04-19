@@ -14,6 +14,9 @@ export default defineEventHandler(async (event) => {
     if (!route) {
         throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
     }
+    if (!route.isPublic) {
+        throw createError({ statusCode: 403, message: '비공개 경로입니다.' })
+    }
 
     const sections = await routeRepository.getSectionsByRouteId(routeId)
 

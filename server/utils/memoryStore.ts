@@ -5,6 +5,8 @@ export const memoryUsers = new Map<
 >()
 
 // 기본 DEV_USER 등록
+// NOTE: MEMORY 모드는 개발 전용이므로 평문 비밀번호를 사용한다.
+// 프로덕션 모드에서는 better-auth + DB 기반 인증을 사용하며 이 저장소는 활성화되지 않는다.
 memoryUsers.set('dev@localhost', {
     id: 'dev-user',
     name: 'Dev User',
