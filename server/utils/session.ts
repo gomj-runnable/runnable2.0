@@ -18,7 +18,7 @@ export const getSessionUser = async (event: H3Event) => {
                 return { userId: user.id, name: user.name, email: user.email }
             }
         }
-        return DEV_USER
+        return null
     }
 
     if (!auth) throw createError({ statusCode: 503, message: '인증 서비스를 사용할 수 없습니다.' })

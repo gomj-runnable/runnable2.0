@@ -1,5 +1,6 @@
 import { fromWebHandler, getCookie, setCookie, deleteCookie, getRequestURL, readBody } from 'h3'
 import type { H3Event } from 'h3'
+import { randomBytes } from 'crypto'
 import { auth } from '#server/utils/auth'
 import { memoryUsers } from '#server/utils/memoryStore'
 import { isMemoryMode } from '#server/utils/config'
@@ -10,13 +11,18 @@ import { isMemoryMode } from '#server/utils/config'
  * TODO: (추가확인 필요)
  */
 
+/** 메모리 모드 전용 CSRF 토큰 저장소. 요청마다 새 토큰을 발급한다. */
+const memoryCsrfTokens = new Map<string, number>()
+
 async function handleMemoryAuth(event: H3Event) {
     const url = getRequestURL(event)
     const pathname = url.pathname.replace('/api/auth', '')
 
     // GET /csrf - better-auth 클라이언트가 sign-in/sign-up 전에 호출하는 엔드포인트
     if (pathname === '/csrf') {
-        return { csrfToken: 'memory-csrf-token' }
+        const token = randomBytes(32).toString('hex')
+        memoryCsrfTokens.set(token, Date.now())
+        return { csrfToken: token }
     }
 
     // GET /ok - better-auth 클라이언트 헬스체크
