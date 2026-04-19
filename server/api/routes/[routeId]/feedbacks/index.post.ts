@@ -27,8 +27,8 @@ export default defineEventHandler(async (event) => {
             userId: user.userId,
             name: input.name,
             description: input.description,
-            longitude: String(input.longitude),
-            latitude: String(input.latitude),
+            lng: String(input.lng),
+            lat: String(input.lat),
             elevation: input.elevation != null ? String(input.elevation) : null,
             authorName,
             createdAt: new Date().toISOString()
@@ -45,8 +45,8 @@ export default defineEventHandler(async (event) => {
             userId: user.userId,
             name: input.name,
             description: input.description,
-            longitude: String(input.longitude),
-            latitude: String(input.latitude),
+            lng: String(input.lng),
+            lat: String(input.lat),
             elevation: input.elevation != null ? String(input.elevation) : null,
             authorName
         })

@@ -4,8 +4,8 @@ import type { CesiumViewer, CesiumEntity } from '~/composables/useWindow'
 import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
 
 export interface RouteInfoClickedPosition {
-    longitude: number
-    latitude: number
+    lng: number
+    lat: number
     elevation?: number
 }
 
@@ -63,8 +63,8 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
                 const carto = C.Cartographic.fromCartesian(cartesian)
                 clickedPosition.value = {
-                    longitude: C.Math.toDegrees(carto.longitude),
-                    latitude: C.Math.toDegrees(carto.latitude),
+                    lng: C.Math.toDegrees(carto.longitude),
+                    lat: C.Math.toDegrees(carto.latitude),
                     elevation: carto.height > 0 ? carto.height : undefined
                 }
             }, C.ScreenSpaceEventType.LEFT_CLICK)
@@ -182,8 +182,8 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
         for (const item of allItems) {
             const position = C.Cartesian3.fromDegrees(
-                Number(item.longitude),
-                Number(item.latitude),
+                Number(item.lng),
+                Number(item.lat),
                 item.elevation != null ? Number(item.elevation) + 2 : undefined
             )
 
