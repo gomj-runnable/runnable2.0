@@ -84,12 +84,15 @@ useHead({
 
 const notification = useNotificationStore()
 
+const toast = useToast()
+
 const { init } = useMapInit({
     onBuildingCorrected: () => {
-        notification.notify({
+        toast.add({
             title: '위치 보정',
-            message: '건물 위를 선택하여 인근 지면으로 위치가 보정되었습니다.',
-            tone: NotificationToneEnum.INFO
+            description: '건물 위를 선택하여 인근 지면으로 위치가 보정되었습니다.',
+            icon: 'i-lucide-info',
+            color: 'info'
         })
     }
 })
