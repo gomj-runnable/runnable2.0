@@ -2,7 +2,7 @@ import type { GeoJsonPosition, GeoJson } from '#shared/types/geojson.ts'
 
 export type NodeType = 'station' | 'sector' | 'floor' | 'spot' | 'facility' | 'move'
 
-export interface NodeAttribute {
+export interface BaseAttribute {
     comment?: string
     file_id?: string | null
     file_nm?: string | null
@@ -11,6 +11,9 @@ export interface NodeAttribute {
     addr_road?: string | null
     addr_jibun?: string | null
     description?: string | null
+}
+
+export interface NodeAttribute extends BaseAttribute {
     geom?: GeoJson | null
 }
 
@@ -46,15 +49,7 @@ export interface ThemeMapData {
     children: BaseNode[]
 }
 
-export interface ThemeMapAttribute {
-    comment?: string
-    file_id?: string | null
-    file_nm?: string | null
-    fly_dir?: string | null
-    fly_pos?: string | null
-    addr_road?: string | null
-    addr_jibun?: string | null
-    description?: string | null
+export interface ThemeMapAttribute extends BaseAttribute {
     geom?: string | null
 }
 

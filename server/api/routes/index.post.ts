@@ -10,7 +10,7 @@ import { requireSession } from '../../utils/session'
 import { lookupDistricts } from '../../utils/district-lookup'
 
 const requestSchema = z.object({
-    route: createRouteSchema.extend({ isPublic: z.boolean().optional().default(true) }),
+    route: createRouteSchema,
     sections: z.array(
         z.object({
             geom: geoJsonLineStringSchema.optional(),

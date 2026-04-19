@@ -228,9 +228,11 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
      * activeTypes 변화 감지 → entityMap 상태와 비교하여 레이어 동기화.
      * Set 비교 대신 entityMap 존재 여부로 판단하여 안정성 확보.
      */
+    const activeTypesKey = computed(() => [...activeTypes.value].sort().join(','))
     watch(
-        activeTypes,
-        async (current) => {
+        activeTypesKey,
+        async () => {
+            const current = activeTypes.value
             await fetchFacilities()
 
             for (const type of ALL_FACILITY_TYPES) {
@@ -243,8 +245,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                     removeLayer(type)
                 }
             }
-        },
-        { deep: true }
+        }
     )
 
     /**
