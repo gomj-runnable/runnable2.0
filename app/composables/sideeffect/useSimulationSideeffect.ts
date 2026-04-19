@@ -1,4 +1,5 @@
 import type { ShallowRef } from 'vue'
+import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { interpolatePath, getProgressInfo, haversineDistance } from '~/composables/action/useFlythroughAction'
 import { useSimulationStore } from '~/composables/store/useSimulationStore'
@@ -151,7 +152,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
 
     /** RAF 루프 한 프레임 처리 */
     const tick = (timestamp: number) => {
-        if (store.playbackState.value !== 'playing') return
+        if (!store.playbackState.value.isPlaying) return
 
         if (lastTimestamp === null) {
             lastTimestamp = timestamp
@@ -179,7 +180,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
             store.setProgressInfo(getProgressInfo(activeCoordinates, 1))
             _updateCamera(Cesium, v, 1)
             cameraView.restoreThirdPerson()
-            store.setPlaybackState('stopped')
+            store.setPlaybackState(PlaybackStateEnum.STOPPED)
             lastTimestamp = null
             return
         }
@@ -255,7 +256,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
             lastSetHeading = heading
         }
 
-        store.setPlaybackState('playing')
+        store.setPlaybackState(PlaybackStateEnum.PLAYING)
         rafId = requestAnimationFrame(tick)
     }
 
@@ -263,17 +264,17 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
      * 재생을 일시정지한다.
      */
     const pausePlayback = () => {
-        if (store.playbackState.value !== 'playing') return
+        if (!store.playbackState.value.isPlaying) return
         _stopRaf()
-        store.setPlaybackState('paused')
+        store.setPlaybackState(PlaybackStateEnum.PAUSED)
     }
 
     /**
      * 일시정지 상태에서 재생을 재개한다.
      */
     const resumePlayback = () => {
-        if (store.playbackState.value !== 'paused') return
-        store.setPlaybackState('playing')
+        if (!store.playbackState.value.isPaused) return
+        store.setPlaybackState(PlaybackStateEnum.PLAYING)
         rafId = requestAnimationFrame(tick)
     }
 

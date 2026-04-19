@@ -1,4 +1,5 @@
-import type { PlaybackSpeed, PlaybackState, ProgressInfo } from '#shared/types/simulation'
+import type { PlaybackSpeed, ProgressInfo } from '#shared/types/simulation'
+import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 
 /**
  * 3D 경로 시뮬레이션 재생 상태를 관리하는 store composable.
@@ -7,7 +8,7 @@ import type { PlaybackSpeed, PlaybackState, ProgressInfo } from '#shared/types/s
  */
 export const useSimulationStore = () => {
     /** 재생 상태 (stopped / playing / paused) */
-    const playbackState = useState<PlaybackState>('simulation.playbackState', () => 'stopped')
+    const playbackState = useState<PlaybackStateEnum>('simulation.playbackState', () => PlaybackStateEnum.STOPPED)
 
     /** 재생 속도 배율 */
     const playbackSpeed = useState<PlaybackSpeed>('simulation.playbackSpeed', () => 1)
@@ -25,19 +26,19 @@ export const useSimulationStore = () => {
     const elapsedSeconds = computed(() => Math.round((progress.value * totalDurationMs.value) / 1000))
 
     /** 재생 중 여부 */
-    const isPlaying = computed(() => playbackState.value === 'playing')
+    const isPlaying = computed(() => playbackState.value.isPlaying)
 
     /** 일시정지 여부 */
-    const isPaused = computed(() => playbackState.value === 'paused')
+    const isPaused = computed(() => playbackState.value.isPaused)
 
     /** 정지 여부 */
-    const isStopped = computed(() => playbackState.value === 'stopped')
+    const isStopped = computed(() => playbackState.value.isStopped)
 
     /** 활성 상태 여부 (재생 또는 일시정지) */
-    const isActive = computed(() => playbackState.value !== 'stopped')
+    const isActive = computed(() => playbackState.value.isActive)
 
     /** 재생 상태를 변경한다. */
-    const setPlaybackState = (state: PlaybackState) => {
+    const setPlaybackState = (state: PlaybackStateEnum) => {
         playbackState.value = state
     }
 
@@ -62,7 +63,7 @@ export const useSimulationStore = () => {
 
     /** 시뮬레이션 상태 전체를 초기값으로 되돌린다. */
     const reset = () => {
-        playbackState.value = 'stopped'
+        playbackState.value = PlaybackStateEnum.STOPPED
         playbackSpeed.value = 1
         progress.value = 0
         progressInfo.value = null

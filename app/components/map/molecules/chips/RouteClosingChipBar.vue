@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
+import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 
 defineProps<{
-    /** 현재 활성화된 경로 닫기 모드 (loop-close | round-trip | null) */
+    /** 현재 활성화된 경로 닫기 모드 (RouteClosingModeEnum | null) */
     closingMode: RouteClosingMode
     /** 칩 버튼 전체 비활성화 여부 */
     disabled?: boolean
@@ -22,18 +23,18 @@ defineEmits<{
             icon="i-lucide-rotate-ccw"
             appearance="elevated"
             size="md"
-            :active="closingMode === 'loop-close'"
+            :active="closingMode?.isLoopClose"
             :disabled="disabled"
-            @click="$emit('update:closingMode', closingMode === 'loop-close' ? null : 'loop-close')"
+            @click="$emit('update:closingMode', closingMode?.isLoopClose ? null : RouteClosingModeEnum.LOOP_CLOSE)"
         />
         <ChipButton
             label="왕복 코스"
             icon="i-lucide-arrow-left-right"
             appearance="elevated"
             size="md"
-            :active="closingMode === 'round-trip'"
+            :active="closingMode?.isRoundTrip"
             :disabled="disabled"
-            @click="$emit('update:closingMode', closingMode === 'round-trip' ? null : 'round-trip')"
+            @click="$emit('update:closingMode', closingMode?.isRoundTrip ? null : RouteClosingModeEnum.ROUND_TRIP)"
         />
     </div>
 </template>

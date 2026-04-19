@@ -1,7 +1,8 @@
-import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
+import type { SeoulMonthlyWeather, HourlyWeather } from '#shared/types/weather'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 
-type ActiveWeatherLayer = WeatherLayer | null
+type ActiveWeatherLayer = WeatherLayerEnum | null
 
 /**
  * 날씨 패널의 날짜·시간·레이어 선택 상태와 날씨 데이터를 관리하는 store composable.

@@ -6,12 +6,13 @@ import type {
     GroundPolylinePrimitiveInstance
 } from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
-import type { SeoulMonthlyWeather, HourlyWeather, WeatherLayer } from '#shared/types/weather'
+import type { SeoulMonthlyWeather, HourlyWeather } from '#shared/types/weather'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
 
-type ActiveWeatherLayer = WeatherLayer | null
+type ActiveWeatherLayer = WeatherLayerEnum | null
 
 interface UseWeatherSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>

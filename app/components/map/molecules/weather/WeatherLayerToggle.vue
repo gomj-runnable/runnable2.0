@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import type { WeatherLayer } from '#shared/types/weather'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 */
-    modelValue: WeatherLayer | null
+    modelValue: WeatherLayerEnum | null
 }>()
 
 /** 날씨 레이어 변경 이벤트 */
 const emit = defineEmits<{
-    'update:modelValue': [value: WeatherLayer | null]
+    'update:modelValue': [value: WeatherLayerEnum | null]
 }>()
 
-const layers: { value: WeatherLayer; label: string; icon: string }[] = [
-    { value: 'weather', label: '날씨', icon: 'i-lucide-cloud-sun' },
-    { value: 'temperature', label: '온도', icon: 'i-lucide-thermometer' },
-    { value: 'pm10', label: '미세먼지', icon: 'i-lucide-wind' },
+const layers: { value: WeatherLayerEnum; label: string; icon: string }[] = [
+    { value: WeatherLayerEnum.WEATHER, label: '날씨', icon: 'i-lucide-cloud-sun' },
+    { value: WeatherLayerEnum.TEMPERATURE, label: '온도', icon: 'i-lucide-thermometer' },
+    { value: WeatherLayerEnum.PM10, label: '미세먼지', icon: 'i-lucide-wind' },
 ]
 
-const handleClick = (layer: WeatherLayer) => {
-    emit('update:modelValue', props.modelValue === layer ? null : layer)
+const handleClick = (layer: WeatherLayerEnum) => {
+    emit('update:modelValue', props.modelValue?.equals(layer) ? null : layer)
 }
 </script>
 
@@ -27,12 +27,12 @@ const handleClick = (layer: WeatherLayer) => {
     <div class="weather-layer-toggle">
         <ChipButton
             v-for="layer in layers"
-            :key="layer.value"
+            :key="layer.value.key"
             :label="layer.label"
             :icon="layer.icon"
             size="sm"
             appearance="elevated"
-            :active="modelValue === layer.value"
+            :active="modelValue?.equals(layer.value) ?? false"
             @click="handleClick(layer.value)"
         />
     </div>

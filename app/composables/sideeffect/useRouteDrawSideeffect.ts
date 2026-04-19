@@ -3,6 +3,7 @@ import type { DrawActionData, CesiumEntity, CesiumViewer } from '~/composables/u
 import { createEntityGroup } from '~/composables/action/useEntityCleanup'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
+import type { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import { createSectionSchema } from '#shared/schemas/route.schema'
 import {
     createHeightAwareRouteGeom,
@@ -22,6 +23,7 @@ import {
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import type { NotificationOptions } from '~/composables/store/useNotificationStore'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 
 /**
  * `useRouteDrawSideeffect`에 주입하는 의존성 옵션.
@@ -43,7 +45,7 @@ interface UseRouteDrawSideeffectOptions {
     /** 드로잉 관련 상태 전체를 초기화하는 함수 */
     resetRouteDrawState: () => void
     /** 경로 닫기 모드 ref */
-    closingMode?: Ref<string | null>
+    closingMode?: Ref<RouteClosingModeEnum | null>
     /** 알림 표시 콜백. alert() 대신 모달로 메시지를 표시한다. */
     notify: (options: NotificationOptions) => void
 }
@@ -132,7 +134,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return
         }
 
-        const isRoundTrip = options.closingMode?.value === 'round-trip'
+        const isRoundTrip = options.closingMode?.value?.isRoundTrip
 
         sectionPolylines.set(
             ranges
@@ -185,7 +187,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             options.notify({
                 title: '지도 로딩 중',
                 message: '지도를 아직 불러오는 중입니다.',
-                tone: 'warning'
+                tone: NotificationToneEnum.WARNING
             })
             return null
         }
@@ -202,7 +204,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
         if (!result || !('data' in result) || !result.data) {
             if (result && 'message' in result && result.message) {
-                options.notify({ title: '알림', message: result.message, tone: 'warning' })
+                options.notify({ title: '알림', message: result.message, tone: NotificationToneEnum.WARNING })
             }
             return null
         }
@@ -247,7 +249,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             options.notify({
                 title: '구간 없음',
                 message: '먼저 구간을 그려주세요.',
-                tone: 'warning'
+                tone: NotificationToneEnum.WARNING
             })
             return
         }

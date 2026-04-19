@@ -1,14 +1,9 @@
 import type { Cartesian3, Color, MaterialProperty, Property } from 'cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { CesiumRuntime } from '#shared/types/cesium'
+import { GroundClampModeEnum } from '#shared/types/ground-clamp-mode.enum'
 
-/**
- * 지면 고정(Ground Clamping) 모드.
- * - `'clamp'` : 지면에 완전히 고정 (기본값)
- * - `'relative'` : 지면 기준 상대 높이
- * - `'none'` : 고정 없음 (절대 좌표)
- */
-export type GroundClampMode = 'clamp' | 'relative' | 'none'
+export type GroundClampMode = GroundClampModeEnum
 
 // ─── Polyline ────────────────────────────────────────────────────
 
@@ -19,8 +14,8 @@ export interface ClampedPolylineParams {
     width?: number
     /** Cesium material (Color, DashMaterial 등) */
     material?: Color | MaterialProperty
-    /** 지면 고정 모드 (기본 'clamp') */
-    mode?: GroundClampMode
+    /** 지면 고정 모드 (기본 CLAMP) */
+    mode?: GroundClampModeEnum
 }
 
 /**
@@ -40,7 +35,7 @@ export const createClampedPolyline = (cesium: CesiumRuntime, params: ClampedPoly
         cesium.Cartesian3.fromDegrees(lng, lat, h)
     ),
     width: params.width ?? 4,
-    clampToGround: (params.mode ?? 'clamp') !== 'none',
+    clampToGround: (params.mode ?? GroundClampModeEnum.CLAMP).shouldClamp,
     material: params.material
 })
 
@@ -55,8 +50,8 @@ export interface ClampedPointParams {
     outlineColor?: Color | Property
     /** 외곽선 너비 (px, 기본 2) */
     outlineWidth?: number
-    /** 지면 고정 모드 (기본 'clamp') */
-    mode?: GroundClampMode
+    /** 지면 고정 모드 (기본 CLAMP) */
+    mode?: GroundClampModeEnum
 }
 
 /**
@@ -67,14 +62,14 @@ export interface ClampedPointParams {
  * @param params - 포인트 파라미터
  */
 export const createClampedPoint = (cesium: CesiumRuntime, params: ClampedPointParams) => {
-    const mode = params.mode ?? 'clamp'
+    const mode = params.mode ?? GroundClampModeEnum.CLAMP
 
     return {
         pixelSize: params.pixelSize ?? 10,
         color: params.color,
         outlineColor: params.outlineColor ?? cesium.Color.WHITE,
         outlineWidth: params.outlineWidth ?? 2,
-        heightReference: mode === 'none'
+        heightReference: mode.isNone
             ? cesium.HeightReference.NONE
             : cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY
@@ -90,8 +85,8 @@ export interface ClampedLabelParams {
     font?: string
     /** 라벨 크기 배율 (기본 0.9) */
     scale?: number
-    /** 지면 고정 모드 (기본 'clamp') */
-    mode?: GroundClampMode
+    /** 지면 고정 모드 (기본 CLAMP) */
+    mode?: GroundClampModeEnum
 }
 
 /**
@@ -102,7 +97,7 @@ export interface ClampedLabelParams {
  * @param params - 라벨 파라미터
  */
 export const createClampedLabel = (cesium: CesiumRuntime, params: ClampedLabelParams) => {
-    const mode = params.mode ?? 'clamp'
+    const mode = params.mode ?? GroundClampModeEnum.CLAMP
 
     return {
         text: params.text,
@@ -112,7 +107,7 @@ export const createClampedLabel = (cesium: CesiumRuntime, params: ClampedLabelPa
         outlineColor: cesium.Color.BLACK,
         verticalOrigin: cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new cesium.Cartesian2(0, -14),
-        heightReference: mode === 'none'
+        heightReference: mode.isNone
             ? cesium.HeightReference.NONE
             : cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
@@ -134,7 +129,7 @@ export const createClampedColorPolyline = (
     color: string,
     alpha = 0.95,
     width = 4,
-    mode: GroundClampMode = 'clamp'
+    mode: GroundClampModeEnum = GroundClampModeEnum.CLAMP
 ) =>
     createClampedPolyline(cesium, {
         positions,

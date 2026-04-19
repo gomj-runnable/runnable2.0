@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
 import type { RouteElevationProfile } from '#shared/types/route'
-import type { DifficultyLevel } from '#shared/types/gradient'
+import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import RouteClosingChipBar from '~/components/map/molecules/chips/RouteClosingChipBar.vue'
 import GradientToggle from '~/components/map/molecules/GradientToggle.vue'
@@ -23,7 +23,7 @@ withDefaults(
         /** 경사도 레이어 활성 여부 */
         gradientActive?: boolean
         /** 현재 경로 난이도 */
-        gradientDifficulty?: DifficultyLevel | null
+        gradientDifficulty?: DifficultyLevelEnum | null
     }>(),
     { showClosing: true, gradientActive: false, gradientDifficulty: null }
 )

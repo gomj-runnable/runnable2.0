@@ -5,6 +5,9 @@ import type {
 } from '#shared/types/route'
 import type { GeoJsonLineString } from '#shared/types/geojson'
 import type { PoiDraftInput } from '#shared/types/facility'
+import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
+
+export { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 
 export const geoJsonPointSchema = z.object({
     type: z.literal('Point'),
@@ -60,7 +63,7 @@ export interface RouteDrawMetricsInput {
     heights?: Array<number | null | undefined> | null
     geoJson?: GeoJsonLineString | null
     /** 마감 모드. round-trip이면 거리 × 2, loop-close이면 거리 + loopCloseDistance */
-    closingMode?: RouteClosingMode
+    closingMode?: RouteClosingModeEnum | null
     /** loop-close 모드에서 출발지-도착지 간 거리 (meters) */
     loopCloseDistance?: number | null
 }
@@ -76,10 +79,10 @@ export class RouteDraftBuilder {
         if (base === undefined) return undefined
 
         const mode = this.drawMetrics?.closingMode
-        if (mode === 'round-trip') {
+        if (mode?.isRoundTrip) {
             return base * 2
         }
-        if (mode === 'loop-close') {
+        if (mode?.isLoopClose) {
             const extra = typeof this.drawMetrics?.loopCloseDistance === 'number'
                 ? this.drawMetrics.loopCloseDistance
                 : 0

@@ -1,4 +1,6 @@
-export type CameraViewMode = 'first-person' | 'third-person'
+import { CameraViewModeEnum } from '#shared/types/camera-view-mode.enum'
+
+export type CameraViewMode = CameraViewModeEnum
 
 /**
  * 카메라 시점 모드 상태를 관리하는 store composable.
@@ -7,22 +9,22 @@ export type CameraViewMode = 'first-person' | 'third-person'
  */
 export const useCameraViewStore = () => {
     /** 현재 카메라 시점 모드 */
-    const viewMode = useState<CameraViewMode>('cameraView.viewMode', () => 'third-person')
+    const viewMode = useState<CameraViewModeEnum>('cameraView.viewMode', () => CameraViewModeEnum.THIRD_PERSON)
 
     /** 1인칭 시점 여부 */
-    const isFirstPerson = computed(() => viewMode.value === 'first-person')
+    const isFirstPerson = computed(() => viewMode.value.isFirstPerson)
 
     /** 3인칭 시점 여부 */
-    const isThirdPerson = computed(() => viewMode.value === 'third-person')
+    const isThirdPerson = computed(() => viewMode.value.isThirdPerson)
 
     /** 카메라 시점을 1인칭으로 전환한다. */
     const setFirstPerson = () => {
-        viewMode.value = 'first-person'
+        viewMode.value = CameraViewModeEnum.FIRST_PERSON
     }
 
     /** 카메라 시점을 3인칭으로 전환한다. */
     const setThirdPerson = () => {
-        viewMode.value = 'third-person'
+        viewMode.value = CameraViewModeEnum.THIRD_PERSON
     }
 
     return {

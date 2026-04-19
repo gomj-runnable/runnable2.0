@@ -1,6 +1,7 @@
 import { distance, point } from '@turf/turf'
-import type { GradientSegment, DifficultyLevel } from '#shared/types/gradient'
+import type { GradientSegment } from '#shared/types/gradient'
 import type { GeoJsonPosition } from '#shared/types/geojson'
+import { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
 
 /**
  * 경사도 계산 및 난이도 분류를 위한 순수 계산 action composable.
@@ -79,42 +80,23 @@ export const useGradientAction = () => {
         distanceKm: number,
         elevGain: number,
         maxGrad: number
-    ): DifficultyLevel => {
-        const byDistance: DifficultyLevel =
-            distanceKm > 20
-                ? 'expert'
-                : distanceKm > 10
-                  ? 'advanced'
-                  : distanceKm > 5
-                    ? 'intermediate'
-                    : 'beginner'
+    ): DifficultyLevelEnum => {
+        const byDistance = distanceKm > 20 ? DifficultyLevelEnum.EXPERT
+            : distanceKm > 10 ? DifficultyLevelEnum.ADVANCED
+            : distanceKm > 5 ? DifficultyLevelEnum.INTERMEDIATE
+            : DifficultyLevelEnum.BEGINNER
 
-        const byElevGain: DifficultyLevel =
-            elevGain > 600
-                ? 'expert'
-                : elevGain > 300
-                  ? 'advanced'
-                  : elevGain > 100
-                    ? 'intermediate'
-                    : 'beginner'
+        const byElevGain = elevGain > 600 ? DifficultyLevelEnum.EXPERT
+            : elevGain > 300 ? DifficultyLevelEnum.ADVANCED
+            : elevGain > 100 ? DifficultyLevelEnum.INTERMEDIATE
+            : DifficultyLevelEnum.BEGINNER
 
-        const byGradient: DifficultyLevel =
-            maxGrad > 12
-                ? 'expert'
-                : maxGrad > 7
-                  ? 'advanced'
-                  : maxGrad > 3
-                    ? 'intermediate'
-                    : 'beginner'
+        const byGradient = maxGrad > 12 ? DifficultyLevelEnum.EXPERT
+            : maxGrad > 7 ? DifficultyLevelEnum.ADVANCED
+            : maxGrad > 3 ? DifficultyLevelEnum.INTERMEDIATE
+            : DifficultyLevelEnum.BEGINNER
 
-        const levels: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert']
-        const maxIndex = Math.max(
-            levels.indexOf(byDistance),
-            levels.indexOf(byElevGain),
-            levels.indexOf(byGradient)
-        )
-
-        return levels[maxIndex]!
+        return DifficultyLevelEnum.max(DifficultyLevelEnum.max(byDistance, byElevGain), byGradient)
     }
 
     return { calculateSegmentGradients, classifyDifficulty, getGradientColor }

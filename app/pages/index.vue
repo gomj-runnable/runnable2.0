@@ -25,6 +25,7 @@ import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserP
 import AuthModal from '~/components/map/templates/AuthModal.vue'
 import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
 import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
 import { useNotificationStore } from '~/composables/store/useNotificationStore'
@@ -88,7 +89,7 @@ const { init } = useMapInit({
         notification.notify({
             title: '위치 보정',
             message: '건물 위를 선택하여 인근 지면으로 위치가 보정되었습니다.',
-            tone: 'info'
+            tone: NotificationToneEnum.INFO
         })
     }
 })
@@ -149,7 +150,7 @@ const facilityEffect = useFacilitySideeffect({
             notification.notify({
                 title: '연결 불가',
                 message: `선택한 시설물이 경로에서 ${Math.round(result.distanceMeters)}m 떨어져 있어 연결할 수 없습니다. (최대 500m)`,
-                tone: 'error'
+                tone: NotificationToneEnum.ERROR
             })
             return
         }
@@ -158,7 +159,7 @@ const facilityEffect = useFacilitySideeffect({
             notification.notify({
                 title: '거리 경고',
                 message: `선택한 시설물이 경로에서 ${Math.round(result.distanceMeters)}m 떨어져 있습니다.`,
-                tone: 'warning'
+                tone: NotificationToneEnum.WARNING
             })
         }
 
@@ -376,7 +377,7 @@ watch(showRouteInfoChip, (visible) => {
 watch(showSimulationChip, (visible) => {
     if (!visible) {
         isSimDrawerOpen.value = false
-        if (simulation.playbackState.value !== 'stopped') {
+        if (!simulation.playbackState.value.isStopped) {
             simulationEffect.stopPlayback()
         }
     }
