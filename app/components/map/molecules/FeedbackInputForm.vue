@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 피드백 입력 폼 — 지도 클릭으로 선택된 위치에 텍스트 피드백을 작성한다 */
+/** 피드백 입력 폼 — 지도 클릭으로 선택된 위치에 장소명과 설명을 작성한다 */
 const props = defineProps<{
     longitude: number
     latitude: number
@@ -7,21 +7,21 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    submit: [payload: { content: string; authorName?: string }]
+    submit: [payload: { name: string; description: string }]
     cancel: []
 }>()
 
-const content = ref('')
-const authorName = ref('')
+const name = ref('')
+const description = ref('')
 
 const handleSubmit = () => {
-    if (!content.value.trim()) return
+    if (!name.value.trim() || !description.value.trim()) return
     emit('submit', {
-        content: content.value.trim(),
-        authorName: authorName.value.trim() || undefined
+        name: name.value.trim(),
+        description: description.value.trim()
     })
-    content.value = ''
-    authorName.value = ''
+    name.value = ''
+    description.value = ''
 }
 </script>
 
@@ -36,18 +36,18 @@ const handleSubmit = () => {
         <div class="feedback-input-form__coord">
             {{ props.longitude.toFixed(5) }}, {{ props.latitude.toFixed(5) }}
         </div>
+        <input
+            v-model="name"
+            class="feedback-input-form__name-input"
+            placeholder="장소명"
+            maxlength="100"
+        />
         <textarea
-            v-model="content"
+            v-model="description"
             class="feedback-input-form__textarea"
             placeholder="이 구간에 대한 의견을 남겨주세요"
             maxlength="500"
             rows="3"
-        />
-        <input
-            v-model="authorName"
-            class="feedback-input-form__name"
-            placeholder="닉네임 (선택)"
-            maxlength="100"
         />
         <div class="feedback-input-form__actions">
             <button class="feedback-input-form__btn feedback-input-form__btn--cancel" @click="emit('cancel')">
@@ -55,7 +55,7 @@ const handleSubmit = () => {
             </button>
             <button
                 class="feedback-input-form__btn feedback-input-form__btn--submit"
-                :disabled="!content.trim()"
+                :disabled="!name.trim() || !description.trim()"
                 @click="handleSubmit"
             >
                 등록
@@ -66,6 +66,11 @@ const handleSubmit = () => {
 
 <style scoped>
 .feedback-input-form {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -74,6 +79,7 @@ const handleSubmit = () => {
     border-radius: 8px;
     border: 1px solid var(--color-border, #333);
     min-width: 260px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 }
 
 .feedback-input-form__header {
@@ -101,6 +107,16 @@ const handleSubmit = () => {
     color: var(--color-text-muted, #888);
 }
 
+.feedback-input-form__name-input {
+    width: 100%;
+    background: var(--color-surface-variant, #222);
+    border: 1px solid var(--color-border, #444);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--color-text, #fff);
+    font-size: 13px;
+}
+
 .feedback-input-form__textarea {
     width: 100%;
     resize: vertical;
@@ -108,16 +124,6 @@ const handleSubmit = () => {
     border: 1px solid var(--color-border, #444);
     border-radius: 6px;
     padding: 8px;
-    color: var(--color-text, #fff);
-    font-size: 13px;
-}
-
-.feedback-input-form__name {
-    width: 100%;
-    background: var(--color-surface-variant, #222);
-    border: 1px solid var(--color-border, #444);
-    border-radius: 6px;
-    padding: 6px 8px;
     color: var(--color-text, #fff);
     font-size: 13px;
 }

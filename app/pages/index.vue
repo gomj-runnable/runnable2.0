@@ -71,6 +71,7 @@ import { useMapInit } from '~/composables/sideeffect/useMapInit'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
 import FeedbackPanel from '~/components/map/templates/FeedbackPanel.vue'
+import FeedbackInputForm from '~/components/map/molecules/FeedbackInputForm.vue'
 import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/components/map/templates/WeatherRecommendPanel.vue'
 
@@ -188,6 +189,7 @@ const handleRouteSelect = async (routeId: string) => {
     if (sections) {
         sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
     }
+    feedbackEffect.fetchFeedbacks(routeId)
 }
 
 // ─── 고도 시각화 ────────────────────────────────────────────────
@@ -217,6 +219,27 @@ const discover = useDiscoverStore()
 const discoverEffect = useDiscoverSideeffect({ viewer })
 
 const feedbackEffect = useFeedbackSideeffect(viewer)
+
+const handleFeedbackSubmit = async (payload: { name: string; description: string }) => {
+    const pos = feedbackEffect.clickedPosition.value
+    if (!pos) return
+    const routeId = routeList.selectedRouteId
+    if (!routeId) {
+        alert('피드백을 남기려면 먼저 경로를 저장하고 목록에서 선택해주세요.')
+        return
+    }
+    try {
+        await feedbackEffect.submitFeedback(routeId, {
+            name: payload.name,
+            description: payload.description,
+            longitude: pos.longitude,
+            latitude: pos.latitude,
+            elevation: pos.elevation
+        })
+    } catch {
+        alert('피드백 등록에 실패했습니다. 로그인이 필요합니다.')
+    }
+}
 
 const simulation = useSimulationStore()
 const simulationEffect = useSimulationSideeffect({ viewer })
@@ -522,6 +545,14 @@ watch(showSimulationChip, (visible) => {
                     :title="elevationChart.title"
                     :profile="elevationChart.profile"
                     @update:open="elevationChart.setOpen($event)"
+                />
+                <FeedbackInputForm
+                    v-if="feedbackEffect.clickedPosition.value"
+                    :longitude="feedbackEffect.clickedPosition.value.longitude"
+                    :latitude="feedbackEffect.clickedPosition.value.latitude"
+                    :elevation="feedbackEffect.clickedPosition.value.elevation"
+                    @submit="handleFeedbackSubmit"
+                    @cancel="feedbackEffect.cancelAdding()"
                 />
             </template>
         </MapShell>
