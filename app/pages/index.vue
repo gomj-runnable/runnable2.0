@@ -62,6 +62,7 @@ import { useRightPanelStore } from '~/composables/store/useRightPanelStore'
 import { useDiscoverStore } from '~/composables/store/useDiscoverStore'
 import { useDiscoverSideeffect } from '~/composables/sideeffect/useDiscoverSideeffect'
 import { useFeedbackSideeffect } from '~/composables/sideeffect/useFeedbackSideeffect'
+import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
 import { useSimulationStore } from '~/composables/store/useSimulationStore'
 import { useSimulationSideeffect } from '~/composables/sideeffect/useSimulationSideeffect'
 import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommendStore'
@@ -70,8 +71,8 @@ import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSidee
 import { useMapInit } from '~/composables/sideeffect/useMapInit'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
-import FeedbackPanel from '~/components/map/templates/FeedbackPanel.vue'
 import FeedbackInputForm from '~/components/map/molecules/FeedbackInputForm.vue'
+import FeedbackMarkerPopup from '~/components/map/molecules/FeedbackMarkerPopup.vue'
 import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/components/map/templates/WeatherRecommendPanel.vue'
 
@@ -98,10 +99,19 @@ const { init } = useMapInit({
 /** Cesium 뷰어 인스턴스. `onMounted` 이후 `window.viewer`로 할당된다. */
 const viewer = shallowRef<CesiumViewer | null>(null)
 
+// ─── 피드백 ──────────────────────────────────────────────────────
+
+const feedbackStore = useFeedbackStore()
+const feedbackEffect = useFeedbackSideeffect(viewer)
+
 // ─── 경로 Facade (그리기·저장·목록·고도·닫기) ────────────────────
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute, hideRoutePolylines, showRoutePolylines } =
-    useRouteMapFacade(viewer)
+const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute, hideRoutePolylines, showRoutePolylines, showFeedbackGuide } =
+    useRouteMapFacade(viewer, {
+        onAfterSave: async (routeId) => {
+            await feedbackEffect.saveLocalFeedbacks(routeId)
+        }
+    })
 
 const routeDrawStore = useRouteDrawStore()
 
@@ -218,26 +228,30 @@ const rightPanel = useRightPanelStore()
 const discover = useDiscoverStore()
 const discoverEffect = useDiscoverSideeffect({ viewer })
 
-const feedbackEffect = useFeedbackSideeffect(viewer)
-
 const handleFeedbackSubmit = async (payload: { name: string; description: string }) => {
     const pos = feedbackEffect.clickedPosition.value
     if (!pos) return
-    const routeId = routeList.selectedRouteId
-    if (!routeId) {
-        alert('피드백을 남기려면 먼저 경로를 저장하고 목록에서 선택해주세요.')
-        return
+
+    const input = {
+        name: payload.name,
+        description: payload.description,
+        longitude: pos.longitude,
+        latitude: pos.latitude,
+        elevation: pos.elevation
     }
-    try {
-        await feedbackEffect.submitFeedback(routeId, {
-            name: payload.name,
-            description: payload.description,
-            longitude: pos.longitude,
-            latitude: pos.latitude,
-            elevation: pos.elevation
-        })
-    } catch {
-        alert('피드백 등록에 실패했습니다. 로그인이 필요합니다.')
+
+    const routeId = routeList.selectedRouteId
+    if (routeId) {
+        // 저장된 경로 → 서버에 즉시 저장
+        try {
+            await feedbackEffect.submitFeedback(routeId, input)
+        } catch {
+            alert('피드백 등록에 실패했습니다. 로그인이 필요합니다.')
+        }
+    } else {
+        // 그리기 중 → 로컬에 저장 (경로 저장 시 일괄 전송)
+        feedbackStore.addLocalFeedback(input)
+        feedbackEffect.cancelAdding()
     }
 }
 
@@ -477,10 +491,6 @@ watch(showSimulationChip, (visible) => {
                     @update:selected-district="discover.selectedDistrict.value = $event"
                     @select-route="handleRouteSelect"
                 />
-                <FeedbackPanel
-                    v-else-if="rightPanel.activePanel.value === 'feedback'"
-                    :route-id="routeList.selectedRouteId ?? ''"
-                />
                 <WeatherRecommendPanel
                     v-else-if="rightPanel.activePanel.value === 'weather-recommend'"
                     :routes="weatherRecommend.recommendedRoutes.value"
@@ -554,6 +564,26 @@ watch(showSimulationChip, (visible) => {
                     @submit="handleFeedbackSubmit"
                     @cancel="feedbackEffect.cancelAdding()"
                 />
+                <FeedbackMarkerPopup
+                    v-if="feedbackStore.selectedMarkerFeedback.value && !feedbackEffect.clickedPosition.value"
+                    :name="feedbackStore.selectedMarkerFeedback.value.name"
+                    :description="feedbackStore.selectedMarkerFeedback.value.description"
+                    :author-name="'authorName' in feedbackStore.selectedMarkerFeedback.value ? feedbackStore.selectedMarkerFeedback.value.authorName : undefined"
+                    @close="feedbackStore.selectedMarkerFeedback.value = null"
+                />
+                <!-- 그리기 완료 후 피드백 안내 모달 -->
+                <div
+                    v-if="showFeedbackGuide"
+                    class="feedback-guide-modal"
+                    @click="showFeedbackGuide = false"
+                >
+                    <div class="feedback-guide-modal__content" @click.stop>
+                        <p>화면을 클릭해 해당 위치에 장소 설명을 추가할 수 있습니다.</p>
+                        <button class="feedback-guide-modal__btn" @click="showFeedbackGuide = false">
+                            확인
+                        </button>
+                    </div>
+                </div>
             </template>
         </MapShell>
 
@@ -588,3 +618,38 @@ watch(showSimulationChip, (visible) => {
 </template>
 
 <style scoped src="~/assets/css/pages/index.css"></style>
+
+<style scoped>
+.feedback-guide-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.feedback-guide-modal__content {
+    background: var(--color-surface, #1a1a1a);
+    border: 1px solid var(--color-border, #333);
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-align: center;
+    max-width: 320px;
+    color: var(--color-text, #fff);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.feedback-guide-modal__btn {
+    margin-top: 12px;
+    padding: 8px 24px;
+    background: var(--color-primary, #4CAF50);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+</style>

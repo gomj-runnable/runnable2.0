@@ -34,7 +34,14 @@ import { useNotificationStore } from '~/composables/store/useNotificationStore'
  *
  * @param viewer - 페이지에서 초기화한 Cesium 뷰어 ref
  */
-export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
+interface RouteMapFacadeOptions {
+    onAfterSave?: (routeId: string) => Promise<void>
+}
+
+export const useRouteMapFacade = (
+    viewer: ShallowRef<CesiumViewer | null>,
+    facadeOptions?: RouteMapFacadeOptions
+) => {
     // ─── 내부 의존성 조합 ─────────────────────────────────────────
 
     const store = useRouteDrawStore()
@@ -60,6 +67,8 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
 
     const saveEffect = useRouteSaveSideeffect()
     const downloadEffect = useRouteDownloadSideeffect()
+
+    const showFeedbackGuide = ref(false)
 
     const terrainSampler = useTerrainSampler(viewer)
 
@@ -151,6 +160,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
 
         openElevationChart('경로 고도 그래프', createRouteElevationProfile(densified))
+        showFeedbackGuide.value = true
     }
 
     const selectRoute = async (routeId: string) => {
@@ -324,11 +334,15 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         try {
             const { routeDraftPayload, sectionPayloads } = buildSavePayload()
 
-            await saveEffect.saveRoute(routeDraftPayload, sectionPayloads)
+            const saveResult = await saveEffect.saveRoute(routeDraftPayload, sectionPayloads) as { route: { routeId: string } }
+            const savedRouteId = saveResult.route.routeId
+
+            await facadeOptions?.onAfterSave?.(savedRouteId)
             await listEffect.fetchRoutes()
 
             store.isRouteSaveModalOpen.value = false
             store.resetRouteDrawState()
+            showFeedbackGuide.value = false
             store.activeNav.value = '목록'
             notification.notify({
                 title: '저장 완료',
@@ -449,6 +463,7 @@ export const useRouteMapFacade = (viewer: ShallowRef<CesiumViewer | null>) => {
         optimizationMode: store.optimizationMode,
         isOptimizing: store.isOptimizing,
         hideRoutePolylines,
-        showRoutePolylines
+        showRoutePolylines,
+        showFeedbackGuide
     }
 }

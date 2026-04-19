@@ -10,23 +10,26 @@ export interface FeedbackClickedPosition {
 }
 
 /**
- * 피드백 데이터 페칭과 Cesium 마커 렌더링을 담당하는 sideeffect.
- * useFeedbackStore를 구독하여 피드백 마커를 지도에 동기화한다.
+ * 피드백 데이터 페칭, Cesium 마커 렌더링, 지도 클릭 핸들링을 담당하는 sideeffect.
+ * 서버 저장된 피드백과 로컬 미저장 피드백 모두 지도에 표시한다.
  */
 export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
     const store = useFeedbackStore()
     let entityGroup: ReturnType<typeof createEntityGroup> | null = null
+    const entityToFeedbackMap = new Map<CesiumEntity, SavedFeedback | FeedbackDraftInput>()
 
     /** 지도 클릭으로 선택된 피드백 위치 */
     const clickedPosition = ref<FeedbackClickedPosition | null>(null)
-    let clickHandler: import('cesium').ScreenSpaceEventHandler | null = null
+    let addClickHandler: import('cesium').ScreenSpaceEventHandler | null = null
+    let markerClickHandler: import('cesium').ScreenSpaceEventHandler | null = null
 
-    /** isAddingFeedback 상태에 따라 지도 클릭 핸들러를 등록/해제한다 */
+    // ─── 지도 클릭: 피드백 추가 모드 ─────────────────────────────
+
     watch(
         () => store.isAddingFeedback.value,
         (isAdding) => {
-            clickHandler?.destroy()
-            clickHandler = null
+            addClickHandler?.destroy()
+            addClickHandler = null
             clickedPosition.value = null
 
             if (!isAdding) return
@@ -66,17 +69,54 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
                 }
             }, C.ScreenSpaceEventType.LEFT_CLICK)
 
-            clickHandler = handler
+            addClickHandler = handler
         }
     )
 
-    /** 피드백 추가 모드를 해제하고 클릭 위치를 초기화한다 */
     const cancelAdding = () => {
         store.isAddingFeedback.value = false
         clickedPosition.value = null
     }
 
-    /** 특정 경로의 피드백 목록을 서버에서 불러온다 */
+    // ─── 마커 클릭: 팝업 표시 ────────────────────────────────────
+
+    watch(
+        viewer,
+        (v) => {
+            markerClickHandler?.destroy()
+            markerClickHandler = null
+
+            if (!v) return
+
+            const C = window.Cesium
+            if (!C) return
+
+            const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
+
+            handler.setInputAction((movement: { position: unknown }) => {
+                if (store.isAddingFeedback.value) return
+
+                const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
+                if (!picked?.id) {
+                    store.selectedMarkerFeedback.value = null
+                    return
+                }
+
+                const fb = entityToFeedbackMap.get(picked.id as CesiumEntity)
+                if (fb) {
+                    store.selectedMarkerFeedback.value = fb
+                } else {
+                    store.selectedMarkerFeedback.value = null
+                }
+            }, C.ScreenSpaceEventType.LEFT_CLICK)
+
+            markerClickHandler = handler
+        },
+        { immediate: true }
+    )
+
+    // ─── 서버 API ────────────────────────────────────────────────
+
     const fetchFeedbacks = async (routeId: string) => {
         store.isLoading.value = true
         try {
@@ -89,7 +129,26 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
         }
     }
 
-    /** 새 피드백을 서버에 전송한다 */
+    /** 로컬 피드백을 서버에 일괄 저장한다 */
+    const saveLocalFeedbacks = async (routeId: string) => {
+        const locals = store.localFeedbacks.value
+        if (!locals.length) return
+
+        for (const input of locals) {
+            try {
+                const feedback = await $fetch<SavedFeedback>(`/api/routes/${routeId}/feedbacks`, {
+                    method: 'POST',
+                    body: input
+                })
+                store.feedbacks.value = [...store.feedbacks.value, feedback]
+            } catch (e) {
+                console.error('[FeedbackSideeffect] 피드백 일괄 저장 실패:', e)
+            }
+        }
+        store.clearLocalFeedbacks()
+    }
+
+    /** 새 피드백을 서버에 즉시 전송한다 (저장된 경로에서 ChipButton으로 추가 시) */
     const submitFeedback = async (routeId: string, input: FeedbackDraftInput) => {
         try {
             const feedback = await $fetch<SavedFeedback>(`/api/routes/${routeId}/feedbacks`, {
@@ -105,25 +164,30 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
         }
     }
 
-    /** 피드백 마커를 Cesium 지도에 렌더링한다 */
+    // ─── 마커 렌더링 ─────────────────────────────────────────────
+
     const renderFeedbackMarkers = () => {
         const v = viewer.value
         const C = window.Cesium
         if (!v || !C) return
 
-        // 기존 마커 제거
         clearMarkers()
-
         entityGroup = createEntityGroup(v)
+        entityToFeedbackMap.clear()
 
-        for (const fb of store.feedbacks.value) {
+        const allFeedbacks: (SavedFeedback | FeedbackDraftInput)[] = [
+            ...store.feedbacks.value,
+            ...store.localFeedbacks.value
+        ]
+
+        for (const fb of allFeedbacks) {
             const position = C.Cartesian3.fromDegrees(
                 Number(fb.longitude),
                 Number(fb.latitude),
                 fb.elevation != null ? Number(fb.elevation) + 2 : undefined
             )
 
-            entityGroup.add({
+            const entity = entityGroup.add({
                 position,
                 point: {
                     pixelSize: 10,
@@ -147,29 +211,33 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
                     backgroundColor: new C.Color(0.165, 0.165, 0.165, 0.8)
                 },
                 properties: {
-                    feedbackId: fb.feedbackId,
                     type: 'feedback'
                 }
             })
+
+            entityToFeedbackMap.set(entity, fb)
         }
     }
 
-    /** 모든 피드백 마커를 제거한다 */
     const clearMarkers = () => {
         if (entityGroup) {
             entityGroup.removeAll()
             entityGroup = null
         }
+        entityToFeedbackMap.clear()
     }
 
-    // 피드백 목록 변경 시 마커 재렌더링
-    watch(() => store.feedbacks.value, () => {
-        renderFeedbackMarkers()
-    }, { deep: true })
+    // 피드백 목록 또는 로컬 피드백 변경 시 마커 재렌더링
+    watch(
+        [() => store.feedbacks.value, () => store.localFeedbacks.value],
+        () => renderFeedbackMarkers(),
+        { deep: true }
+    )
 
     return {
         fetchFeedbacks,
         submitFeedback,
+        saveLocalFeedbacks,
         renderFeedbackMarkers,
         clearMarkers,
         clickedPosition,

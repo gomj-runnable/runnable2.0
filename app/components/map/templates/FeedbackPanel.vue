@@ -70,8 +70,8 @@ const copyShareLink = async () => {
                 v-for="fb in feedbackStore.feedbacks.value"
                 :key="fb.feedbackId"
                 class="feedback-panel__item"
-                :class="{ 'is-selected': feedbackStore.selectedFeedback.value?.feedbackId === fb.feedbackId }"
-                @click="feedbackStore.selectedFeedback.value = fb"
+                :class="{ 'is-selected': 'feedbackId' in (feedbackStore.selectedMarkerFeedback.value ?? {}) && (feedbackStore.selectedMarkerFeedback.value as any)?.feedbackId === fb.feedbackId }"
+                @click="feedbackStore.selectedMarkerFeedback.value = fb"
             >
                 <div class="feedback-panel__item-header">
                     <span class="feedback-panel__item-name">{{ fb.name }}</span>
