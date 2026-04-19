@@ -6,6 +6,7 @@ import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 import { useElevationLayerStore } from '~/composables/store/useElevationLayerStore'
 import { useRightPanelStore, type RightPanelType } from '~/composables/store/useRightPanelStore'
+import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
 
 /** POI 검색 대상 유형 (현재 위치 검색 버튼 표시 기준) */
 const SEARCHABLE_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital', 'sidewalk']
@@ -36,6 +37,7 @@ const sidewalk = useSidewalkStore()
 const boundary = useBoundaryStore()
 const elevation = useElevationLayerStore()
 const rightPanel = useRightPanelStore()
+const feedbackStore = useFeedbackStore()
 
 /** crosswalk / fountain / hospital / sidewalk 중 하나라도 활성화되어 있으면 검색 버튼 표시 */
 const hasSearchableActive = computed(() =>
@@ -45,7 +47,6 @@ const hasSearchableActive = computed(() =>
 )
 
 const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
-    { key: 'feedback', label: '피드백', icon: 'i-lucide-message-circle' },
     { key: 'weather-recommend', label: '추천', icon: 'i-lucide-cloud-sun' },
 ]
 </script>
@@ -123,6 +124,14 @@ const panelButtons: { key: RightPanelType; label: string; icon: string }[] = [
                 appearance="elevated"
                 :active="simulationActive"
                 @click="$emit('toggleSimulation')"
+            />
+            <ChipButton
+                label="피드백"
+                icon="i-lucide-message-circle"
+                size="sm"
+                appearance="elevated"
+                :active="feedbackStore.isAddingFeedback.value"
+                @click="feedbackStore.toggleAddingMode()"
             />
             <ChipButton
                 v-for="btn in panelButtons"
