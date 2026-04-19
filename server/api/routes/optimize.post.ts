@@ -1,7 +1,9 @@
 import { RouteOptimizeRequestBody, RouteOptimizeResponseBody } from '#shared/schemas/route-optimization.schema'
 import { createRoutingService } from '../../utils/routing'
+import { requireSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
+  await requireSession(event)
   const raw = await readBody(event)
   const request = RouteOptimizeRequestBody.fromRaw(raw)
   const config = useRuntimeConfig()

@@ -15,7 +15,7 @@ async function seed() {
   const ADMIN_ID = 'admin_master_01'
   const adminData = {
     email: 'admin@runnable.local',
-    password: '!runnable2242',
+    password: process.env.ADMIN_SEED_PASSWORD || '!runnable2242',
     name: '최고관리자'
   }
 

@@ -14,5 +14,5 @@ memoryUsers.set('dev@localhost', {
     id: 'dev-user',
     name: 'Dev User',
     email: 'dev@localhost',
-    password: '!runnable2242'
+    password: process.env.ADMIN_SEED_PASSWORD || '!runnable2242'
 })

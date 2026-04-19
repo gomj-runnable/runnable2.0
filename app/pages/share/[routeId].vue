@@ -3,14 +3,16 @@
  * 공유 경로 페이지 — 인증 없이 접근 가능한 경로 공유 뷰.
  * 3D 지도 위에 경로와 경로정보 마커를 표시하고 경로정보를 남길 수 있다.
  */
+import type { SavedRoute, SavedSection } from '#shared/types/route'
+
 definePageMeta({ ssr: false, layout: 'default' })
 
 const route = useRoute()
 const routeId = route.params.routeId as string
 
 const sharedData = ref<{
-    route: Record<string, unknown>
-    sections: Array<Record<string, unknown>>
+    route: SavedRoute
+    sections: SavedSection[]
     routeInfos: Array<Record<string, unknown>>
 } | null>(null)
 const error = ref<string | null>(null)
@@ -41,15 +43,15 @@ onMounted(async () => {
 
         <div v-else-if="sharedData" class="share-page__content">
             <div class="share-page__header">
-                <h1 class="share-page__title">{{ (sharedData.route as Record<string, string>).title }}</h1>
-                <p v-if="(sharedData.route as Record<string, string>).description" class="share-page__desc">
-                    {{ (sharedData.route as Record<string, string>).description }}
+                <h1 class="share-page__title">{{ sharedData.route.title }}</h1>
+                <p v-if="sharedData.route.description" class="share-page__desc">
+                    {{ sharedData.route.description }}
                 </p>
             </div>
 
             <div class="share-page__info">
-                <span v-if="sharedData.route?.['distance']">
-                    거리: {{ (Number(sharedData.route['distance']) / 1000).toFixed(2) }}km
+                <span v-if="sharedData.route?.distance">
+                    거리: {{ (Number(sharedData.route.distance) / 1000).toFixed(2) }}km
                 </span>
                 <span>경로정보 {{ sharedData.routeInfos.length }}개</span>
             </div>

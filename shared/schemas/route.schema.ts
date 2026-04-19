@@ -8,7 +8,7 @@ import type { PoiDraftInput } from '#shared/types/facility'
 
 export const geoJsonPointSchema = z.object({
     type: z.literal('Point'),
-    coordinates: z.tuple([z.number(), z.number()])
+    coordinates: z.tuple([z.number(), z.number(), z.number().optional()])
 })
 
 export const poiSchema = z.object({
@@ -49,7 +49,8 @@ export const createRouteSchema = z.object({
     lowHeight: z.number().optional(),
     distance: z.number().nonnegative().optional(),
     sgg: z.array(z.string()).optional(),
-    emd: z.array(z.string()).optional()
+    emd: z.array(z.string()).optional(),
+    isPublic: z.boolean().optional().default(true)
 })
 
 export type RouteClosingMode = 'loop-close' | 'round-trip' | null
