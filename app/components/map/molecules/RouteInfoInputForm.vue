@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /** 경로정보 입력 폼 — 지도 클릭으로 선택된 위치에 장소명과 설명을 작성한다 */
 const props = defineProps<{
-    longitude: number
-    latitude: number
+    lng: number
+    lat: number
     elevation?: number
 }>()
 
@@ -34,7 +34,7 @@ const handleSubmit = () => {
             </button>
         </div>
         <div class="feedback-input-form__coord">
-            {{ props.longitude.toFixed(5) }}, {{ props.latitude.toFixed(5) }}
+            {{ props.lng.toFixed(5) }}, {{ props.lat.toFixed(5) }}
         </div>
         <input
             v-model="name"

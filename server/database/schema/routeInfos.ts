@@ -15,8 +15,8 @@ export const routeInfos = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 100 }).notNull(),
     description: text('description').notNull(),
-    longitude: numeric('longitude', { precision: 12, scale: 8 }).notNull(),
-    latitude: numeric('latitude', { precision: 12, scale: 8 }).notNull(),
+    lng: numeric('longitude', { precision: 12, scale: 8 }).notNull(),
+    lat: numeric('latitude', { precision: 12, scale: 8 }).notNull(),
     elevation: numeric('elevation', { precision: 10, scale: 2 }),
     authorName: varchar('author_name', { length: 100 }).notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow()

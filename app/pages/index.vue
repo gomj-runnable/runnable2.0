@@ -258,8 +258,8 @@ const handleRouteInfoSubmit = async (payload: { name: string; description: strin
     const input = {
         name: payload.name,
         description: payload.description,
-        longitude: pos.longitude,
-        latitude: pos.latitude,
+        lng: pos.lng,
+        lat: pos.lat,
         elevation: pos.elevation
     }
 
@@ -599,8 +599,8 @@ watch(showSimulationChip, (visible) => {
                 />
                 <RouteInfoInputForm
                     v-if="routeInfoEffect.clickedPosition.value"
-                    :longitude="routeInfoEffect.clickedPosition.value.longitude"
-                    :latitude="routeInfoEffect.clickedPosition.value.latitude"
+                    :lng="routeInfoEffect.clickedPosition.value.lng"
+                    :lat="routeInfoEffect.clickedPosition.value.lat"
                     :elevation="routeInfoEffect.clickedPosition.value.elevation"
                     @submit="handleRouteInfoSubmit"
                     @cancel="routeInfoEffect.cancelAdding()"
