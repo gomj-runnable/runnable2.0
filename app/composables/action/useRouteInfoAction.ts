@@ -1,15 +1,15 @@
 /**
- * 피드백 관련 순수 계산 유틸리티.
- * 공유 링크 생성, 피드백 표시 포맷팅 등을 담당한다.
+ * 경로정보 관련 순수 계산 유틸리티.
+ * 공유 링크 생성, 경로정보 표시 포맷팅 등을 담당한다.
  */
-export const useFeedbackAction = () => {
+export const useRouteInfoAction = () => {
     /** 경로 공유 링크를 생성한다 */
     const generateShareLink = (routeId: string): string => {
         const origin = typeof window !== 'undefined' ? window.location.origin : ''
         return `${origin}/share/${routeId}`
     }
 
-    /** 피드백 생성 시각을 상대적 텍스트로 포맷한다 */
+    /** 경로정보 생성 시각을 상대적 텍스트로 포맷한다 */
     const formatRelativeTime = (dateStr: string): string => {
         const date = new Date(dateStr)
         const now = new Date()

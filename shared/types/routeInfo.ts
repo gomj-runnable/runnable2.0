@@ -1,4 +1,4 @@
-export interface FeedbackBase {
+export interface RouteInfoBase {
     name: string
     description: string
     longitude: number
@@ -6,12 +6,12 @@ export interface FeedbackBase {
     elevation?: number
 }
 
-export interface SavedFeedback extends FeedbackBase {
-    feedbackId: string
+export interface SavedRouteInfo extends RouteInfoBase {
+    routeInfoId: string
     routeId: string
     userId: string
     authorName: string
     createdAt?: string
 }
 
-export type FeedbackDraftInput = FeedbackBase
+export type RouteInfoDraftInput = RouteInfoBase

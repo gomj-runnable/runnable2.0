@@ -2,11 +2,11 @@ import { pgTable, text, varchar, numeric, timestamp, index } from 'drizzle-orm/p
 import { routes } from './routes'
 import { users } from './users'
 
-// route_feedbacks
-export const routeFeedbacks = pgTable(
-  'route_feedbacks',
+// route_infos
+export const routeInfos = pgTable(
+  'route_infos',
   {
-    feedbackId: text('feedback_id').primaryKey(),
+    routeInfoId: text('route_info_id').primaryKey(),
     routeId: text('route_id')
       .notNull()
       .references(() => routes.routeId, { onDelete: 'cascade' }),
@@ -22,7 +22,7 @@ export const routeFeedbacks = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow()
   },
   (table) => [
-    index('feedback_route_idx').on(table.routeId),
-    index('feedback_user_idx').on(table.userId)
+    index('route_info_route_idx').on(table.routeId),
+    index('route_info_user_idx').on(table.userId)
   ]
 )

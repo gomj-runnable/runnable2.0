@@ -61,8 +61,8 @@ import { useGradientSideeffect } from '~/composables/sideeffect/useGradientSidee
 import { useRightPanelStore } from '~/composables/store/useRightPanelStore'
 import { useDiscoverStore } from '~/composables/store/useDiscoverStore'
 import { useDiscoverSideeffect } from '~/composables/sideeffect/useDiscoverSideeffect'
-import { useFeedbackSideeffect } from '~/composables/sideeffect/useFeedbackSideeffect'
-import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
+import { useRouteInfoSideeffect } from '~/composables/sideeffect/useRouteInfoSideeffect'
+import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
 import { useSimulationStore } from '~/composables/store/useSimulationStore'
 import { useSimulationSideeffect } from '~/composables/sideeffect/useSimulationSideeffect'
 import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommendStore'
@@ -71,8 +71,8 @@ import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSidee
 import { useMapInit } from '~/composables/sideeffect/useMapInit'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import DiscoverPanel from '~/components/map/templates/DiscoverPanel.vue'
-import FeedbackInputForm from '~/components/map/molecules/FeedbackInputForm.vue'
-import FeedbackMarkerPopup from '~/components/map/molecules/FeedbackMarkerPopup.vue'
+import RouteInfoInputForm from '~/components/map/molecules/RouteInfoInputForm.vue'
+import RouteInfoMarkerPopup from '~/components/map/molecules/RouteInfoMarkerPopup.vue'
 import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/components/map/templates/WeatherRecommendPanel.vue'
 
@@ -99,17 +99,17 @@ const { init } = useMapInit({
 /** Cesium 뷰어 인스턴스. `onMounted` 이후 `window.viewer`로 할당된다. */
 const viewer = shallowRef<CesiumViewer | null>(null)
 
-// ─── 피드백 ──────────────────────────────────────────────────────
+// ─── 경로정보 ────────────────────────────────────────────────────
 
-const feedbackStore = useFeedbackStore()
-const feedbackEffect = useFeedbackSideeffect(viewer)
+const routeInfoStore = useRouteInfoStore()
+const routeInfoEffect = useRouteInfoSideeffect(viewer)
 
 // ─── 경로 Facade (그리기·저장·목록·고도·닫기) ────────────────────
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute, hideRoutePolylines, showRoutePolylines, showFeedbackGuide } =
+const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute, hideRoutePolylines, showRoutePolylines, showRouteInfoGuide } =
     useRouteMapFacade(viewer, {
         onAfterSave: async (routeId) => {
-            await feedbackEffect.saveLocalFeedbacks(routeId)
+            await routeInfoEffect.saveLocalRouteInfos(routeId)
         }
     })
 
@@ -201,26 +201,26 @@ const handleRouteSelect = async (routeId: string) => {
     }
 }
 
-// 경로 선택/해제 시 피드백 로드/정리
+// 경로 선택/해제 시 경로정보 로드/정리
 watch(
     () => routeList.selectedRouteId,
     (routeId) => {
         if (routeId) {
-            feedbackEffect.fetchFeedbacks(routeId)
+            routeInfoEffect.fetchRouteInfos(routeId)
         } else {
-            feedbackStore.clearFeedbacks()
-            feedbackEffect.clearMarkers()
+            routeInfoStore.clearRouteInfos()
+            routeInfoEffect.clearMarkers()
         }
     }
 )
 
-// 경로 폴리라인이 지워지면 로컬 피드백도 함께 정리
+// 경로 폴리라인이 지워지면 로컬 경로정보도 함께 정리
 watch(
     () => routeDrawStore.drawnPositions.value,
     (positions) => {
         if (!positions) {
-            feedbackStore.clearLocalFeedbacks()
-            feedbackEffect.clearMarkers()
+            routeInfoStore.clearLocalRouteInfos()
+            routeInfoEffect.clearMarkers()
         }
     }
 )
@@ -251,8 +251,8 @@ const rightPanel = useRightPanelStore()
 const discover = useDiscoverStore()
 const discoverEffect = useDiscoverSideeffect({ viewer })
 
-const handleFeedbackSubmit = async (payload: { name: string; description: string }) => {
-    const pos = feedbackEffect.clickedPosition.value
+const handleRouteInfoSubmit = async (payload: { name: string; description: string }) => {
+    const pos = routeInfoEffect.clickedPosition.value
     if (!pos) return
 
     const input = {
@@ -267,14 +267,14 @@ const handleFeedbackSubmit = async (payload: { name: string; description: string
     if (routeId) {
         // 저장된 경로 → 서버에 즉시 저장
         try {
-            await feedbackEffect.submitFeedback(routeId, input)
+            await routeInfoEffect.submitRouteInfo(routeId, input)
         } catch {
-            alert('피드백 등록에 실패했습니다. 로그인이 필요합니다.')
+            alert('경로정보 등록에 실패했습니다. 로그인이 필요합니다.')
         }
     } else {
         // 그리기 중 → 로컬에 저장 (경로 저장 시 일괄 전송)
-        feedbackStore.addLocalFeedback(input)
-        feedbackEffect.cancelAdding()
+        routeInfoStore.addLocalRouteInfo(input)
+        routeInfoEffect.cancelAdding()
     }
 }
 
@@ -287,8 +287,8 @@ const weatherRecommendEffect = useWeatherRecommendSideeffect()
 // ─── 시뮬레이션 Drawer ──────────────────────────────────────────
 const isSimDrawerOpen = ref(false)
 
-/** 피드백 Chip 표출 조건: 그리기 완료 후 / 목록·탐색에서 경로 선택 후 */
-const showFeedbackChip = computed(() => {
+/** 경로정보 Chip 표출 조건: 그리기 완료 후 / 목록·탐색에서 경로 선택 후 */
+const showRouteInfoChip = computed(() => {
     if (activeNav.value === '그리기' && drawing.sectionDraft) return true
     if (activeNav.value === '목록' && routeList.selectedRouteId) return true
     if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
@@ -302,6 +302,8 @@ const showSimulationChip = computed(() => {
     if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
     return false
 })
+
+
 
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
@@ -372,10 +374,10 @@ watch(activeNav, (next) => {
     }
 })
 
-/** 피드백 Chip 조건이 해제되면 추가 모드를 끈다. */
-watch(showFeedbackChip, (visible) => {
-    if (!visible && feedbackStore.isAddingFeedback.value) {
-        feedbackEffect.cancelAdding()
+/** 경로정보 Chip 조건이 해제되면 추가 모드를 끈다. */
+watch(showRouteInfoChip, (visible) => {
+    if (!visible && routeInfoStore.isAddingRouteInfo.value) {
+        routeInfoEffect.cancelAdding()
     }
 })
 
@@ -566,7 +568,7 @@ watch(showSimulationChip, (visible) => {
                     :is-searching="facility.isSearching.value"
                     :show-simulation="showSimulationChip"
                     :simulation-active="isSimDrawerOpen"
-                    :show-feedback="showFeedbackChip"
+                    :show-feedback="showRouteInfoChip"
                     @toggle="facility.toggleType"
                     @search-nearby="facilityEffect.searchNearby"
                     @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"
@@ -595,30 +597,30 @@ watch(showSimulationChip, (visible) => {
                     :profile="elevationChart.profile"
                     @update:open="elevationChart.setOpen($event)"
                 />
-                <FeedbackInputForm
-                    v-if="feedbackEffect.clickedPosition.value"
-                    :longitude="feedbackEffect.clickedPosition.value.longitude"
-                    :latitude="feedbackEffect.clickedPosition.value.latitude"
-                    :elevation="feedbackEffect.clickedPosition.value.elevation"
-                    @submit="handleFeedbackSubmit"
-                    @cancel="feedbackEffect.cancelAdding()"
+                <RouteInfoInputForm
+                    v-if="routeInfoEffect.clickedPosition.value"
+                    :longitude="routeInfoEffect.clickedPosition.value.longitude"
+                    :latitude="routeInfoEffect.clickedPosition.value.latitude"
+                    :elevation="routeInfoEffect.clickedPosition.value.elevation"
+                    @submit="handleRouteInfoSubmit"
+                    @cancel="routeInfoEffect.cancelAdding()"
                 />
-                <FeedbackMarkerPopup
-                    v-if="feedbackStore.selectedMarkerFeedback.value && !feedbackEffect.clickedPosition.value"
-                    :name="feedbackStore.selectedMarkerFeedback.value.name"
-                    :description="feedbackStore.selectedMarkerFeedback.value.description"
-                    :author-name="'authorName' in feedbackStore.selectedMarkerFeedback.value ? feedbackStore.selectedMarkerFeedback.value.authorName : undefined"
-                    @close="feedbackStore.selectedMarkerFeedback.value = null"
+                <RouteInfoMarkerPopup
+                    v-if="routeInfoStore.selectedMarkerRouteInfo.value && !routeInfoEffect.clickedPosition.value"
+                    :name="routeInfoStore.selectedMarkerRouteInfo.value.name"
+                    :description="routeInfoStore.selectedMarkerRouteInfo.value.description"
+                    :author-name="'authorName' in routeInfoStore.selectedMarkerRouteInfo.value ? routeInfoStore.selectedMarkerRouteInfo.value.authorName : undefined"
+                    @close="routeInfoStore.selectedMarkerRouteInfo.value = null"
                 />
-                <!-- 그리기 완료 후 피드백 안내 모달 -->
+                <!-- 그리기 완료 후 경로정보 안내 모달 -->
                 <div
-                    v-if="showFeedbackGuide"
-                    class="feedback-guide-modal"
-                    @click="showFeedbackGuide = false"
+                    v-if="showRouteInfoGuide"
+                    class="route-info-guide-modal"
+                    @click="showRouteInfoGuide = false"
                 >
-                    <div class="feedback-guide-modal__content" @click.stop>
+                    <div class="route-info-guide-modal__content" @click.stop>
                         <p>화면을 클릭해 해당 위치에 장소 설명을 추가할 수 있습니다.</p>
-                        <button class="feedback-guide-modal__btn" @click="showFeedbackGuide = false">
+                        <button class="route-info-guide-modal__btn" @click="showRouteInfoGuide = false">
                             확인
                         </button>
                     </div>
@@ -659,7 +661,7 @@ watch(showSimulationChip, (visible) => {
 <style scoped src="~/assets/css/pages/index.css"></style>
 
 <style scoped>
-.feedback-guide-modal {
+.route-info-guide-modal {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -669,7 +671,7 @@ watch(showSimulationChip, (visible) => {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.feedback-guide-modal__content {
+.route-info-guide-modal__content {
     background: var(--color-surface, #1a1a1a);
     border: 1px solid var(--color-border, #333);
     border-radius: 10px;
@@ -681,7 +683,7 @@ watch(showSimulationChip, (visible) => {
     line-height: 1.5;
 }
 
-.feedback-guide-modal__btn {
+.route-info-guide-modal__btn {
     margin-top: 12px;
     padding: 8px 24px;
     background: var(--color-primary, #4CAF50);

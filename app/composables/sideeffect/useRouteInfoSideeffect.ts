@@ -1,32 +1,32 @@
 import type { ShallowRef } from 'vue'
-import type { SavedFeedback, FeedbackDraftInput } from '#shared/types/feedback'
+import type { SavedRouteInfo, RouteInfoDraftInput } from '#shared/types/routeInfo'
 import type { CesiumViewer, CesiumEntity } from '~/composables/useWindow'
-import { useFeedbackStore } from '~/composables/store/useFeedbackStore'
+import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
 
-export interface FeedbackClickedPosition {
+export interface RouteInfoClickedPosition {
     longitude: number
     latitude: number
     elevation?: number
 }
 
 /**
- * 피드백 데이터 페칭, Cesium 마커 렌더링, 지도 클릭 핸들링을 담당하는 sideeffect.
- * 서버 저장된 피드백과 로컬 미저장 피드백 모두 지도에 표시한다.
+ * 경로정보 데이터 페칭, Cesium 마커 렌더링, 지도 클릭 핸들링을 담당하는 sideeffect.
+ * 서버 저장된 경로정보와 로컬 미저장 경로정보 모두 지도에 표시한다.
  */
-export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
-    const store = useFeedbackStore()
+export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
+    const store = useRouteInfoStore()
     let entityGroup: ReturnType<typeof createEntityGroup> | null = null
-    const entityToFeedbackMap = new Map<CesiumEntity, SavedFeedback | FeedbackDraftInput>()
+    const entityToRouteInfoMap = new Map<CesiumEntity, SavedRouteInfo | RouteInfoDraftInput>()
 
-    /** 지도 클릭으로 선택된 피드백 위치 */
-    const clickedPosition = ref<FeedbackClickedPosition | null>(null)
+    /** 지도 클릭으로 선택된 경로정보 위치 */
+    const clickedPosition = ref<RouteInfoClickedPosition | null>(null)
     let addClickHandler: import('cesium').ScreenSpaceEventHandler | null = null
     let markerClickHandler: import('cesium').ScreenSpaceEventHandler | null = null
 
-    // ─── 지도 클릭: 피드백 추가 모드 ─────────────────────────────
+    // ─── 지도 클릭: 경로정보 추가 모드 ─────────────────────────────
 
     watch(
-        () => store.isAddingFeedback.value,
+        () => store.isAddingRouteInfo.value,
         (isAdding) => {
             addClickHandler?.destroy()
             addClickHandler = null
@@ -74,7 +74,7 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
     )
 
     const cancelAdding = () => {
-        store.isAddingFeedback.value = false
+        store.isAddingRouteInfo.value = false
         clickedPosition.value = null
     }
 
@@ -94,19 +94,19 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
 
             handler.setInputAction((movement: { position: unknown }) => {
-                if (store.isAddingFeedback.value) return
+                if (store.isAddingRouteInfo.value) return
 
                 const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
                 if (!picked?.id) {
-                    store.selectedMarkerFeedback.value = null
+                    store.selectedMarkerRouteInfo.value = null
                     return
                 }
 
-                const fb = entityToFeedbackMap.get(picked.id as CesiumEntity)
-                if (fb) {
-                    store.selectedMarkerFeedback.value = fb
+                const item = entityToRouteInfoMap.get(picked.id as CesiumEntity)
+                if (item) {
+                    store.selectedMarkerRouteInfo.value = item
                 } else {
-                    store.selectedMarkerFeedback.value = null
+                    store.selectedMarkerRouteInfo.value = null
                 }
             }, C.ScreenSpaceEventType.LEFT_CLICK)
 
@@ -117,74 +117,74 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
 
     // ─── 서버 API ────────────────────────────────────────────────
 
-    const fetchFeedbacks = async (routeId: string) => {
+    const fetchRouteInfos = async (routeId: string) => {
         store.isLoading.value = true
         try {
-            const data = await $fetch<SavedFeedback[]>(`/api/routes/${routeId}/feedbacks`)
-            store.feedbacks.value = data
+            const data = await $fetch<SavedRouteInfo[]>(`/api/routes/${routeId}/feedbacks`)
+            store.routeInfos.value = data
         } catch (e) {
-            console.error('[FeedbackSideeffect] 피드백 조회 실패:', e)
+            console.error('[RouteInfoSideeffect] 경로정보 조회 실패:', e)
         } finally {
             store.isLoading.value = false
         }
     }
 
-    /** 로컬 피드백을 서버에 일괄 저장한다 */
-    const saveLocalFeedbacks = async (routeId: string) => {
-        const locals = store.localFeedbacks.value
+    /** 로컬 경로정보를 서버에 일괄 저장한다 */
+    const saveLocalRouteInfos = async (routeId: string) => {
+        const locals = store.localRouteInfos.value
         if (!locals.length) return
 
         for (const input of locals) {
             try {
-                const feedback = await $fetch<SavedFeedback>(`/api/routes/${routeId}/feedbacks`, {
+                const item = await $fetch<SavedRouteInfo>(`/api/routes/${routeId}/feedbacks`, {
                     method: 'POST',
                     body: input
                 })
-                store.feedbacks.value = [...store.feedbacks.value, feedback]
+                store.routeInfos.value = [...store.routeInfos.value, item]
             } catch (e) {
-                console.error('[FeedbackSideeffect] 피드백 일괄 저장 실패:', e)
+                console.error('[RouteInfoSideeffect] 경로정보 일괄 저장 실패:', e)
             }
         }
-        store.clearLocalFeedbacks()
+        store.clearLocalRouteInfos()
     }
 
-    /** 새 피드백을 서버에 즉시 전송한다 (저장된 경로에서 ChipButton으로 추가 시) */
-    const submitFeedback = async (routeId: string, input: FeedbackDraftInput) => {
+    /** 새 경로정보를 서버에 즉시 전송한다 (저장된 경로에서 ChipButton으로 추가 시) */
+    const submitRouteInfo = async (routeId: string, input: RouteInfoDraftInput) => {
         try {
-            const feedback = await $fetch<SavedFeedback>(`/api/routes/${routeId}/feedbacks`, {
+            const item = await $fetch<SavedRouteInfo>(`/api/routes/${routeId}/feedbacks`, {
                 method: 'POST',
                 body: input
             })
-            store.feedbacks.value = [...store.feedbacks.value, feedback]
-            store.isAddingFeedback.value = false
-            return feedback
+            store.routeInfos.value = [...store.routeInfos.value, item]
+            store.isAddingRouteInfo.value = false
+            return item
         } catch (e) {
-            console.error('[FeedbackSideeffect] 피드백 등록 실패:', e)
+            console.error('[RouteInfoSideeffect] 경로정보 등록 실패:', e)
             throw e
         }
     }
 
     // ─── 마커 렌더링 ─────────────────────────────────────────────
 
-    const renderFeedbackMarkers = () => {
+    const renderRouteInfoMarkers = () => {
         const v = viewer.value
         const C = window.Cesium
         if (!v || !C) return
 
         clearMarkers()
         entityGroup = createEntityGroup(v)
-        entityToFeedbackMap.clear()
+        entityToRouteInfoMap.clear()
 
-        const allFeedbacks: (SavedFeedback | FeedbackDraftInput)[] = [
-            ...store.feedbacks.value,
-            ...store.localFeedbacks.value
+        const allItems: (SavedRouteInfo | RouteInfoDraftInput)[] = [
+            ...store.routeInfos.value,
+            ...store.localRouteInfos.value
         ]
 
-        for (const fb of allFeedbacks) {
+        for (const item of allItems) {
             const position = C.Cartesian3.fromDegrees(
-                Number(fb.longitude),
-                Number(fb.latitude),
-                fb.elevation != null ? Number(fb.elevation) + 2 : undefined
+                Number(item.longitude),
+                Number(item.latitude),
+                item.elevation != null ? Number(item.elevation) + 2 : undefined
             )
 
             const entity = entityGroup.add({
@@ -198,7 +198,7 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
                     disableDepthTestDistance: Number.POSITIVE_INFINITY
                 },
                 label: {
-                    text: fb.name,
+                    text: item.name,
                     font: '13px sans-serif',
                     style: C.LabelStyle.FILL_AND_OUTLINE,
                     outlineWidth: 2,
@@ -211,11 +211,11 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
                     backgroundColor: new C.Color(0.165, 0.165, 0.165, 0.8)
                 },
                 properties: {
-                    type: 'feedback'
+                    type: 'routeInfo'
                 }
             })
 
-            entityToFeedbackMap.set(entity, fb)
+            entityToRouteInfoMap.set(entity, item)
         }
     }
 
@@ -224,21 +224,21 @@ export const useFeedbackSideeffect = (viewer: ShallowRef<CesiumViewer | null>) =
             entityGroup.removeAll()
             entityGroup = null
         }
-        entityToFeedbackMap.clear()
+        entityToRouteInfoMap.clear()
     }
 
-    // 피드백 목록 또는 로컬 피드백 변경 시 마커 재렌더링
+    // 경로정보 목록 또는 로컬 경로정보 변경 시 마커 재렌더링
     watch(
-        [() => store.feedbacks.value, () => store.localFeedbacks.value],
-        () => renderFeedbackMarkers(),
+        [() => store.routeInfos.value, () => store.localRouteInfos.value],
+        () => renderRouteInfoMarkers(),
         { deep: true }
     )
 
     return {
-        fetchFeedbacks,
-        submitFeedback,
-        saveLocalFeedbacks,
-        renderFeedbackMarkers,
+        fetchRouteInfos,
+        submitRouteInfo,
+        saveLocalRouteInfos,
+        renderRouteInfoMarkers,
         clearMarkers,
         clickedPosition,
         cancelAdding

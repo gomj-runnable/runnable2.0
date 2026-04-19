@@ -68,7 +68,7 @@ export const useRouteMapFacade = (
     const saveEffect = useRouteSaveSideeffect()
     const downloadEffect = useRouteDownloadSideeffect()
 
-    const showFeedbackGuide = ref(false)
+    const showRouteInfoGuide = ref(false)
 
     const terrainSampler = useTerrainSampler(viewer)
 
@@ -160,7 +160,7 @@ export const useRouteMapFacade = (
         const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
 
         openElevationChart('경로 고도 그래프', createRouteElevationProfile(densified))
-        showFeedbackGuide.value = true
+        showRouteInfoGuide.value = true
     }
 
     const selectRoute = async (routeId: string) => {
@@ -342,7 +342,7 @@ export const useRouteMapFacade = (
 
             store.isRouteSaveModalOpen.value = false
             store.resetRouteDrawState()
-            showFeedbackGuide.value = false
+            showRouteInfoGuide.value = false
             store.activeNav.value = '목록'
             notification.notify({
                 title: '저장 완료',
@@ -464,6 +464,6 @@ export const useRouteMapFacade = (
         isOptimizing: store.isOptimizing,
         hideRoutePolylines,
         showRoutePolylines,
-        showFeedbackGuide
+        showRouteInfoGuide
     }
 }

@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm'
-import { routeFeedbacks } from '../../../../database/schema'
+import { routeInfos } from '../../../../database/schema'
 import { db } from '../../../../utils/db'
-import { memoryFeedbacks } from '../../../../utils/memoryStore'
+import { memoryRouteInfos } from '../../../../utils/memoryStore'
 
-/** GET /api/routes/:routeId/feedbacks — 경로에 달린 피드백 목록 조회 (인증 불필요) */
+/** GET /api/routes/:routeId/feedbacks — 경로에 달린 경로정보 목록 조회 (인증 불필요) */
 export default defineEventHandler(async (event) => {
     const routeId = getRouterParam(event, 'routeId')
     if (!routeId) {
@@ -11,14 +11,14 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!db) {
-        return memoryFeedbacks.filter((fb) => fb.routeId === routeId)
+        return memoryRouteInfos.filter((item) => item.routeId === routeId)
     }
 
-    const feedbacks = await db
+    const items = await db
         .select()
-        .from(routeFeedbacks)
-        .where(eq(routeFeedbacks.routeId, routeId))
-        .orderBy(routeFeedbacks.createdAt)
+        .from(routeInfos)
+        .where(eq(routeInfos.routeId, routeId))
+        .orderBy(routeInfos.createdAt)
 
-    return feedbacks
+    return items
 })

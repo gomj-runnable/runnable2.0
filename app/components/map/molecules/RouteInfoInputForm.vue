@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 피드백 입력 폼 — 지도 클릭으로 선택된 위치에 장소명과 설명을 작성한다 */
+/** 경로정보 입력 폼 — 지도 클릭으로 선택된 위치에 장소명과 설명을 작성한다 */
 const props = defineProps<{
     longitude: number
     latitude: number
@@ -28,7 +28,7 @@ const handleSubmit = () => {
 <template>
     <div class="feedback-input-form">
         <div class="feedback-input-form__header">
-            <span class="feedback-input-form__title">피드백 남기기</span>
+            <span class="feedback-input-form__title">경로정보 남기기</span>
             <button class="feedback-input-form__close" @click="emit('cancel')">
                 <UIcon name="i-lucide-x" />
             </button>

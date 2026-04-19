@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 피드백 마커 클릭 시 표시되는 오버레이 팝업 */
+/** 경로정보 마커 클릭 시 표시되는 오버레이 팝업 */
 defineProps<{
     name: string
     description: string
