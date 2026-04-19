@@ -1,38 +1,19 @@
 <script setup lang="ts">
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import HoverTooltip from '~/components/map/atoms/HoverTooltip.vue'
-import type { DifficultyLevel } from '#shared/types/gradient'
+import { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
 
 const props = defineProps<{
     active: boolean
-    difficulty: DifficultyLevel | null
+    difficulty: DifficultyLevelEnum | null
 }>()
 
 defineEmits<{
     toggle: []
 }>()
 
-const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
-    beginner: '초급',
-    intermediate: '중급',
-    advanced: '고급',
-    expert: '전문가'
-}
-
-const DIFFICULTY_COLORS: Record<DifficultyLevel, string> = {
-    beginner: '#4CAF50',
-    intermediate: '#FFC107',
-    advanced: '#FF9800',
-    expert: '#F44336'
-}
-
-const difficultyLabel = computed(() =>
-    props.difficulty ? DIFFICULTY_LABELS[props.difficulty] : null
-)
-
-const difficultyColor = computed(() =>
-    props.difficulty ? DIFFICULTY_COLORS[props.difficulty] : null
-)
+const difficultyLabel = computed(() => props.difficulty?.label ?? null)
+const difficultyColor = computed(() => props.difficulty?.color ?? null)
 </script>
 
 <template>

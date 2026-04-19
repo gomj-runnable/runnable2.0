@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { WeatherLayer } from '#shared/types/weather'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 (표시할 범례 결정에 사용) */
-    activeLayer: WeatherLayer | null
+    activeLayer: WeatherLayerEnum | null
     /** 온도 레이어 활성 시 표시할 현재 온도 값 (°C) */
     currentTemperature?: number | null
 }>()
@@ -27,7 +27,7 @@ const pm10Items = [
 <template>
     <div class="weather-legend">
         <!-- 날씨 레이어 -->
-        <template v-if="activeLayer === 'weather'">
+        <template v-if="activeLayer?.isWeather">
             <p class="weather-legend__title">날씨</p>
             <div class="weather-legend__list">
                 <div
@@ -46,7 +46,7 @@ const pm10Items = [
         </template>
 
         <!-- 온도 레이어 -->
-        <template v-else-if="activeLayer === 'temperature'">
+        <template v-else-if="activeLayer?.isTemperature">
             <p class="weather-legend__title">온도 (°C)</p>
             <div v-if="currentTemperature !== null && currentTemperature !== undefined" class="weather-legend__current-temp">
                 <span class="weather-legend__temp-value">{{ currentTemperature.toFixed(1) }}°C</span>
@@ -69,7 +69,7 @@ const pm10Items = [
         </template>
 
         <!-- 미세먼지 레이어 -->
-        <template v-else-if="activeLayer === 'pm10'">
+        <template v-else-if="activeLayer?.isPm10">
             <p class="weather-legend__title">미세먼지 PM10</p>
             <div class="weather-legend__list">
                 <div

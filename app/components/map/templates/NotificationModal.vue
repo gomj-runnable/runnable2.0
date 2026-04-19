@@ -9,13 +9,6 @@ import PopupModal from '~/components/map/templates/PopupModal.vue'
 import { useNotificationStore } from '~/composables/store/useNotificationStore'
 
 const notification = useNotificationStore()
-
-const toneIcon: Record<string, string> = {
-    success: 'i-lucide-circle-check',
-    error: 'i-lucide-circle-x',
-    warning: 'i-lucide-alert-triangle',
-    info: 'i-lucide-info'
-}
 </script>
 
 <template>
@@ -28,7 +21,7 @@ const toneIcon: Record<string, string> = {
         <section class="notification-modal" :class="`is-${notification.tone.value}`">
             <div class="notification-modal__header">
                 <UIcon
-                    :name="toneIcon[notification.tone.value] ?? toneIcon.info"
+                    :name="notification.tone.value.icon"
                     class="notification-modal__icon"
                 />
                 <h2 id="popup-title-notification" class="notification-modal__title">

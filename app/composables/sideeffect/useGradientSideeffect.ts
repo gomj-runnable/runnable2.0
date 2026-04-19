@@ -1,7 +1,8 @@
 import type { Ref, ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/composables/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
-import type { GradientSegment, DifficultyLevel } from '#shared/types/gradient'
+import type { GradientSegment } from '#shared/types/gradient'
+import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
 import { createEntityGroup } from '~/composables/action/useEntityCleanup'
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
@@ -13,7 +14,7 @@ interface GradientSideeffectOptions {
     isGradientVisible: Ref<boolean>
     drawnPositions: Ref<GeoJsonPosition[] | null>
     setSegments: (segments: GradientSegment[]) => void
-    setDifficulty: (level: DifficultyLevel | null) => void
+    setDifficulty: (level: DifficultyLevelEnum | null) => void
     hideRoutePolylines: () => void
     showRoutePolylines: () => void
 }

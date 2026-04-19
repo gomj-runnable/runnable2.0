@@ -25,6 +25,7 @@ import { useRouteListSideeffect } from '~/composables/sideeffect/useRouteListSid
 import { useRouteOptimizationSideeffect } from '~/composables/sideeffect/useRouteOptimizationSideeffect'
 import { useAuthStore } from '~/composables/store/useAuthStore'
 import { useNotificationStore } from '~/composables/store/useNotificationStore'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 
 /**
  * 경로 지도 화면의 모든 기능을 단일 진입점으로 제공하는 Facade.
@@ -141,13 +142,13 @@ export const useRouteMapFacade = (
                 notification.notify({
                     title: '경로 보정 완료',
                     message: '보행자 경로로 자동 보정되었습니다.',
-                    tone: 'success'
+                    tone: NotificationToneEnum.SUCCESS
                 })
             } else if (result.message) {
                 notification.notify({
                     title: '경로 보정 건너뜀',
                     message: result.message,
-                    tone: 'info'
+                    tone: NotificationToneEnum.INFO
                 })
             }
         }
@@ -258,7 +259,7 @@ export const useRouteMapFacade = (
         let attrs = sectionPayload.attrs ?? []
 
         // 도착지 연결: 마지막점 → 첫점을 1개 구간으로 추가
-        if (closingMode === 'loop-close' && originalPositions.length >= 2) {
+        if (closingMode?.isLoopClose && originalPositions.length >= 2) {
             positions = [...originalPositions, originalPositions[0]!]
             ranges = [
                 ...ranges,
@@ -268,7 +269,7 @@ export const useRouteMapFacade = (
         }
 
         // 왕복 코스: 역순 경로를 원래 구간 수만큼 미러링하여 추가
-        if (closingMode === 'round-trip' && originalPositions.length >= 2) {
+        if (closingMode?.isRoundTrip && originalPositions.length >= 2) {
             const returnPositions = [...originalPositions].reverse()
             positions = [...originalPositions, ...returnPositions]
 
@@ -326,7 +327,7 @@ export const useRouteMapFacade = (
             notification.notify({
                 title: '로그인 필요',
                 message: '경로를 저장하려면 먼저 로그인해주세요.',
-                tone: 'info'
+                tone: NotificationToneEnum.INFO
             })
             return
         }
@@ -347,13 +348,13 @@ export const useRouteMapFacade = (
             notification.notify({
                 title: '저장 완료',
                 message: '경로가 저장되었습니다.',
-                tone: 'success'
+                tone: NotificationToneEnum.SUCCESS
             })
         } catch (error) {
             notification.notify({
                 title: '저장 실패',
                 message: error instanceof Error ? error.message : '저장 중 오류가 발생했습니다.',
-                tone: 'error'
+                tone: NotificationToneEnum.ERROR
             })
         }
     }
@@ -380,14 +381,14 @@ export const useRouteMapFacade = (
             notification.notify({
                 title: '다운로드 준비 완료',
                 message: `${route.title} GPX 다운로드를 시작했습니다.`,
-                tone: 'success'
+                tone: NotificationToneEnum.SUCCESS
             })
         } catch (error) {
             notification.notify({
                 title: '다운로드 실패',
                 message:
                     error instanceof Error ? error.message : 'GPX 다운로드 중 오류가 발생했습니다.',
-                tone: 'error'
+                tone: NotificationToneEnum.ERROR
             })
         }
     }

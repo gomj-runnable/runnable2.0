@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { SeoulMonthlyWeather, WeatherLayer } from '#shared/types/weather'
+import type { SeoulMonthlyWeather } from '#shared/types/weather'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
 import WeatherLayerToggle from '~/components/map/molecules/weather/WeatherLayerToggle.vue'
 import WeatherDatePicker from '~/components/map/molecules/weather/WeatherDatePicker.vue'
@@ -15,7 +16,7 @@ const props = defineProps<{
     /** 현재 선택된 월 (YYYY-MM) */
     selectedMonth: string
     /** 현재 활성화된 날씨 레이어 타입 */
-    activeLayer: WeatherLayer | null
+    activeLayer: WeatherLayerEnum | null
     /** 서울 월별 날씨 데이터 (없으면 null) */
     monthlyData: SeoulMonthlyWeather | null
     /** 날씨 데이터 로딩 중 여부 */
@@ -32,7 +33,7 @@ const emit = defineEmits<{
     /** 월 선택 변경 시 새 월을 전달 */
     'update:selectedMonth': [month: string]
     /** 날씨 레이어 전환 시 새 레이어 타입을 전달 */
-    'update:activeLayer': [layer: WeatherLayer | null]
+    'update:activeLayer': [layer: WeatherLayerEnum | null]
     /** 고도 레이어 활성화 상태 변경 시 전달 */
     'update:elevationActive': [active: boolean]
 }>()
@@ -49,7 +50,7 @@ const handleElevationToggle = () => {
 }
 
 /** 날씨 레이어 변경: 레이어 선택 시 고도 레이어를 끈다 */
-const handleLayerChange = (layer: WeatherLayer | null) => {
+const handleLayerChange = (layer: WeatherLayerEnum | null) => {
     emit('update:activeLayer', layer)
     if (layer !== null && props.isElevationActive) {
         emit('update:elevationActive', false)

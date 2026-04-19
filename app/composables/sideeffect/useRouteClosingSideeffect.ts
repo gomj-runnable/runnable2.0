@@ -92,8 +92,8 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
 
         if (!positions || positions.length < 2) return
 
-        if (mode === 'loop-close') renderLoopClosePreview()
-        else if (mode === 'round-trip') renderRoundTripPreview()
+        if (mode?.isLoopClose) renderLoopClosePreview()
+        else if (mode?.isRoundTrip) renderRoundTripPreview()
     })
 
     return {

@@ -1,8 +1,8 @@
 import type {
-    HourlyWeather,
-    WeatherLayer
+    HourlyWeather
 } from '#shared/types/weather'
 import type { WeatherCondition, Pm10Grade } from '#shared/types/weather'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { WeatherConditionEnum } from '#shared/types/weather-condition.enum'
 import { Pm10GradeEnum } from '#shared/types/pm10-grade.enum'
 
@@ -94,15 +94,11 @@ const PM10_NO_DATA_COLOR = 'rgba(80, 80, 80, 0.3)'
  * @param layer - 현재 활성 날씨 레이어 (`'weather'` | `'temperature'` | `'pm10'`)
  * @returns 레이어에 맞는 반투명 RGBA 색상 문자열
  */
-export const resolvePolygonColor = (weather: HourlyWeather, layer: WeatherLayer): string => {
-    switch (layer) {
-        case 'weather':
-            return conditionToColor(weather.condition)
-        case 'temperature':
-            return tempToColor(weather.temperature)
-        case 'pm10':
-            return weather.pm10Grade ? pm10GradeToColor(weather.pm10Grade) : PM10_NO_DATA_COLOR
-    }
+export const resolvePolygonColor = (weather: HourlyWeather, layer: WeatherLayerEnum): string => {
+    if (layer.isWeather) return conditionToColor(weather.condition)
+    if (layer.isTemperature) return tempToColor(weather.temperature)
+    if (layer.isPm10) return weather.pm10Grade ? pm10GradeToColor(weather.pm10Grade) : PM10_NO_DATA_COLOR
+    return PM10_NO_DATA_COLOR
 }
 
 /**
