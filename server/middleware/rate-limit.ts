@@ -61,7 +61,7 @@ export default defineEventHandler((event) => {
   if (entry.count > limit) {
     const retryAfter = Math.ceil((WINDOW_MS - (now - entry.windowStart)) / 1000)
 
-    setHeader(event, 'Retry-After', String(retryAfter))
+    setHeader(event, 'Retry-After', retryAfter)
     setHeader(event, 'X-RateLimit-Limit', String(limit))
     setHeader(event, 'X-RateLimit-Remaining', '0')
 

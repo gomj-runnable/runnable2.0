@@ -1,6 +1,6 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
-import { RouteDraftBuilder, createSectionSchema } from '#shared/schemas/route.schema'
+import { RouteDraftAssembler, createSectionSchema } from '#shared/schemas/route.schema'
 import {
     createRouteElevationProfile,
     buildDraftSectionInputs,
@@ -129,11 +129,17 @@ export const useRouteMapFacade = (
 
         if (store.optimizationMode.value !== 'NONE') {
             const originalWaypoints = [...positions]
-            const result = await optimizationEffect.optimizeRoute(positions, store.optimizationMode.value)
+            const result = await optimizationEffect.optimizeRoute(
+                positions,
+                store.optimizationMode.value
+            )
             if (result.optimized) {
                 positions = result.positions
                 store.drawnPositions.value = positions
-                store.sectionPointRanges.value = createWaypointBasedSectionRanges(positions, originalWaypoints)
+                store.sectionPointRanges.value = createWaypointBasedSectionRanges(
+                    positions,
+                    originalWaypoints
+                )
                 store.sectionDraft.value = createInitialSectionDraft(
                     positions,
                     createHeightAwareRouteGeom(store.drawMetrics.value ?? undefined, positions)
@@ -293,10 +299,17 @@ export const useRouteMapFacade = (
             store.drawMetrics.value ?? undefined,
             positions
         )
-        const routeDraftPayload = new RouteDraftBuilder({
-            ...(store.drawMetrics.value ?? {}),
-            geoJson: routeGeom
-        }).toRoute(store.routeForm.value)
+        const assembler = new RouteDraftAssembler()
+            .withPositions(positions)
+            .withDrawMetrics({
+                ...(store.drawMetrics.value ?? {}),
+                geoJson: routeGeom,
+                closingMode
+            })
+            .withSectionAttrs(attrs)
+            .withClosingMode(closingMode)
+
+        const { route: routeDraftPayload } = assembler.build(store.routeForm.value)
         const sectionPayloads = createSectionDraftsFromRanges(
             attrs,
             ranges,
@@ -335,7 +348,9 @@ export const useRouteMapFacade = (
         try {
             const { routeDraftPayload, sectionPayloads } = buildSavePayload()
 
-            const saveResult = await saveEffect.saveRoute(routeDraftPayload, sectionPayloads) as { route: { routeId: string } }
+            const saveResult = (await saveEffect.saveRoute(routeDraftPayload, sectionPayloads)) as {
+                route: { routeId: string }
+            }
             const savedRouteId = saveResult.route.routeId
 
             await facadeOptions?.onAfterSave?.(savedRouteId)
@@ -393,7 +408,10 @@ export const useRouteMapFacade = (
         }
     }
 
-    const addPoiToSection = (sectionIndex: number, poi: import('#shared/types/facility').PoiDraftInput) => {
+    const addPoiToSection = (
+        sectionIndex: number,
+        poi: import('#shared/types/facility').PoiDraftInput
+    ) => {
         const current = store.sectionPois.value[sectionIndex] ?? []
         store.sectionPois.value = {
             ...store.sectionPois.value,

@@ -17,13 +17,15 @@ export abstract class EnumBase {
     }
 
     /** enum class의 모든 인스턴스를 배열로 반환한다 */
-    static values<T extends EnumBase>(enumClass: Record<string, unknown>): T[] {
-        return Object.values(enumClass).filter((v): v is T => v instanceof EnumBase)
+    static values<T extends EnumBase>(enumClass: object): T[] {
+        return Object.values(enumClass as Record<string, unknown>).filter(
+            (value): value is T => value instanceof EnumBase
+        )
     }
 
     /** key 문자열로 enum 인스턴스를 찾는다 */
     static fromKey<T extends EnumBase>(
-        enumClass: Record<string, unknown>,
+        enumClass: object,
         key: string
     ): T | undefined {
         return EnumBase.values<T>(enumClass).find((v) => v.key === key)

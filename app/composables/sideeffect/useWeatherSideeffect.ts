@@ -7,11 +7,12 @@ import type {
 } from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
 import type { SeoulMonthlyWeather, HourlyWeather } from '#shared/types/weather'
-import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
+import type { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
 import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
+import { withErrorBoundary } from '~/composables/action/useAsyncDecorator'
 
 type ActiveWeatherLayer = WeatherLayerEnum | null
 
@@ -154,21 +155,38 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
 
     const { ensureGuBoundaryLoaded } = useDistrictSideeffect()
 
+    // 데이터 없는 구역 표시색
+    const NO_DATA_COLOR = 'rgba(80, 80, 80, 0.3)'
+
+    const _fetchWeatherData = withErrorBoundary(
+        async (date: string) => $fetch<SeoulMonthlyWeather>(`/api/weather/${date}`),
+        { label: 'WeatherSideeffect', retry: 1 }
+    )
+
     /** 선택된 날짜의 월별 날씨 데이터를 서버에서 가져와 `monthlyData`에 저장한다. */
     const fetchMonthlyWeather = async () => {
         isLoading.value = true
         try {
-            const data = await $fetch<SeoulMonthlyWeather>(`/api/weather/${selectedDate.value}`)
+            const data = await _fetchWeatherData(selectedDate.value)
             monthlyData.value = data
-        } catch (err) {
-            console.error('[WeatherSideeffect] weather fetch failed', err)
+        } catch {
+            // 에러는 withErrorBoundary에서 로깅됨 — 날씨 실패가 전체 마운트를 깨뜨리지 않도록 격리
         } finally {
             isLoading.value = false
         }
     }
 
-    // 데이터 없는 구역 표시색
-    const NO_DATA_COLOR = 'rgba(80, 80, 80, 0.3)'
+    const _loadGeoJsonDataSource = withErrorBoundary(
+        async (Cesium: CesiumRuntime, geojson: object) => {
+            return await Cesium.GeoJsonDataSource.load(geojson, {
+                stroke: Cesium.Color.fromCssColorString('rgba(255,255,255,0.85)'),
+                fill: Cesium.Color.fromCssColorString(NO_DATA_COLOR),
+                strokeWidth: 2,
+                clampToGround: true
+            })
+        },
+        { label: 'WeatherSideeffect' }
+    )
 
     /** 행정경계 GeoJSON을 Cesium DataSource로 로드하고 초기 폴리곤 색상을 적용한다. */
     const loadBoundaryDataSource = async () => {
@@ -177,20 +195,17 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
 
         const Cesium = getCesiumRuntime()
         try {
-            const ds = await Cesium.GeoJsonDataSource.load(boundaryGeojson.value as object, {
-                stroke: Cesium.Color.fromCssColorString('rgba(255,255,255,0.85)'),
-                fill: Cesium.Color.fromCssColorString(NO_DATA_COLOR),
-                strokeWidth: 2,
-                clampToGround: true
-            })
+            const ds = await _loadGeoJsonDataSource(Cesium, boundaryGeojson.value as object)
+            if (!ds) return
+
             await (
                 v as unknown as { dataSources: { add(ds: unknown): Promise<void> } }
             ).dataSources.add(ds)
             weatherDataSource = ds
             ;(ds as unknown as { show: boolean }).show = false
             buildBoundaryOutlinePrimitive()
-        } catch (err) {
-            console.error('[WeatherSideeffect] GeoJsonDataSource load failed', err)
+        } catch {
+            // 에러는 withErrorBoundary에서 로깅됨 — DataSource 실패가 전체 초기화를 깨뜨리지 않도록 격리
         }
     }
 
