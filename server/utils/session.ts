@@ -2,8 +2,6 @@ import type { H3Event } from 'h3'
 import { authService } from './auth'
 import type { IRouteRepository, SavedRoute } from '../repositories/route.repository'
 
-export type { SessionUser } from './auth.service'
-
 /** 현재 요청의 인증 세션에서 userId를 추출한다. 미인증이면 null을 반환한다. */
 export const getSessionUser = (event: H3Event) => authService.getSession(event)
 

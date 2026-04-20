@@ -14,9 +14,9 @@ export class GroundClampModeEnum extends EnumBase {
         super(key, label)
     }
 
-    get isClamp(): boolean { return this === GroundClampModeEnum.CLAMP }
-    get isRelative(): boolean { return this === GroundClampModeEnum.RELATIVE }
-    get isNone(): boolean { return this === GroundClampModeEnum.NONE }
+    get isClamp(): boolean { return this.key === 'clamp' }
+    get isRelative(): boolean { return this.key === 'relative' }
+    get isNone(): boolean { return this.key === 'none' }
 
     static from(key: string): GroundClampModeEnum {
         return EnumBase.fromKey<GroundClampModeEnum>(GroundClampModeEnum, key) ?? GroundClampModeEnum.CLAMP

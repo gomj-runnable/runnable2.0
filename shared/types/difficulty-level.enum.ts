@@ -15,10 +15,10 @@ export class DifficultyLevelEnum extends EnumBase {
         super(key, label)
     }
 
-    get isBeginner(): boolean     { return this === DifficultyLevelEnum.BEGINNER }
-    get isIntermediate(): boolean { return this === DifficultyLevelEnum.INTERMEDIATE }
-    get isAdvanced(): boolean     { return this === DifficultyLevelEnum.ADVANCED }
-    get isExpert(): boolean       { return this === DifficultyLevelEnum.EXPERT }
+    get isBeginner(): boolean     { return this.key === 'beginner' }
+    get isIntermediate(): boolean { return this.key === 'intermediate' }
+    get isAdvanced(): boolean     { return this.key === 'advanced' }
+    get isExpert(): boolean       { return this.key === 'expert' }
 
     /** 두 난이도 중 더 높은 것을 반환 */
     static max(a: DifficultyLevelEnum, b: DifficultyLevelEnum): DifficultyLevelEnum {

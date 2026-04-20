@@ -7,9 +7,9 @@ export class PlaybackStateEnum extends EnumBase {
 
     private constructor(key: string, label: string) { super(key, label) }
 
-    get isStopped(): boolean { return this === PlaybackStateEnum.STOPPED }
-    get isPlaying(): boolean { return this === PlaybackStateEnum.PLAYING }
-    get isPaused(): boolean { return this === PlaybackStateEnum.PAUSED }
+    get isStopped(): boolean { return this.key === 'stopped' }
+    get isPlaying(): boolean { return this.key === 'playing' }
+    get isPaused(): boolean { return this.key === 'paused' }
     get isActive(): boolean { return !this.isStopped }
 
     static from(key: string): PlaybackStateEnum {

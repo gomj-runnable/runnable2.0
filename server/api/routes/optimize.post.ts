@@ -1,6 +1,4 @@
 import { RouteOptimizeRequestBody, RouteOptimizeResponseBody } from '#shared/schemas/route-optimization.schema'
-import { getRoutingService } from '../../utils/routing'
-import { requireSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
   await requireSession(event)

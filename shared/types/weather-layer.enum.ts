@@ -73,13 +73,13 @@ export class WeatherLayerEnum extends EnumBase {
     }
 
     get isWeather(): boolean {
-        return this === WeatherLayerEnum.WEATHER
+        return this.key === 'weather'
     }
     get isTemperature(): boolean {
-        return this === WeatherLayerEnum.TEMPERATURE
+        return this.key === 'temperature'
     }
     get isPm10(): boolean {
-        return this === WeatherLayerEnum.PM10
+        return this.key === 'pm10'
     }
 
     static from(key: string): WeatherLayerEnum | undefined {

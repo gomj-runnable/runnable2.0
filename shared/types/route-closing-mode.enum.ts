@@ -6,8 +6,8 @@ export class RouteClosingModeEnum extends EnumBase {
 
     private constructor(key: string, label: string) { super(key, label) }
 
-    get isLoopClose(): boolean { return this === RouteClosingModeEnum.LOOP_CLOSE }
-    get isRoundTrip(): boolean { return this === RouteClosingModeEnum.ROUND_TRIP }
+    get isLoopClose(): boolean { return this.key === 'loop-close' }
+    get isRoundTrip(): boolean { return this.key === 'round-trip' }
 
     static from(key: string): RouteClosingModeEnum | null {
         return EnumBase.fromKey<RouteClosingModeEnum>(RouteClosingModeEnum, key) ?? null
