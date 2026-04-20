@@ -40,6 +40,13 @@ body {
   height: 100%;
 }
 
+/* --- 키보드 포커스 표시 --- */
+[tabindex="0"]:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--color-primary, #4f9cf5);
+    outline-offset: 2px;
+}
+
 /* --- POI 마커 — Cesium이 DOM에 직접 주입하므로 반드시 전역 --- */
 .icon-poi-wrap {
   font-size: var(--text-label-xs);

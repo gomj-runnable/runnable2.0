@@ -1,5 +1,5 @@
 import type { Cartesian3 } from 'cesium'
-import type { DrawActionData } from '~/composables/useWindow'
+import type { CesiumEntity, DrawActionData } from '~/composables/useWindow'
 import type { RouteGeoJson } from '#shared/types/route'
 import type { GeoJsonLineString, GeoJsonPosition } from '#shared/types/geojson'
 import type { CesiumRuntime } from '#shared/types/cesium'
@@ -132,7 +132,7 @@ export const toLineStringCoordinate = (
  */
 export const addRoutePointEntity = (
     cesium: CesiumRuntime,
-    viewer: { entities: { add(options: unknown): unknown } },
+    viewer: { entities: { add(options: unknown): CesiumEntity } },
     position: GeoJsonPosition,
     color: string
 ) =>

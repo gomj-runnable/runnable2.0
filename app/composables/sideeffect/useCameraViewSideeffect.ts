@@ -24,7 +24,7 @@ export const useCameraViewSideeffect = (options: UseCameraViewSideeffectOptions)
         const v = viewer.value
         if (!v) return
 
-        const ctrl = (v as any).screenSpaceCameraController
+        const ctrl = v.screenSpaceCameraController
         if (!ctrl) return
 
         savedRotateEventTypes = ctrl.rotateEventTypes
@@ -46,7 +46,7 @@ export const useCameraViewSideeffect = (options: UseCameraViewSideeffectOptions)
         const v = viewer.value
         if (!v) return
 
-        const ctrl = (v as any).screenSpaceCameraController
+        const ctrl = v.screenSpaceCameraController
         if (!ctrl) return
 
         ctrl.enableRotate = savedEnableRotate

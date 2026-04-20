@@ -32,7 +32,7 @@ withDefaults(
 </script>
 
 <template>
-    <div class="map-sidebar" :class="{ 'is-collapsed': collapsed }">
+    <nav class="map-sidebar" role="navigation" :class="{ 'is-collapsed': collapsed }">
         <header class="map-sidebar__header">
             <slot name="header">
                 <IconButton :icon="logoIcon" :label="logoLabel" />
@@ -49,10 +49,10 @@ withDefaults(
             </div>
         </div>
 
-        <footer class="map-sidebar__footer" :class="{ 'is-collapsed': collapsed }">
+        <footer class="map-sidebar__footer" role="toolbar" :class="{ 'is-collapsed': collapsed }">
             <slot name="footer" />
         </footer>
-    </div>
+    </nav>
 </template>
 
 <style scoped src="~/assets/css/components/templates/MapSidebar.css"></style>
