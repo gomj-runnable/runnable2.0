@@ -56,6 +56,16 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Frame-Options': 'DENY',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)',
+        }
+      }
+    },
     publicAssets: [
       { dir: resolve(__dirname, 'lib'), baseURL: '/lib' },
       { dir: resolve(__dirname, 'static'), baseURL: '/static' }

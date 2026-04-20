@@ -409,7 +409,7 @@ export const useRouteMapFacade = (
         }
     }
 
-    const drawing = proxyRefs({
+    const drawing = reactive({
         sectionDraft: store.sectionDraft,
         sectionPois: store.sectionPois,
         activeSectionIndex: store.activeSectionIndex,
@@ -421,14 +421,14 @@ export const useRouteMapFacade = (
         removePoiFromSection
     })
 
-    const saveModal = proxyRefs({
+    const saveModal = reactive({
         open: store.isRouteSaveModalOpen,
         routeForm: store.routeForm,
         routeDistance: store.routeDistance,
         confirm: confirmSave
     })
 
-    const routeList = proxyRefs({
+    const routeList = reactive({
         searchQuery: store.searchQuery,
         filteredRoutes,
         selectedRouteId: store.selectedRouteId,
@@ -436,7 +436,7 @@ export const useRouteMapFacade = (
         download: downloadRouteGpx
     })
 
-    const elevationChart = proxyRefs({
+    const elevationChart = reactive({
         open: store.isElevationChartOpen,
         title: store.elevationChartTitle,
         profile: store.elevationProfile,
@@ -444,7 +444,7 @@ export const useRouteMapFacade = (
         close: closeElevationChart
     })
 
-    const closing = proxyRefs({
+    const closing = reactive({
         mode: store.closingMode,
         setMode: store.setClosingMode,
         isLoopClose: store.isLoopClose,
