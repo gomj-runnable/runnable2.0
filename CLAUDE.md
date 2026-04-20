@@ -277,6 +277,7 @@
 - `create-server-crud` : Nitro API 핸들러 4종(GET/POST/PUT/DELETE) + Repository 인터페이스/InMemory/Drizzle/팩토리 4파일 세트를 생성하기 위한 프로젝트 전용 스킬
 - `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
 - `create-bottom-drawer` : `BottomDrawer` 래퍼 컴포넌트를 감싸 하단 Drawer UI를 구현하기 위한 프로젝트 전용 스킬
+- `create-session-doc` : 현재 세션에서 수행한 작업을 `public/docs/session/` 하위에 날짜별 markdown으로 기록하기 위한 프로젝트 전용 스킬
 
 ## 현재 .claude Command
 

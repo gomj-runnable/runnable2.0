@@ -163,7 +163,7 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     const init = async () => {
         await Promise.all([ensureGuBoundaryLoaded(), ensureDongBoundaryLoaded()])
 
-        watch(
+        const stopGuWatch = watch(
             isGuActive,
             (active) => {
                 if (active) showGu()
@@ -172,7 +172,7 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
             { immediate: true }
         )
 
-        watch(
+        const stopDongWatch = watch(
             isDongActive,
             (active) => {
                 if (active) showDong()
@@ -180,6 +180,11 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
             },
             { immediate: true }
         )
+
+        onBeforeUnmount(() => {
+            stopGuWatch()
+            stopDongWatch()
+        })
     }
 
     return { init }

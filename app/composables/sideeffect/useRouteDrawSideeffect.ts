@@ -309,6 +309,11 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         })
     }
 
+    onBeforeUnmount(() => {
+        sectionPolylines.clear()
+        sectionPoints.clear()
+    })
+
     return {
         cancelDrawing,
         handleDrawReset,
