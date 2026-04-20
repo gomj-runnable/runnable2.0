@@ -6,72 +6,72 @@
  * 사이드바(목록·그리기·탐색 탭)와 지도 오버레이(날씨·편의시설·고도 차트·경로 닫기 칩)로 구성되며,
  * `useRouteMapFacade`를 통해 드로잉·저장·목록 로직을 단일 진입점으로 사용한다.
  */
-import type { CesiumViewer } from '~/composables/useWindow'
-import MapShell from '~/components/map/templates/MapShell.vue'
-import MapSidebar from '~/components/map/templates/MapSidebar.vue'
-import MapSidebarTabs from '~/components/map/templates/MapSidebarTabs.vue'
-import DrawRoutePanel from '~/components/map/templates/DrawRoutePanel.vue'
-import RouteElevationModal from '~/components/map/templates/RouteElevationModal.vue'
-import RouteOverlayBottomBar from '~/components/map/templates/RouteOverlayBottomBar.vue'
-import RouteSaveModal from '~/components/map/templates/RouteSaveModal.vue'
-import NotificationModal from '~/components/map/templates/NotificationModal.vue'
-import RouteListPanel from '~/components/map/templates/RouteListPanel.vue'
-import WeatherOverlay from '~/components/map/templates/WeatherOverlay.vue'
-import FacilityOverlay from '~/components/map/templates/FacilityOverlay.vue'
-import GradientLegend from '~/components/map/molecules/GradientLegend.vue'
-import ExplorePanel from '~/components/map/templates/ExplorePanel.vue'
-import IconButton from '~/components/map/molecules/buttons/IconButton.vue'
-import SidebarUserProfile from '~/components/map/molecules/profiles/SidebarUserProfile.vue'
-import AuthModal from '~/components/map/templates/AuthModal.vue'
-import Textfield from '~/components/map/atoms/inputs/Textfield.vue'
-import ChipButton from '~/components/map/molecules/buttons/ChipButton.vue'
+import type { CesiumViewer } from '~/shared/lib/useWindow'
+import MapShell from '~/widgets/map-shell/ui/MapShell.vue'
+import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
+import MapSidebarTabs from '~/widgets/map-shell/ui/MapSidebarTabs.vue'
+import DrawRoutePanel from '~/features/draw-route/ui/DrawRoutePanel.vue'
+import RouteElevationModal from '~/features/draw-route/ui/RouteElevationModal.vue'
+import RouteOverlayBottomBar from '~/features/draw-route/ui/RouteOverlayBottomBar.vue'
+import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
+import NotificationModal from '~/widgets/notification/ui/NotificationModal.vue'
+import RouteListPanel from '~/features/draw-route/ui/RouteListPanel.vue'
+import WeatherOverlay from '~/features/weather-overlay/ui/WeatherOverlay.vue'
+import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
+import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
+import ExplorePanel from '~/features/explore/ui/ExplorePanel.vue'
+import IconButton from '~/shared/ui/buttons/IconButton.vue'
+import SidebarUserProfile from '~/entities/user/ui/SidebarUserProfile.vue'
+import AuthModal from '~/entities/user/ui/AuthModal.vue'
+import Textfield from '~/shared/ui/inputs/Textfield.vue'
+import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
-import { useRouteMapFacade } from '~/composables/useRouteMapFacade'
-import { useRouteDrawStore } from '~/composables/store/useRouteDrawStore'
-import { useNotificationStore } from '~/composables/store/useNotificationStore'
+import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
+import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
+import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import {
     findNearestSection,
     validatePoiDistance,
     generatePoiComment
-} from '~/composables/action/usePoiSnapping'
-import { useWeatherStore } from '~/composables/store/useWeatherStore'
-import { useWeatherSideeffect } from '~/composables/sideeffect/useWeatherSideeffect'
-import { useFacilityStore } from '~/composables/store/useFacilityStore'
-import { useFacilitySideeffect } from '~/composables/sideeffect/useFacilitySideeffect'
-import { useSidewalkSideeffect } from '~/composables/sideeffect/useSidewalkSideeffect'
-import { useAuthStore } from '~/composables/store/useAuthStore'
-import { useAuthSideeffect } from '~/composables/sideeffect/useAuthSideeffect'
-import { useExploreSearchSideeffect } from '~/composables/sideeffect/useExploreSearchSideeffect'
-import { FILTER_ALL } from '~/composables/store/useExploreFilterStore'
-import { useCameraStore } from '~/composables/store/useCameraStore'
-import { useCameraSideeffect } from '~/composables/sideeffect/useCameraSideeffect'
-import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
-import { useBoundarySideeffect } from '~/composables/sideeffect/useBoundarySideeffect'
-import MapFooter from '~/components/map/molecules/MapFooter.vue'
-import SecondPanel from '~/components/map/templates/SecondPanel.vue'
-import { useSectionInfoStore } from '~/composables/store/useSectionInfoStore'
+} from '~/entities/route/lib/usePoiSnapping'
+import { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
+import { useWeatherSideeffect } from '~/features/weather-overlay/api/useWeatherSideeffect'
+import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
+import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
+import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
+import { useAuthStore } from '~/entities/user/model/useAuthStore'
+import { useAuthSideeffect } from '~/entities/user/api/useAuthSideeffect'
+import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
+import { FILTER_ALL } from '~/features/explore/model/useExploreFilterStore'
+import { useCameraStore } from '~/features/camera/model/useCameraStore'
+import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
+import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
+import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
+import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
+import SecondPanel from '~/widgets/right-panel/ui/SecondPanel.vue'
+import { useSectionInfoStore } from '~/entities/route/model/useSectionInfoStore'
 import {
     calculateTotalDistance,
     calculateTotalTime,
     formatTime
-} from '~/composables/action/usePaceCalculator'
-import { useElevationLayerStore } from '~/composables/store/useElevationLayerStore'
-import { useElevationLayerSideeffect } from '~/composables/sideeffect/useElevationLayerSideeffect'
-import { useGradientStore } from '~/composables/store/useGradientStore'
-import { useGradientSideeffect } from '~/composables/sideeffect/useGradientSideeffect'
-import { useRouteInfoSideeffect } from '~/composables/sideeffect/useRouteInfoSideeffect'
-import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
-import { useSimulationStore } from '~/composables/store/useSimulationStore'
-import { useSimulationSideeffect } from '~/composables/sideeffect/useSimulationSideeffect'
-import { useWeatherRecommendStore } from '~/composables/store/useWeatherRecommendStore'
-import { useWeatherRecommendSideeffect } from '~/composables/sideeffect/useWeatherRecommendSideeffect'
-import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
-import { useMapInit } from '~/composables/sideeffect/useMapInit'
-import { useDistrictStore } from '~/composables/store/useDistrictStore'
-import RouteInfoInputForm from '~/components/map/molecules/RouteInfoInputForm.vue'
-import RouteInfoMarkerPopup from '~/components/map/molecules/RouteInfoMarkerPopup.vue'
-import SimulationDrawer from '~/components/map/templates/SimulationDrawer.vue'
-import WeatherRecommendPanel from '~/components/map/templates/WeatherRecommendPanel.vue'
+} from '~/entities/route/lib/usePaceCalculator'
+import { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
+import { useElevationLayerSideeffect } from '~/features/elevation-layer/api/useElevationLayerSideeffect'
+import { useGradientStore } from '~/entities/gradient/model/useGradientStore'
+import { useGradientSideeffect } from '~/entities/gradient/api/useGradientSideeffect'
+import { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSideeffect'
+import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
+import { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
+import { useSimulationSideeffect } from '~/features/simulation/api/useSimulationSideeffect'
+import { useWeatherRecommendStore } from '~/entities/weather/model/useWeatherRecommendStore'
+import { useWeatherRecommendSideeffect } from '~/features/weather-overlay/api/useWeatherRecommendSideeffect'
+import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
+import { useMapInit } from '~/shared/lib/map/useMapInit'
+import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
+import RouteInfoInputForm from '~/entities/route/ui/RouteInfoInputForm.vue'
+import RouteInfoMarkerPopup from '~/entities/route/ui/RouteInfoMarkerPopup.vue'
+import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
+import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -106,12 +106,22 @@ const routeInfoEffect = useRouteInfoSideeffect(viewer)
 
 // ─── 경로 Facade (그리기·저장·목록·고도·닫기) ────────────────────
 
-const { activeNav, drawing, saveModal, routeList, elevationChart, closing, exploreSelectRoute, hideRoutePolylines, showRoutePolylines, showRouteInfoGuide } =
-    useRouteMapFacade(viewer, {
-        onAfterSave: async (routeId) => {
-            await routeInfoEffect.saveLocalRouteInfos(routeId)
-        }
-    })
+const {
+    activeNav,
+    drawing,
+    saveModal,
+    routeList,
+    elevationChart,
+    closing,
+    exploreSelectRoute,
+    hideRoutePolylines,
+    showRoutePolylines,
+    showRouteInfoGuide
+} = useRouteMapFacade(viewer, {
+    onAfterSave: async (routeId) => {
+        await routeInfoEffect.saveLocalRouteInfos(routeId)
+    }
+})
 
 const routeDrawStore = useRouteDrawStore()
 
@@ -302,12 +312,11 @@ const showRouteInfoChip = computed(() => {
 /** 시뮬레이션 Chip 표출 조건 */
 const showSimulationChip = computed(() => {
     if (activeNav.value === '그리기' && drawing.sectionDraft) return true
-    if (activeNav.value === '목록' && routeList.selectedRouteId && sectionInfo.isOpen.value) return true
+    if (activeNav.value === '목록' && routeList.selectedRouteId && sectionInfo.isOpen.value)
+        return true
     if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
     return false
 })
-
-
 
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
@@ -586,7 +595,9 @@ watch(showSimulationChip, (visible) => {
                 />
                 <GradientLegend
                     v-if="gradient.isGradientVisible.value"
-                    :has-other-legend="!!weather.activeLayer.value || elevation.isElevationVisible.value"
+                    :has-other-legend="
+                        !!weather.activeLayer.value || elevation.isElevationVisible.value
+                    "
                 />
                 <RouteElevationModal
                     :open="elevationChart.open"
@@ -603,10 +614,17 @@ watch(showSimulationChip, (visible) => {
                     @cancel="routeInfoEffect.cancelAdding()"
                 />
                 <RouteInfoMarkerPopup
-                    v-if="routeInfoStore.selectedMarkerRouteInfo.value && !routeInfoEffect.clickedPosition.value"
+                    v-if="
+                        routeInfoStore.selectedMarkerRouteInfo.value &&
+                        !routeInfoEffect.clickedPosition.value
+                    "
                     :name="routeInfoStore.selectedMarkerRouteInfo.value.name"
                     :description="routeInfoStore.selectedMarkerRouteInfo.value.description"
-                    :author-name="'authorName' in routeInfoStore.selectedMarkerRouteInfo.value ? routeInfoStore.selectedMarkerRouteInfo.value.authorName : undefined"
+                    :author-name="
+                        'authorName' in routeInfoStore.selectedMarkerRouteInfo.value
+                            ? routeInfoStore.selectedMarkerRouteInfo.value.authorName
+                            : undefined
+                    "
                     @close="routeInfoStore.selectedMarkerRouteInfo.value = null"
                 />
                 <!-- 그리기 완료 후 경로정보 안내 모달 -->
@@ -617,7 +635,10 @@ watch(showSimulationChip, (visible) => {
                 >
                     <div class="route-info-guide-modal__content" @click.stop>
                         <p>화면을 클릭해 해당 위치에 장소 설명을 추가할 수 있습니다.</p>
-                        <button class="route-info-guide-modal__btn" @click="showRouteInfoGuide = false">
+                        <button
+                            class="route-info-guide-modal__btn"
+                            @click="showRouteInfoGuide = false"
+                        >
                             확인
                         </button>
                     </div>
@@ -683,7 +704,7 @@ watch(showSimulationChip, (visible) => {
 .route-info-guide-modal__btn {
     margin-top: 12px;
     padding: 8px 24px;
-    background: var(--color-primary, #4CAF50);
+    background: var(--color-primary, #4caf50);
     color: #fff;
     border: none;
     border-radius: 6px;

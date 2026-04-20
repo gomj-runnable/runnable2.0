@@ -7,6 +7,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui'],
 
+  components: false,
+
+  imports: {
+    dirs: []
+  },
+
   app: {
     head: {
       viewport: 'width=device-width, initial-scale=1, maximum-scale=1'
