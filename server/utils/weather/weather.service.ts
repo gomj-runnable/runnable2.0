@@ -1,8 +1,9 @@
 import type { DongWeather, HourlyWeather, SeoulMonthlyWeather } from '#shared/types/weather'
-import { fetchSeoulAirQuality } from './airquality.adapter'
-import { fetchForecastWeatherSlots } from './forecast.adapter'
+import type { IObservedWeatherAdapter, IForecastAdapter, IAirQualityAdapter } from './common'
+import { AirQualityAdapter } from './airquality.adapter'
+import { ForecastAdapter } from './forecast.adapter'
+import { ObservedWeatherAdapter } from './observed.adapter'
 import { mergeWeatherSlots } from './merge.service'
-import { fetchObservedWeatherSlots } from './observed.adapter'
 import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 import {
     addDays,
@@ -33,6 +34,12 @@ const toIsoDate = (date: Date): string => {
 }
 
 class WeatherService {
+    constructor(
+        private readonly observedAdapter: IObservedWeatherAdapter,
+        private readonly forecastAdapter: IForecastAdapter,
+        private readonly airQualityAdapter: IAirQualityAdapter
+    ) {}
+
     /** 날짜 기준 서울 날씨 조회 */
     async requestByDate(
         requestedDate?: string,
@@ -51,15 +58,21 @@ class WeatherService {
 
         const observedPromise =
             authKey && observedStart <= observedEnd
-                ? fetchObservedWeatherSlots(authKey, observedStart, observedEnd)
+                ? this.observedAdapter.fetchSlots(authKey, observedStart, observedEnd)
                 : Promise.resolve<HourlyWeather[]>([])
 
-        const forecastPromise = fetchForecastWeatherSlots(openDataKey ?? '', toIsoDate(baseDate), now)
+        const forecastPromise = this.forecastAdapter.fetchSlots(
+            openDataKey ?? '',
+            toIsoDate(baseDate),
+            now
+        )
 
-        const airQualityPromise = fetchSeoulAirQuality(airKoreaKey ?? '').catch((error) => {
-            console.error('[WeatherService] airquality adapter failed, fallback continues', error)
-            return new Map<string, import('./airquality.adapter').AirQualitySlot[]>()
-        })
+        const airQualityPromise = this.airQualityAdapter
+            .fetchSeoulAirQuality(airKoreaKey ?? '')
+            .catch((error) => {
+                console.error('[WeatherService] airquality adapter failed, fallback continues', error)
+                return new Map<string, import('./airquality.adapter').AirQualitySlot[]>()
+            })
 
         const [observedSlots, forecastSlots, airQualityByGu] = await Promise.all([
             observedPromise.catch((error) => {
@@ -121,4 +134,10 @@ class WeatherService {
     }
 }
 
-export const weatherService = new WeatherService()
+export const createWeatherService = (
+    observedAdapter: IObservedWeatherAdapter = new ObservedWeatherAdapter(),
+    forecastAdapter: IForecastAdapter = new ForecastAdapter(),
+    airQualityAdapter: IAirQualityAdapter = new AirQualityAdapter()
+): WeatherService => new WeatherService(observedAdapter, forecastAdapter, airQualityAdapter)
+
+export const weatherService = createWeatherService()

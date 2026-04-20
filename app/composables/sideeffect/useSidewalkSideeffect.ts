@@ -2,6 +2,7 @@ import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
 import { useCameraStore } from '~/composables/store/useCameraStore'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 interface UseSidewalkSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -58,8 +59,9 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
         if (primitiveMap.has(key)) return
 
         const v = viewer.value
-        const C = window.Cesium
-        if (!v || !C) return
+        if (!v) return
+
+        const C = getCesiumRuntime()
 
         const coords = await fetchDong(district, dong)
         const color = C.Color.fromCssColorString('#FF7043').withAlpha(0.85)

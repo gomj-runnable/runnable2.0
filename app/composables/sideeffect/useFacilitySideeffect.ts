@@ -1,6 +1,7 @@
 import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
+import type { CesiumRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
@@ -9,6 +10,7 @@ import { useCameraStore } from '~/composables/store/useCameraStore'
 import { useSidewalkStore } from '~/composables/store/useSidewalkStore'
 import { createClampedPoint, createClampedLabel, createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 /** 시설물 유형별 Cesium Entity 색상 (신호 횡단보도 / 무신호 횡단보도 구분) */
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
@@ -67,7 +69,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
     const addCrosswalkEntity = (
         v: CesiumViewer,
-        _C: typeof import('cesium'),
+        _C: CesiumRuntime,
         facility: Facility
     ) => {
         if (facility.polyline && facility.polyline.length >= 2) {
@@ -76,12 +78,13 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                 ([lng, lat]) => [lng, lat, 0] as GeoJsonPosition
             )
 
+            const C = getCesiumRuntime()
             return v.entities.add({
                 name: facility.name,
-                polyline: createClampedPolyline(window.Cesium, {
+                polyline: createClampedPolyline(C, {
                     positions,
                     width: 6,
-                    material: toCesiumColor(window.Cesium, color, 0.9)
+                    material: toCesiumColor(C, color, 0.9)
                 })
             })
         }
@@ -89,16 +92,16 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         return null
     }
 
-    const addPointEntity = (v: CesiumViewer, C: typeof import('cesium'), facility: Facility) => {
+    const addPointEntity = (v: CesiumViewer, C: CesiumRuntime, facility: Facility) => {
         const color = getLayerColor(facility.type)
 
         return v.entities.add({
             name: facility.name,
             position: C.Cartesian3.fromDegrees(facility.lng, facility.lat),
-            point: createClampedPoint(window.Cesium, {
-                color: toCesiumColor(window.Cesium, color)
+            point: createClampedPoint(C, {
+                color: toCesiumColor(C, color)
             }),
-            label: createClampedLabel(window.Cesium, {
+            label: createClampedLabel(C, {
                 text: facility.name
             })
         })
@@ -112,10 +115,9 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
      */
     const showLayer = (type: FacilityType) => {
         const v = viewer.value
-        const C = window.Cesium
+        if (!v) return
 
-        if (!v || !C) return
-
+        const C = getCesiumRuntime()
         removeLayer(type)
 
         const items = facilities.value.filter((f) => f.type === type)
@@ -196,10 +198,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
             if (!v || !onPoiClick) return
 
-            const C = window.Cesium
-
-            if (!C) return
-
+            const C = getCesiumRuntime()
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
 
             handler.setInputAction((movement: { position: unknown }) => {

@@ -13,6 +13,7 @@ import {
     parseYmd,
     toDateOnly
 } from './common'
+import type { IForecastAdapter } from './common'
 import { GU_BY_CODE } from '../district/seoul-gu-data'
 
 const FORECAST_BASE_TIMES = ['0200', '0500', '0800', '1100', '1400', '1700', '2000', '2300']
@@ -99,64 +100,73 @@ const mapConditionByPtySky = (
     return mapConditionByCloudAndRain(tmp, null, null)
 }
 
-export const fetchForecastWeatherSlots = async (
+export class ForecastAdapter implements IForecastAdapter {
+    async fetchSlots(
+        serviceKey: string,
+        requestedDate: string,
+        now: Date = new Date()
+    ): Promise<HourlyWeather[]> {
+        if (!serviceKey.trim()) {
+            return []
+        }
+
+        const targetDate = parseYmd(requestedDate)
+        const today = toDateOnly(now)
+        const isToday = targetDate ? targetDate.getTime() === today.getTime() : false
+        const isFuture = targetDate ? targetDate.getTime() > today.getTime() : false
+        const base = isToday || isFuture ? now : (targetDate ?? now)
+        const { baseDate, baseTime } = resolveForecastBase(base)
+
+        const seoulCenter = GU_BY_CODE.get('11110')
+        const nx = seoulCenter?.nx ?? 60
+        const ny = seoulCenter?.ny ?? 127
+
+        const items = await fetchVilageFcst(serviceKey, baseDate, baseTime, nx, ny)
+        const grouped = new Map<string, Record<string, string>>()
+
+        for (const item of items) {
+            const key = `${item.fcstDate}${item.fcstTime}`
+            const row = grouped.get(key) ?? {}
+            row[item.category] = item.fcstValue
+            grouped.set(key, row)
+        }
+
+        const slots: HourlyWeather[] = []
+
+        for (const [key, row] of grouped.entries()) {
+            const fcstDate = key.slice(0, 8)
+            const fcstTime = key.slice(8, 12)
+            const date = toSlotDate(fcstDate, fcstTime)
+            if (!date) {
+                continue
+            }
+
+            const temperature = parseNumber(row.TMP)
+            if (temperature === null) {
+                continue
+            }
+
+            const pty = parseNumber(row.PTY)
+            const sky = parseNumber(row.SKY)
+
+            slots.push({
+                date: formatDate(date),
+                time: formatHour(date),
+                condition: mapConditionByPtySky(pty, sky, temperature),
+                temperature,
+                pm10: null,
+                pm10Grade: null,
+                source: 'forecast'
+            })
+        }
+
+        return slots.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))
+    }
+}
+
+/** @deprecated 직접 ForecastAdapter 인스턴스를 사용하거나 WeatherService를 통해 접근하세요 */
+export const fetchForecastWeatherSlots = (
     serviceKey: string,
     requestedDate: string,
-    now: Date = new Date()
-): Promise<HourlyWeather[]> => {
-    if (!serviceKey.trim()) {
-        return []
-    }
-
-    const targetDate = parseYmd(requestedDate)
-    const today = toDateOnly(now)
-    const isToday = targetDate ? targetDate.getTime() === today.getTime() : false
-    const isFuture = targetDate ? targetDate.getTime() > today.getTime() : false
-    const base = isToday || isFuture ? now : (targetDate ?? now)
-    const { baseDate, baseTime } = resolveForecastBase(base)
-
-    const seoulCenter = GU_BY_CODE.get('11110')
-    const nx = seoulCenter?.nx ?? 60
-    const ny = seoulCenter?.ny ?? 127
-
-    const items = await fetchVilageFcst(serviceKey, baseDate, baseTime, nx, ny)
-    const grouped = new Map<string, Record<string, string>>()
-
-    for (const item of items) {
-        const key = `${item.fcstDate}${item.fcstTime}`
-        const row = grouped.get(key) ?? {}
-        row[item.category] = item.fcstValue
-        grouped.set(key, row)
-    }
-
-    const slots: HourlyWeather[] = []
-
-    for (const [key, row] of grouped.entries()) {
-        const fcstDate = key.slice(0, 8)
-        const fcstTime = key.slice(8, 12)
-        const date = toSlotDate(fcstDate, fcstTime)
-        if (!date) {
-            continue
-        }
-
-        const temperature = parseNumber(row.TMP)
-        if (temperature === null) {
-            continue
-        }
-
-        const pty = parseNumber(row.PTY)
-        const sky = parseNumber(row.SKY)
-
-        slots.push({
-            date: formatDate(date),
-            time: formatHour(date),
-            condition: mapConditionByPtySky(pty, sky, temperature),
-            temperature,
-            pm10: null,
-            pm10Grade: null,
-            source: 'forecast'
-        })
-    }
-
-    return slots.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))
-}
+    now?: Date
+) => new ForecastAdapter().fetchSlots(serviceKey, requestedDate, now)

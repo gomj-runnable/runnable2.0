@@ -11,6 +11,7 @@ import {
     mapPm10Grade,
     parseNumber
 } from './common'
+import type { IObservedWeatherAdapter } from './common'
 
 const decodeResponse = async (response: Response) => {
     const buffer = await response.arrayBuffer()
@@ -159,51 +160,53 @@ const fetchPm10Map = async (
     return result
 }
 
-export const fetchObservedWeatherSlots = async (
-    authKey: string,
-    start: Date,
-    end: Date
-): Promise<HourlyWeather[]> => {
-    const tm1 = formatKstMinute(start)
-    const tm2 = formatKstMinute(end)
+export class ObservedWeatherAdapter implements IObservedWeatherAdapter {
+    async fetchSlots(authKey: string, start: Date, end: Date): Promise<HourlyWeather[]> {
+        const tm1 = formatKstMinute(start)
+        const tm2 = formatKstMinute(end)
 
-    const [tempMap, rainMap, cloudMap, pm10Map] = await Promise.all([
-        fetchHourlyObsMap(authKey, tm1, tm2, 'TA'),
-        fetchHourlyObsMap(authKey, tm1, tm2, 'RN'),
-        fetchHourlyObsMap(authKey, tm1, tm2, 'CA_TOT'),
-        fetchPm10Map(authKey, tm1, tm2).catch(() => new Map<string, number>())
-    ])
+        const [tempMap, rainMap, cloudMap, pm10Map] = await Promise.all([
+            fetchHourlyObsMap(authKey, tm1, tm2, 'TA'),
+            fetchHourlyObsMap(authKey, tm1, tm2, 'RN'),
+            fetchHourlyObsMap(authKey, tm1, tm2, 'CA_TOT'),
+            fetchPm10Map(authKey, tm1, tm2).catch(() => new Map<string, number>())
+        ])
 
-    const timestamps = Array.from(tempMap.keys()).sort((a, b) => a.localeCompare(b))
+        const timestamps = Array.from(tempMap.keys()).sort((a, b) => a.localeCompare(b))
 
-    const slots: HourlyWeather[] = []
+        const slots: HourlyWeather[] = []
 
-    for (const tm of timestamps) {
-        const temperature = tempMap.get(tm)
-        if (typeof temperature !== 'number') {
-            continue
+        for (const tm of timestamps) {
+            const temperature = tempMap.get(tm)
+            if (typeof temperature !== 'number') {
+                continue
+            }
+
+            const year = Number(tm.slice(0, 4))
+            const month = Number(tm.slice(4, 6))
+            const day = Number(tm.slice(6, 8))
+            const hour = Number(tm.slice(8, 10))
+            const date = fromKstParts(year, month, day, hour, 0)
+
+            const rainfall = rainMap.get(tm) ?? null
+            const cloudAmount = cloudMap.get(tm) ?? null
+            const pm10 = pm10Map.get(tm) ?? null
+
+            slots.push({
+                date: formatDate(date),
+                time: formatHour(date),
+                condition: mapConditionByCloudAndRain(temperature, rainfall, cloudAmount),
+                temperature,
+                pm10,
+                pm10Grade: pm10 === null ? null : mapPm10Grade(pm10),
+                source: 'observed'
+            })
         }
 
-        const year = Number(tm.slice(0, 4))
-        const month = Number(tm.slice(4, 6))
-        const day = Number(tm.slice(6, 8))
-        const hour = Number(tm.slice(8, 10))
-        const date = fromKstParts(year, month, day, hour, 0)
-
-        const rainfall = rainMap.get(tm) ?? null
-        const cloudAmount = cloudMap.get(tm) ?? null
-        const pm10 = pm10Map.get(tm) ?? null
-
-        slots.push({
-            date: formatDate(date),
-            time: formatHour(date),
-            condition: mapConditionByCloudAndRain(temperature, rainfall, cloudAmount),
-            temperature,
-            pm10,
-            pm10Grade: pm10 === null ? null : mapPm10Grade(pm10),
-            source: 'observed'
-        })
+        return slots
     }
-
-    return slots
 }
+
+/** @deprecated 직접 ObservedWeatherAdapter 인스턴스를 사용하거나 WeatherService를 통해 접근하세요 */
+export const fetchObservedWeatherSlots = (authKey: string, start: Date, end: Date) =>
+    new ObservedWeatherAdapter().fetchSlots(authKey, start, end)

@@ -1,5 +1,18 @@
 import type { HourlyWeather, Pm10Grade, WeatherCondition } from '#shared/types/weather'
 import { Pm10GradeEnum } from '#shared/types/pm10-grade.enum'
+import type { AirQualitySlot } from './airquality.adapter'
+
+export interface IObservedWeatherAdapter {
+    fetchSlots(authKey: string, start: Date, end: Date): Promise<HourlyWeather[]>
+}
+
+export interface IForecastAdapter {
+    fetchSlots(serviceKey: string, requestedDate: string, now?: Date): Promise<HourlyWeather[]>
+}
+
+export interface IAirQualityAdapter {
+    fetchSeoulAirQuality(serviceKey: string): Promise<Map<string, AirQualitySlot[]>>
+}
 
 export const SEOUL_ASOS_STATION = 108
 export const KMA_TYP01_BASE_URL = 'https://apihub.kma.go.kr/api/typ01/url'

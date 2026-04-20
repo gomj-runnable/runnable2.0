@@ -7,6 +7,7 @@ import { createEntityGroup } from '~/composables/action/useEntityCleanup'
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
 import { useGradientAction } from '~/composables/action/useGradientAction'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 import { distance, point } from '@turf/turf'
 
 interface GradientSideeffectOptions {
@@ -53,13 +54,14 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
 
         setDifficulty(classifyDifficulty(totalDistanceKm, cumulativeElevGain, maxGrad))
 
+        const C = getCesiumRuntime()
         const entities = segments.map((seg) => {
             const segPositions = [positions[seg.startIndex]!, positions[seg.endIndex]!]
             return v.entities.add({
-                polyline: createClampedPolyline(window.Cesium, {
+                polyline: createClampedPolyline(C, {
                     positions: segPositions,
                     width: 5,
-                    material: toCesiumColor(window.Cesium, seg.color, 0.9)
+                    material: toCesiumColor(C, seg.color, 0.9)
                 })
             })
         })

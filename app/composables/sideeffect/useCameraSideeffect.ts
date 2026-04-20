@@ -4,6 +4,7 @@ import type { CesiumViewer } from '~/composables/useWindow'
 import type { GeoFeature } from '#shared/types/geojson'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 interface UseCameraSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -25,8 +26,6 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
     const { viewer, centerLat, centerLng, altitude, heading, pitch, locationLabel } = options
     const { guGeojson, dongGeojson } = useDistrictStore()
     const { ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictSideeffect()
-
-    const getCesium = () => window.Cesium
 
     /**
      * 점이 폴리곤 내부에 있는지 판단한다.
@@ -82,7 +81,9 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
                 const geo = feature.geometry
                 if (!geo) continue
 
-                const dongName = String(feature.properties?.EMD_KOR_NM ?? feature.properties?.name ?? '')
+                const dongName = String(
+                    feature.properties?.EMD_KOR_NM ?? feature.properties?.name ?? ''
+                )
                 if (!dongName) continue
 
                 if (geo.type === 'Polygon') {
@@ -109,7 +110,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
         const v = viewer.value
         if (!v) return
 
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         const camera = v.camera
         const scene = v.scene
 
@@ -129,7 +130,7 @@ export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
             Math.floor(scene.canvas.clientHeight / 2)
         )
 
-        const ray = camera.getPickRay(windowPos)
+        const ray = camera.getPickRay(windowPos as import('cesium').Cartesian2)
         if (!ray) return
 
         const intersection = scene.globe.pick(ray, scene)

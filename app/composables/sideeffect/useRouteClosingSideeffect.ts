@@ -5,6 +5,7 @@ import type { RouteClosingMode } from '~/composables/store/useRouteClosingStore'
 import { toCesiumColor } from '~/composables/action/useRouteDrawUtils'
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { createEntityGroup } from '~/composables/action/useEntityCleanup'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 /**
  * `useRouteClosingSideeffect`에 주입하는 의존성 옵션.
@@ -37,7 +38,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         const firstPoint = positions[0]!
         const lastPoint = positions[positions.length - 1]!
 
-        const Cesium = window.Cesium
+        const Cesium = getCesiumRuntime()
         const entity = options.viewer.value.entities.add({
             polyline: createClampedPolyline(Cesium, {
                 positions: [lastPoint, firstPoint],
@@ -57,7 +58,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         const reversedPositions = [...positions].reverse()
         const entities: CesiumEntity[] = []
 
-        const Cesium = window.Cesium
+        const Cesium = getCesiumRuntime()
         // 외곽 스트로크 (넓고 반투명 — 감싸는 효과)
         const outerEntity = options.viewer.value.entities.add({
             polyline: createClampedPolyline(Cesium, {

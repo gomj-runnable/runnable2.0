@@ -11,6 +11,7 @@ import {
     toCesiumColor
 } from '~/composables/action/useRouteDrawUtils'
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 /** `useRouteListSideeffect`에 주입하는 의존성 옵션 */
 interface UseRouteListSideeffectOptions {
@@ -44,7 +45,7 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             return null
         }
 
-        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color)
+        return addRoutePointEntity(getCesiumRuntime(), options.viewer.value, position, color)
     }
 
     /** 지도에 그려진 미리보기 폴리라인을 모두 제거한다. */
@@ -93,14 +94,15 @@ export const useRouteListSideeffect = (options: UseRouteListSideeffectOptions) =
             return sections
         }
 
+        const C = getCesiumRuntime()
         polylines.set(previewSegments.map((positions, index) => {
             const color = getSectionColor(index)
 
             return options.viewer.value!.entities.add({
-                polyline: createClampedPolyline(window.Cesium, {
+                polyline: createClampedPolyline(C, {
                     positions,
                     width: 4,
-                    material: toCesiumColor(window.Cesium, color, 0.95)
+                    material: toCesiumColor(C, color, 0.95)
                 })
             })
         }))

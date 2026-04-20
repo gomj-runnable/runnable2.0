@@ -1,5 +1,6 @@
 import type { ShallowRef, Ref } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 interface ElevationLayerOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -85,9 +86,9 @@ export const useElevationLayerSideeffect = (options: ElevationLayerOptions) => {
         .map((height, i) => ({ height, color: ELEVATION_COLORS[i]! }))
 
     const applyElevationMaterial = () => {
-        const C = window.Cesium
+        const C = getCesiumRuntime()
         const v = viewer.value
-        if (!C || !v) return
+        if (!v) return
 
         originalMaterial = v.scene.globe.material
 

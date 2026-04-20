@@ -1,11 +1,13 @@
 import type { ShallowRef } from 'vue'
 import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 import type { CesiumViewer } from '~/composables/useWindow'
+import type { CesiumRuntime } from '#shared/types/cesium'
 import { interpolatePath, getProgressInfo, haversineDistance } from '~/composables/action/useFlythroughAction'
 import { useSimulationStore } from '~/composables/store/useSimulationStore'
 import { useSectionInfoStore } from '~/composables/store/useSectionInfoStore'
 import { calculateSectionDistance } from '~/composables/action/usePaceCalculator'
 import { useCameraViewSideeffect } from '~/composables/sideeffect/useCameraViewSideeffect'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 interface UseSimulationSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -27,7 +29,6 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
 
     const sectionInfo = useSectionInfoStore()
 
-    const getCesium = () => window.Cesium
     const cameraView = useCameraViewSideeffect({ viewer })
 
     /** 현재 RAF 루프 ID. null이면 루프가 비활성 상태 */
@@ -161,7 +162,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
         const elapsed = timestamp - lastTimestamp
         lastTimestamp = timestamp
 
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         const v = viewer.value
         if (!v || !Cesium) {
             rafId = requestAnimationFrame(tick)
@@ -202,7 +203,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
     }
 
     /** 카메라를 현재 진행률 위치로 이동한다. heading은 경로 방향 + 사용자 오프셋, pitch는 사용자 직접 제어. */
-    const _updateCamera = (Cesium: typeof window.Cesium, v: CesiumViewer, progress: number) => {
+    const _updateCamera = (Cesium: CesiumRuntime, v: CesiumViewer, progress: number) => {
         _captureUserInput(v)
 
         const pos = interpolatePath(activeCoordinates, progress)
@@ -242,7 +243,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
         store.setProgressInfo(getProgressInfo(coordinates, 0))
 
         // 초기 시작 방향으로 카메라를 설정하고 1인칭 모드로 전환한다
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         const v = viewer.value
         if (v && Cesium) {
             cameraView.enableFirstPerson()
@@ -303,7 +304,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
         store.setProgress(progress)
         store.setProgressInfo(getProgressInfo(activeCoordinates, distanceProgress))
 
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         const v = viewer.value
         if (v && Cesium) {
             _updateCamera(Cesium, v, distanceProgress)
