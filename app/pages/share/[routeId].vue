@@ -33,9 +33,7 @@ onMounted(async () => {
 
 <template>
     <div class="share-page">
-        <div v-if="isLoading" class="share-page__loading">
-            경로를 불러오는 중...
-        </div>
+        <div v-if="isLoading" class="share-page__loading">경로를 불러오는 중...</div>
 
         <div v-else-if="error" class="share-page__error">
             {{ error }}
@@ -57,9 +55,7 @@ onMounted(async () => {
             </div>
 
             <!-- TODO: 3D 지도 뷰어 + 경로정보 마커 렌더링 -->
-            <div class="share-page__map-placeholder">
-                3D 지도 뷰어 영역 (Phase 2에서 구현)
-            </div>
+            <div class="share-page__map-placeholder">3D 지도 뷰어 영역 (Phase 2에서 구현)</div>
         </div>
     </div>
 </template>
