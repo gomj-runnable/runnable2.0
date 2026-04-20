@@ -23,6 +23,7 @@ import {
 import { createClampedPolyline } from '~/composables/action/useGroundClamping'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import type { NotificationOptions } from '~/composables/store/useNotificationStore'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 
 /**
@@ -83,7 +84,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         }
 
         const color = getSectionColor(sectionIndex)
-        const Cesium = window.Cesium
+        const Cesium = getCesiumRuntime()
         const material = isDashed
             ? new Cesium.PolylineDashMaterialProperty({
                   color: toCesiumColor(Cesium, color, 0.7),
@@ -105,7 +106,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return null
         }
 
-        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color)
+        return addRoutePointEntity(getCesiumRuntime(), options.viewer.value, position, color)
     }
 
     /**
@@ -209,7 +210,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return null
         }
         const data = result.data
-        const positions = normalizeDrawPositions(window.Cesium, data)
+        const positions = normalizeDrawPositions(getCesiumRuntime(), data)
         const routeGeom = createHeightAwareRouteGeom(data, positions)
 
         if (positions.length === 0) {

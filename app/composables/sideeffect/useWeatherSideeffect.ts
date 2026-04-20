@@ -11,6 +11,7 @@ import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { toCartesianPosition } from '~/composables/action/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/composables/action/useWeatherDataTransform'
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 type ActiveWeatherLayer = WeatherLayerEnum | null
 
@@ -52,8 +53,6 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     /** 외곽선 색상 업데이트를 위한 구역 코드·인스턴스 ID 매핑 목록 */
     const weatherOutlineInstances = shallowRef<Array<{ code: string; id: string }>>([])
 
-    const getCesium = (): CesiumRuntime => (window as unknown as { Cesium: CesiumRuntime }).Cesium
-
     const resolveWeatherByCode = (
         snapshot: Map<string, HourlyWeather>,
         code: string
@@ -91,7 +90,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         const v = viewer.value
         if (!v || !boundaryGeojson.value) return
 
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         const featureCollection = boundaryGeojson.value as {
             features?: Array<{
                 properties?: Record<string, unknown>
@@ -176,7 +175,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         const v = viewer.value
         if (!v || !boundaryGeojson.value) return
 
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         try {
             const ds = await Cesium.GeoJsonDataSource.load(boundaryGeojson.value as object, {
                 stroke: Cesium.Color.fromCssColorString('rgba(255,255,255,0.85)'),
@@ -211,7 +210,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         if (weatherOutlinePrimitive) {
             weatherOutlinePrimitive.show = true
         }
-        const Cesium = getCesium()
+        const Cesium = getCesiumRuntime()
         const snapshot = dailySnapshot.value
         const layer = activeLayer.value
 

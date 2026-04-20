@@ -1,16 +1,29 @@
-import type { CallbackProperty, Cartesian3, Cartographic, Color, EllipsoidGeodesic } from 'cesium'
+import type {
+    CallbackProperty,
+    Cartesian3,
+    Cartographic,
+    Color,
+    EllipsoidGeodesic,
+    Material,
+    MaterialProperty
+} from 'cesium'
 
 export interface CesiumDrawHandler {
     destroy(): void
+    isDestroyed(): boolean
     setInputAction(
         action: (movement: { position?: unknown; endPosition?: unknown }) => void,
         type: unknown
     ): void
+    getInputAction(type: unknown): unknown
+    removeInputAction(type: unknown): void
 }
 
 export interface CesiumRuntime {
     Cartographic: {
+        new (longitude?: number, latitude?: number, height?: number): Cartographic
         fromCartesian(position: Cartesian3): Cartographic
+        fromDegrees(longitude: number, latitude: number, height?: number): Cartographic
     }
     Math: {
         toDegrees(radians: number): number
@@ -33,8 +46,10 @@ export interface CesiumRuntime {
     }
     CallbackProperty: new (callback: () => Cartesian3[], isConstant: boolean) => CallbackProperty
     Color: {
+        new (red?: number, green?: number, blue?: number, alpha?: number): Color
         WHITE: Color
         BLACK: Color
+        YELLOW: Color
         fromCssColorString(color: string): Color
     }
     HeightReference: {
@@ -46,8 +61,20 @@ export interface CesiumRuntime {
     }
     VerticalOrigin: {
         BOTTOM: unknown
+        CENTER: unknown
+        TOP: unknown
     }
-    Cartesian2: new (x?: number, y?: number) => unknown
+    sampleTerrainMostDetailed(
+        terrainProvider: unknown,
+        positions: Cartographic[]
+    ): Promise<Cartographic[]>
+    PolylineMaterialAppearance: new (options?: { material?: unknown }) => unknown
+    ClassificationType: {
+        TERRAIN: unknown
+        CESIUM_3D_TILE: unknown
+        BOTH: unknown
+    }
+    Cartesian2: new (x?: number, y?: number) => { x: number; y: number }
     CesiumTerrainProvider: {
         fromUrl?: (url: string) => Promise<unknown>
         new (options?: { url?: string }): unknown
@@ -60,7 +87,32 @@ export interface CesiumRuntime {
     }
     Cartesian3: {
         fromDegrees(longitude: number, latitude: number, height?: number): Cartesian3
+        fromDegreesArray(coordinates: number[]): Cartesian3[]
     }
+    HorizontalOrigin: {
+        CENTER: unknown
+        LEFT: unknown
+        RIGHT: unknown
+    }
+    Ellipsoid: {
+        WGS84: {
+            cartesianToCartographic(cartesian: unknown): {
+                latitude: number
+                longitude: number
+                height: number
+            }
+        }
+    }
+    createElevationBandMaterial?: (options: unknown) => Material
+    Material: {
+        fromType(type: string, options?: unknown): Material
+    }
+    PolylineDashMaterialProperty: new (options?: {
+        color?: Color
+        gapColor?: Color
+        dashLength?: number
+        dashPattern?: number
+    }) => MaterialProperty
     GeoJsonDataSource: {
         load(
             data: object | string,
@@ -82,13 +134,15 @@ export interface CesiumRuntime {
         geometryInstances: unknown
         appearance: unknown
         asynchronous?: boolean
+        show?: boolean
+        classificationType?: unknown
     }) => GroundPolylinePrimitiveInstance
     PolylineColorAppearance: new () => unknown
     ColorGeometryInstanceAttribute: {
         fromColor(color: Color): unknown
         toValue(color: Color): unknown
     }
-    ColorMaterialProperty: new (color: Color) => unknown
+    ColorMaterialProperty: new (color: Color) => MaterialProperty
 }
 
 export interface GeoJsonDataSourceInstance {
@@ -126,6 +180,7 @@ export interface CesiumSceneRuntime {
     globe?: {
         depthTestAgainstTerrain: boolean
         pick(ray: unknown, scene: CesiumSceneRuntime): unknown
+        material?: unknown
     }
     primitives: {
         add(primitive: unknown): void

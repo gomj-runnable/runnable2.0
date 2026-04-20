@@ -1,6 +1,7 @@
 import type { AirKoreaRltmItem } from '#shared/types/weather'
 import { AirKoreaOriginalResponse } from '#shared/types/weather'
 import { parseNumber, mapPm10Grade } from './common'
+import type { IAirQualityAdapter } from './common'
 import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 
 const AIRKOREA_BASE_URL = 'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty'
@@ -14,12 +15,6 @@ export interface AirQualitySlot {
     pm10: number | null
     pm10Grade: ReturnType<typeof mapPm10Grade> | null
 }
-
-// ─── 캐시 ─────────────────────────────────────────────────────
-let cachedResult: Map<string, AirQualitySlot[]> | null = null
-let cacheTimestamp = 0
-
-const isCacheValid = () => cachedResult !== null && Date.now() - cacheTimestamp < CACHE_TTL_MS
 
 // ─── 동시 요청 제한 ───────────────────────────────────────────
 const runWithConcurrency = async <T>(
@@ -46,29 +41,6 @@ const runWithConcurrency = async <T>(
     return results
 }
 
-// ─── API 호출 ─────────────────────────────────────────────────
-const fetchStationRltm = async (
-    serviceKey: string,
-    stationName: string
-): Promise<AirKoreaRltmItem[]> => {
-    const url = new URL(AIRKOREA_BASE_URL)
-    url.searchParams.set('serviceKey', serviceKey)
-    url.searchParams.set('stationName', stationName)
-    url.searchParams.set('dataTerm', 'DAILY')
-    url.searchParams.set('returnType', 'json')
-    url.searchParams.set('numOfRows', '24')
-    url.searchParams.set('pageNo', '1')
-    url.searchParams.set('ver', '1.3')
-
-    const response = await fetch(url.toString())
-    if (!response.ok) {
-        throw new Error(`AirKorea request failed for ${stationName} (${response.status})`)
-    }
-
-    const original = new AirKoreaOriginalResponse(await response.json())
-    return original.response?.body?.items ?? []
-}
-
 const guNameToCode = new Map<string, string>(
     SEOUL_GU_DATA.map(gu => [gu.name, gu.code])
 )
@@ -92,56 +64,94 @@ const parseAirKoreaItems = (items: AirKoreaRltmItem[]): AirQualitySlot[] => {
     return slots
 }
 
-/** 서울 전체 구의 실시간 미세먼지 데이터를 조회 (1시간 캐싱, 동시 5개 제한) */
-export const fetchSeoulAirQuality = async (
-    serviceKey: string
-): Promise<Map<string, AirQualitySlot[]>> => {
-    if (!serviceKey.trim()) {
-        return new Map()
+export class AirQualityAdapter implements IAirQualityAdapter {
+    private cachedResult: Map<string, AirQualitySlot[]> | null = null
+    private cacheTimestamp = 0
+
+    private isCacheValid(): boolean {
+        return this.cachedResult !== null && Date.now() - this.cacheTimestamp < CACHE_TTL_MS
     }
 
-    if (isCacheValid()) {
-        return cachedResult!
-    }
+    private async fetchStationRltm(
+        serviceKey: string,
+        stationName: string
+    ): Promise<AirKoreaRltmItem[]> {
+        const url = new URL(AIRKOREA_BASE_URL)
+        url.searchParams.set('serviceKey', serviceKey)
+        url.searchParams.set('stationName', stationName)
+        url.searchParams.set('dataTerm', 'DAILY')
+        url.searchParams.set('returnType', 'json')
+        url.searchParams.set('numOfRows', '24')
+        url.searchParams.set('pageNo', '1')
+        url.searchParams.set('ver', '1.3')
 
-    const guNames = SEOUL_GU_DATA.map(gu => gu.name)
-
-    const tasks = guNames.map((name) => async () => {
-        const items = await fetchStationRltm(serviceKey, name)
-        return { name, items }
-    })
-
-    const results = await runWithConcurrency(tasks, MAX_CONCURRENT)
-
-    const slotsByGu = new Map<string, AirQualitySlot[]>()
-
-    for (const result of results) {
-        if (result.status !== 'fulfilled') continue
-        const { name, items } = result.value
-        const guCode = guNameToCode.get(name)
-        if (!guCode) continue
-        slotsByGu.set(guCode, parseAirKoreaItems(items))
-    }
-
-    cachedResult = slotsByGu
-    cacheTimestamp = Date.now()
-
-    return slotsByGu
-}
-
-/** 서울 전체 구의 최신 PM10 값을 guCode → pm10 Map으로 반환 */
-export const fetchLatestPm10Map = async (
-    serviceKey: string
-): Promise<Map<string, number>> => {
-    const slotsByGu = await fetchSeoulAirQuality(serviceKey)
-    const pm10Map = new Map<string, number>()
-
-    for (const [guCode, slots] of slotsByGu) {
-        const latest = slots.find((s) => s.pm10 !== null)
-        if (latest?.pm10 !== null && latest?.pm10 !== undefined) {
-            pm10Map.set(guCode, latest.pm10)
+        const response = await fetch(url.toString())
+        if (!response.ok) {
+            throw new Error(`AirKorea request failed for ${stationName} (${response.status})`)
         }
+
+        const original = new AirKoreaOriginalResponse(await response.json())
+        return original.response?.body?.items ?? []
     }
 
-    return pm10Map
+    /** 서울 전체 구의 실시간 미세먼지 데이터를 조회 (1시간 캐싱, 동시 5개 제한) */
+    async fetchSeoulAirQuality(serviceKey: string): Promise<Map<string, AirQualitySlot[]>> {
+        if (!serviceKey.trim()) {
+            return new Map()
+        }
+
+        if (this.isCacheValid()) {
+            return this.cachedResult!
+        }
+
+        const guNames = SEOUL_GU_DATA.map(gu => gu.name)
+
+        const tasks = guNames.map((name) => async () => {
+            const items = await this.fetchStationRltm(serviceKey, name)
+            return { name, items }
+        })
+
+        const results = await runWithConcurrency(tasks, MAX_CONCURRENT)
+
+        const slotsByGu = new Map<string, AirQualitySlot[]>()
+
+        for (const result of results) {
+            if (result.status !== 'fulfilled') continue
+            const { name, items } = result.value
+            const guCode = guNameToCode.get(name)
+            if (!guCode) continue
+            slotsByGu.set(guCode, parseAirKoreaItems(items))
+        }
+
+        this.cachedResult = slotsByGu
+        this.cacheTimestamp = Date.now()
+
+        return slotsByGu
+    }
+
+    /** 서울 전체 구의 최신 PM10 값을 guCode → pm10 Map으로 반환 */
+    async fetchLatestPm10Map(serviceKey: string): Promise<Map<string, number>> {
+        const slotsByGu = await this.fetchSeoulAirQuality(serviceKey)
+        const pm10Map = new Map<string, number>()
+
+        for (const [guCode, slots] of slotsByGu) {
+            const latest = slots.find((s) => s.pm10 !== null)
+            if (latest?.pm10 !== null && latest?.pm10 !== undefined) {
+                pm10Map.set(guCode, latest.pm10)
+            }
+        }
+
+        return pm10Map
+    }
 }
+
+// ─── 기존 함수형 API 유지 (하위 호환) ────────────────────────
+const _defaultAdapter = new AirQualityAdapter()
+
+/** @deprecated 직접 AirQualityAdapter 인스턴스를 사용하거나 WeatherService를 통해 접근하세요 */
+export const fetchSeoulAirQuality = (serviceKey: string) =>
+    _defaultAdapter.fetchSeoulAirQuality(serviceKey)
+
+/** @deprecated 직접 AirQualityAdapter 인스턴스를 사용하거나 WeatherService를 통해 접근하세요 */
+export const fetchLatestPm10Map = (serviceKey: string) =>
+    _defaultAdapter.fetchLatestPm10Map(serviceKey)

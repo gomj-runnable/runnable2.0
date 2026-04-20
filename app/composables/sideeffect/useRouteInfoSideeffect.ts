@@ -2,6 +2,8 @@ import type { ShallowRef } from 'vue'
 import type { SavedRouteInfo, RouteInfoDraftInput } from '#shared/types/routeInfo'
 import type { CesiumViewer, CesiumEntity } from '~/composables/useWindow'
 import { useRouteInfoStore } from '~/composables/store/useRouteInfoStore'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
+import type { CesiumDrawHandler } from '#shared/types/cesium'
 
 export interface RouteInfoClickedPosition {
     lng: number
@@ -20,8 +22,8 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
     /** 지도 클릭으로 선택된 경로정보 위치 */
     const clickedPosition = ref<RouteInfoClickedPosition | null>(null)
-    let addClickHandler: import('cesium').ScreenSpaceEventHandler | null = null
-    let markerClickHandler: import('cesium').ScreenSpaceEventHandler | null = null
+    let addClickHandler: CesiumDrawHandler | null = null
+    let markerClickHandler: CesiumDrawHandler | null = null
 
     // ─── 지도 클릭: 경로정보 추가 모드 ─────────────────────────────
 
@@ -35,24 +37,26 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
             if (!isAdding) return
 
             const v = viewer.value
-            const C = window.Cesium
-            if (!v || !C) return
+            if (!v) return
 
+            const C = getCesiumRuntime()
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
 
-            handler.setInputAction((movement: { position: unknown }) => {
+            handler.setInputAction((movement: { position?: unknown }) => {
                 const scene = (v as unknown as { scene: import('cesium').Scene }).scene
                 let cartesian: import('cesium').Cartesian3 | undefined
 
                 if (scene.pickPositionSupported) {
-                    const picked = scene.pickPosition(movement.position as import('cesium').Cartesian2)
+                    const picked = scene.pickPosition(
+                        movement.position as import('cesium').Cartesian2
+                    )
                     if (C.defined(picked)) cartesian = picked
                 }
 
                 if (!cartesian) {
-                    const ray = (v as unknown as { camera: import('cesium').Camera }).camera.getPickRay(
-                        movement.position as import('cesium').Cartesian2
-                    )
+                    const ray = (
+                        v as unknown as { camera: import('cesium').Camera }
+                    ).camera.getPickRay(movement.position as import('cesium').Cartesian2)
                     if (ray) {
                         const globePick = scene.globe?.pick(ray, scene)
                         if (C.defined(globePick)) cartesian = globePick
@@ -88,12 +92,10 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
             if (!v) return
 
-            const C = window.Cesium
-            if (!C) return
-
+            const C = getCesiumRuntime()
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
 
-            handler.setInputAction((movement: { position: unknown }) => {
+            handler.setInputAction((movement: { position?: unknown }) => {
                 if (store.isAddingRouteInfo.value) return
 
                 const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
@@ -168,9 +170,9 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
     const renderRouteInfoMarkers = () => {
         const v = viewer.value
-        const C = window.Cesium
-        if (!v || !C) return
+        if (!v) return
 
+        const C = getCesiumRuntime()
         clearMarkers()
         entityGroup = createEntityGroup(v)
         entityToRouteInfoMap.clear()

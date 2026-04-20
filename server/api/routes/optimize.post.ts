@@ -1,5 +1,5 @@
 import { RouteOptimizeRequestBody, RouteOptimizeResponseBody } from '#shared/schemas/route-optimization.schema'
-import { createRoutingService } from '../../utils/routing'
+import { getRoutingService } from '../../utils/routing'
 import { requireSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const request = RouteOptimizeRequestBody.fromRaw(raw)
   const config = useRuntimeConfig()
 
-  const service = createRoutingService(request.mode, { tmapApi: config.tmapApi as string })
+  const service = getRoutingService(request.mode, { tmapApi: config.tmapApi as string })
 
   if (!service || !service.isAvailable()) {
     return RouteOptimizeResponseBody.fallback(

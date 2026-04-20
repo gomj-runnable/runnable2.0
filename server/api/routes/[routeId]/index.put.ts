@@ -12,7 +12,7 @@ const updateSchema = z.object({
 export default defineEventHandler(async (event) => {
     const routeId = requireRouteIdParam(event)
 
-    await requireRouteOwnership(event, routeId)
+    await requireRouteOwnership(event, routeId, routeRepository)
 
     const body = await readBody(event)
     const input = updateSchema.parse(body)

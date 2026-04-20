@@ -3,6 +3,7 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { CesiumViewer } from '~/composables/useWindow'
 import type { RouteElevationSectionInput } from '~/composables/action/useRouteElevationProfile'
 import { densifyPositions } from '~/composables/action/usePositionDensify'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 /**
  * Cesium 지형 프로바이더를 사용해 위치 배열의 실제 지형 고도를 샘플링한다.
@@ -21,11 +22,12 @@ export const useTerrainSampler = (viewer: ShallowRef<CesiumViewer | null>) => {
      */
     const sampleTerrain = async (positions: GeoJsonPosition[]): Promise<GeoJsonPosition[]> => {
         const v = viewer.value
-        const C = window.Cesium
 
-        if (!v || !C || positions.length === 0) {
+        if (!v || positions.length === 0) {
             return positions
         }
+
+        const C = getCesiumRuntime()
 
         const cartographics = positions.map(([lng, lat]) =>
             C.Cartographic.fromDegrees(lng, lat)

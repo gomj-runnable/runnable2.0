@@ -3,8 +3,11 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from './db'
 import { users, userSessions, userAccounts, userVerifications } from '../database/schema/users'
 import { isMemoryMode } from './config'
+import { createAuthService } from './auth.service'
 
-export const auth = isMemoryMode ? null : betterAuth({
+export type AuthInstance = ReturnType<typeof betterAuth> | null
+
+const betterAuthInstance: AuthInstance = isMemoryMode ? null : betterAuth({
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
     database: drizzleAdapter(db!, {
@@ -32,3 +35,9 @@ export const auth = isMemoryMode ? null : betterAuth({
         expiresIn: 60 * 60 * 24 * 30 // 30일
     }
 })
+
+/** better-auth 인스턴스. MEMORY 모드에서는 null */
+export const auth = betterAuthInstance
+
+/** IAuthService 구현체. isMemoryMode에 따라 자동 선택 */
+export const authService = createAuthService(betterAuthInstance)

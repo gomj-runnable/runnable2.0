@@ -7,6 +7,7 @@ import {
     isBuildingPick,
     findNearestGroundPosition
 } from '~/composables/action/useBuildingDetection'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 type ViewerEntityHandle = Parameters<CesiumViewer['entities']['remove']>[0]
 
@@ -85,10 +86,8 @@ export const useMapInit = (options?: MapInitOptions) => {
         })
     }
 
-    const getCesium = () => window.Cesium as unknown as CesiumRuntime
-
     const toGeoJsonPosition = (cartesian: Cartesian3): GeoJsonPosition => {
-        const CesiumLib = getCesium()
+        const CesiumLib = getCesiumRuntime()
         const cartographic = CesiumLib.Cartographic.fromCartesian(cartesian)
 
         return [
@@ -99,7 +98,7 @@ export const useMapInit = (options?: MapInitOptions) => {
     }
 
     const calculateDistance = (positions: Cartesian3[]): number => {
-        const CesiumLib = getCesium()
+        const CesiumLib = getCesiumRuntime()
 
         if (positions.length < 2) {
             return 0
@@ -167,7 +166,7 @@ export const useMapInit = (options?: MapInitOptions) => {
         viewer: CesiumViewer,
         movement: { position?: unknown; endPosition?: unknown }
     ) => {
-        const CesiumLib = getCesium()
+        const CesiumLib = getCesiumRuntime()
         const rawViewer = viewer as unknown as CesiumViewerRuntime
         const scene = rawViewer.scene
         const windowPosition = movement.endPosition ?? movement.position
@@ -210,7 +209,7 @@ export const useMapInit = (options?: MapInitOptions) => {
     }
 
     const attachDrawHelpers = (viewer: CesiumViewer) => {
-        const CesiumLib = getCesium()
+        const CesiumLib = getCesiumRuntime()
         const rawViewer = viewer as unknown as CesiumViewerRuntime
 
         viewer._cancelDrawAction = () => {
@@ -319,7 +318,7 @@ export const useMapInit = (options?: MapInitOptions) => {
     }
 
     const applyViewerScene = async (viewer: CesiumViewer) => {
-        const CesiumLib = getCesium()
+        const CesiumLib = getCesiumRuntime()
         const rawViewer = viewer as unknown as CesiumViewerRuntime
         const terrainUrl = 'https://mapprime.synology.me:15289/seoul/data/terrain/1m_v1.1/'
         const tilesetUrl = 'https://mapprime.synology.me:15289/seoul/data/all_ktx2/tileset.json'
@@ -391,7 +390,8 @@ export const useMapInit = (options?: MapInitOptions) => {
         await loadScript('/lib/cesium/Cesium.js')
         const creditContainer = getHiddenCreditContainer()
 
-        const viewer = new window.Cesium.Viewer('map', {
+        const CesiumLib = getCesiumRuntime()
+        const viewer = new (CesiumLib as unknown as { Viewer: new (container: string, options: object) => CesiumViewer }).Viewer('map', {
             baseLayerPicker: false,
             baseLayer: false,
             animation: false,

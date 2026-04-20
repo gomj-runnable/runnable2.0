@@ -6,6 +6,7 @@ import type { GeoFeature } from '#shared/types/geojson'
 import { useBoundaryStore } from '~/composables/store/useBoundaryStore'
 import { useDistrictStore } from '~/composables/store/useDistrictStore'
 import { useDistrictSideeffect } from '~/composables/sideeffect/useDistrictSideeffect'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 interface UseBoundarySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -34,7 +35,7 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     /** 시군구 엔티티를 추가한다. */
     const showGu = () => {
         const v = viewer.value
-        const C = window.Cesium
+        const C = getCesiumRuntime()
         if (!v || !C || !guGeojson.value) return
 
         const geojson = guGeojson.value as { features?: GeoFeature[] }
@@ -101,7 +102,7 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     /** 행정동 엔티티를 추가한다. 시군구 위에 렌더링된다. */
     const showDong = () => {
         const v = viewer.value
-        const C = window.Cesium
+        const C = getCesiumRuntime()
         if (!v || !C || !dongGeojson.value) return
 
         const geojson = dongGeojson.value as { features?: GeoFeature[] }
