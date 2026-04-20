@@ -88,6 +88,8 @@ const POI_ICON: Record<string, string> = {
                             rows: 2
                         }
                     ]"
+                    tabindex="0"
+                    role="button"
                     @update:field="
                         $emit('updateSectionAttr', {
                             index,
@@ -96,6 +98,7 @@ const POI_ICON: Record<string, string> = {
                         })
                     "
                     @click="$emit('selectSection', { index })"
+                    @keydown.enter="$emit('selectSection', { index })"
                     @delete="$emit('removeSection', { index })"
                 >
                     <template #meta>
@@ -107,7 +110,7 @@ const POI_ICON: Record<string, string> = {
                     class="draw-route-panel__poi-list"
                 >
                     <span
-                        v-for="(poi, poiIndex) in (sectionPois?.[index] ?? [])"
+                        v-for="(poi, poiIndex) in sectionPois?.[index] ?? []"
                         :key="`poi-${index}-${poiIndex}`"
                         class="draw-route-panel__poi-chip"
                         :title="poi.name"

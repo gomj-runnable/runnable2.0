@@ -105,7 +105,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return null
         }
 
-        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color) as CesiumEntity
+        return addRoutePointEntity(window.Cesium, options.viewer.value, position, color)
     }
 
     /**
