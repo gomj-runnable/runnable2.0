@@ -1,3 +1,8 @@
+---
+name: create-type-role
+description: This skill should be used when the user asks to "복수 API 응답을 하나로 통합", "공통 도메인 타입을 정의하고 adapter를 분리", "API 별로 adapter를 만들어"해야 할 때. 공통 도메인 타입 → adapter 정규화 → 서비스 소비 패턴을 정의한다.
+---
+
 # Create Type Role
 
 복수 API 응답을 하나의 기능에서 사용할 때, **공통 도메인 타입을 먼저 정의**하고 각 API `response.data`를 adapter로 정규화해서 서비스에서 소비하는 패턴.
@@ -15,12 +20,12 @@
 ## 폴더 패턴
 
 ```
-shared/types/<domain>.ts          # 공통 도메인 타입
-server/adapters/<domain>/
-  ├── api-a.adapter.ts             # ApiAResponse → DomainType
-  └── api-b.adapter.ts             # ApiBResponse → DomainType
-server/services/<domain>/
-  └── <domain>-service.ts          # 공통 타입만 소비
+shared/types/<domain>.ts              # 공통 도메인 타입
+server/utils/<domain>/
+  ├── <sourceA>.adapter.ts            # ApiAResponse → DomainType
+  ├── <sourceB>.adapter.ts            # ApiBResponse → DomainType
+  ├── <domain>.service.ts             # 공통 타입만 소비
+  └── common.ts                       # 공통 유틸 (선택)
 ```
 
 프론트·서버 공용 타입은 반드시 `shared/types/`에 둔다. API 응답 원본 타입은 adapter 내부에 한정한다.
@@ -28,25 +33,34 @@ server/services/<domain>/
 ## 핵심 예시
 
 ```ts
-// shared/types/route.ts — 공통 타입
-export interface RouteSummary {
-  id: string; name: string; distanceMeter: number; source: 'apiA' | 'apiB'
+// shared/types/weather.ts — 공통 타입
+export interface HourlyWeather {
+  date: string; temperature: number; humidity: number; source: 'observed' | 'forecast'
 }
 
-// server/adapters/route/api-a.adapter.ts — 변환만 담당
-export const adaptApiARoute = (data: ApiARouteItem): RouteSummary => ({
-  id: data.route_id, name: data.route_name,
-  distanceMeter: data.distance_m ?? 0, source: 'apiA'
+// server/utils/weather/observed.adapter.ts — 변환만 담당
+export const adaptObservedData = (data: KmaObservedItem): HourlyWeather => ({
+  date: data.tm, temperature: Number(data.ta),
+  humidity: Number(data.hm), source: 'observed'
 })
 
-// server/services/route/route-service.ts — 공통 타입만 소비
-export async function getRouteSummaries(): Promise<RouteSummary[]> {
-  const [a, b] = await Promise.all([$fetch('/api/a/routes'), $fetch('/api/b/routes')])
-  return [...a.data.map(adaptApiARoute), ...b.data.map(adaptApiBRoute)]
+// server/utils/weather/weather.service.ts — 공통 타입만 소비
+export async function getHourlyWeather(): Promise<HourlyWeather[]> {
+  const [observed, forecast] = await Promise.all([
+    fetchObserved(), fetchForecast()
+  ])
+  return mergeWeatherData(observed, forecast)
 }
 ```
 
-핵심: `getRouteSummaries`는 API 응답 구조를 모른다. 차이는 adapter가 끝낸다.
+핵심: `getHourlyWeather`는 API 응답 구조를 모른다. 차이는 adapter가 끝낸다.
+
+### 레퍼런스
+- `server/utils/weather/observed.adapter.ts` — 관측 데이터 변환
+- `server/utils/weather/forecast.adapter.ts` — 예보 데이터 변환
+- `server/utils/weather/airquality.adapter.ts` — 대기질 데이터 변환
+- `server/utils/weather/weather.service.ts` — 공통 타입 소비 오케스트레이터
+- `server/utils/weather/merge.service.ts` — 복수 소스 병합 로직
 
 ## 점검 항목
 
