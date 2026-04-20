@@ -133,7 +133,7 @@ export const useElevationLayerSideeffect = (options: ElevationLayerOptions) => {
     }
 
     const init = () => {
-        watch(
+        const stopWatch = watch(
             isElevationVisible,
             (visible) => {
                 if (visible) {
@@ -144,6 +144,10 @@ export const useElevationLayerSideeffect = (options: ElevationLayerOptions) => {
             },
             { immediate: true }
         )
+
+        onBeforeUnmount(() => {
+            stopWatch()
+        })
     }
 
     return { init }

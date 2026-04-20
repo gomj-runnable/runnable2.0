@@ -75,7 +75,7 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
     }
 
     const init = () => {
-        watch(
+        const stopWatch = watch(
             [isGradientVisible, drawnPositions] as const,
             ([visible, positions]) => {
                 if (visible && positions && positions.length >= 2) {
@@ -86,6 +86,11 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
             },
             { immediate: true }
         )
+
+        onBeforeUnmount(() => {
+            stopWatch()
+            gradientPolylines.clear()
+        })
     }
 
     return { init }

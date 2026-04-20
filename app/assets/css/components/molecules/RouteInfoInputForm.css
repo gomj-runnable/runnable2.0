@@ -1,0 +1,91 @@
+.route-info-input-form {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-xs);
+    padding: var(--gap-section-md);
+    background: var(--color-surface-base);
+    border-radius: var(--radius-control-sm);
+    border: var(--border-width-base) solid var(--color-border-default);
+    min-width: 260px;
+    box-shadow: var(--shadow-md);
+}
+
+.route-info-input-form__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-info-input-form__title {
+    font-size: var(--text-body-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-strong);
+}
+
+.route-info-input-form__close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--size-1);
+}
+
+.route-info-input-form__coord {
+    font-size: var(--font-size-11);
+    color: var(--color-text-muted);
+}
+
+.route-info-input-form__name-input {
+    width: 100%;
+    background: var(--color-surface-soft);
+    border: var(--border-width-base) solid var(--color-border-default);
+    border-radius: var(--radius-control-sm);
+    padding: var(--gap-section-xs) var(--size-4);
+    color: var(--color-text-strong);
+    font-size: var(--text-body-xs);
+}
+
+.route-info-input-form__textarea {
+    width: 100%;
+    resize: vertical;
+    background: var(--color-surface-soft);
+    border: var(--border-width-base) solid var(--color-border-default);
+    border-radius: var(--radius-control-sm);
+    padding: var(--size-4);
+    color: var(--color-text-strong);
+    font-size: var(--text-body-xs);
+}
+
+.route-info-input-form__actions {
+    display: flex;
+    gap: var(--gap-section-xs);
+    justify-content: flex-end;
+}
+
+.route-info-input-form__btn {
+    padding: var(--gap-section-xs) var(--gap-section-md);
+    border-radius: var(--radius-control-sm);
+    border: none;
+    font-size: var(--text-body-xs);
+    cursor: pointer;
+}
+
+.route-info-input-form__btn--cancel {
+    background: var(--color-surface-soft-strong);
+    color: var(--color-text-muted);
+}
+
+.route-info-input-form__btn--submit {
+    background: var(--btn-primary-bg);
+    color: var(--color-text-on-brand);
+}
+
+.route-info-input-form__btn--submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
