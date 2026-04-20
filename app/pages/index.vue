@@ -194,7 +194,15 @@ const sectionTotalTime = computed(() =>
     formatTime(calculateTotalTime(sectionInfo.sections.value, sectionInfo.userPaces.value))
 )
 
+/** 선택 경로가 바뀌면 기존 시뮬레이션을 즉시 정지한다. */
+const stopSimulationForRouteChange = () => {
+    if (!simulation.playbackState.value.isStopped) {
+        simulationEffect.stopPlayback()
+    }
+}
+
 const handleRouteSelect = async (routeId: string) => {
+    stopSimulationForRouteChange()
     const sections = await routeList.select(routeId)
     if (sections) {
         sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
@@ -354,6 +362,7 @@ const handleLogout = async () => {
 
 /** 탐색 결과에서 경로를 선택하면 지도 미리보기와 고도 차트를 표시한다. */
 const handleExploreSelect = async (routeId: string) => {
+    stopSimulationForRouteChange()
     explore.selectRoute(routeId)
     const route = explore.searchResults.value.find((r) => r.routeId === routeId)
     await exploreSelectRoute(routeId, route?.title)

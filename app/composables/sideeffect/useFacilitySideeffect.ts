@@ -1,7 +1,7 @@
 import type { ShallowRef } from 'vue'
-import type { Entity } from 'cesium'
+import type { Entity, LabelGraphics, PointGraphics } from 'cesium'
 import type { CesiumViewer } from '~/composables/useWindow'
-import type { CesiumRuntime } from '#shared/types/cesium'
+import type { CesiumDrawHandler, CesiumRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
@@ -94,16 +94,18 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
     const addPointEntity = (v: CesiumViewer, C: CesiumRuntime, facility: Facility) => {
         const color = getLayerColor(facility.type)
+        const point = createClampedPoint(C, {
+            color: toCesiumColor(C, color)
+        }) as ConstructorParameters<typeof PointGraphics>[0]
+        const label = createClampedLabel(C, {
+            text: facility.name
+        }) as ConstructorParameters<typeof LabelGraphics>[0]
 
         return v.entities.add({
             name: facility.name,
             position: C.Cartesian3.fromDegrees(facility.lng, facility.lat),
-            point: createClampedPoint(C, {
-                color: toCesiumColor(C, color)
-            }),
-            label: createClampedLabel(C, {
-                text: facility.name
-            })
+            point,
+            label
         })
     }
 
@@ -188,7 +190,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
     }
 
     /** Cesium 화면 클릭 → 시설물 엔티티 감지 → onPoiClick 콜백 호출 */
-    let clickHandler: import('cesium').ScreenSpaceEventHandler | null = null
+    let clickHandler: CesiumDrawHandler | null = null
 
     watch(
         viewer,
@@ -201,7 +203,9 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             const C = getCesiumRuntime()
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
 
-            handler.setInputAction((movement: { position: unknown }) => {
+            handler.setInputAction((movement) => {
+                if (!movement.position) return
+
                 const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
 
                 if (!picked?.id) return

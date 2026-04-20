@@ -1,5 +1,6 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/composables/useWindow'
+import type { CesiumViewerRuntime } from '#shared/types/cesium'
 import { useCameraViewStore } from '~/composables/store/useCameraViewStore'
 
 interface UseCameraViewSideeffectOptions {
@@ -24,14 +25,14 @@ export const useCameraViewSideeffect = (options: UseCameraViewSideeffectOptions)
         const v = viewer.value
         if (!v) return
 
-        const ctrl = v.screenSpaceCameraController
+        const ctrl = (v as unknown as CesiumViewerRuntime).screenSpaceCameraController
         if (!ctrl) return
 
         savedRotateEventTypes = ctrl.rotateEventTypes
         savedZoomEventTypes = ctrl.zoomEventTypes
-        savedEnableTilt = ctrl.enableTilt
-        savedEnableRotate = ctrl.enableRotate
-        savedEnableLook = ctrl.enableLook
+        savedEnableTilt = ctrl.enableTilt ?? true
+        savedEnableRotate = ctrl.enableRotate ?? true
+        savedEnableLook = ctrl.enableLook ?? false
 
         ctrl.enableRotate = false
         ctrl.enableTilt = false
@@ -46,7 +47,7 @@ export const useCameraViewSideeffect = (options: UseCameraViewSideeffectOptions)
         const v = viewer.value
         if (!v) return
 
-        const ctrl = v.screenSpaceCameraController
+        const ctrl = (v as unknown as CesiumViewerRuntime).screenSpaceCameraController
         if (!ctrl) return
 
         ctrl.enableRotate = savedEnableRotate

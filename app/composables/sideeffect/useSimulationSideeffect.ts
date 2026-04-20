@@ -2,12 +2,17 @@ import type { ShallowRef } from 'vue'
 import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 import type { CesiumViewer } from '~/composables/useWindow'
 import type { CesiumRuntime } from '#shared/types/cesium'
-import { interpolatePath, getProgressInfo, haversineDistance } from '~/composables/action/useFlythroughAction'
+import {
+    interpolatePath,
+    getProgressInfo,
+    haversineDistance
+} from '~/composables/action/useFlythroughAction'
 import { useSimulationStore } from '~/composables/store/useSimulationStore'
 import { useSectionInfoStore } from '~/composables/store/useSectionInfoStore'
 import { calculateSectionDistance } from '~/composables/action/usePaceCalculator'
 import { useCameraViewSideeffect } from '~/composables/sideeffect/useCameraViewSideeffect'
 import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
+import { usePlaybackStateMachine } from '~/composables/action/usePlaybackStateMachine'
 
 interface UseSimulationSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -30,6 +35,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
     const sectionInfo = useSectionInfoStore()
 
     const cameraView = useCameraViewSideeffect({ viewer })
+    const playbackMachine = usePlaybackStateMachine()
 
     /** 현재 RAF 루프 ID. null이면 루프가 비활성 상태 */
     let rafId: number | null = null
@@ -142,9 +148,8 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
         const i = lo
         const prevTime = cumulativeTimeFractions[i - 1]!
         const currTime = cumulativeTimeFractions[i]!
-        const segmentRatio = currTime > prevTime
-            ? (timeProgress - prevTime) / (currTime - prevTime)
-            : 0
+        const segmentRatio =
+            currTime > prevTime ? (timeProgress - prevTime) / (currTime - prevTime) : 0
 
         const prevDist = (i - 1) / (len - 1)
         const currDist = i / (len - 1)
@@ -153,7 +158,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
 
     /** RAF 루프 한 프레임 처리 */
     const tick = (timestamp: number) => {
-        if (!store.playbackState.value.isPlaying) return
+        if (!playbackMachine.state.value.isPlaying) return
 
         if (lastTimestamp === null) {
             lastTimestamp = timestamp
@@ -181,6 +186,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
             store.setProgressInfo(getProgressInfo(activeCoordinates, 1))
             _updateCamera(Cesium, v, 1)
             cameraView.restoreThirdPerson()
+            playbackMachine.send('COMPLETE')
             store.setPlaybackState(PlaybackStateEnum.STOPPED)
             lastTimestamp = null
             return
@@ -228,9 +234,20 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
 
     /**
      * 재생을 시작한다. 처음 또는 정지 상태에서 진행률 0부터 시작한다.
+     * 일시정지 상태에서 동일 경로면 resumePlayback, 다른 경로면 처음부터 시작한다.
      * @param coordinates - GeoJSON [경도, 위도, 고도] 배열
      */
     const startPlayback = (coordinates: number[][]) => {
+        if (playbackMachine.canSend('RESUME') && coordinates === activeCoordinates) {
+            resumePlayback()
+            return
+        }
+
+        // 일시정지 상태에서 다른 경로가 들어오면 상태 머신을 리셋한다
+        if (playbackMachine.state.value.isActive) {
+            playbackMachine.reset()
+        }
+
         _stopRaf()
         activeCoordinates = coordinates
         userHeadingOffset = 0
@@ -251,12 +268,17 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
             const heading = Cesium.Math.toRadians(pos.heading)
             userPitch = Cesium.Math.toRadians(pos.pitch)
             v.camera.setView({
-                destination: Cesium.Cartesian3.fromDegrees(pos.longitude, pos.latitude, pos.elevation),
+                destination: Cesium.Cartesian3.fromDegrees(
+                    pos.longitude,
+                    pos.latitude,
+                    pos.elevation
+                ),
                 orientation: { heading, pitch: userPitch, roll: 0 }
             })
             lastSetHeading = heading
         }
 
+        if (!playbackMachine.send('PLAY')) return
         store.setPlaybackState(PlaybackStateEnum.PLAYING)
         rafId = requestAnimationFrame(tick)
     }
@@ -265,8 +287,9 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
      * 재생을 일시정지한다.
      */
     const pausePlayback = () => {
-        if (!store.playbackState.value.isPlaying) return
+        if (!playbackMachine.canSend('PAUSE')) return
         _stopRaf()
+        playbackMachine.send('PAUSE')
         store.setPlaybackState(PlaybackStateEnum.PAUSED)
     }
 
@@ -274,7 +297,8 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
      * 일시정지 상태에서 재생을 재개한다.
      */
     const resumePlayback = () => {
-        if (!store.playbackState.value.isPaused) return
+        if (!playbackMachine.canSend('RESUME')) return
+        playbackMachine.send('RESUME')
         store.setPlaybackState(PlaybackStateEnum.PLAYING)
         rafId = requestAnimationFrame(tick)
     }
@@ -284,6 +308,7 @@ export const useSimulationSideeffect = (options: UseSimulationSideeffectOptions)
      */
     const stopPlayback = () => {
         _stopRaf()
+        if (!playbackMachine.send('STOP')) return
         const v = viewer.value
         if (v) cameraView.restoreThirdPerson()
         store.reset()
