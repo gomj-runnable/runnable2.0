@@ -6,8 +6,8 @@ export class CameraViewModeEnum extends EnumBase {
 
     private constructor(key: string, label: string) { super(key, label) }
 
-    get isFirstPerson(): boolean { return this === CameraViewModeEnum.FIRST_PERSON }
-    get isThirdPerson(): boolean { return this === CameraViewModeEnum.THIRD_PERSON }
+    get isFirstPerson(): boolean { return this.key === 'first-person' }
+    get isThirdPerson(): boolean { return this.key === 'third-person' }
 
     static from(key: string): CameraViewModeEnum {
         return EnumBase.fromKey<CameraViewModeEnum>(CameraViewModeEnum, key) ?? CameraViewModeEnum.THIRD_PERSON

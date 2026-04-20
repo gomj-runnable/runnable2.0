@@ -15,10 +15,10 @@ export class NotificationToneEnum extends EnumBase {
         super(key, label)
     }
 
-    get isSuccess(): boolean { return this === NotificationToneEnum.SUCCESS }
-    get isError(): boolean { return this === NotificationToneEnum.ERROR }
-    get isInfo(): boolean { return this === NotificationToneEnum.INFO }
-    get isWarning(): boolean { return this === NotificationToneEnum.WARNING }
+    get isSuccess(): boolean { return this.key === 'success' }
+    get isError(): boolean { return this.key === 'error' }
+    get isInfo(): boolean { return this.key === 'info' }
+    get isWarning(): boolean { return this.key === 'warning' }
 
     static from(key: string): NotificationToneEnum {
         return EnumBase.fromKey<NotificationToneEnum>(NotificationToneEnum, key) ?? NotificationToneEnum.INFO
