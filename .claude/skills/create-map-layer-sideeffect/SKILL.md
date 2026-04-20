@@ -26,8 +26,10 @@ Cesium 지도 위에 Entity/Primitive 레이어를 추가할 때 따르는 sidee
 |------|------|
 | 의존성 주입 | `Use{Name}SideeffectOptions` 인터페이스로 viewer + store refs 전달 |
 | viewer 필수 | `viewer: ShallowRef<CesiumViewer \| null>` — 모든 Options에 포함 |
+| Cesium 접근 | `getCesiumRuntime()`으로 접근 — `window.Cesium` 직접 사용 금지 |
+| null 가드 | viewer는 `if (!v) return`으로 가드, Cesium은 `getCesiumRuntime()`이 미로드 시 throw |
 | 엔티티 저장소 | `shallowRef<Entity[]>` 또는 `Map<string, Entity[]>` |
-| null 가드 | Entity 추가/제거 전 `if (!viewer.value \|\| !window.Cesium) return` |
+| 비동기 에러 격리 | `withErrorBoundary`로 API 호출 래핑 — 실패가 전체 초기화를 깨뜨리지 않도록 격리 |
 | 클린업 | `onBeforeUnmount` 또는 `destroy()` 반환으로 엔티티 정리 보장 |
 | store 분리 | 상태는 store composable에서 관리, sideeffect는 렌더링만 담당 |
 
@@ -53,11 +55,19 @@ export interface Use{Name}SideeffectOptions {
 }
 ```
 
+## 필수 import
+
+```typescript
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
+import { withErrorBoundary } from '~/composables/action/useAsyncDecorator'
+```
+
 ## 스켈레톤 — Entity 방식
 
 ```typescript
 import { shallowRef, watch, onBeforeUnmount } from 'vue'
 import type { Entity as CesiumEntity } from '#shared/types/cesium'
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
 
 export const use{Name}Sideeffect = (options: Use{Name}SideeffectOptions) => {
     // 1. 엔티티 저장소
@@ -66,8 +76,8 @@ export const use{Name}Sideeffect = (options: Use{Name}SideeffectOptions) => {
     // 2. 추가 함수
     const show{Layer} = (data: {Data}) => {
         const v = options.viewer.value
-        const C = window.Cesium
-        if (!v || !C) return
+        if (!v) return
+        const Cesium = getCesiumRuntime() // throws if not loaded
 
         const entity = v.entities.add({
             /* Cesium entity definition */
@@ -104,12 +114,16 @@ export const use{Name}Sideeffect = (options: Use{Name}SideeffectOptions) => {
 `useFacilitySideeffect.ts` 패턴. 타입별로 Entity를 그룹 관리할 때 사용한다.
 
 ```typescript
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
+
 const entityMap = shallowRef(new Map<{Type}, CesiumEntity[]>())
 
 const showByType = (type: {Type}, items: {Item}[]) => {
     removeByType(type)
     const v = options.viewer.value
     if (!v) return
+    const Cesium = getCesiumRuntime()
+
     const created = items.map(item => v.entities.add({ /* ... */ }))
     const next = new Map(entityMap.value)
     next.set(type, created)
@@ -139,12 +153,20 @@ const removeAll = () => {
 `useCameraSideeffect.ts`, `useBoundarySideeffect.ts` 패턴. 비동기 초기화가 필요할 때 사용한다.
 
 ```typescript
+import { getCesiumRuntime } from '~/composables/sideeffect/useCesiumRuntime'
+import { withErrorBoundary } from '~/composables/action/useAsyncDecorator'
+
 export const use{Name}Sideeffect = (options: Use{Name}SideeffectOptions) => {
     // ... 엔티티 저장소, show/remove 함수
 
+    // withErrorBoundary로 비동기 호출 래핑
+    const _fetchData = withErrorBoundary(
+        () => $fetch('/api/{domain}/'),
+        { retry: 1, fallback: [] }
+    )
+
     const init = async () => {
-        // 데이터 fetch
-        const data = await $fetch('/api/{domain}/')
+        const data = await _fetchData()
         // watch 등록, 이벤트 리스너 추가
         watch(options.isActive, handler)
     }
@@ -155,6 +177,32 @@ export const use{Name}Sideeffect = (options: Use{Name}SideeffectOptions) => {
     }
 
     return { init, destroy, show{Layer}, remove{Layer} }
+}
+```
+
+## withErrorBoundary 사용 패턴
+
+비동기 API 호출이 실패해도 전체 sideeffect 초기화가 깨지지 않도록 격리한다.
+
+```typescript
+import { withErrorBoundary } from '~/composables/action/useAsyncDecorator'
+
+// 기본: 실패 시 빈 배열 반환
+const safeFetch = withErrorBoundary(
+    () => $fetch('/api/data'),
+    { fallback: [] }
+)
+
+// retry 포함: 1회 재시도 후 fallback
+const fetchWithRetry = withErrorBoundary(
+    () => $fetch('/api/data'),
+    { retry: 1, fallback: null }
+)
+
+// init에서 사용
+const init = async () => {
+    const data = await safeFetch()
+    if (data.length) show{Layer}(data)
 }
 ```
 
@@ -179,7 +227,9 @@ export const use{Name}Sideeffect = (options: Use{Name}SideeffectOptions) => {
 
 - Options 인터페이스에 `viewer: ShallowRef<CesiumViewer | null>`이 포함되었는가
 - store를 내부에서 직접 import하지 않고 Options로 주입받는가
-- Entity 추가 전 `if (!viewer.value || !window.Cesium) return` 가드가 있는가
+- `window.Cesium` 직접 참조 없이 `getCesiumRuntime()`을 사용하는가
+- `getCesiumRuntime()` 호출 지점에서 throw 가능성을 인지하고 적절히 처리하는가
+- 비동기 API 호출이 `withErrorBoundary`로 래핑되어 실패를 격리하는가
 - 제거 함수가 `viewer.entities.remove()` 후 저장소를 초기화하는가
 - `onBeforeUnmount` 또는 `destroy()`에서 모든 엔티티를 정리하는가
 - watch 동기화 시 이전 엔티티를 먼저 제거한 뒤 새로 추가하는가

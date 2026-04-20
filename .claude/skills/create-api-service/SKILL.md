@@ -113,17 +113,62 @@ class {Domain}Service {
   → {Domain}LocalResponse              ← 추상화 반환
 ```
 
-→ 코드: [examples/service.ts](examples/service.ts), [examples/types.ts](examples/types.ts)
+## Strategy + Registry 대안 패턴
+
+플러그인 방식으로 다수 provider를 지원할 때 사용한다. `requestBy{기준}()` 클래스 패턴 대신 인터페이스 + 자기등록 구조를 사용한다.
+
+```typescript
+// server/utils/{domain}/registry.ts — Registry
+const registry = new Map<string, () => IService>()
+
+export const registerService = (key: string, factory: () => IService) => {
+    registry.set(key, factory)
+}
+
+export const getService = (key: string): IService => {
+    const factory = registry.get(key)
+    if (!factory) throw new Error(`Service not found: ${key}`)
+    return factory()
+}
+```
+
+```typescript
+// server/utils/{domain}/tmap.service.ts — 인터페이스 구현 + 자기 등록
+import { registerService } from './registry'
+
+class TMapService implements RoutingService {
+    async optimize(waypoints: Position[]): Promise<OptimizedRoute> { ... }
+}
+
+registerService('TMAP', () => new TMapService())
+```
+
+```typescript
+// server/utils/{domain}/index.ts — side-effect import로 등록 트리거
+import './tmap.service'
+import './osm.service'
+```
+
+### 선택 기준
+
+| 조건 | 방식 |
+|------|------|
+| 단일 외부 API, 기준별 조회 | `requestBy{기준}()` 클래스 패턴 |
+| 다수 provider, 동일 인터페이스 | Strategy + Registry 패턴 |
+| 다수 API 소스 통합 | `create-unified-api-response` 스킬 참조 |
+
+### 레퍼런스
+- `server/utils/routing/registry.ts:10-27` — Service Registry
+- `server/utils/routing/tmap.service.ts:80` — 자기 등록
+- `server/utils/routing/index.ts:1-3` — side-effect import
 
 ## 기존 프로젝트 패턴과의 관계
 
-현재 `server/utils/weather/`의 adapter 패턴과 호환:
-
-| 기존 패턴 | 이 스킬 적용 후 |
-|-----------|-----------------|
-| `VilageFcstResponse` (interface) | `VilageFcstOriginalResponse` (class) |
-| `HourlyWeather` (interface) | 그대로 유지 (Local Response 역할) |
-| `fetchForecast()` | `service.requestByDate()` |
+| 기존 패턴 | 위치 | 설명 |
+|-----------|------|------|
+| Weather adapter (functional) | `server/utils/weather/*.adapter.ts` | 함수형 adapter 패턴 |
+| Auth Service (interface DI) | `server/utils/auth.service.ts` | `IAuthService` + Factory |
+| Routing (Strategy + Registry) | `server/utils/routing/` | 다수 provider 자기등록 |
 
 기존 코드를 **즉시 전환할 필요 없음**. 새 API 연동부터 이 규칙을 적용한다.
 
@@ -131,17 +176,19 @@ class {Domain}Service {
 
 1. **원본 Response Class 정의** — `shared/types/{domain}.ts`에 외부 API 응답 구조 class 선언
 2. **Local Response 정의** — 같은 파일에 필요한 필드만 담은 interface 선언
-3. **Service 생성** — `server/utils/{domain}/{domain}.service.ts`에 `requestBy{기준}()` 메서드 구현
-4. **Adapter 분리 (선택)** — 외부 호출과 변환이 복잡하면 adapter 파일로 분리
-5. **API 엔드포인트 연결** — `server/api/{domain}/`에서 service 호출
-6. **프론트엔드 sideeffect 연결** — `composables/sideeffect/`에서 API 호출
+3. **패턴 선택** — 단일 API(`requestBy{기준}`) vs 다수 provider(Strategy + Registry)
+4. **Service 생성** — `server/utils/{domain}/{domain}.service.ts`에 메서드 구현
+5. **Adapter 분리 (선택)** — 외부 호출과 변환이 복잡하면 adapter 파일로 분리
+6. **API 엔드포인트 연결** — `server/api/{domain}/`에서 service 호출
+7. **프론트엔드 sideeffect 연결** — `composables/sideeffect/`에서 API 호출
 
 ## 점검 항목
 
 - 원본 Response가 class로 정의되었는가
 - class가 외부 API의 전체 응답 구조를 반영하는가
 - Local Response가 필요한 필드만 포함하는가
-- Service 메서드가 `requestBy{기준}()` 네이밍을 따르는가
+- Service 메서드가 `requestBy{기준}()` 네이밍을 따르는가 (또는 Strategy 인터페이스)
 - Service 반환값이 Local Response 타입인가
 - 원본 Response와 Local Response가 모두 `shared/types/`에 명세되었는가
 - API 내부 로직(에러 처리, 캐싱 등)이 Service/Adapter 안에 캡슐화되었는가
+- Strategy 패턴 사용 시 Registry에 자기 등록되었는가

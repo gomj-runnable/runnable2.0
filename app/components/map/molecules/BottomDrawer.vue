@@ -43,11 +43,4 @@ defineEmits<{
     </UDrawer>
 </template>
 
-<style scoped>
-.bottom-drawer {
-    padding: var(--gap-2) var(--gap-3);
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-2);
-}
-</style>
+<style scoped src="~/assets/css/components/molecules/BottomDrawer.css"></style>

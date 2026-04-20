@@ -14,25 +14,4 @@ defineProps<{
     </footer>
 </template>
 
-<style scoped>
-.map-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    pointer-events: none;
-}
-
-.map-footer__label {
-    font-size: var(--text-caption);
-    color: var(--color-text-subtle);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    user-select: none;
-    padding: 4px 12px;
-    margin: 0;
-    background: color-mix(in srgb, var(--color-surface-default) 75%, transparent);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    border-radius: var(--radius-surface-md) 0 0 0;
-}
-</style>
+<style scoped src="~/assets/css/components/molecules/MapFooter.css"></style>
