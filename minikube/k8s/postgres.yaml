@@ -7,7 +7,7 @@ spec:
   accessModes: [ReadWriteOnce]
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -16,6 +16,8 @@ metadata:
   namespace: runnable
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: postgres
@@ -48,17 +50,26 @@ spec:
                   key: POSTGRES_DB
             - name: TZ
               value: Asia/Seoul
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "root", "-d", "runnable"]
+              command: ['sh', '-c', 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "root", "-d", "runnable"]
+              command: ['sh', '-c', 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
             initialDelaySeconds: 30
             periodSeconds: 10
       volumes:
