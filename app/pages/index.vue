@@ -14,17 +14,13 @@ import DrawRoutePanel from '~/features/draw-route/ui/DrawRoutePanel.vue'
 import RouteElevationModal from '~/features/draw-route/ui/RouteElevationModal.vue'
 import RouteOverlayBottomBar from '~/features/draw-route/ui/RouteOverlayBottomBar.vue'
 import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
-import NotificationModal from '~/widgets/notification/ui/NotificationModal.vue'
 import RouteListPanel from '~/features/draw-route/ui/RouteListPanel.vue'
 import WeatherOverlay from '~/features/weather-overlay/ui/WeatherOverlay.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
 import ExplorePanel from '~/features/explore/ui/ExplorePanel.vue'
-import IconButton from '~/shared/ui/buttons/IconButton.vue'
 import SidebarUserProfile from '~/entities/user/ui/SidebarUserProfile.vue'
 import AuthModal from '~/entities/user/ui/AuthModal.vue'
-import Textfield from '~/shared/ui/inputs/Textfield.vue'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
@@ -64,6 +60,7 @@ import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
 import { useSimulationSideeffect } from '~/features/simulation/api/useSimulationSideeffect'
 import { useWeatherRecommendStore } from '~/entities/weather/model/useWeatherRecommendStore'
+import { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
 import { useWeatherRecommendSideeffect } from '~/features/weather-overlay/api/useWeatherRecommendSideeffect'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
 import { useMapInit } from '~/shared/lib/map/useMapInit'
@@ -265,6 +262,25 @@ const gradientEffect = useGradientSideeffect({
 // ─── 추천 경로 토글 ──────────────────────────────────────────────
 const showRecommend = ref(false)
 
+// ─── 오버레이 가시성 컨텍스트 ────────────────────────────────────
+/**
+ * 현재 탭·선택 상태·추천 모드에 따라 오버레이 UI 그룹의 표출 컨텍스트를 결정한다.
+ * 경로 카드가 화면에서 보이지 않으면 연관 오버레이도 함께 숨긴다.
+ */
+const overlayContext = computed<MapOverlayContextEnum>(() => {
+    if (activeNav.value === '그리기' && drawing.sectionDraft) {
+        return MapOverlayContextEnum.DRAWING
+    }
+    if (activeNav.value === '목록' && routeList.selectedRouteId) {
+        return MapOverlayContextEnum.LIST_SELECTED
+    }
+    if (activeNav.value === '탐색') {
+        if (showRecommend.value) return MapOverlayContextEnum.RECOMMEND
+        if (explore.selectedRouteId.value) return MapOverlayContextEnum.EXPLORE_SELECTED
+    }
+    return MapOverlayContextEnum.NONE
+})
+
 const handleRouteInfoSubmit = async (payload: { name: string; description: string }) => {
     const pos = routeInfoEffect.clickedPosition.value
     if (!pos) return
@@ -301,21 +317,14 @@ const weatherRecommendEffect = useWeatherRecommendSideeffect()
 // ─── 시뮬레이션 Drawer ──────────────────────────────────────────
 const isSimDrawerOpen = ref(false)
 
-/** 경로정보 Chip 표출 조건: 그리기 완료 후 / 목록·탐색에서 경로 선택 후 */
-const showRouteInfoChip = computed(() => {
-    if (activeNav.value === '그리기' && drawing.sectionDraft) return true
-    if (activeNav.value === '목록' && routeList.selectedRouteId) return true
-    if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
-    return false
-})
+/** 경로정보 Chip 표출 조건: overlayContext에 활성 경로가 있을 때 */
+const showRouteInfoChip = computed(() => overlayContext.value.hasActiveRoute)
 
-/** 시뮬레이션 Chip 표출 조건 */
+/** 시뮬레이션 Chip 표출 조건: 활성 경로 + 목록 탭에서는 구간정보 열림 필요 */
 const showSimulationChip = computed(() => {
-    if (activeNav.value === '그리기' && drawing.sectionDraft) return true
-    if (activeNav.value === '목록' && routeList.selectedRouteId && sectionInfo.isOpen.value)
-        return true
-    if (activeNav.value === '탐색' && explore.selectedRouteId.value) return true
-    return false
+    if (!overlayContext.value.hasActiveRoute) return false
+    if (overlayContext.value.isListSelected) return sectionInfo.isOpen.value
+    return true
 })
 
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
@@ -387,20 +396,28 @@ watch(activeNav, (next) => {
     }
 })
 
-/** 경로정보 Chip 조건이 해제되면 추가 모드를 끈다. */
-watch(showRouteInfoChip, (visible) => {
-    if (!visible && routeInfoStore.isAddingRouteInfo.value) {
-        routeInfoEffect.cancelAdding()
-    }
-})
+/**
+ * 오버레이 컨텍스트가 바뀌면 이전 컨텍스트에서 활성화된 상호작용 UI를 일괄 정리한다.
+ * - 경로정보 추가 모드 해제
+ * - 시뮬레이션 Drawer 닫기 + 재생 정지
+ * - 경로정보 마커 팝업 닫기
+ */
+watch(overlayContext, (next, prev) => {
+    if (next.key === prev.key) return
 
-/** 시뮬레이션 Chip 조건이 해제되면 Drawer를 닫고 시뮬레이션을 정지한다. */
-watch(showSimulationChip, (visible) => {
-    if (!visible) {
+    // 활성 경로가 사라진 경우: 연관 오버레이 일괄 정리
+    if (!next.hasActiveRoute) {
+        // 경로정보 추가 모드 해제
+        if (routeInfoStore.isAddingRouteInfo.value) {
+            routeInfoEffect.cancelAdding()
+        }
+        // 시뮬레이션 Drawer 닫기 + 재생 정지
         isSimDrawerOpen.value = false
         if (!simulation.playbackState.value.isStopped) {
             simulationEffect.stopPlayback()
         }
+        // 경로정보 마커 팝업 닫기
+        routeInfoStore.selectedMarkerRouteInfo.value = null
     }
 })
 </script>
@@ -408,40 +425,39 @@ watch(showSimulationChip, (visible) => {
 <template>
     <div class="index-page">
         <MapShell :show-second-panel="sectionInfo.isOpen.value">
-            <template #sidebar="{ collapsed, toggleSidebar }">
-                <MapSidebar :collapsed="collapsed">
+            <template #sidebar="{ open: sidebarOpen, setSidebarOpen }">
+                <MapSidebar :open="sidebarOpen" @update:open="setSidebarOpen">
                     <template #header>
-                        <IconButton v-if="!collapsed" icon="i-lucide-map-pin" label="Runnable" />
-                        <div
-                            class="sidebar-header-actions"
-                            :class="{ 'sidebar-header-actions--collapsed': collapsed }"
-                        >
-                            <IconButton
-                                :icon="
-                                    collapsed
-                                        ? 'i-lucide-panel-left-open'
-                                        : 'i-lucide-panel-left-close'
-                                "
-                                @click="toggleSidebar"
-                            />
-                        </div>
+                        <UButton
+                            v-if="sidebarOpen"
+                            variant="ghost"
+                            icon="i-lucide-map-pin"
+                            label="Runnable"
+                            color="neutral"
+                            size="lg"
+                        />
+                        <UButton
+                            variant="ghost"
+                            :icon="sidebarOpen ? 'i-lucide-panel-left-close' : 'i-lucide-panel-left-open'"
+                            color="neutral"
+                            @click="toggleSidebar"
+                        />
                     </template>
 
                     <template #subheader>
                         <MapSidebarTabs
                             v-model="activeNav"
                             :items="navItems"
-                            :collapsed="collapsed"
                         />
                     </template>
 
                     <template #default>
                         <template v-if="activeNav === '목록'">
-                            <Textfield
+                            <UInput
                                 v-model="routeList.searchQuery"
                                 type="search"
                                 placeholder="경로 이름으로 검색"
-                                leading-icon="i-lucide-search"
+                                icon="i-lucide-search"
                             />
                             <RouteListPanel
                                 :routes="routeList.filteredRoutes"
@@ -465,11 +481,11 @@ watch(showSimulationChip, (visible) => {
                             @select-section="drawing.activeSectionIndex = $event.index"
                         />
                         <template v-else-if="activeNav === '탐색'">
-                            <Textfield
+                            <UInput
                                 v-model="explore.searchQuery.value"
                                 type="search"
                                 placeholder="경로 이름으로 검색"
-                                leading-icon="i-lucide-search"
+                                icon="i-lucide-search"
                                 @keyup.enter="explore.search(explore.searchQuery.value)"
                             />
                             <div class="explore-filter-row">
@@ -488,13 +504,7 @@ watch(showSimulationChip, (visible) => {
                                     :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
                                     @update:model-value="explore.filter.selectedDong.value = $event"
                                 />
-                                <ChipButton
-                                    label="초기화"
-                                    icon="i-lucide-rotate-ccw"
-                                    size="sm"
-                                    appearance="outlined"
-                                    @click="explore.filter.resetFilters"
-                                />
+                                <UButton variant="outline" color="neutral" size="sm" icon="i-lucide-rotate-ccw" label="초기화" @click="explore.filter.resetFilters" />
                             </div>
                             <ExplorePanel
                                 :routes="explore.filteredResults.value"
@@ -580,7 +590,7 @@ watch(showSimulationChip, (visible) => {
                     @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"
                 />
                 <RouteOverlayBottomBar
-                    v-if="activeNav === '그리기' || elevationChart.profile"
+                    v-if="overlayContext.showDrawingTools || (overlayContext.hasActiveRoute && elevationChart.profile)"
                     :elevation-chip-label="elevationChart.title"
                     :elevation-chip-active="elevationChart.open"
                     :elevation-profile="elevationChart.profile"
@@ -665,7 +675,6 @@ watch(showSimulationChip, (visible) => {
             @update:description="saveModal.routeForm.description = $event"
             @submit="saveModal.confirm"
         />
-        <NotificationModal />
         <AuthModal
             :open="authStore.isAuthModalOpen.value"
             :mode="authStore.authModalMode.value"

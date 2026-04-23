@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
 import Card from '~/shared/ui/cards/Card.vue'
-import IconButton from '~/shared/ui/buttons/IconButton.vue'
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 defineProps<{
@@ -38,9 +37,10 @@ defineEmits<{
                             <h3 class="route-list-panel__card-title">
                                 {{ route.title }}
                             </h3>
-                            <IconButton
+                            <UButton
+                                variant="outline"
+                                color="neutral"
                                 icon="i-lucide-download"
-                                appearance="secondary"
                                 label="경로 다운로드"
                                 @click.stop="$emit('download', route.routeId)"
                             />

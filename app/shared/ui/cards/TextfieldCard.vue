@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import Card from '~/shared/ui/cards/Card.vue'
-import IconButton from '~/shared/ui/buttons/IconButton.vue'
-import Textfield from '~/shared/ui/inputs/Textfield.vue'
 
 /** 카드 내 단일 입력 필드의 설정 타입 */
 type TextfieldCardField = {
@@ -101,21 +99,19 @@ defineEmits<{
         <template v-if="titleField" #title>
             <div class="textfield-card__title-row">
                 <div class="textfield-card__title-field">
-                    <Textfield
+                    <UInput
                         :model-value="titleField.modelValue ?? ''"
-                        :label="titleField.label"
                         :placeholder="titleField.placeholder"
                         :type="titleField.type ?? 'text'"
                         :name="titleField.name"
                         :autocomplete="titleField.autocomplete"
                         :inputmode="titleField.inputmode"
-                        :leading-icon="titleField.leadingIcon"
+                        :icon="titleField.leadingIcon"
                         :trailing-icon="titleField.trailingIcon"
-                        :supporting-text="titleField.supportingText"
                         :disabled="disabled || titleField.disabled"
                         :readonly="titleField.readonly"
                         :required="titleField.required"
-                        :invalid="titleField.invalid"
+                        :color="titleField.invalid ? 'error' : undefined"
                         :autofocus="titleField.autofocus"
                         @update:model-value="
                             $emit('update:field', {
@@ -127,9 +123,12 @@ defineEmits<{
                     />
                 </div>
 
-                <IconButton
+                <UButton
                     v-if="deletable"
+                    variant="ghost"
+                    color="neutral"
                     icon="i-lucide-trash-2"
+                    square
                     class="textfield-card__delete-button"
                     aria-label="휴지통"
                     title="휴지통"
@@ -175,22 +174,20 @@ defineEmits<{
                         </label>
                     </template>
 
-                    <Textfield
+                    <UInput
                         v-else
                         :model-value="field.modelValue ?? ''"
-                        :label="field.label"
                         :placeholder="field.placeholder"
                         :type="field.type ?? 'text'"
                         :name="field.name"
                         :autocomplete="field.autocomplete"
                         :inputmode="field.inputmode"
-                        :leading-icon="field.leadingIcon"
+                        :icon="field.leadingIcon"
                         :trailing-icon="field.trailingIcon"
-                        :supporting-text="field.supportingText"
                         :disabled="disabled || field.disabled"
                         :readonly="field.readonly"
                         :required="field.required"
-                        :invalid="field.invalid"
+                        :color="field.invalid ? 'error' : undefined"
                         :autofocus="field.autofocus"
                         @update:model-value="
                             $emit('update:field', {

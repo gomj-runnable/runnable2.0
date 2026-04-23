@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import type { SeoulMonthlyWeather } from '#shared/types/weather'
 import type { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 import WeatherLayerToggle from '~/entities/weather/ui/WeatherLayerToggle.vue'
 import WeatherDatePicker from '~/entities/weather/ui/WeatherDatePicker.vue'
 import WeatherLegend from '~/entities/weather/ui/WeatherLegend.vue'
 import ElevationLegend from '~/entities/weather/ui/ElevationLegend.vue'
-import PopupModal from '~/shared/ui/PopupModal.vue'
-
 const props = defineProps<{
     /** 현재 선택된 날짜 (YYYY-MM-DD) */
     selectedDate: string
@@ -102,15 +99,14 @@ const hourOptions = computed(() => {
     return [`${new Date().getHours().toString().padStart(2, '0')}:00`]
 })
 
-const isHourOpen = ref(false)
-
-/** 시간을 선택하고 드롭다운을 닫는다 */
-const selectHour = (hour: string) => {
-    // 선택한 시간을 부모에 전달
-    emit('update:selectedHour', hour)
-    // 시간 드롭다운 닫기
-    isHourOpen.value = false
-}
+/** 시간 드롭다운 메뉴 아이템 목록 */
+const hourMenuItems = computed(() => [
+    hourOptions.value.map(hour => ({
+        label: hour,
+        active: props.selectedHour === hour,
+        onSelect: () => emit('update:selectedHour', hour)
+    }))
+])
 
 /** 시간 표시 (HH시) */
 const hourLabel = computed(() => {
@@ -128,30 +124,20 @@ const hourLabel = computed(() => {
                     @update:model-value="handleLayerChange"
                 />
                 <div class="weather-overlay__datetime-row">
-                    <div class="weather-overlay__calendar-wrap">
-                        <ChipButton
+                    <UPopover v-model:open="isCalendarOpen" :overlay="false">
+                        <UButton
                             id="popup-weather-calendar-trigger"
                             :label="dateLabel"
                             icon="i-lucide-calendar"
                             size="sm"
-                            appearance="elevated"
-                            :active="isCalendarOpen"
+                            :variant="isCalendarOpen ? 'solid' : 'outline'"
+                            :color="isCalendarOpen ? 'primary' : 'neutral'"
                             :class="{ 'is-no-data': !hasDataForSelectedDate && !isLoading }"
-                            @click="isCalendarOpen = !isCalendarOpen"
                         />
-                        <PopupModal
-                            :open="isCalendarOpen"
-                            popup-id="popup-weather-calendar"
-                            aria-labelledby="popup-weather-calendar-title"
-                            panel-class="weather-overlay__calendar-modal-panel"
-                            @update:open="isCalendarOpen = $event"
-                        >
-                            <section class="weather-overlay__calendar-modal">
-                                <header class="weather-overlay__calendar-modal-header">
-                                    <h2
-                                        id="popup-weather-calendar-title"
-                                        class="weather-overlay__calendar-modal-title"
-                                    >
+                        <template #content>
+                            <section class="weather-overlay__calendar-popover">
+                                <header class="weather-overlay__calendar-popover-header">
+                                    <h2 class="weather-overlay__calendar-popover-title">
                                         날짜 선택
                                     </h2>
                                     <button
@@ -171,29 +157,17 @@ const hourLabel = computed(() => {
                                     @update:month="emit('update:selectedMonth', $event)"
                                 />
                             </section>
-                        </PopupModal>
-                    </div>
-                    <div class="weather-overlay__hour-wrap">
-                        <ChipButton
+                        </template>
+                    </UPopover>
+                    <UDropdownMenu :items="hourMenuItems">
+                        <UButton
                             :label="hourLabel"
                             icon="i-lucide-clock-3"
                             size="sm"
-                            appearance="elevated"
-                            :active="isHourOpen"
-                            @click="isHourOpen = !isHourOpen"
+                            variant="outline"
+                            color="neutral"
                         />
-                        <div v-if="isHourOpen" class="weather-overlay__hour-dropdown">
-                            <button
-                                v-for="hour in hourOptions"
-                                :key="hour"
-                                class="weather-overlay__hour-option"
-                                :class="{ 'is-active': selectedHour === hour }"
-                                @click="selectHour(hour)"
-                            >
-                                {{ hour }}
-                            </button>
-                        </div>
-                    </div>
+                    </UDropdownMenu>
                     <span v-if="isLoading" class="i-lucide-loader-2 weather-overlay__spinner" />
                 </div>
             </div>

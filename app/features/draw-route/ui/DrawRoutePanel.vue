@@ -2,7 +2,6 @@
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
 import type { PoiDraftInput } from '#shared/types/facility'
 import TextfieldCard from '~/shared/ui/cards/TextfieldCard.vue'
-import Button from '~/shared/ui/buttons/Button.vue'
 
 defineProps<{
     /** 경로 구간별 속성 목록 (제목·요약·설명) */
@@ -43,18 +42,22 @@ const POI_ICON: Record<string, string> = {
         <div class="map-section-label">경로 그리기</div>
 
         <div class="draw-route-panel__actions">
-            <Button
+            <UButton
                 icon="i-lucide-rotate-ccw"
-                appearance="secondary"
-                role="cancel"
+                variant="outline"
+                color="neutral"
                 block
+                label="초기화"
                 @click="$emit('reset')"
-            >
-                초기화
-            </Button>
-            <Button icon="i-lucide-save" appearance="tinted" block @click="$emit('save')">
-                저장
-            </Button>
+            />
+            <UButton
+                icon="i-lucide-save"
+                variant="subtle"
+                color="primary"
+                block
+                label="저장"
+                @click="$emit('save')"
+            />
         </div>
 
         <div class="map-section-label">구간 목록</div>

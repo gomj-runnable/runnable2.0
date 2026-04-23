@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
-import HoverTooltip from '~/shared/ui/HoverTooltip.vue'
 import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
 
 const props = defineProps<{
@@ -18,23 +16,21 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
 
 <template>
     <div class="gradient-toggle">
-        <ChipButton
+        <UButton
             label="경사도"
             icon="i-lucide-trending-up"
             size="sm"
-            appearance="elevated"
-            :active="active"
+            :variant="active ? 'solid' : 'outline'"
+            :color="active ? 'primary' : 'neutral'"
             @click="$emit('toggle')"
         />
-        <HoverTooltip v-if="active && difficultyLabel" placement="top" :offset="8">
-            <template #trigger>
-                <span
-                    class="gradient-toggle__badge"
-                    :style="{ backgroundColor: difficultyColor ?? undefined }"
-                >
-                    {{ difficultyLabel }}
-                </span>
-            </template>
+        <UTooltip v-if="active && difficultyLabel">
+            <span
+                class="gradient-toggle__badge"
+                :style="{ backgroundColor: difficultyColor ?? undefined }"
+            >
+                {{ difficultyLabel }}
+            </span>
             <template #content>
                 <p class="gradient-toggle__tooltip-title">난이도 판정 기준</p>
                 <table class="gradient-toggle__tooltip-table">
@@ -95,7 +91,7 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
                 </table>
                 <p class="gradient-toggle__tooltip-note">세 기준 중 가장 높은 등급 적용</p>
             </template>
-        </HoverTooltip>
+        </UTooltip>
     </div>
 </template>
 

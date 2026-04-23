@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 */
@@ -25,14 +24,14 @@ const handleClick = (layer: WeatherLayerEnum) => {
 
 <template>
     <div class="weather-layer-toggle">
-        <ChipButton
+        <UButton
             v-for="layer in layers"
             :key="layer.value.key"
             :label="layer.label"
             :icon="layer.icon"
             size="sm"
-            appearance="elevated"
-            :active="modelValue?.equals(layer.value) ?? false"
+            :variant="(modelValue?.equals(layer.value) ?? false) ? 'solid' : 'outline'"
+            :color="(modelValue?.equals(layer.value) ?? false) ? 'primary' : 'neutral'"
             @click="handleClick(layer.value)"
         />
     </div>

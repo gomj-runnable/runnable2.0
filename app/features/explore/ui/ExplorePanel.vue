@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
 import Card from '~/shared/ui/cards/Card.vue'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 defineProps<{
@@ -27,12 +26,12 @@ defineEmits<{
     <div class="explore-panel">
         <div class="explore-panel__header">
             <div class="map-section-label">공개 경로</div>
-            <ChipButton
+            <UButton
                 label="추천"
                 icon="i-lucide-cloud-sun"
                 size="sm"
-                appearance="elevated"
-                :active="recommendActive"
+                :variant="recommendActive ? 'solid' : 'outline'"
+                :color="recommendActive ? 'primary' : 'neutral'"
                 @click="$emit('recommend')"
             />
         </div>

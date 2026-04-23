@@ -1,11 +1,8 @@
 /**
  * 앱 전역 알림 상태를 관리하는 store composable.
- * 어디서든 `useNotificationStore().notify()`를 호출하면 NotificationModal이 표시된다.
- * alert() 대신 사용하여 일관된 UI를 제공한다.
+ * 어디서든 `useNotificationStore().notify()`를 호출하면 toast 알림이 표시된다.
  */
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
-
-export type NotificationTone = NotificationToneEnum
 
 export interface NotificationOptions {
     /** 알림 제목 */
@@ -17,26 +14,18 @@ export interface NotificationOptions {
 }
 
 export const useNotificationStore = () => {
-    const isOpen = useState('notification-open', () => false)
-    const title = useState('notification-title', () => '')
-    const message = useState('notification-message', () => '')
-    const tone = useState<NotificationToneEnum>(
-        'notification-tone',
-        () => NotificationToneEnum.INFO
-    )
+    const toast = useToast()
 
-    /** 알림 모달을 표시한다. */
+    /** toast 알림을 표시한다. */
     const notify = (options: NotificationOptions) => {
-        title.value = options.title
-        message.value = options.message
-        tone.value = options.tone ?? NotificationToneEnum.INFO
-        isOpen.value = true
+        const tone = options.tone ?? NotificationToneEnum.INFO
+        toast.add({
+            title: options.title,
+            description: options.message,
+            icon: tone.icon,
+            color: tone.color as 'info' | 'success' | 'error' | 'warning' | 'neutral'
+        })
     }
 
-    /** 알림 모달을 닫는다. */
-    const close = () => {
-        isOpen.value = false
-    }
-
-    return { isOpen, title, message, tone, notify, close }
+    return { notify }
 }
