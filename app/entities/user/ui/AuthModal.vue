@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import Button from '~/shared/ui/buttons/Button.vue'
-import Textfield from '~/shared/ui/inputs/Textfield.vue'
-import PopupModal from '~/shared/ui/PopupModal.vue'
 import { useAuthSideeffect } from '~/entities/user/api/useAuthSideeffect'
 
 const props = defineProps<{
@@ -83,31 +80,23 @@ const toggleMode = () => {
 </script>
 
 <template>
-    <PopupModal
+    <UModal
         :open="open"
-        popup-id="popup-auth"
-        aria-labelledby="popup-title-auth"
+        :title="mode === 'login' ? '로그인' : '회원가입'"
+        :description="mode === 'login' ? '계정에 로그인하세요' : '새 계정을 만드세요'"
+        :ui="{ footer: 'justify-end' }"
         @update:open="$emit('update:open', $event)"
     >
-        <div class="auth-modal">
-            <div class="auth-modal__header">
-                <div class="auth-modal__eyebrow">
-                    {{ mode === 'login' ? '로그인' : '회원가입' }}
-                </div>
-                <h2 id="popup-title-auth" class="auth-modal__title">
-                    {{ mode === 'login' ? '계정에 로그인하세요' : '새 계정을 만드세요' }}
-                </h2>
-            </div>
-
-            <form class="auth-modal__fields" @submit.prevent="handleSubmit">
+        <template #body>
+            <div class="auth-modal__fields">
                 <label v-if="mode === 'signup'" class="auth-modal__field map-form-field">
                     <span class="map-form-label">이름</span>
-                    <Textfield v-model="name" placeholder="사용자 이름" autocomplete="name" />
+                    <UInput v-model="name" placeholder="사용자 이름" autocomplete="name" />
                 </label>
 
                 <label class="auth-modal__field map-form-field">
                     <span class="map-form-label">이메일</span>
-                    <Textfield
+                    <UInput
                         v-model="email"
                         type="email"
                         placeholder="email@example.com"
@@ -117,7 +106,7 @@ const toggleMode = () => {
 
                 <label class="auth-modal__field map-form-field">
                     <span class="map-form-label">비밀번호</span>
-                    <Textfield
+                    <UInput
                         v-model="password"
                         type="password"
                         placeholder="비밀번호"
@@ -129,36 +118,34 @@ const toggleMode = () => {
                     <UIcon name="i-lucide-alert-circle" />
                     {{ errorMessage }}
                 </div>
-
-                <div class="auth-modal__actions">
-                    <Button
-                        appearance="secondary"
-                        role="cancel"
-                        class="auth-modal__button"
-                        label="취소"
-                        @click="$emit('update:open', false)"
-                    />
-                    <Button
-                        appearance="prominent"
-                        class="auth-modal__button auth-modal__button--primary"
-                        :label="mode === 'login' ? '로그인' : '가입'"
-                        :disabled="isLoading"
-                        @click="handleSubmit"
-                    />
-                </div>
-            </form>
-
-            <div class="auth-modal__footer">
-                <button type="button" class="auth-modal__toggle" @click="toggleMode">
-                    {{
-                        mode === 'login'
-                            ? '계정이 없으신가요? 회원가입'
-                            : '이미 계정이 있으신가요? 로그인'
-                    }}
-                </button>
             </div>
-        </div>
-    </PopupModal>
+        </template>
+
+        <template #footer="{ close }">
+            <button type="button" class="auth-modal__toggle" @click="toggleMode">
+                {{
+                    mode === 'login'
+                        ? '계정이 없으신가요? 회원가입'
+                        : '이미 계정이 있으신가요? 로그인'
+                }}
+            </button>
+            <div class="auth-modal__actions">
+                <UButton
+                    variant="outline"
+                    color="neutral"
+                    label="취소"
+                    @click="close"
+                />
+                <UButton
+                    variant="solid"
+                    color="primary"
+                    :label="mode === 'login' ? '로그인' : '가입'"
+                    :disabled="isLoading"
+                    @click="handleSubmit"
+                />
+            </div>
+        </template>
+    </UModal>
 </template>
 
 <style scoped src="./AuthModal.css"></style>

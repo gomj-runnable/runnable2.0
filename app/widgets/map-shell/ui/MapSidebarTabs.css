@@ -4,17 +4,3 @@
     gap: var(--gap-section-2xs);
     padding: var(--gap-section-sm) var(--gap-section-md);
 }
-
-.map-sidebar-tabs.is-collapsed {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0;
-}
-
-.map-sidebar-tabs.is-collapsed :deep(.app-button) {
-    --map-button-width: var(--size-input-height);
-    --map-button-height: var(--size-input-height);
-    --map-button-padding: 0;
-    align-self: center;
-    justify-content: center;
-}

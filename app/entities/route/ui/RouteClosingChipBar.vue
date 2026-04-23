@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { RouteClosingMode } from '~/entities/route/model/useRouteClosingStore'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 
 defineProps<{
     /** 현재 활성화된 경로 닫기 모드 (RouteClosingModeEnum | null) */
@@ -18,12 +17,12 @@ defineEmits<{
 
 <template>
     <div class="route-closing-chip-bar">
-        <ChipButton
+        <UButton
             label="도착지 연결"
             icon="i-lucide-rotate-ccw"
-            appearance="elevated"
             size="md"
-            :active="closingMode?.isLoopClose"
+            :variant="closingMode?.isLoopClose ? 'solid' : 'outline'"
+            :color="closingMode?.isLoopClose ? 'primary' : 'neutral'"
             :disabled="disabled"
             @click="
                 $emit(
@@ -32,12 +31,12 @@ defineEmits<{
                 )
             "
         />
-        <ChipButton
+        <UButton
             label="왕복 코스"
             icon="i-lucide-arrow-left-right"
-            appearance="elevated"
             size="md"
-            :active="closingMode?.isRoundTrip"
+            :variant="closingMode?.isRoundTrip ? 'solid' : 'outline'"
+            :color="closingMode?.isRoundTrip ? 'primary' : 'neutral'"
             :disabled="disabled"
             @click="
                 $emit(

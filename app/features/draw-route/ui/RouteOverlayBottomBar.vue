@@ -2,7 +2,6 @@
 import type { RouteClosingMode } from '~/entities/route/model/useRouteClosingStore'
 import type { RouteElevationProfile } from '#shared/types/route'
 import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 import RouteClosingChipBar from '~/entities/route/ui/RouteClosingChipBar.vue'
 import GradientToggle from '~/entities/gradient/ui/GradientToggle.vue'
 
@@ -40,13 +39,13 @@ defineEmits<{
 
 <template>
     <div class="route-overlay-chip-bar">
-        <ChipButton
+        <UButton
             v-if="elevationProfile"
             :label="elevationChipLabel"
             icon="i-lucide-chart-line"
-            appearance="elevated"
             size="md"
-            :active="elevationChipActive"
+            :variant="elevationChipActive ? 'solid' : 'outline'"
+            :color="elevationChipActive ? 'primary' : 'neutral'"
             @click="$emit('toggle-elevation')"
         />
         <RouteClosingChipBar

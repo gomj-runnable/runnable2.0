@@ -4,18 +4,14 @@
  * `useNotificationStore`의 상태를 구독하여 알림을 표시한다.
  * 페이지 루트에 한 번만 마운트하면 어디서든 `notify()`로 호출 가능하다.
  */
-import Button from '~/shared/ui/buttons/Button.vue'
-import PopupModal from '~/shared/ui/PopupModal.vue'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 
 const notification = useNotificationStore()
 </script>
 
 <template>
-    <PopupModal
+    <UModal
         :open="notification.isOpen.value"
-        popup-id="popup-notification"
-        aria-labelledby="popup-title-notification"
         @update:open="notification.close()"
     >
         <section class="notification-modal" :class="`is-${notification.tone.value}`">
@@ -27,10 +23,10 @@ const notification = useNotificationStore()
             </div>
             <p class="notification-modal__message">{{ notification.message.value }}</p>
             <div class="notification-modal__actions">
-                <Button appearance="prominent" label="확인" @click="notification.close()" />
+                <UButton variant="solid" color="primary" label="확인" @click="notification.close()" />
             </div>
         </section>
-    </PopupModal>
+    </UModal>
 </template>
 
 <style scoped src="./NotificationModal.css"></style>

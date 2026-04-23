@@ -175,6 +175,20 @@ docker compose -f "$COMPOSE_FILE" build $NO_CACHE "$APP_SERVICE"
 log "이미지 빌드 완료"
 
 # =============================================================================
+# Docker Hub Push
+# =============================================================================
+section "Docker Hub Push"
+
+DOCKER_REPO="myeongjunkim0615/runnable"
+docker tag "${IMAGE_NAME}:latest" "${DOCKER_REPO}:${TIMESTAMP}"
+docker tag "${IMAGE_NAME}:latest" "${DOCKER_REPO}:latest"
+
+log "Push 시작: ${DOCKER_REPO}:${TIMESTAMP}"
+docker push "${DOCKER_REPO}:${TIMESTAMP}"
+docker push "${DOCKER_REPO}:latest"
+log "Docker Hub Push 완료"
+
+# =============================================================================
 # DB 컨테이너 먼저 기동 (신규 배포 시)
 # =============================================================================
 section "서비스 시작"

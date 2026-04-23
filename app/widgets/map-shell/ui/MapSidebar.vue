@@ -1,58 +1,81 @@
 <script setup lang="ts">
-import IconButton from '~/shared/ui/buttons/IconButton.vue'
-
 /**
- * MapSidebar — Compound 패턴
+ * MapSidebar — USidebar 기반 사이드바
  *
- * Flat 사용 (간단한 경우):
- *   <MapSidebar logo-icon="i-lucide-map" logo-label="Runnable" />
- *
- * Compound 사용 (커스텀이 필요한 경우):
- *   <MapSidebar>
- *     <template #header>...</template>
- *     <template #default>...</template>
- *     <template #footer>...</template>
- *   </MapSidebar>
+ * Nuxt UI의 USidebar를 래핑하여 기존 슬롯 구조(header, subheader, default, footer)를 유지한다.
+ * Close/Toggle 아이콘은 header 슬롯 내부에 위치한다.
  */
-withDefaults(
-    defineProps<{
-        /** 헤더에 표시할 로고 아이콘 클래스 */
-        logoIcon?: string
-        /** 헤더에 표시할 로고 레이블 텍스트 */
-        logoLabel?: string
-        /** 사이드바 접힘 상태 여부 */
-        collapsed?: boolean
-    }>(),
-    {
-        logoIcon: undefined,
-        logoLabel: undefined,
-        collapsed: false
-    }
-)
+const open = defineModel<boolean>('open', { default: true })
 </script>
 
 <template>
-    <nav class="map-sidebar" role="navigation" :class="{ 'is-collapsed': collapsed }">
-        <header class="map-sidebar__header">
-            <slot name="header">
-                <IconButton :icon="logoIcon" :label="logoLabel" />
-            </slot>
-        </header>
+    <USidebar
+        v-model:open="open"
+        collapsible="offcanvas"
+        side="left"
+        :ui="{
+            root: 'map-sidebar-root',
+            header: 'map-sidebar-header',
+            body: 'map-sidebar-body',
+            footer: 'map-sidebar-footer'
+        }"
+    >
+        <template #header>
+            <slot name="header" />
+        </template>
 
-        <div v-if="$slots.subheader" class="map-sidebar__subheader">
-            <slot name="subheader" />
-        </div>
-
-        <div class="map-sidebar__content" :class="{ 'is-collapsed': collapsed }">
-            <div class="map-sidebar__body">
+        <template #default>
+            <div v-if="$slots.subheader" class="map-sidebar-subheader">
+                <slot name="subheader" />
+            </div>
+            <div class="map-sidebar-content">
                 <slot />
             </div>
-        </div>
+        </template>
 
-        <footer class="map-sidebar__footer" role="toolbar" :class="{ 'is-collapsed': collapsed }">
+        <template #footer>
             <slot name="footer" />
-        </footer>
-    </nav>
+        </template>
+    </USidebar>
 </template>
 
-<style scoped src="./MapSidebar.css"></style>
+<style scoped>
+.map-sidebar-root {
+    --sidebar-width: var(--size-sidebar-expanded, 320px);
+    height: 100%;
+}
+
+.map-sidebar-header {
+    padding: var(--gap-7, 12px) var(--gap-section-md, 16px) var(--gap-section-sm, 8px);
+    min-height: 56px;
+}
+
+.map-sidebar-subheader {
+    flex-shrink: 0;
+    padding-bottom: 0;
+}
+
+.map-sidebar-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--gap-4, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section-2xs, 4px);
+}
+
+.map-sidebar-content::-webkit-scrollbar {
+    width: 3px;
+}
+
+.map-sidebar-content::-webkit-scrollbar-thumb {
+    background: var(--sidebar-border, var(--color-border-default));
+    border-radius: 2px;
+}
+
+.map-sidebar-footer {
+    border-top: 1px solid var(--sidebar-border, var(--color-border-default));
+}
+</style>

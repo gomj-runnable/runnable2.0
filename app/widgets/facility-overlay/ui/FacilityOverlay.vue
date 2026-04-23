@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FacilityType } from '#shared/types/facility'
-import ChipButton from '~/shared/ui/buttons/ChipButton.vue'
 import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
@@ -50,27 +49,24 @@ const hasSearchableActive = computed(() =>
 <template>
     <div class="facility-overlay">
         <div class="facility-overlay__chips">
-            <ChipButton
+            <UButton
                 v-if="hasSearchableActive"
                 label="현재 위치 검색"
                 icon="i-lucide-locate"
                 size="sm"
-                appearance="tinted"
+                variant="subtle"
+                color="primary"
                 :disabled="isSearching"
                 @click="$emit('searchNearby')"
             />
-            <ChipButton
+            <UButton
                 v-for="layer in FACILITY_LAYERS"
                 :key="layer.type"
                 :label="layer.label"
                 :icon="layer.icon"
                 size="sm"
-                appearance="elevated"
-                :active="
-                    layer.type === 'sidewalk'
-                        ? sidewalk.isActive.value
-                        : activeTypes.has(layer.type)
-                "
+                :variant="(layer.type === 'sidewalk' ? sidewalk.isActive.value : activeTypes.has(layer.type)) ? 'solid' : 'outline'"
+                :color="(layer.type === 'sidewalk' ? sidewalk.isActive.value : activeTypes.has(layer.type)) ? 'primary' : 'neutral'"
                 @click="
                     layer.type === 'sidewalk'
                         ? (sidewalk.isActive.value = !sidewalk.isActive.value)
@@ -83,51 +79,51 @@ const hasSearchableActive = computed(() =>
                         :style="{ backgroundColor: layer.color }"
                     />
                 </template>
-            </ChipButton>
+            </UButton>
         </div>
         <div class="facility-overlay__chips">
-            <ChipButton
+            <UButton
                 label="지역 고도"
                 icon="i-lucide-mountain"
                 size="sm"
-                appearance="elevated"
-                :active="elevation.isElevationVisible.value"
+                :variant="elevation.isElevationVisible.value ? 'solid' : 'outline'"
+                :color="elevation.isElevationVisible.value ? 'primary' : 'neutral'"
                 @click="elevation.toggleElevation"
             />
-            <ChipButton
+            <UButton
                 label="시군구"
                 icon="i-lucide-map"
                 size="sm"
-                appearance="elevated"
-                :active="boundary.isGuActive.value"
+                :variant="boundary.isGuActive.value ? 'solid' : 'outline'"
+                :color="boundary.isGuActive.value ? 'primary' : 'neutral'"
                 @click="boundary.toggleGu"
             />
-            <ChipButton
+            <UButton
                 label="읍면동"
                 icon="i-lucide-map-pin"
                 size="sm"
-                appearance="elevated"
-                :active="boundary.isDongActive.value"
+                :variant="boundary.isDongActive.value ? 'solid' : 'outline'"
+                :color="boundary.isDongActive.value ? 'primary' : 'neutral'"
                 @click="boundary.toggleDong"
             />
         </div>
         <div class="facility-overlay__chips">
-            <ChipButton
+            <UButton
                 v-if="showSimulation"
                 label="시뮬레이션"
                 icon="i-lucide-play-circle"
                 size="sm"
-                appearance="elevated"
-                :active="simulationActive"
+                :variant="simulationActive ? 'solid' : 'outline'"
+                :color="simulationActive ? 'primary' : 'neutral'"
                 @click="$emit('toggleSimulation')"
             />
-            <ChipButton
+            <UButton
                 v-if="showRouteInfo"
                 label="경로정보"
                 icon="i-lucide-message-circle"
                 size="sm"
-                appearance="elevated"
-                :active="routeInfoStore.isAddingRouteInfo.value"
+                :variant="routeInfoStore.isAddingRouteInfo.value ? 'solid' : 'outline'"
+                :color="routeInfoStore.isAddingRouteInfo.value ? 'primary' : 'neutral'"
                 @click="routeInfoStore.toggleAddingMode()"
             />
         </div>

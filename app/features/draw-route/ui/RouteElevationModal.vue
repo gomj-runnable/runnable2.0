@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import type { RouteElevationProfile } from '#shared/types/route'
-import Button from '~/shared/ui/buttons/Button.vue'
-import PopupModal from '~/shared/ui/PopupModal.vue'
 import { createDistanceTicks } from '~/entities/route/lib/useRouteElevationProfile'
 import { calcChartGeometry } from '~/features/elevation-layer/lib/useElevationChartAction'
 import { formatDistance } from '~/shared/lib/useFormatUtils'
@@ -75,29 +73,14 @@ const chartGeometry = computed(() => {
 </script>
 
 <template>
-    <PopupModal
+    <UModal
         :open="open && !!profile"
-        popup-id="popup-route-elevation"
-        aria-labelledby="popup-title-route-elevation"
-        position="bottom"
-        panel-class="route-elevation-modal__popup-panel"
+        :title="title"
+        description="Elevation Profile"
         @update:open="$emit('update:open', $event)"
     >
-        <section v-if="profile" class="route-elevation-modal route-elevation-modal__panel">
-            <header class="route-elevation-modal__header">
-                <div>
-                    <p class="route-elevation-modal__eyebrow">Elevation Profile</p>
-                    <h2 id="popup-title-route-elevation" class="route-elevation-modal__title">
-                        {{ title }}
-                    </h2>
-                </div>
-                <Button
-                    appearance="secondary"
-                    size="sm"
-                    icon="i-lucide-x"
-                    @click="$emit('update:open', false)"
-                />
-            </header>
+        <template #body>
+            <div v-if="profile" class="route-elevation-modal">
 
             <div class="route-elevation-modal__summary">
                 <article
@@ -225,8 +208,10 @@ const chartGeometry = computed(() => {
                 <span>섹션별 선 색상은 지도 구간 색상과 동일합니다.</span>
                 <span>500m 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
             </footer>
-        </section>
-    </PopupModal>
+
+            </div>
+        </template>
+    </UModal>
 </template>
 
 <style scoped src="./RouteElevationModal.css"></style>

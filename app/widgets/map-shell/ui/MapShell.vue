@@ -2,15 +2,8 @@
 /**
  * MapShell — 사이드바 + 뷰어 전체 Shell
  *
- * Flat 사용:
- *   <MapShell> <div id="map" /> </MapShell>
- *
- * Compound 사용:
- *   <MapShell>
- *     <template #sidebar><MapSidebar>...</MapSidebar></template>
- *     <template #default><div id="map" /></template>
- *     <template #overlay><MapToolbar /></template>
- *   </MapShell>
+ * USidebar의 v-model:open을 통해 접힘 상태를 관리한다.
+ * SecondPanel이 열릴 때 사이드바를 자동으로 축소한다.
  */
 const props = withDefaults(
     defineProps<{
@@ -25,35 +18,38 @@ const props = withDefaults(
     }
 )
 
-const isSidebarCollapsed = ref(false)
+const isSidebarOpen = ref(true)
 
 /** SecondPanel이 열릴 때 사이드바를 축소하여 SecondPanel을 강조한다 */
 watch(
     () => props.showSecondPanel,
     (open) => {
-        if (open) isSidebarCollapsed.value = true
+        if (open) isSidebarOpen.value = false
     }
 )
 
 /** 사이드바 접힘 상태를 토글한다 */
 const toggleSidebar = () => {
-    // hideSidebar가 true이면 토글 불가
     if (props.hideSidebar) return
+    isSidebarOpen.value = !isSidebarOpen.value
+}
 
-    isSidebarCollapsed.value = !isSidebarCollapsed.value
+/** 사이드바 열림 상태를 직접 설정한다 */
+const setSidebarOpen = (value: boolean) => {
+    if (props.hideSidebar) return
+    isSidebarOpen.value = value
 }
 </script>
 
 <template>
     <div class="map-shell">
-        <aside
+        <slot
             v-if="!props.hideSidebar"
-            class="map-shell__sidebar"
-            :class="{ 'is-collapsed': isSidebarCollapsed }"
-            aria-label="메인 사이드바"
-        >
-            <slot name="sidebar" :collapsed="isSidebarCollapsed" :toggle-sidebar="toggleSidebar" />
-        </aside>
+            name="sidebar"
+            :open="isSidebarOpen"
+            :toggle-sidebar="toggleSidebar"
+            :set-sidebar-open="setSidebarOpen"
+        />
 
         <aside
             v-if="props.showSecondPanel && $slots.secondPanel"

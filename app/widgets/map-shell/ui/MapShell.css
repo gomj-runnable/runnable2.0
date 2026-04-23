@@ -8,28 +8,6 @@
     min-width: 0;
 }
 
-.map-shell__sidebar {
-    position: relative;
-    display: flex;
-    align-self: stretch;
-    z-index: var(--z-panel);
-    width: var(--size-sidebar-expanded);
-    height: 100%;
-    min-height: 0;
-    flex-shrink: 0;
-    overflow: hidden;
-    will-change: width;
-    transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.map-shell__sidebar > * {
-    flex: 1 1 auto;
-    min-height: 0;
-}
-
-.map-shell__sidebar.is-collapsed {
-    width: var(--size-sidebar-collapsed);
-}
 
 .map-shell__second-panel {
     position: relative;

@@ -278,6 +278,7 @@
 - `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
 - `create-bottom-drawer` : `BottomDrawer` 래퍼 컴포넌트를 감싸 하단 Drawer UI를 구현하기 위한 프로젝트 전용 스킬
 - `create-session-doc` : 현재 세션에서 수행한 작업을 `public/docs/session/` 하위에 날짜별 markdown으로 기록하기 위한 프로젝트 전용 스킬
+- `sync-overlay-visibility` : 경로 카드와 연관 오버레이 UI(시뮬레이션·경로정보·고도·경사도)의 가시성을 `MapOverlayContextEnum` 기반으로 동기화하기 위한 프로젝트 전용 스킬
 
 ## 현재 .claude Command
 

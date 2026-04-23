@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import Button from '~/shared/ui/buttons/Button.vue'
-import Textfield from '~/shared/ui/inputs/Textfield.vue'
-import PopupModal from '~/shared/ui/PopupModal.vue'
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 defineProps<{
@@ -30,24 +27,18 @@ defineEmits<{
 </script>
 
 <template>
-    <PopupModal
+    <UModal
         :open="open"
-        popup-id="popup-route-save"
-        aria-labelledby="popup-title-route-save"
+        title="경로 저장"
+        description="경로 정보를 입력하세요"
+        :ui="{ footer: 'justify-end' }"
         @update:open="$emit('update:open', $event)"
     >
-        <div class="route-save-modal">
-            <div class="route-save-modal__header">
-                <div class="route-save-modal__eyebrow">경로 저장</div>
-                <h2 id="popup-title-route-save" class="route-save-modal__title">
-                    경로 정보를 입력하세요
-                </h2>
-            </div>
-
+        <template #body>
             <div class="route-save-modal__fields">
                 <label class="route-save-modal__field map-form-field">
                     <span class="map-form-label">제목</span>
-                    <Textfield
+                    <UInput
                         :model-value="title"
                         placeholder="경로 제목"
                         @update:model-value="$emit('update:title', $event)"
@@ -72,7 +63,7 @@ defineEmits<{
 
                 <label class="route-save-modal__field map-form-field">
                     <span class="map-form-label">거리</span>
-                    <Textfield
+                    <UInput
                         :model-value="formatDistance(distance)"
                         placeholder="0.00"
                         disabled
@@ -86,24 +77,23 @@ defineEmits<{
                     </div>
                 </div>
             </div>
+        </template>
 
-            <div class="route-save-modal__actions">
-                <Button
-                    appearance="secondary"
-                    role="cancel"
-                    class="route-save-modal__button"
-                    label="취소"
-                    @click="$emit('update:open', false)"
-                />
-                <Button
-                    appearance="prominent"
-                    class="route-save-modal__button route-save-modal__button--primary"
-                    label="저장"
-                    @click="$emit('submit')"
-                />
-            </div>
-        </div>
-    </PopupModal>
+        <template #footer="{ close }">
+            <UButton
+                variant="outline"
+                color="neutral"
+                label="취소"
+                @click="close"
+            />
+            <UButton
+                variant="solid"
+                color="primary"
+                label="저장"
+                @click="$emit('submit')"
+            />
+        </template>
+    </UModal>
 </template>
 
 <style scoped src="./RouteSaveModal.css"></style>
