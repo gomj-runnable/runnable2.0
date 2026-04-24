@@ -425,7 +425,7 @@ watch(overlayContext, (next, prev) => {
 <template>
     <div class="index-page">
         <MapShell :show-second-panel="sectionInfo.isOpen.value">
-            <template #sidebar="{ open: sidebarOpen, setSidebarOpen }">
+            <template #sidebar="{ open: sidebarOpen, setSidebarOpen, toggleSidebar }">
                 <MapSidebar :open="sidebarOpen" @update:open="setSidebarOpen">
                     <template #header>
                         <UButton

@@ -1,2 +1,0 @@
-// ui
-export { default as NotificationModal } from './ui/NotificationModal.vue'
