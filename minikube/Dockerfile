@@ -20,7 +20,6 @@ WORKDIR /app
 
 COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/lib ./lib
-COPY --from=builder /app/static ./static
 
 ENV NODE_ENV=production
 ENV PORT=3000
