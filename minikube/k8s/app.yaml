@@ -23,8 +23,8 @@ spec:
         - name: ghcr-pull-secret
       containers:
         - name: app
-          image: myeongjunkim0615/runnable:latest
-          imagePullPolicy: Always
+          image: runnable-app:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           envFrom:

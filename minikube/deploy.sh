@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ENV="${1:-dev}"
+if [[ "$ENV" != "dev" && "$ENV" != "prod" ]]; then
+  echo "사용법: bash deploy.sh [dev|prod]  (기본값: dev)"
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$SCRIPT_DIR/k8s"
+
+echo "==> 환경: $ENV"
 
 echo "==> minikube 상태 확인"
 minikube status || minikube start
@@ -19,8 +27,8 @@ docker build -t image-watcher:latest -f "$SCRIPT_DIR/webhook/Dockerfile" "$SCRIP
 
 echo "==> Kubernetes 리소스 배포"
 kubectl apply -f "$K8S_DIR/namespace.yaml"
-kubectl apply -f "$K8S_DIR/secret.yaml"
-kubectl apply -f "$K8S_DIR/configmap.yaml"
+kubectl apply -f "$K8S_DIR/config/secret.${ENV}.yaml"
+kubectl apply -f "$K8S_DIR/config/configmap.${ENV}.yaml"
 kubectl apply -f "$K8S_DIR/postgres.yaml"
 
 # ghcr.io private 이미지 pull용 Secret 생성

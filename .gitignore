@@ -32,3 +32,6 @@ public/uploads/
 
 # README.md
 README.*.md
+
+# K8s prod secrets/config
+minikube/k8s/config/*prod*

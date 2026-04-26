@@ -4,9 +4,9 @@ metadata:
   name: runnable-config
   namespace: runnable
 data:
-  NODE_ENV: production
+  NODE_ENV: development
   PORT: "3000"
   TZ: Asia/Seoul
-  BETTER_AUTH_URL: http://localhost:3000
+  BETTER_AUTH_URL: https://macmini.tail070e2e.ts.net/
   USE_DATABASE_MODE: POSTGRES
-  ROUTE_MODE: NONE
+  ROUTE_MODE: TMAP
