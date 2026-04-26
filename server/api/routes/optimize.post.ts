@@ -1,13 +1,5 @@
 import { RouteOptimizeRequestBody, RouteOptimizeResponseBody } from '#shared/schemas/route-optimization.schema'
 
-import { tmapServiceFactory } from '../../utils/routing/tmap.service'
-import { osrmServiceFactory } from '../../utils/routing/osrm.service'
-
-// 라우팅 서비스를 registry에 명시적 등록.
-// Nitro가 side-effect-only import를 tree-shake하므로 export를 참조해야 실행된다.
-registerRoutingService('TMAP', tmapServiceFactory)
-registerRoutingService('OSRM', osrmServiceFactory)
-
 export default defineEventHandler(async (event) => {
   await requireSession(event)
   const raw = await readBody(event)
