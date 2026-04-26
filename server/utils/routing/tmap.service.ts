@@ -1,6 +1,6 @@
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { AbstractRoutingService, toCoordString } from './common'
-import { registerRoutingService } from './registry'
+import type { RoutingServiceConfig } from './registry'
 
 const TMAP_PEDESTRIAN_URL = 'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1'
 
@@ -73,4 +73,6 @@ export class TMapRoutingService extends AbstractRoutingService {
   }
 }
 
-registerRoutingService('TMAP', (config) => new TMapRoutingService(config.tmapApi ?? ''))
+/** TMap 서비스 팩토리. 핸들러에서 직접 등록에 사용. */
+export const tmapServiceFactory = (config: RoutingServiceConfig) =>
+    new TMapRoutingService(config.tmapApi ?? '')

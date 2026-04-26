@@ -1,6 +1,5 @@
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { AbstractRoutingService } from './common'
-import { registerRoutingService } from './registry'
 
 interface OsrmResponse {
   code: string
@@ -37,4 +36,5 @@ export class OsrmRoutingService extends AbstractRoutingService {
   }
 }
 
-registerRoutingService('OSRM', () => new OsrmRoutingService())
+/** OSRM 서비스 팩토리. 핸들러에서 직접 등록에 사용. */
+export const osrmServiceFactory = () => new OsrmRoutingService()
