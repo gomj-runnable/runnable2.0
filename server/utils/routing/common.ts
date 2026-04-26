@@ -22,7 +22,6 @@ export const interpolateHeights = (
   const totalOptimized = optimized.length - 1
 
   return optimized.map(([lng, lat], i): GeoJsonPosition => {
-    // 최적화된 좌표의 비율에 해당하는 원본 인덱스를 계산
     const ratio = totalOptimized === 0 ? 0 : i / totalOptimized
     const origIdx = ratio * totalOriginal
     const lower = Math.floor(origIdx)
@@ -35,4 +34,38 @@ export const interpolateHeights = (
 
     return [lng, lat, interpolatedAlt]
   })
+}
+
+/**
+ * Template Method 기반 라우팅 서비스 추상 클래스.
+ *
+ * 공통 흐름: 검증 → API 호출 → 응답 파싱 → 고도 보간
+ * 서브클래스는 callApi()와 parseCoords()만 구현한다.
+ */
+export abstract class AbstractRoutingService implements RoutingService {
+  abstract isAvailable(): boolean
+
+  /** 외부 라우팅 API를 호출한다. */
+  protected abstract callApi(positions: GeoJsonPosition[]): Promise<Response>
+
+  /** API 응답에서 2D 좌표 배열을 추출한다. 빈 배열이면 원본 반환. */
+  protected abstract parseCoords(data: unknown): [number, number][]
+
+  /** Template Method — 서브클래스가 override하지 않는다. */
+  async optimize(positions: GeoJsonPosition[]): Promise<GeoJsonPosition[]> {
+    if (positions.length < 2) return positions
+
+    const response = await this.callApi(positions)
+
+    if (!response.ok) {
+      throw new Error(`Routing API error: ${response.status} ${response.statusText}`)
+    }
+
+    const data: unknown = await response.json()
+    const coords = this.parseCoords(data)
+
+    if (coords.length === 0) return positions
+
+    return interpolateHeights(positions, coords)
+  }
 }

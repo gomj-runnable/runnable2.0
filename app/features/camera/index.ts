@@ -1,5 +1,5 @@
 // model
-export * from './model/useCameraStore'
+export * from '~/shared/model/useCameraStore'
 export * from './model/useCameraViewStore'
 
 // api

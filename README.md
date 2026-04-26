@@ -150,51 +150,47 @@ pnpm dev
 
 ## 디렉터리 구조
 
+프론트엔드는 [Feature-Sliced Design (FSD)](https://feature-sliced.design/) 아키텍처를 따른다. 각 슬라이스는 `api/` (부수효과), `lib/` (순수 계산), `model/` (상태), `ui/` (컴포넌트) 세그먼트로 구성한다.
+
 ```
 Runnable/
-├── app/                                    # 프론트엔드
+├── app/                                    # 프론트엔드 (FSD)
 │   ├── pages/
 │   │   └── index.vue                       # 메인 지도 페이지 (SSR: false)
 │   │
-│   ├── components/map/
-│   │   ├── atoms/inputs/                   # 최소 단위 입력 (Textfield)
-│   │   ├── molecules/                      # 중간 단위 UI
-│   │   │   ├── buttons/                    #   Button, ChipButton, FabButton 등 9종
-│   │   │   ├── weather/                    #   WeatherDatePicker, Legend, LayerToggle
-│   │   │   ├── chips/                      #   RouteClosingChipBar
-│   │   │   └── profiles/                   #   SidebarUserProfile
-│   │   ├── organizations/cards/            # Card, TextfieldCard
-│   │   └── templates/                      # 페이지 조합 단위
-│   │       ├── MapShell.vue                #   지도 + 오버레이 컨테이너
-│   │       ├── MapSidebar.vue              #   사이드바 레이아웃
-│   │       ├── RouteListPanel.vue          #   경로 목록
-│   │       ├── DrawRoutePanel.vue          #   경로 드로잉
-│   │       ├── WeatherOverlay.vue          #   날씨 오버레이
-│   │       ├── FacilityOverlay.vue         #   시설물 오버레이
-│   │       └── ...                         #   모달, 패널 등 15종
+│   ├── entities/                           # 도메인 엔티티
+│   │   ├── boundary/                       #   행정경계
+│   │   ├── facility/                       #   편의시설
+│   │   ├── gradient/                       #   경사도
+│   │   ├── notification/                   #   알림
+│   │   ├── route/                          #   러닝 경로
+│   │   ├── user/                           #   사용자
+│   │   └── weather/                        #   날씨
+│   │       ├── api/                        #     부수효과 (API 호출, 지도 렌더링)
+│   │       ├── lib/                        #     순수 계산 (데이터 변환)
+│   │       ├── model/                      #     상태 관리 (useState 기반)
+│   │       └── ui/                         #     UI 컴포넌트
 │   │
-│   ├── composables/
-│   │   ├── action/                         # 순수 계산 (13종)
-│   │   │   ├── useWeatherDataTransform.ts  #   날씨 데이터 변환 (enum 위임)
-│   │   │   ├── useRouteDrawDraft.ts        #   구간 초안 관리
-│   │   │   ├── useRouteDrawUtils.ts        #   드로잉 유틸
-│   │   │   ├── useGroundClamping.ts        #   지형 클램핑
-│   │   │   └── ...
-│   │   ├── sideeffect/                     # 부수 효과 — API, 브라우저 IO (15종)
-│   │   │   ├── useRouteDrawSideeffect.ts   #   경로 드로잉 렌더링
-│   │   │   ├── useWeatherSideeffect.ts     #   날씨 레이어
-│   │   │   ├── useFacilitySideeffect.ts    #   시설물 마커 (enum 위임)
-│   │   │   ├── useRouteOptimizationSideeffect.ts  # 경로 보정 (enum 위임)
-│   │   │   └── ...
-│   │   ├── store/                          # 공유 상태 관리 (11종)
-│   │   │   ├── useRouteDrawStore.ts        #   드로잉 상태 + 최적화 모드 (env 연동)
-│   │   │   ├── useWeatherStore.ts          #   날씨 상태
-│   │   │   ├── useFacilityStore.ts         #   시설물 상태 (enum 자동 도출)
-│   │   │   └── ...
-│   │   ├── useRouteMapFacade.ts            # 지도 기능 통합 파사드
-│   │   ├── useMapInit.ts                   # Cesium 초기화
-│   │   └── useWindow.ts                    # window 전역 타입
+│   ├── features/                           # 사용자 기능
+│   │   ├── camera/                         #   카메라 제어
+│   │   ├── discover/                       #   지역 기반 탐색
+│   │   ├── draw-route/                     #   경로 그리기
+│   │   ├── elevation-layer/                #   고도 레이어
+│   │   ├── explore/                        #   경로 탐색
+│   │   ├── route-info/                     #   경로 정보
+│   │   ├── simulation/                     #   3D 시뮬레이션
+│   │   └── weather-overlay/                #   날씨 오버레이
 │   │
+│   ├── widgets/                            # 복합 위젯
+│   │   ├── facility-overlay/               #   시설물 오버레이
+│   │   ├── map-shell/                      #   지도 + 오버레이 컨테이너
+│   │   └── right-panel/                    #   우측 패널
+│   │
+│   ├── shared/                             # 앱 내 공용
+│   │   ├── lib/                            #   공용 유틸, map/ 헬퍼
+│   │   └── ui/                             #   공용 UI 컴포넌트
+│   │
+│   ├── layouts/                            # Nuxt 레이아웃
 │   └── assets/css/
 │       ├── base/                           # 디자인 토큰
 │       │   ├── primitive.css               #   원시값 토큰
@@ -214,6 +210,7 @@ Runnable/
 │   │   ├── facilities/                     # 시설물 조회 + 주변 검색
 │   │   ├── weather/                        # 날씨 API
 │   │   ├── boundary/                       # 서울 행정경계 GeoJSON
+│   │   ├── district/                       # 서울 구별 데이터
 │   │   └── auth/                           # better-auth 핸들러
 │   │
 │   ├── database/
@@ -221,6 +218,8 @@ Runnable/
 │   │   ├── migrations/                     # DB 마이그레이션
 │   │   ├── schema.ts                       # 스키마 진입점
 │   │   └── seed.ts                         # 시드 데이터
+│   │
+│   ├── middleware/                          # Nitro 미들웨어
 │   │
 │   ├── repositories/                       # 데이터 접근 계층
 │   │   ├── route.repository.ts             #   인터페이스
@@ -240,19 +239,13 @@ Runnable/
 │       │   ├── tmap.service.ts             #   TMap 보행자 라우팅
 │       │   ├── osrm.service.ts             #   OSRM 보행자 라우팅
 │       │   └── common.ts                   #   공통 인터페이스
+│       ├── district/                       # 서울 구별 유틸
 │       ├── auth.ts                         # 인증 설정
 │       ├── db.ts                           # DB 연결
 │       └── error.ts                        # 에러 처리
 │
 ├── shared/                                 # Frontend + Backend 공용
-│   ├── types/                              # 도메인 타입
-│   │   ├── enum-base.ts                    #   Java enum 스타일 베이스 클래스
-│   │   ├── weather-condition.enum.ts       #   날씨 상태 enum (color/icon/label)
-│   │   ├── pm10-grade.enum.ts              #   미세먼지 등급 enum (color)
-│   │   ├── facility-type.enum.ts           #   시설물 유형 enum (icon/color/poiType)
-│   │   ├── route-optimization-mode.enum.ts #   경로 최적화 모드 enum (requiresServer)
-│   │   ├── route.ts, weather.ts, facility.ts, geojson.ts, ...
-│   │   └── route-optimization.ts           #   최적화 모드 레지스트리 + 타입
+│   ├── types/                              # 도메인 타입 + enum
 │   ├── schemas/                            # Zod 런타임 검증 스키마
 │   ├── constants/                          # 상수 정의
 │   └── data/                               # 샘플 데이터
@@ -266,31 +259,29 @@ Runnable/
 
 ## 코드 컨벤션
 
-### 컴포넌트 설계 (Atomic Design)
+### FSD 레이어 계층
 
-컴포넌트는 `app/components/<page>/` 아래에 4단계 계층으로 분류한다.
+프론트엔드는 [Feature-Sliced Design](https://feature-sliced.design/)을 따르며, 4개 레이어로 구성한다.
 
-| 계층 | 디렉터리 | 역할 | 예시 |
-|------|----------|------|------|
-| Atom | `atoms/` | 최소 단위 입력 요소 | `Textfield` |
-| Molecule | `molecules/` | Atom을 조합한 독립 UI | `Button`, `IconButton`, `ChipButton` |
-| Organization | `organizations/` | 도메인 의미가 있는 카드·리스트 | `Card` |
-| Template | `templates/` | 페이지를 구성하는 Shell·Panel·Modal | `MapShell`, `AuthModal`, `ExplorePanel` |
+| 레이어 | 디렉터리 | 역할 | 예시 |
+|--------|----------|------|------|
+| Shared | `app/shared/` | 앱 전역 공용 유틸·UI | `map/` 헬퍼, 공용 컴포넌트 |
+| Entity | `app/entities/` | 도메인 엔티티 (비즈니스 데이터 단위) | `route/`, `weather/`, `facility/` |
+| Feature | `app/features/` | 사용자 시나리오 단위 기능 | `draw-route/`, `simulation/`, `discover/` |
+| Widget | `app/widgets/` | 여러 Entity·Feature를 조합한 복합 UI | `map-shell/`, `right-panel/` |
 
-- `pages/`는 화면 조합과 초기 진입만 담당한다. 로직은 composable에 위임한다.
-- 브라우저 전용 지도 페이지는 `definePageMeta({ ssr: false })`를 설정한다.
+각 슬라이스는 아래 세그먼트로 내부를 분리한다.
 
-### Composable 분리 원칙
-
-`app/composables/`는 책임별로 세 디렉터리로 분리한다.
-
-| 디렉터리 | 책임 | 금지 사항 |
+| 세그먼트 | 책임 | 금지 사항 |
 |----------|------|-----------|
-| `action/` | 순수 계산 (변환, 포맷, 트리 탐색) | 외부 API 호출, 전역 상태 저장, 브라우저 IO |
-| `sideeffect/` | 외부 연동 (API, 지도 엔진, 타이머) | 상태를 직접 소유 (store와 연결하거나 결과를 반환) |
-| `store/` | 공유 상태 관리 (useState 기반) | 외부 통신 직접 수행 |
+| `api/` | 부수 효과 (API 호출, 지도 엔진, 타이머) | 상태를 직접 소유 (model과 연결하거나 결과를 반환) |
+| `lib/` | 순수 계산 (변환, 포맷, 트리 탐색) | 외부 API 호출, 전역 상태 저장, 브라우저 IO |
+| `model/` | 공유 상태 관리 (useState 기반) | 외부 통신 직접 수행 |
+| `ui/` | Vue 컴포넌트 | 비즈니스 로직 직접 포함 |
 
-하나의 composable이 여러 책임을 동시에 가지지 않도록 한다.
+- `pages/`는 화면 조합과 초기 진입만 담당한다. 로직은 각 슬라이스의 세그먼트에 위임한다.
+- 브라우저 전용 지도 페이지는 `definePageMeta({ ssr: false })`를 설정한다.
+- 하나의 파일이 여러 세그먼트의 책임을 동시에 가지지 않도록 한다.
 
 ### CSS 토큰 계층
 
@@ -392,108 +383,9 @@ GitHub Actions로 자동화된 파이프라인이 구성되어 있다.
 
 ---
 
-## AI 에이전트 팀 운영 (OMC Team)
+## AI 에이전트 팀 운영
 
-iTerm2 + zsh 환경에서 Claude Code 네이티브 팀을 사용한다. tmux 의존 없이 동작한다.
-
-### 환경
-
-- **터미널**: iTerm2 (zsh)
-- **팀 런타임**: Claude Code Native Team (`/oh-my-claudecode:team`)
-- **tmux 기반 `/omc-teams`는 사용하지 않는다.**
-
-### 팀 시작
-
-```bash
-# 기본: 자동 에이전트 수 + 자동 라우팅
-/team "경로 저장 API 리팩터링"
-
-# 에이전트 수 지정 (N:역할)
-/team 3:executor "TypeScript 에러 전체 수정"
-
-# 역할별 지정
-/team 2:debugger "빌드 에러 수정"
-/team 4:designer "반응형 레이아웃 구현"
-
-# Ralph 래핑 (실패 시 자동 재시도 + Architect 검증)
-/team ralph "사용자 관리 REST API 구축"
-```
-
-### 팀 파이프라인
-
-팀은 아래 단계를 순차적으로 진행한다.
-
-```
-team-plan → team-prd → team-exec → team-verify → team-fix (반복)
-```
-
-| 단계 | 에이전트 | 역할 |
-|------|----------|------|
-| **plan** | `explore` (haiku), `planner` (opus) | 작업 분석, 하위 태스크 분해 |
-| **prd** | `analyst` (opus) | 요구사항 정리, 스코프 확정 |
-| **exec** | `executor` (sonnet) | 코드 구현 (사용자 지정 가능) |
-| **verify** | `verifier` (sonnet) | 품질 검증, 보안 리뷰 |
-| **fix** | `executor` / `debugger` | 검증 실패 항목 수정 |
-
-### 에이전트 역할 목록
-
-| 역할 | 모델 | 용도 |
-|------|------|------|
-| `executor` | sonnet / opus | 코드 구현 (opus는 복잡한 작업) |
-| `debugger` | sonnet | 빌드/타입 에러 수정, 회귀 분석 |
-| `designer` | sonnet | UI/UX 구현 |
-| `architect` | opus | 시스템 경계 설계 (읽기 전용) |
-| `code-reviewer` | opus | 코드 리뷰, 스타일 검사 |
-| `security-reviewer` | sonnet | 보안 취약점 탐지 |
-| `test-engineer` | sonnet | 테스트 작성, TDD |
-| `writer` | haiku | 문서 작성 |
-| `verifier` | sonnet | 변경 검증 |
-| `planner` | opus | 전략 계획 |
-
-### 모니터링 및 제어
-
-팀 실행 중 리더(Lead)가 자동으로 모니터링하며, 필요시 아래 도구로 개입한다.
-
-```bash
-# 팀 내 메시지 전송
-SendMessage(to: "worker-1", body: "sections.get.ts 수정 완료 후 알려줘")
-
-# 태스크 목록 확인
-TaskList(team_name: "refactor-api")
-
-# 태스크 상태 갱신
-TaskUpdate(task_id: "1", status: "completed")
-```
-
-### 프로젝트 전용 팀 구성 (3-에이전트)
-
-이 프로젝트의 비trivial 작업은 아래 구조로 진행한다.
-
-| 역할 | 모델 | 책임 |
-|------|------|------|
-| **설계 (Architect)** | Claude Opus 4.6 | 시스템 분석, 구현 계획, 브리프 작성 |
-| **코딩 (Builder)** | Claude Sonnet 4.5 | 브리프 기반 코드 구현 |
-| **테스트 (Tester)** | Claude Sonnet 4.5 | 품질 검증, 성능 테스트 |
-
-작업 순서: **Architect → Builder → Tester → Architect(최종 확인)**
-
-```bash
-# 예: 3-에이전트 팀으로 경로 검색 기능 구현
-/team 3:executor "경로 검색 기능 구현 - Architect가 설계, Builder가 구현, Tester가 검증"
-
-# 또는 Ralph로 자동 반복
-/team ralph "날씨 API 캐싱 최적화"
-```
-
-### 가이드라인
-
-1. **tmux를 사용하지 않는다.** `/omc-teams`(tmux 기반) 대신 `/team`(네이티브)을 사용한다.
-2. **iTerm2 분할로 모니터링한다.** 필요시 iTerm2 `Cmd+D` / `Cmd+Shift+D`로 탭/패널을 분할해 별도 Claude 세션을 열 수 있다.
-3. **에이전트 수는 작업 규모에 맞춘다.** 소규모(1-2), 중규모(3-5), 대규모(5-10).
-4. **`ralph`는 안정성이 중요한 작업에 사용한다.** 실패 시 자동 재시도 + Architect 검증을 포함한다.
-5. **exec 단계 에이전트만 사용자가 지정한다.** plan/verify 등 다른 단계는 리더가 자동 라우팅한다.
-6. **보안/인증 관련 변경은 `security-reviewer`가 verify 단계에 자동 포함된다.**
-7. **20개 이상 파일 변경 시 `code-reviewer` (opus)가 자동 투입된다.**
+상세 가이드는 [로컬 개발 설정](docs/local-setup.md)과 [`CLAUDE.md`](CLAUDE.md)의 "3-에이전트 팀 워크플로우" 섹션을 참조한다.
 
 ---
 

@@ -1,6 +1,5 @@
 import type { GeoJsonPosition } from '#shared/types/geojson'
-import type { RoutingService } from './common'
-import { interpolateHeights } from './common'
+import { AbstractRoutingService } from './common'
 import { registerRoutingService } from './registry'
 
 interface OsrmResponse {
@@ -12,44 +11,29 @@ interface OsrmResponse {
   }>
 }
 
-export class OsrmRoutingService implements RoutingService {
+export class OsrmRoutingService extends AbstractRoutingService {
   private readonly baseUrl = 'https://router.project-osrm.org/route/v1/foot'
 
   isAvailable(): boolean {
     return true
   }
 
-  async optimize(positions: GeoJsonPosition[]): Promise<GeoJsonPosition[]> {
-    if (positions.length < 2) {
-      return positions
-    }
-
+  protected async callApi(positions: GeoJsonPosition[]): Promise<Response> {
     const coordinates = positions
       .map(([lng, lat]) => `${lng},${lat}`)
       .join(';')
 
-    const url = `${this.baseUrl}/${coordinates}?overview=full&geometries=geojson&steps=false`
+    return fetch(`${this.baseUrl}/${coordinates}?overview=full&geometries=geojson&steps=false`)
+  }
 
-    try {
-      const response = await fetch(url)
+  protected parseCoords(data: unknown): [number, number][] {
+    const response = data as OsrmResponse
 
-      if (!response.ok) {
-        return positions
-      }
-
-      const data: OsrmResponse = await response.json()
-
-      if (data.code !== 'Ok' || !data.routes.length) {
-        return positions
-      }
-
-      const routedCoords = data.routes[0]!.geometry.coordinates
-      const routed2D: [number, number][] = routedCoords.map(([lng, lat]) => [lng, lat])
-
-      return interpolateHeights(positions, routed2D)
-    } catch {
-      return positions
+    if (response.code !== 'Ok' || !response.routes.length) {
+      return []
     }
+
+    return response.routes[0]!.geometry.coordinates.map(([lng, lat]) => [lng, lat])
   }
 }
 

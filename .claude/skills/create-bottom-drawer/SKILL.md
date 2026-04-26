@@ -12,7 +12,7 @@
 
 | 컴포넌트 | 경로 | 역할 |
 |----------|------|------|
-| `BottomDrawer` | `app/components/map/molecules/BottomDrawer.vue` | UDrawer 래퍼, 공통 기본값 제공 |
+| `BottomDrawer` | `app/shared/ui/BottomDrawer.vue` | UDrawer 래퍼, 공통 기본값 제공 |
 
 ## Props
 
@@ -28,11 +28,11 @@
 
 ### 1. 구체화 컴포넌트 생성
 
-`BottomDrawer`를 감싸는 전용 컴포넌트를 `templates/`에 만든다.
+`BottomDrawer`를 감싸는 전용 컴포넌트를 해당 feature의 `ui/`에 만든다.
 
 ```vue
 <script setup lang="ts">
-import BottomDrawer from '~/components/map/molecules/BottomDrawer.vue'
+import { BottomDrawer } from '~/shared/ui'
 
 defineProps<{ open: boolean }>()
 defineEmits<{ 'update:open': [value: boolean] }>()
@@ -61,7 +61,7 @@ const isDrawerOpen = ref(false)
 
 | 컴포넌트 | 경로 | 용도 |
 |----------|------|------|
-| `SimulationDrawer` | `app/components/map/templates/SimulationDrawer.vue` | 시뮬레이션 재생 컨트롤 + 진행 정보 |
+| `SimulationDrawer` | `app/features/simulation/ui/SimulationDrawer.vue` | 시뮬레이션 재생 컨트롤 + 진행 정보 |
 
 ## 예시
 
@@ -71,7 +71,7 @@ const isDrawerOpen = ref(false)
 ## 규칙
 
 - `UDrawer`를 직접 사용하지 않고 `BottomDrawer`를 감싸서 구체화한다.
-- 구체화 컴포넌트는 `templates/`에 둔다.
+- 구체화 컴포넌트는 해당 feature의 `ui/`에 둔다.
 - `BottomDrawer` 자체에는 도메인 로직을 넣지 않는다. 공통 레이아웃(padding, gap)만 담당한다.
 - `open` 상태는 부모 페이지에서 관리하고, `v-model:open`으로 전달한다.
 - 지도 위에서 사용할 때는 `overlay: false`, `modal: false`를 유지한다 (기본값).

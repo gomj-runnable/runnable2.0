@@ -1,5 +1,5 @@
 import type { GeoJsonPosition } from '#shared/types/geojson'
-import { type RoutingService, toCoordString, interpolateHeights } from './common'
+import { AbstractRoutingService, toCoordString } from './common'
 import { registerRoutingService } from './registry'
 
 const TMAP_PEDESTRIAN_URL = 'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1'
@@ -16,10 +16,11 @@ interface TMapResponse {
   features: TMapFeature[]
 }
 
-export class TMapRoutingService implements RoutingService {
+export class TMapRoutingService extends AbstractRoutingService {
   private readonly apiKey: string
 
   constructor(apiKey: string) {
+    super()
     this.apiKey = apiKey
   }
 
@@ -27,9 +28,7 @@ export class TMapRoutingService implements RoutingService {
     return !!this.apiKey
   }
 
-  async optimize(positions: GeoJsonPosition[]): Promise<GeoJsonPosition[]> {
-    if (positions.length < 2) return positions
-
+  protected async callApi(positions: GeoJsonPosition[]): Promise<Response> {
     const start = positions[0]!
     const end = positions[positions.length - 1]!
     const waypoints = positions.slice(1, -1)
@@ -48,7 +47,7 @@ export class TMapRoutingService implements RoutingService {
       body.passList = waypoints.map(toCoordString).join('_')
     }
 
-    const response = await fetch(TMAP_PEDESTRIAN_URL, {
+    return fetch(TMAP_PEDESTRIAN_URL, {
       method: 'POST',
       headers: {
         appKey: this.apiKey,
@@ -56,24 +55,19 @@ export class TMapRoutingService implements RoutingService {
       },
       body: JSON.stringify(body),
     })
+  }
 
-    if (!response.ok) {
-      throw new Error(`TMap API error: ${response.status} ${response.statusText}`)
-    }
+  protected parseCoords(data: unknown): [number, number][] {
+    const response = data as TMapResponse
+    const coords: [number, number][] = []
 
-    const data = (await response.json()) as TMapResponse
-
-    const optimizedCoords: [number, number][] = []
-    for (const feature of data.features) {
+    for (const feature of response.features) {
       if (feature.geometry.type === 'LineString') {
-        const coords = feature.geometry.coordinates as [number, number][]
-        optimizedCoords.push(...coords)
+        coords.push(...(feature.geometry.coordinates as [number, number][]))
       }
     }
 
-    if (optimizedCoords.length === 0) return positions
-
-    return interpolateHeights(positions, optimizedCoords)
+    return coords
   }
 }
 
