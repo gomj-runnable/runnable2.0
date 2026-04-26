@@ -1,9 +1,9 @@
 import { RouteOptimizeRequestBody, RouteOptimizeResponseBody } from '#shared/schemas/route-optimization.schema'
 
 // Side-effect: 라우팅 서비스를 registry에 등록한다.
-// index.ts에 두면 Nuxt auto-import가 export 없는 파일을 실행하지 않으므로 핸들러에서 직접 import.
-import '~/server/utils/routing/tmap.service'
-import '~/server/utils/routing/osrm.service'
+// Nuxt auto-import는 export 없는 파일을 실행하지 않으므로 핸들러에서 직접 import.
+import '../../utils/routing/tmap.service'
+import '../../utils/routing/osrm.service'
 
 export default defineEventHandler(async (event) => {
   await requireSession(event)
