@@ -39,7 +39,7 @@ import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { useAuthSideeffect } from '~/entities/user/api/useAuthSideeffect'
 import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
 import { FILTER_ALL } from '~/features/explore/model/useExploreFilterStore'
-import { useCameraStore } from '~/features/camera/model/useCameraStore'
+import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
 import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
@@ -426,7 +426,7 @@ watch(overlayContext, (next, prev) => {
     <div class="index-page">
         <MapShell :show-second-panel="sectionInfo.isOpen.value">
             <template #sidebar="{ open: sidebarOpen, setSidebarOpen, toggleSidebar }">
-                <MapSidebar :open="sidebarOpen" @update:open="setSidebarOpen">
+                <MapSidebar :collapsed="!sidebarOpen" @update:collapsed="setSidebarOpen(!$event)">
                     <template #header>
                         <UButton
                             v-if="sidebarOpen"

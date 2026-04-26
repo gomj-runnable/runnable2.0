@@ -7,22 +7,23 @@ Codex도 동일한 규칙을 따른다.
 
 작업 전 반드시 아래 파일을 읽고 규칙을 따를 것:
 
-1. **`CLAUDE.md`** (프로젝트 루트) — 패키지 구조, 작업 원칙, 아키텍처, composable 분리, CSS 토큰 규칙 등 모든 프로젝트 규칙의 1차 기준
+1. **`CLAUDE.md`** (프로젝트 루트) — 패키지 구조, 작업 원칙, 아키텍처, FSD 레이어 분리, CSS 토큰 규칙 등 모든 프로젝트 규칙의 1차 기준
 2. **`.claude/skills/`** — 반복 패턴의 구체적 구현 규칙
    - `runnable-architecture/SKILL.md` — 패키지 구조와 디렉터리 책임
-   - `runnable-composables/SKILL.md` — action/sideeffect/store 분리 원칙
+   - `runnable-composables/SKILL.md` — api/lib/model 분리 원칙
    - `runnable-components/SKILL.md` — UI 컴포넌트 계층 설계
    - `create-api-service/SKILL.md` — 외부 API 연동 패턴
    - `create-unified-api-response/SKILL.md` — 다중 API 통합 패턴
    - `create-map-overlay/SKILL.md` — 지도 오버레이 UI 패턴
 
-## 핵심 규칙 요약
+## 핵심 규칙 요약 (FSD 구조)
 
-- 화면 조합: `app/pages/`, `app/components/<page>/templates/`
-- 재사용 UI: `app/components/<page>/molecules/`
-- 순수 계산: `app/composables/action/`
-- 외부 API/브라우저: `app/composables/sideeffect/`
-- 공유 상태: `app/composables/store/`
+- 페이지 조합: `app/pages/`
+- 도메인 엔티티: `app/entities/{entity}/` (api, lib, model, ui)
+- 사용자 기능: `app/features/{feature}/` (api, lib, model, ui)
+- 복합 위젯: `app/widgets/{widget}/`
+- 공용 UI: `app/shared/ui/`
+- 공용 유틸: `app/shared/lib/`
 - 공통 타입/스키마: `shared/types/`, `shared/schemas/`
 - API 엔드포인트: `server/api/`
 - CSS 토큰: `app/assets/css/base/primitive.css`, `semantic.css`

@@ -7,6 +7,6 @@ data:
   NODE_ENV: development
   PORT: "3000"
   TZ: Asia/Seoul
-  BETTER_AUTH_URL: https://macmini.tail070e2e.ts.net/
+  BETTER_AUTH_URL: http://localhost:3000/
   USE_DATABASE_MODE: POSTGRES
   ROUTE_MODE: TMAP

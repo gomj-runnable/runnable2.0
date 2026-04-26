@@ -1,18 +1,19 @@
 <script setup lang="ts">
 /**
- * MapSidebar — USidebar 기반 사이드바
+ * MapSidebar — UDashboardSidebar 기반 사이드바
  *
- * Nuxt UI의 USidebar를 래핑하여 기존 슬롯 구조(header, subheader, default, footer)를 유지한다.
+ * Nuxt UI의 UDashboardSidebar를 래핑하여 기존 슬롯 구조(header, subheader, default, footer)를 유지한다.
  * Close/Toggle 아이콘은 header 슬롯 내부에 위치한다.
  */
-const open = defineModel<boolean>('open', { default: true })
+const collapsed = defineModel<boolean>('collapsed', { default: false })
 </script>
 
 <template>
-    <USidebar
-        v-model:open="open"
-        collapsible="offcanvas"
+    <UDashboardSidebar
+        v-model:collapsed="collapsed"
+        collapsible
         side="left"
+        :toggle="false"
         :ui="{
             root: 'map-sidebar-root',
             header: 'map-sidebar-header',
@@ -36,7 +37,7 @@ const open = defineModel<boolean>('open', { default: true })
         <template #footer>
             <slot name="footer" />
         </template>
-    </USidebar>
+    </UDashboardSidebar>
 </template>
 
 <style scoped>

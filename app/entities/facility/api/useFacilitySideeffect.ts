@@ -6,7 +6,7 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
-import { useCameraStore } from '~/features/camera/model/useCameraStore'
+import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import {
     createClampedPoint,

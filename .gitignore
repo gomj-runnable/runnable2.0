@@ -23,15 +23,17 @@ logs
 .env.*
 !.env.example
 
-# files
+# Environment-specific files (local/prod)
+# *.local.* 및 *.prod.* 패턴의 파일은 환경별 민감 정보를 포함할 수 있으므로 추적하지 않는다.
+# 예: configmap.local.yaml, secret.prod.yaml, README.local.md
+*.local.*
+*.prod.*
+!*.example.*
+
+# Static uploads & MCP
 public/uploads/
 .mcp.json
 
 # Oh My ClaudeCode
 .omc/
 
-# README.md
-README.*.md
-
-# K8s prod secrets/config
-minikube/k8s/config/*prod*

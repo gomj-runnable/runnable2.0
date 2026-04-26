@@ -1,7 +1,7 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
-import { useCameraStore } from '~/features/camera/model/useCameraStore'
+import { useCameraStore } from '~/shared/model/useCameraStore'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 
 interface UseSidewalkSideeffectOptions {

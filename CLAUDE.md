@@ -9,25 +9,27 @@
 
 ## 패키지 구조
 
-### Front-end
+### Front-end (FSD — Feature-Sliced Design)
 
 - `app/` : 프론트엔드 루트
+- `app/entities/` : 도메인 엔티티 슬라이스 (boundary, facility, gradient, notification, route, user, weather)
+- `app/features/` : 사용자 기능 슬라이스 (camera, discover, draw-route, elevation-layer, explore, route-info, simulation, weather-overlay)
+- `app/shared/` : FSD 공용 레이어
+- `app/shared/lib/` : 공용 composable (map/useCesiumRuntime, map/useMapInit, map/useTerrainSampler, useWindow, useFormatUtils 등)
+- `app/shared/ui/` : 최소 단위 재사용 UI (BottomDrawer, Card, TextfieldCard 등)
+- `app/widgets/` : 복합 위젯 (map-shell, facility-overlay, right-panel)
+- `app/widgets/map-shell/` : 지도 셸 위젯 (MapShell, MapSidebar, MapFooter, MapSidebarTabs, useRouteMapFacade, useEntityCleanup)
 - `app/assets/css/` : 전역 CSS, 디자인 토큰, 지도 UI 스타일
 - `app/assets/images/` : 이미지 자산
 - `app/assets/icons/` : 아이콘 자산
-- `app/components/` : 페이지 단위 UI 컴포넌트
-- `app/components/<page>/` : 페이지별 독립 컴포넌트 패키지
-- `app/components/<page>/atoms/` : 최소 단위 입력 컴포넌트 (예: Textfield)
-- `app/components/<page>/molecules/` : atomic design 기준의 중간 단위 컴포넌트
-- `app/components/<page>/organizations/` : 조직 단위 컴포넌트 (예: cards)
-- `app/components/<page>/templates/` : 페이지 조합 단위 컴포넌트
-- `app/composables/` : 상태 관리, 독립 유틸, 부수효과 처리
-- `app/composables/action/` : 독립적인 유틸리티 기능 패키지
-- `app/composables/sideeffect/` : 외부 API 통신 등 부수 효과를 이해하기 쉽고 테스트 가능하게 관리하는 패키지
-- `app/composables/store/` : 데이터 상태를 관리하는 패키지
-- `app/composables/constant/` : 상수 composable (향후 상수 composable용 예약 디렉터리)
 - `app/layouts/` : 공통 레이아웃
 - `app/pages/` : 실제 라우트 페이지
+
+각 FSD 슬라이스 내부 레이어:
+- `api/` : 부수 효과 — 외부 API 통신, 브라우저 API 접근, Cesium Entity 조작 (구 `composables/sideeffect/`)
+- `lib/` : 순수 계산 — 독립적인 유틸리티 함수, 데이터 변환 (구 `composables/action/`)
+- `model/` : 상태 관리 — `useState` 기반 공유 상태, computed, mutation (구 `composables/store/`)
+- `ui/` : Vue 컴포넌트 — 슬라이스 전용 UI
 
 ### Back-end
 
@@ -54,14 +56,16 @@
 ### 기타
 
 - `lib/` : 외부 라이브러리 저장소, 일반적인 기능 수정 범위에서는 우선순위가 낮다
-- `public/` : 요구사항 정의서, 참고 이미지, 기타 정적 자료
+- `public/` : 참고 이미지, 기타 정적 자료
 
 ## 작업 원칙
 
 - 화면 조합은 `app/pages/`에서 최소한으로 유지한다.
-- 재사용 가능한 UI는 `app/components/`에 둔다.
-- 상태와 사이드 이펙트는 `app/composables/`로 이동한다.
-- `app/composables/` 내부에서는 책임을 `action`, `sideeffect`, `store`로 분리한다.
+- 도메인 엔티티는 `app/entities/<도메인>/`에, 사용자 기능은 `app/features/<기능>/`에 둔다.
+- 복합 위젯은 `app/widgets/`에 둔다.
+- 재사용 가능한 최소 단위 UI는 `app/shared/ui/`에 둔다.
+- 각 슬라이스 내부에서 책임을 `api`(부수 효과), `lib`(순수 계산), `model`(상태 관리)로 분리한다.
+- 슬라이스 간 공용 composable은 `app/shared/lib/`에 둔다.
 - 브라우저 전용 지도 화면은 `ssr: false` 페이지와 전용 layout으로 분리한다.
 - 외부 지도 서버나 외부 API 접근은 가능하면 `server/routes/` 또는 `server/api/`를 경유한다.
 - 프론트엔드와 백엔드가 함께 쓰는 정의는 `shared/`에 둔다.
@@ -70,7 +74,7 @@
 - 문서를 수정할 때는 실제 디렉터리 구조와 서비스 목적이 일치해야 한다.
 - 디자인 토큰은 `primitive -> semantic -> feature CSS` 순서로 계층을 유지한다.
 - primitive token은 값 자체만 두고, semantic token은 역할 이름으로 재매핑한다.
-- feature CSS(`components/**`, `pages/**`)에는 토큰 정의보다 실제 UI 규칙을 우선 둔다.
+- feature CSS(`widgets/**`, `features/**`, `pages/**`)에는 토큰 정의보다 실제 UI 규칙을 우선 둔다.
 
 ## 에이전트 작업 규칙
 
@@ -118,7 +122,7 @@
 
 - `app/pages/`는 화면 조합과 초기 진입만 담당한다.
 - 브라우저 전용 지도 화면은 `definePageMeta({ ssr: false })` 형태를 기본으로 본다.
-- 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/components/map/templates/MapShell.vue`, `app/assets/css/base/main.css` 같은 전용 경계에 둔다.
+- 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/widgets/map-shell/ui/MapShell.vue`, `app/assets/css/base/main.css` 같은 전용 경계에 둔다.
 
 ### CSS 토큰과 스타일 경계
 
@@ -137,7 +141,8 @@
 ### 지도 엔진 연동
 
 - Cesium, MapPrime 같은 브라우저 전역 객체는 직접 페이지에 흩뿌리지 않고 composable 또는 전용 래퍼로 감싼다.
-- 스크립트 로딩, `window` 접근, viewer 초기화는 `sideeffect` 책임으로 본다.
+- 스크립트 로딩, `window` 접근, viewer 초기화는 `api/` 레이어(부수 효과) 책임으로 본다.
+- 공용 지도 초기화는 `app/shared/lib/map/`에 둔다 (useCesiumRuntime, useMapInit, useTerrainSampler).
 - `window` 전역 확장은 한 곳에서 타입 선언으로 관리한다.
 - 지도 엔진 리소스는 `/lib` 정적 자산과 `/proxy/**` 서버 프록시를 통해 연결한다.
 
@@ -145,21 +150,21 @@
 
 - 프로젝트 전체에서 좌표 체계는 WGS84(`[longitude, latitude, elevation]` = `GeoJsonPosition`)로 통일한다.
 - 경로 좌표의 단일 진실 소스는 `drawnPositions: Ref<GeoJsonPosition[] | null>`이다. 경로 그리기(draw)와 경로 목록(select) 모두 좌표를 `drawnPositions`에 반영해야 한다.
-- 경사도, 고도 프로필 등 경로 좌표에 의존하는 공통 sideeffect는 `drawnPositions`를 watch하여 동작한다. 새로운 좌표 소스가 추가되더라도 `drawnPositions`에 반영하는 것으로 통합한다.
+- 경사도, 고도 프로필 등 경로 좌표에 의존하는 공통 부수 효과(`api/`)는 `drawnPositions`를 watch하여 동작한다. 새로운 좌표 소스가 추가되더라도 `drawnPositions`에 반영하는 것으로 통합한다.
 - 지면 고정 폴리라인이 겹칠 때는 기존 폴리라인을 `entity.show = false`로 숨기고 오버레이 폴리라인을 그린다. 오버레이 해제 시 `entity.show = true`로 복원한다. `createEntityGroup`의 `hide()/show()`를 사용한다.
 - 경로 최적화(TMap/OSM 등) 후 section 분할은 API 반환 전체 포인트가 아니라 사용자가 클릭한 원본 waypoint 기준으로 한다. `createWaypointBasedSectionRanges(optimizedPositions, originalWaypoints)`를 사용한다.
-- 여러 composable이 공유해야 하는 상태는 `ref()`가 아닌 `useState()`를 사용한다. `ref()`는 호출마다 새 인스턴스를 생성하므로 교차 composable 공유에 적합하지 않다.
+- 여러 슬라이스가 공유해야 하는 상태는 `ref()`가 아닌 `useState()`를 사용한다. `ref()`는 호출마다 새 인스턴스를 생성하므로 교차 슬라이스 공유에 적합하지 않다.
 
 ### UI 공통 패턴
 
-- 호버 시 tooltip을 표시하려면 `app/components/map/atoms/HoverTooltip.vue`를 사용한다. `#trigger` 슬롯에 호버 대상, `#content` 슬롯에 tooltip 내용을 배치한다. `placement`(`top`/`bottom`/`left`/`right`)와 `offset`(px) props로 위치를 제어한다.
-- atoms 계층(`app/components/map/atoms/`)은 프로젝트 전역에서 재사용하는 최소 단위 UI 컴포넌트를 둔다.
+- 호버 시 tooltip을 표시하려면 `app/shared/ui/` 내의 HoverTooltip 컴포넌트를 사용한다. `#trigger` 슬롯에 호버 대상, `#content` 슬롯에 tooltip 내용을 배치한다. `placement`(`top`/`bottom`/`left`/`right`)와 `offset`(px) props로 위치를 제어한다.
+- `app/shared/ui/`는 프로젝트 전역에서 재사용하는 최소 단위 UI 컴포넌트를 둔다 (BottomDrawer, Card, TextfieldCard 등).
 
 ### 상태와 데이터 흐름
 
-- 페이지는 샘플 데이터나 서버 응답을 받아 `store`에 반영하고, 화면 동작은 composable을 조합해 수행한다.
-- 트리 탐색, 평탄화, 좌표 변환 같은 순수 계산은 `action`으로 분리한다.
-- `useState` 기반 공유 상태는 `store` 책임으로 간주한다.
+- 페이지는 샘플 데이터나 서버 응답을 받아 `model/`에 반영하고, 화면 동작은 composable을 조합해 수행한다.
+- 트리 탐색, 평탄화, 좌표 변환 같은 순수 계산은 `lib/`로 분리한다.
+- `useState` 기반 공유 상태는 `model/` 책임으로 간주한다.
 
 ## Back-end 아키텍처
 
@@ -204,20 +209,20 @@
 - 브라우저 전용 외부 스크립트는 런타임 로딩과 래핑을 통해 사용한다.
 - 외부 라이브러리 자체보다 이를 감싸는 프로젝트 코드의 경계를 우선 설계한다.
 
-## Composables 분리 원칙
+## FSD 레이어 분리 원칙
 
-`app/composables/`는 역할별로 분리한다. 하나의 composable이 여러 책임을 동시에 가지지 않도록 우선 구조를 나눈 뒤 구현한다.
+각 슬라이스(`entities/*`, `features/*`, `widgets/*`) 내부는 `api/`, `lib/`, `model/` 레이어로 역할을 분리한다. 하나의 composable이 여러 책임을 동시에 가지지 않도록 우선 구조를 나눈 뒤 구현한다.
 
-### `app/composables/` 구현 위임 규칙
+### 구현 위임 규칙
 
-- `app/composables/`에서 캡슐화와 추상화를 기본 원칙으로 유지한다.
+- 각 슬라이스에서 캡슐화와 추상화를 기본 원칙으로 유지한다.
 - 사용자가 추상 클래스나 추상 함수를 만들면 구현체는 `*Impl` 이름으로 분리해 추가한다.
 - 구현체 파일과 클래스, 함수의 상세 구현은 `*Impl` 쪽에 위임한다.
 - 사용자가 지정한 파라미터와 반환값은 계약으로 취급하고 임의로 바꾸지 않는다.
 - 파라미터나 반환값 계약을 조정해야 하면 먼저 이유를 설명하고 사용자 권한을 요청한다.
 - `*Impl` 하위 코드는 에이전트가 책임지고 완성한다.
 
-### `action`
+### `lib/` (순수 계산)
 
 - 독립적인 유틸리티 기능을 구현한다.
 - 외부 API 호출, 전역 상태 저장, 브라우저 IO에 직접 의존하지 않는다.
@@ -225,60 +230,73 @@
 - 가능하면 작은 단위 함수로 쪼개고 테스트가 쉬운 형태를 유지한다.
 - 예: 트리 탐색, 노드 평탄화, 좌표/데이터 변환
 
-### `sideeffect`
+### `api/` (부수 효과)
 
 - 외부 API 통신, 브라우저 기능 접근, 타이머, 로깅 등 부수 효과를 관리한다.
 - 부수 효과의 시작점과 종료 조건이 코드에서 분명히 드러나야 한다.
 - 테스트 가능성을 위해 의존성 주입, 래핑, 인터페이스 분리를 우선 고려한다.
-- 상태를 직접 소유하기보다 `store`와 연결하거나 호출 결과를 반환하는 방식으로 구성한다.
+- 상태를 직접 소유하기보다 `model/`과 연결하거나 호출 결과를 반환하는 방식으로 구성한다.
 - 예: Cesium 스크립트 로딩, MapPrime viewer 초기화, 외부 API 호출, DOM 접근
 
-### `store`
+### `model/` (상태 관리)
 
 - 화면과 기능에서 공유하는 데이터 상태를 관리한다.
 - 읽기, 쓰기, 파생 상태를 한 곳에서 이해할 수 있게 유지한다.
 - 가능한 한 상태 전이 규칙을 명시적으로 드러낸다.
-- 외부 통신 자체는 `sideeffect`에 두고, `store`는 상태 반영과 구독 가능한 데이터 제공에 집중한다.
+- 외부 통신 자체는 `api/`에 두고, `model/`은 상태 반영과 구독 가능한 데이터 제공에 집중한다.
 - 예: `useState` 기반 theme-map 상태, 로딩 상태, 선택 상태
 
-## Composables 점검 항목
+## FSD 레이어 점검 항목
 
-- 유틸성 로직이 `store`나 `sideeffect`에 불필요하게 섞여 있지 않은지 확인한다.
-- 외부 통신 코드가 `action`에 들어가지 않았는지 확인한다.
-- 상태 변경 책임이 `sideeffect`에 과도하게 들어가지 않았는지 확인한다.
-- 하나의 composable이 `action`, `sideeffect`, `store`의 책임을 동시에 수행하지 않는지 확인한다.
+- 유틸성 로직이 `model/`이나 `api/`에 불필요하게 섞여 있지 않은지 확인한다.
+- 외부 통신 코드가 `lib/`에 들어가지 않았는지 확인한다.
+- 상태 변경 책임이 `api/`에 과도하게 들어가지 않았는지 확인한다.
+- 하나의 composable이 `lib/`, `api/`, `model/`의 책임을 동시에 수행하지 않는지 확인한다.
 - 브라우저 전용 지도 엔진 접근이 페이지에 직접 남아 있지 않은지 확인한다.
 - 외부 지도 서버 호출이 프론트엔드에서 직접 수행되지 않는지 확인한다.
 
 ## 빠른 판단표
 
-- 화면 조합 변경: `app/pages/` 또는 `app/components/<page>/templates/`
-- 재사용 UI 추가: `app/components/<page>/molecules/`, `app/components/<page>/templates/`
+- 화면 조합 변경: `app/pages/` 또는 `app/widgets/*/ui/`
+- 도메인 엔티티 추가: `app/entities/<도메인>/` (api, lib, model, ui)
+- 사용자 기능 추가: `app/features/<기능>/` (api, lib, model, ui)
+- 복합 위젯 추가: `app/widgets/<위젯>/` (lib, model, ui)
+- 순수 계산 로직: 해당 슬라이스의 `lib/` 또는 `app/shared/lib/`
+- 외부 API, 브라우저 API, 지도 초기화: 해당 슬라이스의 `api/`
+- 공유 상태: 해당 슬라이스의 `model/`
+- 최소 단위 재사용 UI: `app/shared/ui/`
+- 공용 지도 composable: `app/shared/lib/map/`
 - 외부 CSS 수정: `app/assets/css/components/**`, `app/assets/css/pages/**`
 - 토큰 수정: `app/assets/css/base/primitive.css`, `app/assets/css/base/semantic.css`
-- 순수 계산 로직: `app/composables/action/`
-- 외부 API, 브라우저 API, 지도 초기화: `app/composables/sideeffect/`
-- 공유 상태: `app/composables/store/`
 - 공통 타입, 스키마, fixture: `shared/**`
 - API, 프록시, 인증, DB: `server/**`
-- 최소 단위 재사용 UI (tooltip 등): `app/components/map/atoms/`
-- 호버 tooltip 추가: `HoverTooltip.vue` 래퍼 사용
 
 ## 현재 .claude Skill
+
+### 프로젝트 구조 스킬
 
 - `runnable-architecture` : 러닝 경로 제작 서비스의 패키지 구조와 작업 규칙을 따르기 위한 프로젝트 전용 스킬
 - `runnable-composables` : `app/composables/action`, `app/composables/sideeffect`, `app/composables/store`의 책임 분리를 따르기 위한 프로젝트 전용 스킬
 - `runnable-components` : `app/components/<page>/molecules/`와 `app/components/<page>/templates/` 계층 기준으로 Toss Flat+Compound 원칙에 따라 UI 컴포넌트를 설계하고 구현하기 위한 프로젝트 전용 스킬
-- `create-map-overlay` : MapShell `#overlay` 슬롯에 배치되는 부유 UI(지도 위 컨트롤 패널)의 공통 구조·CSS 패턴을 따르기 위한 프로젝트 전용 스킬
+
+### 생성(Create) 스킬
+
 - `create-api-service` : 외부 API 연동 시 원본 Response Class + 추상화 Local Response 분리, `service.requestBy{기준}()` 네이밍 규칙을 따르기 위한 프로젝트 전용 스킬
-- `create-unified-api-response` : 한 기능에서 2개 이상 API 사용 시 공통 Local Response를 정의하고, 호출부 외 모든 후속 로직을 통일하는 프로젝트 전용 스킬
-- `create-map-layer-sideeffect` : Cesium Entity 생명주기(add/remove/clear) + Options DI + Init/Destroy 패턴으로 지도 레이어 sideeffect를 구현하기 위한 프로젝트 전용 스킬
-- `create-store-composable` : `useState` + `computed` + mutation 함수의 3단 구조와 토글/데이터 2가지 유형의 store composable을 생성하기 위한 프로젝트 전용 스킬
-- `create-server-crud` : Nitro API 핸들러 4종(GET/POST/PUT/DELETE) + Repository 인터페이스/InMemory/Drizzle/팩토리 4파일 세트를 생성하기 위한 프로젝트 전용 스킬
-- `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
 - `create-bottom-drawer` : `BottomDrawer` 래퍼 컴포넌트를 감싸 하단 Drawer UI를 구현하기 위한 프로젝트 전용 스킬
-- `create-session-doc` : 현재 세션에서 수행한 작업을 `public/docs/session/` 하위에 날짜별 markdown으로 기록하기 위한 프로젝트 전용 스킬
+- `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
+- `create-map-layer-sideeffect` : Cesium Entity 생명주기(add/remove/clear) + Options DI + Init/Destroy 패턴으로 지도 레이어 sideeffect를 구현하기 위한 프로젝트 전용 스킬
+- `create-map-overlay` : MapShell `#overlay` 슬롯에 배치되는 부유 UI(지도 위 컨트롤 패널)의 공통 구조·CSS 패턴을 따르기 위한 프로젝트 전용 스킬
+- `create-popup-modal` : Vue 3 Chip Button + Modal Popup 구현 규칙을 따르기 위한 프로젝트 전용 스킬
+- `create-server-crud` : Nitro API 핸들러 4종(GET/POST/PUT/DELETE) + Repository 인터페이스/InMemory/Drizzle/팩토리 4파일 세트를 생성하기 위한 프로젝트 전용 스킬
+- `create-session-doc` : 현재 세션에서 수행한 작업을 `docs/session/` 하위에 날짜별 markdown으로 기록하기 위한 프로젝트 전용 스킬
+- `create-store-composable` : `useState` + `computed` + mutation 함수의 3단 구조와 토글/데이터 2가지 유형의 store composable을 생성하기 위한 프로젝트 전용 스킬
+- `create-type-role` : 복수 API 응답 통합 시 공통 도메인 타입 → adapter 정규화 → 서비스 소비 패턴을 정의하기 위한 프로젝트 전용 스킬
+- `create-unified-api-response` : 한 기능에서 2개 이상 API 사용 시 공통 Local Response를 정의하고, 호출부 외 모든 후속 로직을 통일하는 프로젝트 전용 스킬
+
+### 동기화·인프라 스킬
+
 - `sync-overlay-visibility` : 경로 카드와 연관 오버레이 UI(시뮬레이션·경로정보·고도·경사도)의 가시성을 `MapOverlayContextEnum` 기반으로 동기화하기 위한 프로젝트 전용 스킬
+- `tailscale-funnel` : macOS에서 Tailscale Funnel을 사용해 로컬 포트를 외부 HTTPS로 노출/종료하기 위한 인프라 스킬
 
 ## 현재 .claude Command
 
