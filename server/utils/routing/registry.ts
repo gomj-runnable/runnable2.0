@@ -1,5 +1,7 @@
 import type { RouteOptimizationMode } from '#shared/types/route-optimization'
 import type { RoutingService } from './common'
+import { tmapServiceFactory } from './tmap.service'
+import { osrmServiceFactory } from './osrm.service'
 
 export interface RoutingServiceConfig {
   tmapApi?: string
@@ -7,14 +9,10 @@ export interface RoutingServiceConfig {
 
 export type RoutingServiceFactory = (config: RoutingServiceConfig) => RoutingService
 
-const registry = new Map<RouteOptimizationMode, RoutingServiceFactory>()
-
-/** 라우팅 서비스를 레지스트리에 등록한다 */
-export const registerRoutingService = (
-  mode: RouteOptimizationMode,
-  factory: RoutingServiceFactory
-): void => {
-  registry.set(mode, factory)
+/** 모드 → 팩토리 매핑. 서비스 추가 시 여기에 등록. */
+const ROUTING_FACTORIES: Record<string, RoutingServiceFactory> = {
+  TMAP: tmapServiceFactory,
+  OSRM: osrmServiceFactory,
 }
 
 /** 주어진 모드에 해당하는 라우팅 서비스를 반환한다. 미등록 모드는 null. */
@@ -22,6 +20,6 @@ export const getRoutingService = (
   mode: RouteOptimizationMode,
   config: RoutingServiceConfig = {}
 ): RoutingService | null => {
-  const factory = registry.get(mode)
+  const factory = ROUTING_FACTORIES[mode]
   return factory ? factory(config) : null
 }
