@@ -18,11 +18,6 @@ export class OsrmRoutingService extends AbstractRoutingService {
     return true
   }
 
-  /** OSRM은 외부 서비스이므로 실패 시 원본 좌표를 반환한다 (graceful degradation). */
-  protected override onError(positions: GeoJsonPosition[]): GeoJsonPosition[] {
-    return positions
-  }
-
   protected async callApi(positions: GeoJsonPosition[]): Promise<Response> {
     const coordinates = positions
       .map(([lng, lat]) => `${lng},${lat}`)
