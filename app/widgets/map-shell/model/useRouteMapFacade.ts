@@ -150,11 +150,11 @@ export const useRouteMapFacade = (
                     message: '보행자 경로로 자동 보정되었습니다.',
                     tone: NotificationToneEnum.SUCCESS
                 })
-            } else if (result.message) {
+            } else {
                 notification.notify({
                     title: '경로 보정 건너뜀',
-                    message: result.message,
-                    tone: NotificationToneEnum.INFO
+                    message: result.message ?? '경로 보정 서비스에 연결할 수 없습니다.',
+                    tone: NotificationToneEnum.WARNING
                 })
             }
         }
