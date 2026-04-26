@@ -41,5 +41,8 @@ deploy.sh
 # Lock files
 pnpm-lock.yaml
 
+# K8s prod secrets/config
+minikube/k8s/config/*prod*
+
 # Static docs
 public/docs/
