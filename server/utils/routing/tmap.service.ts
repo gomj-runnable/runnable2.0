@@ -59,6 +59,8 @@ export class TMapRoutingService extends AbstractRoutingService {
 
   protected parseCoords(data: unknown): [number, number][] {
     const response = data as TMapResponse
+    if (!response?.features) return []
+
     const coords: [number, number][] = []
 
     for (const feature of response.features) {

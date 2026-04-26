@@ -51,21 +51,30 @@ export abstract class AbstractRoutingService implements RoutingService {
   /** API 응답에서 2D 좌표 배열을 추출한다. 빈 배열이면 원본 반환. */
   protected abstract parseCoords(data: unknown): [number, number][]
 
+  /** 에러 발생 시 처리. 기본: throw. 서브클래스가 graceful fallback을 원하면 override. */
+  protected onError(positions: GeoJsonPosition[], error: unknown): GeoJsonPosition[] {
+    throw error
+  }
+
   /** Template Method — 서브클래스가 override하지 않는다. */
   async optimize(positions: GeoJsonPosition[]): Promise<GeoJsonPosition[]> {
     if (positions.length < 2) return positions
 
-    const response = await this.callApi(positions)
+    try {
+      const response = await this.callApi(positions)
 
-    if (!response.ok) {
-      throw new Error(`Routing API error: ${response.status} ${response.statusText}`)
+      if (!response.ok) {
+        throw new Error(`Routing API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data: unknown = await response.json()
+      const coords = this.parseCoords(data)
+
+      if (coords.length === 0) return positions
+
+      return interpolateHeights(positions, coords)
+    } catch (error) {
+      return this.onError(positions, error)
     }
-
-    const data: unknown = await response.json()
-    const coords = this.parseCoords(data)
-
-    if (coords.length === 0) return positions
-
-    return interpolateHeights(positions, coords)
   }
 }
