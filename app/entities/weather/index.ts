@@ -1,9 +1,11 @@
 // model
 export * from './model/useWeatherStore'
 export * from './model/useWeatherRecommendStore'
+export * from './model/useWeatherSourceStrategy'
 
 // lib
 export * from './lib/useWeatherDataTransform'
+export * from './lib/useWeatherFilter'
 
 // ui
 export { default as WeatherDatePicker } from './ui/WeatherDatePicker.vue'

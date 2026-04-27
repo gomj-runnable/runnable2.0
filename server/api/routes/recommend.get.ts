@@ -1,5 +1,5 @@
 import { getQuery } from 'h3'
-import { weatherService } from '../../utils/weather/weather.service'
+import { weatherFacade } from '../../utils/weather/weather.facade'
 import { routeRepository } from '../../repositories'
 import type { WeatherMetrics, RecommendedRoute } from '#shared/types/weather-recommend'
 
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
     // 날씨 데이터와 공개 경로를 병렬로 조회한다
     const [monthlyWeather, routes] = await Promise.all([
-        weatherService
+        weatherFacade
             .requestByDate(undefined, { authKey, openDataKey, airKoreaKey })
             .catch((err) => {
                 console.error('[recommend] weather fetch failed', err)
@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
 
 /** 월별 날씨 데이터에서 현재 시각에 가장 가까운 슬롯의 서울 평균 기상 조건을 추출한다 */
 const resolveCurrentWeather = (
-    monthlyWeather: Awaited<ReturnType<typeof weatherService.requestByDate>> | null
+    monthlyWeather: Awaited<ReturnType<typeof weatherFacade.requestByDate>> | null
 ): WeatherMetrics => {
     const fallback: WeatherMetrics = { temperature: 20, precipitation: 0, windSpeed: 3, humidity: 60 }
     if (!monthlyWeather) return fallback

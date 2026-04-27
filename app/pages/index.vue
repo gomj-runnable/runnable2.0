@@ -32,6 +32,7 @@ import {
 } from '~/entities/route/lib/usePoiSnapping'
 import { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
 import { useWeatherSideeffect } from '~/features/weather-overlay/api/useWeatherSideeffect'
+import { useWeatherSourceStrategy } from '~/entities/weather/model/useWeatherSourceStrategy'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
@@ -130,6 +131,7 @@ const authEffect = useAuthSideeffect()
 // ─── 날씨·편의시설 ───────────────────────────────────────────────
 
 const weather = useWeatherStore()
+const weatherSources = useWeatherSourceStrategy()
 const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
 
 const facility = useFacilityStore()
@@ -572,6 +574,7 @@ watch(overlayContext, (next, prev) => {
                     :monthly-data="weather.monthlyData.value"
                     :is-loading="weather.isLoading.value"
                     :is-elevation-active="elevation.isElevationVisible.value"
+                    :available-dates="weatherSources.filteredAvailableDates.value"
                     @update:selected-date="weather.selectedDate.value = $event"
                     @update:selected-hour="weather.selectedHour.value = $event"
                     @update:selected-month="weather.selectedMonth.value = $event"
