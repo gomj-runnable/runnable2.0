@@ -47,3 +47,16 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+    .gradient-legend {
+        bottom: var(--gap-section-xs);
+        left: var(--gap-section-xs);
+        min-width: auto;
+        padding: var(--gap-1) var(--gap-2);
+    }
+
+    .gradient-legend--stacked {
+        bottom: calc(var(--gap-section-xs) + 40px);
+    }
+}

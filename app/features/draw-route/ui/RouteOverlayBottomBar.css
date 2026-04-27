@@ -9,3 +9,9 @@
     gap: var(--gap-section-xs);
     pointer-events: auto;
 }
+
+@media (max-width: 768px) {
+    .route-overlay-chip-bar {
+        display: none;
+    }
+}
