@@ -6,18 +6,22 @@ import type {
     GroundPolylinePrimitiveInstance
 } from '#shared/types/cesium'
 import type { GeoJsonMultiPolygon, GeoJsonPolygon, GeoJsonPosition } from '#shared/types/geojson'
-import type { SeoulMonthlyWeather, HourlyWeather } from '#shared/types/weather'
+import type { SeoulMonthlyWeather, HourlyWeather, MonthAvailability } from '#shared/types/weather'
 import type { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { toCartesianPosition } from '~/entities/route/lib/useRouteDrawUtils'
 import { resolvePolygonColor, toOpaqueColor } from '~/entities/weather/lib/useWeatherDataTransform'
+import { useWeatherSourceStrategy } from '~/entities/weather/model/useWeatherSourceStrategy'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { withErrorBoundary } from '~/shared/lib/useAsyncDecorator'
+import { useNotificationStore } from '~/entities/notification'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 
 type ActiveWeatherLayer = WeatherLayerEnum | null
 
 interface UseWeatherSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
+    selectedMonth: Ref<string>
     selectedDate: Ref<string>
     selectedHour: Ref<string>
     monthlyData: Ref<SeoulMonthlyWeather | null>
@@ -37,6 +41,7 @@ interface UseWeatherSideeffectOptions {
 export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     const {
         viewer,
+        selectedMonth,
         selectedDate,
         selectedHour,
         monthlyData,
@@ -46,6 +51,8 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         isLoading,
         isVisible
     } = options
+
+    const { sourceAvailability } = useWeatherSourceStrategy()
 
     /** 행정경계 GeoJSON을 Cesium DataSource로 로드한 인스턴스 */
     let weatherDataSource: GeoJsonDataSourceInstance | null = null
@@ -154,25 +161,60 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     }
 
     const { ensureGuBoundaryLoaded } = useDistrictSideeffect()
+    const { notify } = useNotificationStore()
 
     // 데이터 없는 구역 표시색
     const NO_DATA_COLOR = 'rgba(80, 80, 80, 0.3)'
 
-    const _fetchWeatherData = withErrorBoundary(
-        async (date: string) => $fetch<SeoulMonthlyWeather>(`/api/weather/${date}`),
+    /** 날씨 에러 알림이 이미 표시되었는지 추적 (세션 당 1회) */
+    let weatherErrorNotified = false
+
+    const _fetchMonthlyData = withErrorBoundary(
+        async (month: string) => $fetch<SeoulMonthlyWeather>(`/api/weather/monthly/${month}`),
         { label: 'WeatherSideeffect', retry: 1 }
     )
 
-    /** 선택된 날짜의 월별 날씨 데이터를 서버에서 가져와 `monthlyData`에 저장한다. */
+    const _fetchAvailability = withErrorBoundary(
+        async (month: string) => $fetch<MonthAvailability>(`/api/weather/availability/${month}`),
+        { label: 'WeatherSideeffect', retry: 1 }
+    )
+
+    /** 선택된 월의 날씨 데이터를 서버에서 가져와 `monthlyData`에 저장한다. */
     const fetchMonthlyWeather = async () => {
         isLoading.value = true
         try {
-            const data = await _fetchWeatherData(selectedDate.value)
+            const month = `${selectedMonth.value.slice(0, 4)}-${selectedMonth.value.slice(4)}`
+            const data = await _fetchMonthlyData(month)
             monthlyData.value = data
+
+            if (data?.sourceErrors?.length && !weatherErrorNotified) {
+                weatherErrorNotified = true
+                notify({
+                    title: '날씨 데이터 일부 실패',
+                    message: data.sourceErrors.map(e => `[${e.source}] ${e.message}`).join('\n'),
+                    tone: NotificationToneEnum.WARNING
+                })
+            }
         } catch {
-            // 에러는 withErrorBoundary에서 로깅됨 — 날씨 실패가 전체 마운트를 깨뜨리지 않도록 격리
+            if (!weatherErrorNotified) {
+                weatherErrorNotified = true
+                notify({
+                    title: '날씨 데이터 로드 실패',
+                    message: '날씨 정보를 불러오지 못했습니다. 네트워크 연결을 확인해 주세요.',
+                    tone: NotificationToneEnum.ERROR
+                })
+            }
         } finally {
             isLoading.value = false
+        }
+    }
+
+    /** 선택된 월의 소스별 가용 날짜 정보를 서버에서 가져온다. */
+    const fetchAvailability = async () => {
+        const month = `${selectedMonth.value.slice(0, 4)}-${selectedMonth.value.slice(4)}`
+        const data = await _fetchAvailability(month)
+        if (data) {
+            sourceAvailability.value = data as unknown as Record<string, string[]>
         }
     }
 
@@ -281,7 +323,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
      * 행정경계·날씨 데이터를 병렬로 불러온 뒤 DataSource를 로드하고 폴리곤 색상을 적용한다.
      */
     const init = async () => {
-        await Promise.all([ensureGuBoundaryLoaded(), fetchMonthlyWeather()])
+        await Promise.all([ensureGuBoundaryLoaded(), fetchMonthlyWeather(), fetchAvailability()])
         await loadBoundaryDataSource()
         updateCesiumPolygons()
     }
@@ -295,5 +337,9 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
             weatherOutlinePrimitive.show = v
         }
     })
-    return { init, clearWeatherLayer }
+    watch(selectedMonth, () => {
+        fetchMonthlyWeather()
+        fetchAvailability()
+    })
+    return { init, clearWeatherLayer, fetchAvailability }
 }

@@ -175,19 +175,3 @@ export const mapConditionByPrecipitation = (
     return 'cloudy'
 }
 
-export const buildFallbackSlot = (date: Date): HourlyWeather => {
-    const { hour, month } = toKstParts(date)
-    const daytimeCurve = Math.max(0, Math.sin(((hour - 6) / 12) * Math.PI))
-    const seasonalBias = Math.sin((month / 12) * Math.PI)
-    const temperature = Number((7 + daytimeCurve * 11 + seasonalBias * 5).toFixed(1))
-
-    return {
-        date: formatDate(date),
-        time: formatHour(date),
-        condition: hour >= 6 && hour <= 18 ? 'partly-cloudy' : 'cloudy',
-        temperature,
-        pm10: null,
-        pm10Grade: null,
-        source: 'fallback'
-    }
-}

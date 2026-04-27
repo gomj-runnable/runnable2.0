@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
+import { useWeatherSourceStrategy, WEATHER_SOURCES } from '../model/useWeatherSourceStrategy'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 */
@@ -20,6 +21,8 @@ const layers: { value: WeatherLayerEnum; label: string; icon: string }[] = [
 const handleClick = (layer: WeatherLayerEnum) => {
     emit('update:modelValue', props.modelValue?.equals(layer) ? null : layer)
 }
+
+const { toggleSource, isSourceActive } = useWeatherSourceStrategy()
 </script>
 
 <template>
@@ -33,6 +36,17 @@ const handleClick = (layer: WeatherLayerEnum) => {
             :variant="(modelValue?.equals(layer.value) ?? false) ? 'solid' : 'outline'"
             :color="(modelValue?.equals(layer.value) ?? false) ? 'primary' : 'neutral'"
             @click="handleClick(layer.value)"
+        />
+        <span class="weather-layer-toggle__divider" />
+        <UButton
+            v-for="src in WEATHER_SOURCES"
+            :key="src.key"
+            :label="src.label"
+            :icon="src.icon"
+            size="sm"
+            :variant="isSourceActive(src.key) ? 'solid' : 'outline'"
+            :color="isSourceActive(src.key) ? 'info' : 'neutral'"
+            @click="toggleSource(src.key)"
         />
     </div>
 </template>

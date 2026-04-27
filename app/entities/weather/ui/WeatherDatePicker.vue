@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import type { SeoulMonthlyWeather } from '#shared/types/weather'
-
 const props = defineProps<{
     /** 현재 선택된 날짜 문자열 (형식: "YYYY-MM-DD") */
     modelValue: string // "2025-04-08"
     /** 달력에 표시할 연월 문자열 (형식: "YYYYMM") */
     month: string // "202504"
-    /** 선택 가능한 날짜 범위를 포함한 월별 날씨 데이터 */
-    monthlyData: SeoulMonthlyWeather | null
+    /** 활성 소스 기반 가용 날짜 목록 */
+    availableDates: Set<string>
 }>()
 
 /** 날짜 선택 및 월 이동 이벤트 */
@@ -26,16 +24,6 @@ const activeMonthKey = computed(
 
 const monthLabel = computed(() => `${calendarYear.value}년 ${calendarMonth.value}월`)
 
-// 해당 월의 날짜 데이터 집합 (데이터 있는 날짜)
-const availableDates = computed(() => {
-    if (!props.monthlyData) return new Set<string>()
-    const dates = new Set<string>()
-    for (const dong of props.monthlyData.dongs) {
-        for (const d of dong.hourly) dates.add(d.date)
-    }
-    return dates
-})
-
 // 달력 첫날의 요일 (0=일요일)
 const firstDayOfWeek = computed(() =>
     new Date(calendarYear.value, calendarMonth.value - 1, 1).getDay()
@@ -46,25 +34,12 @@ const daysInMonth = computed(() => new Date(calendarYear.value, calendarMonth.va
 
 const today = new Date().toISOString().slice(0, 10)
 
-const minMonth = computed(() =>
-    props.monthlyData?.rangeStart ? props.monthlyData.rangeStart.slice(0, 7).replace('-', '') : null
-)
-const maxMonth = computed(() =>
-    props.monthlyData?.rangeEnd ? props.monthlyData.rangeEnd.slice(0, 7).replace('-', '') : null
-)
-const canMovePrev = computed(() => !minMonth.value || activeMonthKey.value > minMonth.value)
-const nextMonthFromNow = computed(() => {
+const canMovePrev = computed(() => true)  // 자유롭게 이동 가능
+const canMoveNext = computed(() => {
     const now = new Date()
     const next = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-    return `${next.getFullYear()}${String(next.getMonth() + 1).padStart(2, '0')}`
-})
-const canMoveNext = computed(() => {
-    const upperBound = maxMonth.value
-        ? maxMonth.value > nextMonthFromNow.value
-            ? maxMonth.value
-            : nextMonthFromNow.value
-        : nextMonthFromNow.value
-    return activeMonthKey.value < upperBound
+    const nextMonthKey = `${next.getFullYear()}${String(next.getMonth() + 1).padStart(2, '0')}`
+    return activeMonthKey.value < nextMonthKey
 })
 
 // 날짜 문자열 생성 (YYYY-MM-DD)

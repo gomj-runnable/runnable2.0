@@ -1,5 +1,5 @@
 import { createError, defineEventHandler } from 'h3'
-import { weatherService } from '../../utils/weather/weather.service'
+import { weatherFacade } from '../../utils/weather/weather.facade'
 
 export default defineEventHandler(async (event) => {
     const dateParam = event.context.params?.date
@@ -15,5 +15,5 @@ export default defineEventHandler(async (event) => {
     const openDataKey = String(config.openData ?? '').trim()
     const airKoreaKey = String(config.airKoreaKey ?? '').trim()
 
-    return weatherService.requestByDate(dateParam, { authKey, openDataKey, airKoreaKey })
+    return weatherFacade.requestByDate(dateParam, { authKey, openDataKey, airKoreaKey })
 })

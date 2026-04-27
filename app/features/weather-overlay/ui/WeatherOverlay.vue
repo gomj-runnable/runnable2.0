@@ -20,6 +20,8 @@ const props = defineProps<{
     isLoading: boolean
     /** 고도 레이어 활성화 여부 */
     isElevationActive: boolean
+    /** 활성 소스 기반 가용 날짜 목록 */
+    availableDates: Set<string>
 }>()
 
 const emit = defineEmits<{
@@ -64,8 +66,7 @@ const handleDateSelect = (date: string) => {
 
 /** 선택 날짜에 데이터가 있는지 확인 */
 const hasDataForSelectedDate = computed(() => {
-    if (!props.monthlyData) return false
-    return props.monthlyData.dongs.some((d) => d.hourly.some((w) => w.date === props.selectedDate))
+    return props.availableDates.size > 0 && props.availableDates.has(props.selectedDate)
 })
 
 /** 날짜 표시 (MM.DD) */
@@ -152,7 +153,7 @@ const hourLabel = computed(() => {
                                 <WeatherDatePicker
                                     :model-value="selectedDate"
                                     :month="selectedMonth"
-                                    :monthly-data="monthlyData"
+                                    :available-dates="availableDates"
                                     @update:model-value="handleDateSelect"
                                     @update:month="emit('update:selectedMonth', $event)"
                                 />

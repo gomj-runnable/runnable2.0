@@ -3,7 +3,8 @@ export type WeatherCondition = 'clear' | 'partly-cloudy' | 'cloudy' | 'rainy' | 
 export type Pm10Grade = 'good' | 'moderate' | 'bad' | 'very-bad'
 
 export type WeatherLayer = 'weather' | 'temperature' | 'pm10'
-export type WeatherSlotSource = 'observed' | 'forecast' | 'fallback'
+export type WeatherSlotSource = 'observed' | 'forecast'
+export type WeatherSourceKey = 'observed' | 'forecast' | 'airquality'
 
 export interface HourlyWeather {
     date: string // "2025-04-08"
@@ -12,7 +13,7 @@ export interface HourlyWeather {
     temperature: number // °C
     pm10: number | null // µg/m³
     pm10Grade: Pm10Grade | null
-    source?: WeatherSlotSource
+    source: WeatherSlotSource
 }
 
 export interface DongWeather {
@@ -23,11 +24,28 @@ export interface DongWeather {
     hourly: HourlyWeather[]
 }
 
+/** 소스별 에러 정보 */
+export interface WeatherSourceError {
+    source: WeatherSourceKey
+    message: string
+}
+
 export interface SeoulMonthlyWeather {
     baseDate: string // "2026-04-09"
     rangeStart: string // "2026-03-10"
     rangeEnd: string // "2026-04-09"
     dongs: DongWeather[]
+    /** 소스별 에러 목록 (부분 실패 시에도 데이터는 반환) */
+    sourceErrors?: WeatherSourceError[]
+    /** 실제 사용된 소스 목록 */
+    activeSources?: WeatherSourceKey[]
+}
+
+/** 캘린더용 월별 가용일 응답 */
+export interface MonthAvailability {
+    month: string // "2026-04"
+    availableDates: string[] // ["2026-04-01", ...]
+    sourceAvailability: Record<string, string[]> // { observed: [...], forecast: [...] }
 }
 
 // ─── 원본 Response Classes ───
