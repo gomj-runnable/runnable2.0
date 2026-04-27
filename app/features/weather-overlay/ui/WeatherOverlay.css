@@ -80,3 +80,14 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+@media (max-width: 768px) {
+    .weather-overlay__topbar {
+        padding: var(--gap-section-xs) var(--gap-section-sm);
+    }
+
+    .weather-overlay__bottombar {
+        left: var(--gap-section-xs);
+        bottom: var(--gap-section-xs);
+    }
+}

@@ -100,3 +100,103 @@
 .map-shell__overlay > * {
     pointer-events: auto;
 }
+
+/* ── 모바일 헤더 (데스크톱에서는 숨김) ─────────────────────────── */
+.map-shell__mobile-header {
+    display: none;
+}
+
+/* ── 사이드바 래퍼 (데스크톱: 투명 컨테이너) ──────────────────── */
+.map-shell__sidebar-wrapper {
+    display: flex;
+    flex-shrink: 0;
+    height: 100%;
+}
+
+/* ── 모바일 배경 ──────────────────────────────────────────────── */
+.map-shell__mobile-backdrop {
+    display: none;
+}
+
+.map-shell__mobile-title {
+    pointer-events: none;
+}
+
+/* ── 트랜지션 ────────────────────────────────────────────────── */
+.mobile-backdrop-enter-active {
+    transition: opacity 0.25s ease;
+}
+
+.mobile-backdrop-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.mobile-backdrop-enter-from,
+.mobile-backdrop-leave-to {
+    opacity: 0;
+}
+
+/* ── 반응형: 모바일 (≤768px) ──────────────────────────────────── */
+@media (max-width: 768px) {
+    .map-shell {
+        flex-direction: column;
+    }
+
+    /* 모바일 헤더 표시 */
+    .map-shell__mobile-header {
+        display: flex;
+        align-items: center;
+        gap: var(--gap-section-2xs, 4px);
+        padding: var(--gap-section-2xs, 4px) var(--gap-section-sm, 8px);
+        background: var(--color-surface-base);
+        border-bottom: 1px solid var(--color-border-default);
+        flex-shrink: 0;
+        z-index: var(--z-header, 11);
+    }
+
+    /* 사이드바: 왼쪽 오버레이로 전환 */
+    .map-shell__sidebar-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 85vw;
+        z-index: 101;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        background: var(--color-surface-base);
+        box-shadow: var(--shadow-lg, 0 20px 48px rgba(0, 0, 0, 0.3));
+    }
+
+    .map-shell.is-mobile-sidebar-open .map-shell__sidebar-wrapper {
+        transform: translateX(0);
+    }
+
+    /* 모바일 배경 오버레이 */
+    .map-shell__mobile-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* 뷰어: 모바일 헤더 아래로 배치 */
+    .map-shell__viewer {
+        padding: var(--gap-section-xs, 6px);
+    }
+
+    /* SecondPanel: 모바일에서 숨김 처리 */
+    .map-shell__second-panel {
+        display: none;
+    }
+
+    /* 오버레이 위치 조정 */
+    .map-shell__overlay {
+        top: var(--gap-section-xs, 6px);
+        right: var(--gap-section-xs, 6px);
+        bottom: var(--gap-section-xs, 6px);
+        left: var(--gap-section-xs, 6px);
+    }
+}

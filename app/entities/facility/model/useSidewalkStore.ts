@@ -58,6 +58,11 @@ export const useSidewalkStore = () => {
         selectedDong.value = null
     }
 
+    /** 인도 표시 활성 상태를 토글한다. */
+    const toggleActive = () => {
+        isActive.value = !isActive.value
+    }
+
     return {
         districts,
         selectedDistrict,
@@ -66,6 +71,7 @@ export const useSidewalkStore = () => {
         isLoading,
         selectDistrict,
         setDistrictFromLocation,
-        clearSelection
+        clearSelection,
+        toggleActive
     }
 }

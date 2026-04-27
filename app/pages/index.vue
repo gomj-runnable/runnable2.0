@@ -32,7 +32,7 @@ import {
 } from '~/entities/route/lib/usePoiSnapping'
 import { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
 import { useWeatherSideeffect } from '~/features/weather-overlay/api/useWeatherSideeffect'
-import { useWeatherSourceStrategy } from '~/entities/weather/model/useWeatherSourceStrategy'
+import { useWeatherSourceStrategy, WEATHER_SOURCES } from '~/entities/weather/model/useWeatherSourceStrategy'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
@@ -70,6 +70,12 @@ import RouteInfoInputForm from '~/entities/route/ui/RouteInfoInputForm.vue'
 import RouteInfoMarkerPopup from '~/entities/route/ui/RouteInfoMarkerPopup.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
+import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
+import BottomDrawer from '~/shared/ui/BottomDrawer.vue'
+import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
+import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
+import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
+import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -135,6 +141,7 @@ const weatherSources = useWeatherSourceStrategy()
 const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
 
 const facility = useFacilityStore()
+const sidewalk = useSidewalkStore()
 const facilityEffect = useFacilitySideeffect({
     viewer,
     ...facility,
@@ -192,7 +199,7 @@ const cameraEffect = useCameraSideeffect({ viewer, ...camera })
 
 // ─── 행정경계 ────────────────────────────────────────────────────
 
-useBoundaryStore()
+const boundary = useBoundaryStore()
 const boundaryEffect = useBoundarySideeffect({ viewer })
 
 // ─── 구간 정보 ──────────────────────────────────────────────────
@@ -329,9 +336,219 @@ const showSimulationChip = computed(() => {
     return true
 })
 
+// ─── 모바일 감지 ────────────────────────────────────────────────
+const isMobile = ref(false)
+let mobileMediaQuery: MediaQueryList | null = null
+
+// ─── FAB 그룹 (모바일 전용 플로팅 메뉴) ─────────────────────────
+const fabGroups = computed(() => [
+    {
+        key: 'facility',
+        label: '시설물',
+        icon: 'i-lucide-building-2',
+        items: [
+            ...FACILITY_LAYERS.map((layer) => ({
+                key: layer.type,
+                label: layer.label,
+                icon: layer.icon,
+                dotColor: layer.color,
+                active:
+                    layer.type === 'sidewalk'
+                        ? sidewalk.isActive.value
+                        : facility.activeTypes.value.has(layer.type),
+                onClick: () => {
+                    if (layer.type === 'sidewalk') {
+                        sidewalk.toggleActive()
+                    } else {
+                        facility.toggleType(layer.type)
+                    }
+                }
+            })),
+            {
+                key: 'search-nearby',
+                label: '현재 위치 검색',
+                icon: 'i-lucide-locate',
+                active: false,
+                visible: ['crosswalk', 'fountain', 'hospital', 'sidewalk'].some(
+                    (t) => facility.activeTypes.value.has(t as any) || (t === 'sidewalk' && sidewalk.isActive.value)
+                ),
+                onClick: () => facilityEffect.searchNearby()
+            }
+        ]
+    },
+    {
+        key: 'map-layer',
+        label: '지도 레이어',
+        icon: 'i-lucide-layers',
+        items: [
+            {
+                key: 'elevation',
+                label: '지역 고도',
+                icon: 'i-lucide-mountain',
+                active: elevation.isElevationVisible.value,
+                onClick: () => {
+                    const next = !elevation.isElevationVisible.value
+                    elevation.isElevationVisible.value = next
+                    if (next) weather.activeLayer.value = null
+                }
+            },
+            {
+                key: 'gu',
+                label: '시군구',
+                icon: 'i-lucide-map',
+                active: boundary.isGuActive.value,
+                onClick: () => boundary.toggleGu()
+            },
+            {
+                key: 'dong',
+                label: '읍면동',
+                icon: 'i-lucide-map-pin',
+                active: boundary.isDongActive.value,
+                onClick: () => boundary.toggleDong()
+            }
+        ]
+    },
+    {
+        key: 'weather',
+        label: '날씨',
+        icon: 'i-lucide-cloud-sun',
+        items: [
+            {
+                key: 'weather-layer',
+                label: '날씨',
+                icon: 'i-lucide-cloud-sun',
+                active: weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER) ?? false,
+                onClick: () => {
+                    const next = weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER)
+                        ? null
+                        : WeatherLayerEnum.WEATHER
+                    weather.activeLayer.value = next
+                    if (next && elevation.isElevationVisible.value)
+                        elevation.isElevationVisible.value = false
+                }
+            },
+            {
+                key: 'temperature',
+                label: '온도',
+                icon: 'i-lucide-thermometer',
+                active: weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ?? false,
+                onClick: () => {
+                    const next = weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE)
+                        ? null
+                        : WeatherLayerEnum.TEMPERATURE
+                    weather.activeLayer.value = next
+                    if (next && elevation.isElevationVisible.value)
+                        elevation.isElevationVisible.value = false
+                }
+            },
+            {
+                key: 'pm10',
+                label: '미세먼지',
+                icon: 'i-lucide-wind',
+                active: weather.activeLayer.value?.equals(WeatherLayerEnum.PM10) ?? false,
+                onClick: () => {
+                    const next = weather.activeLayer.value?.equals(WeatherLayerEnum.PM10)
+                        ? null
+                        : WeatherLayerEnum.PM10
+                    weather.activeLayer.value = next
+                    if (next && elevation.isElevationVisible.value)
+                        elevation.isElevationVisible.value = false
+                }
+            },
+            ...WEATHER_SOURCES.map((src) => ({
+                key: `source-${src.key}`,
+                label: src.label,
+                icon: src.icon,
+                active: weatherSources.isSourceActive(src.key),
+                onClick: () => weatherSources.toggleSource(src.key)
+            }))
+        ]
+    },
+    {
+        key: 'route-tools',
+        label: '경로 도구',
+        icon: 'i-lucide-route',
+        visible:
+            overlayContext.value.showDrawingTools ||
+            (overlayContext.value.hasActiveRoute && !!elevationChart.profile),
+        items: [
+            {
+                key: 'elevation-chart',
+                label: elevationChart.title,
+                icon: 'i-lucide-chart-line',
+                active: elevationChart.open,
+                visible: !!elevationChart.profile,
+                onClick: () => elevationChart.setOpen(!elevationChart.open)
+            },
+            {
+                key: 'loop-close',
+                label: '도착지 연결',
+                icon: 'i-lucide-rotate-ccw',
+                active: closing.mode?.isLoopClose ?? false,
+                visible: activeNav.value === '그리기',
+                onClick: () =>
+                    closing.setMode(
+                        closing.mode?.isLoopClose ? null : RouteClosingModeEnum.LOOP_CLOSE
+                    )
+            },
+            {
+                key: 'round-trip',
+                label: '왕복 코스',
+                icon: 'i-lucide-arrow-left-right',
+                active: closing.mode?.isRoundTrip ?? false,
+                visible: activeNav.value === '그리기',
+                onClick: () =>
+                    closing.setMode(
+                        closing.mode?.isRoundTrip ? null : RouteClosingModeEnum.ROUND_TRIP
+                    )
+            },
+            {
+                key: 'gradient',
+                label: '경사도',
+                icon: 'i-lucide-trending-up',
+                active: gradient.isGradientVisible.value,
+                onClick: () => gradient.toggleGradient()
+            }
+        ]
+    },
+    {
+        key: 'features',
+        label: '기능',
+        icon: 'i-lucide-play-circle',
+        visible: showSimulationChip.value || showRouteInfoChip.value,
+        items: [
+            {
+                key: 'simulation',
+                label: '시뮬레이션',
+                icon: 'i-lucide-play-circle',
+                active: isSimDrawerOpen.value,
+                visible: showSimulationChip.value,
+                onClick: () => {
+                    isSimDrawerOpen.value = !isSimDrawerOpen.value
+                }
+            },
+            {
+                key: 'route-info',
+                label: '경로정보',
+                icon: 'i-lucide-message-circle',
+                active: routeInfoStore.isAddingRouteInfo.value,
+                visible: showRouteInfoChip.value,
+                onClick: () => routeInfoStore.toggleAddingMode()
+            }
+        ]
+    }
+])
+
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
+    // 모바일 미디어쿼리 리스너
+    mobileMediaQuery = window.matchMedia('(max-width: 768px)')
+    isMobile.value = mobileMediaQuery.matches
+    mobileMediaQuery.addEventListener('change', (e) => {
+        isMobile.value = e.matches
+    })
+
     await init()
     viewer.value = window.viewer
     await Promise.all([
@@ -658,6 +875,29 @@ watch(overlayContext, (next, prev) => {
                 </div>
             </template>
         </MapShell>
+
+        <FloatingActionMenu :groups="fabGroups" />
+
+        <!-- 모바일 전용: SecondPanel을 BottomDrawer로 표시 -->
+        <BottomDrawer
+            v-if="isMobile && sectionInfo.isOpen.value"
+            :open="sectionInfo.isOpen.value"
+            @update:open="!$event && sectionInfo.close()"
+        >
+            <SecondPanel
+                :panel-title="sectionInfo.panelTitle.value"
+                :sections="sectionInfo.sections.value"
+                :user-paces="sectionInfo.userPaces.value"
+                :total-distance="sectionTotalDistance"
+                :total-time="sectionTotalTime"
+                :is-edit-mode="sectionInfo.isEditMode.value"
+                @update:edit-mode="sectionInfo.isEditMode.value = $event"
+                @update:pace="sectionInfo.updatePace"
+                @update:weight="sectionInfo.updateWeight"
+                @update:strategy="sectionInfo.updateStrategy"
+                @close="sectionInfo.close"
+            />
+        </BottomDrawer>
 
         <SimulationDrawer
             v-model:open="isSimDrawerOpen"
