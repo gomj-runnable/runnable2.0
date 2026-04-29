@@ -32,7 +32,8 @@ const locale = defineLocale<Messages>({
         prose: {
             codeCollapse: { closeText: '접기', name: '코드 블록', openText: '펼치기' },
             collapsible: { closeText: '접기', name: '접을 수 있는 섹션', openText: '펼치기' },
-            pre: { copy: '복사' }
+            pre: { copy: '복사' },
+            prompt: { copy: '복사', openIn: '열기' }
         },
         selectMenu: { create: '"{query}" 생성', noData: '데이터 없음', noMatch: '결과 없음', search: '검색…' },
         slideover: { close: '닫기' },

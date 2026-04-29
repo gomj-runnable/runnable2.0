@@ -8,7 +8,6 @@ export * from './lib/useWeatherDataTransform'
 export * from './lib/useWeatherFilter'
 
 // ui
-export { default as WeatherDatePicker } from './ui/WeatherDatePicker.vue'
 export { default as WeatherLegend } from './ui/WeatherLegend.vue'
 export { default as WeatherLayerToggle } from './ui/WeatherLayerToggle.vue'
 export { default as ElevationLegend } from './ui/ElevationLegend.vue'

@@ -18,9 +18,8 @@ export class ObservedService {
             const slots = await this.adapter.fetchSlots(authKey, start, end)
             return { slots, error: null }
         } catch (e) {
-            const message = e instanceof Error ? e.message : String(e)
             console.error('[ObservedService]', e)
-            return { slots: [], error: { source: 'observed', message } }
+            return { slots: [], error: { source: 'observed', message: '관측 데이터 조회 실패' } }
         }
     }
 }
