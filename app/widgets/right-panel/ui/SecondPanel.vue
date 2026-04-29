@@ -100,7 +100,7 @@ const emit = defineEmits<{
                     :max="600"
                     :step="5"
                     class="second-panel__slider"
-                    @update:model-value="emit('update:pace', section.sectionId, $event as number)"
+                    @update:model-value="emit('update:pace', section.sectionId, $event)"
                 />
 
                 <div class="second-panel__slider-row">
@@ -120,7 +120,7 @@ const emit = defineEmits<{
                     :max="30"
                     :step="0.5"
                     class="second-panel__slider"
-                    @update:model-value="emit('update:weight', section.sectionId, $event as number)"
+                    @update:model-value="emit('update:weight', section.sectionId, $event)"
                 />
 
                 <textarea
