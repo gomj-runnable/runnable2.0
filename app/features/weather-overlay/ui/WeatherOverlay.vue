@@ -101,7 +101,7 @@ const handleTimeChange = (value: any) => {
                     :model-value="activeLayer"
                     @update:model-value="handleLayerChange"
                 />
-                <div class="weather-overlay__datetime-row">
+                <div v-if="activeLayer" class="weather-overlay__datetime-row">
                     <UInputDate
                         ref="inputDate"
                         :model-value="dateValue"
