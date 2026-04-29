@@ -11,7 +11,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "typecheck": "nuxt typecheck",
-    "seed": "tsx server/database/seed.ts"
+    "seed": "tsx server/database/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.87",
@@ -43,6 +45,7 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.13.0",
     "@nuxt/eslint-config": "^1.13.0",
+    "@nuxt/test-utils": "^4.0.3",
     "@tailwindcss/vite": "^4.1.18",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^25.2.0",
@@ -55,6 +58,7 @@
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
+    "vitest": "^4.1.5",
     "vue-tsc": "^3.2.4"
   },
   "packageManager": "pnpm@10.28.2",
