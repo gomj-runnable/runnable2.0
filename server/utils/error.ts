@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { getRequestURL } from 'h3'
 
 /**
  * API 핸들러에서 일관된 에러 응답을 생성하는 유틸리티.
@@ -61,9 +62,10 @@ export function withExceptionHandler<T>(
                 throw error
             }
 
-            // Zod ValidationError → 400
+            // Zod ValidationError → 400 (스키마 세부사항 노출 방지)
             if (error instanceof Error && error.name === 'ZodError') {
-                throw badRequest(error.message)
+                console.warn(`[Validation] ${event.method} ${getRequestURL(event).pathname}:`, error.message)
+                throw badRequest('요청 데이터가 유효하지 않습니다.')
             }
 
             // 예상치 못한 에러 → 500 + 로깅

@@ -13,12 +13,12 @@
 
 .discover-district-selector__chip {
     padding: 4px 10px;
-    font-size: var(--text-label-xs);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-label);
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
     background: transparent;
-    border: 1px solid var(--color-border-default);
+    border: 1px solid rgba(223, 255, 0, 0.2);
     border-radius: 9999px;
     cursor: pointer;
     transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
@@ -26,13 +26,13 @@
 }
 
 .discover-district-selector__chip:hover {
-    background: var(--surface-hover);
-    color: var(--text-primary);
-    border-color: var(--color-border-active);
+    background: rgba(204, 255, 0, 0.12);
+    color: #e6e8ea;
+    border-color: rgba(255, 255, 0, 0.42);
 }
 
 .discover-district-selector__chip.is-active {
-    background: var(--nav-active-bg);
-    color: var(--nav-active-color);
-    border-color: var(--nav-active-color);
+    background: color-mix(in srgb, #ccff00 16%, transparent);
+    color: #ccff00;
+    border-color: #ccff00;
 }

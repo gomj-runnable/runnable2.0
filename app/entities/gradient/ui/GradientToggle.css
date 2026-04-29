@@ -9,33 +9,33 @@
     align-items: center;
     padding: 0.25rem 0.375rem;
     border-radius: 0.5rem;
-    font-size: var(--text-caption);
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-on-primary);
+    color: #000000;
     line-height: 1.4;
     white-space: nowrap;
     cursor: default;
 }
 
 .gradient-toggle__tooltip-title {
-    font-size: var(--text-caption);
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #e6e8ea;
     margin-bottom: 0.375rem;
 }
 
 .gradient-toggle__tooltip-table {
     border-collapse: collapse;
-    font-size: var(--text-caption);
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
 }
 
 .gradient-toggle__tooltip-table th {
     font-weight: 600;
-    color: var(--text-muted);
+    color: #8a949e;
     text-align: left;
     padding: 0.25rem 0.375rem 0.25rem 0;
-    border-bottom: 1px solid var(--color-border-default);
+    border-bottom: 1px solid rgba(223, 255, 0, 0.2);
 }
 
 .gradient-toggle__tooltip-table td {
@@ -52,8 +52,8 @@
 }
 
 .gradient-toggle__tooltip-note {
-    font-size: var(--text-label-xs);
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    color: #8a949e;
     margin-top: 0.375rem;
     font-style: italic;
 }

@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 import { getCookie } from 'h3'
 import type { betterAuth } from 'better-auth'
-import { memoryUsers } from './memoryStore'
+import { memoryUsers, memorySessions } from './memoryStore'
 
 export interface SessionUser {
     userId: string
@@ -20,8 +20,8 @@ class MemoryAuthService implements IAuthService {
     async getSession(event: H3Event): Promise<SessionUser | null> {
         const token = getCookie(event, 'better-auth.session_token')
         if (token) {
-            const userId = token.replace('memory-session-', '')
-            const user = Array.from(memoryUsers.values()).find((u) => u.id === userId)
+            const userId = memorySessions.get(token)
+            const user = userId ? Array.from(memoryUsers.values()).find((u) => u.id === userId) : null
             if (user) {
                 return { userId: user.id, name: user.name, email: user.email }
             }

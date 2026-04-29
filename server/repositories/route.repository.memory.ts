@@ -58,6 +58,9 @@ class InMemoryRouteRepository implements IRouteRepository {
     }
 
     async deleteRoute(routeId: string): Promise<boolean> {
+        for (const [id, section] of this.sections) {
+            if (section.routeId === routeId) this.sections.delete(id)
+        }
         return this.routes.delete(routeId)
     }
 

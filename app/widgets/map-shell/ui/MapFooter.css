@@ -6,14 +6,14 @@
 }
 
 .map-footer__label {
-    font-size: var(--text-caption);
-    color: var(--color-text-subtle);
+    font-size: 0.75rem;
+    color: #58616a;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     user-select: none;
     padding: 0.25rem 0.625rem;
     margin: 0;
-    background: color-mix(in srgb, var(--color-surface-default) 75%, transparent);
+    background: color-mix(in srgb, color-mix(in srgb, #1e2124 92%, transparent) 75%, transparent);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-radius: 1rem 0 0 0;

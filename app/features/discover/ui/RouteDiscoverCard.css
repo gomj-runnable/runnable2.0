@@ -7,18 +7,18 @@
 
 .route-discover-card__title {
     margin: 0;
-    font-size: var(--text-heading-xs);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-heading);
-    letter-spacing: var(--letter-spacing-tight);
-    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #e6e8ea;
 }
 
 .route-discover-card__district {
     flex-shrink: 0;
-    font-size: var(--text-label-xs);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
     white-space: nowrap;
 }
 
@@ -30,19 +30,19 @@
 }
 
 .route-discover-card__stat {
-    font-size: var(--text-body-sm);
-    color: var(--text-secondary);
+    font-size: 0.875rem;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
 }
 
 .route-discover-card__stat + .route-discover-card__stat::before {
     content: '·';
     margin-right: 0.375rem;
-    color: var(--text-secondary);
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
 }
 
 .route-discover-card__author {
-    font-size: var(--text-label-sm);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-label);
-    color: color-mix(in srgb, var(--text-primary) 72%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: color-mix(in srgb, #e6e8ea 72%, transparent);
 }

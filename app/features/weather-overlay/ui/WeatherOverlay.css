@@ -55,9 +55,9 @@
 
 .weather-overlay__calendar-popover-title {
     margin: 0;
-    font-size: var(--text-label-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #e6e8ea;
 }
 
 .weather-overlay__calendar-close {
@@ -66,15 +66,15 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border: 1px solid var(--color-border-default);
+    border: 1px solid rgba(223, 255, 0, 0.2);
     border-radius: 0.75rem;
-    background: var(--color-surface-soft);
-    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e6e8ea;
     cursor: pointer;
 }
 
 .weather-overlay__calendar-close:hover {
-    background: var(--color-surface-soft-hover);
+    background: rgba(204, 255, 0, 0.12);
 }
 
 @keyframes spin {

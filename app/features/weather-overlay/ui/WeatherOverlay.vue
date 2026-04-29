@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { SeoulMonthlyWeather } from '#shared/types/weather'
 import type { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { CalendarDate, Time } from '@internationalized/date'
 import type { DateValue } from '@internationalized/date'
@@ -15,8 +14,6 @@ const props = defineProps<{
     selectedMonth: string
     /** 현재 활성화된 날씨 레이어 타입 */
     activeLayer: WeatherLayerEnum | null
-    /** 서울 월별 날씨 데이터 (없으면 null) */
-    monthlyData: SeoulMonthlyWeather | null
     /** 날씨 데이터 로딩 중 여부 */
     isLoading: boolean
     /** 고도 레이어 활성화 여부 */
@@ -40,15 +37,6 @@ const emit = defineEmits<{
 
 const inputDate = useTemplateRef('inputDate')
 
-/** 고도 레이어 토글: 활성화 시 날씨 레이어를 끈다 */
-const handleElevationToggle = () => {
-    const next = !props.isElevationActive
-    emit('update:elevationActive', next)
-    if (next) {
-        emit('update:activeLayer', null)
-    }
-}
-
 /** 날씨 레이어 변경: 레이어 선택 시 고도 레이어를 끈다 */
 const handleLayerChange = (layer: WeatherLayerEnum | null) => {
     emit('update:activeLayer', layer)
@@ -61,7 +49,7 @@ const handleLayerChange = (layer: WeatherLayerEnum | null) => {
 const dateValue = computed(() => {
     const parts = props.selectedDate.split('-')
     if (parts.length !== 3) return undefined
-    return new CalendarDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]))
+    return new CalendarDate(parseInt(parts[0]!), parseInt(parts[1]!), parseInt(parts[2]!))
 })
 
 /** props.selectedMonth("YYYYMM") → CalendarDate placeholder 변환 */
@@ -75,7 +63,7 @@ const calendarPlaceholder = computed(() => {
 const timeValue = computed(() => {
     const parts = props.selectedHour.split(':')
     if (parts.length !== 2) return undefined
-    return new Time(parseInt(parts[0]), parseInt(parts[1]))
+    return new Time(parseInt(parts[0]!), parseInt(parts[1]!))
 })
 
 /** availableDates 기반 날짜 비활성 판정 */
@@ -85,8 +73,8 @@ const isDateUnavailable = (date: DateValue) => {
 }
 
 /** CalendarDate 선택 → 문자열로 변환하여 부모에 전달 */
-const handleDateChange = (value: DateValue | null) => {
-    if (!value) return
+const handleDateChange = (value: any) => {
+    if (!value || typeof value !== 'object' || !('year' in value)) return
     const dateStr = `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`
     emit('update:selectedDate', dateStr)
 }
@@ -98,8 +86,8 @@ const handlePlaceholderChange = (date: DateValue) => {
 }
 
 /** Time 변경 → 문자열로 변환하여 부모에 전달 */
-const handleTimeChange = (value: Time | null) => {
-    if (!value) return
+const handleTimeChange = (value: any) => {
+    if (!value || typeof value !== 'object' || !('hour' in value)) return
     const hourStr = `${String(value.hour).padStart(2, '0')}:${String(value.minute).padStart(2, '0')}`
     emit('update:selectedHour', hourStr)
 }

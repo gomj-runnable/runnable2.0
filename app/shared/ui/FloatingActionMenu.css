@@ -34,20 +34,20 @@
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        border: 1px solid var(--color-border-default);
-        background: var(--color-surface-elevated, #2a2a2a);
-        color: var(--text-primary, #fff);
+        border: 1px solid rgba(223, 255, 0, 0.2);
+        background: color-mix(in srgb, #1e2124 86%, transparent);
+        color: #e6e8ea;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: var(--shadow-md, 0 12px 32px rgba(0, 0, 0, 0.3));
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
         transition: transform 0.2s ease, background 0.2s ease;
     }
 
     .fab-menu__trigger.is-open {
-        background: var(--primary-color, #4caf50);
-        border-color: var(--primary-color, #4caf50);
+        background: #ccff00;
+        border-color: #ccff00;
     }
 
     .fab-menu__trigger-icon {
@@ -77,21 +77,21 @@
         width: 44px;
         height: 44px;
         border-radius: 50%;
-        border: 1px solid var(--color-border-default);
-        background: var(--color-surface-elevated, #2a2a2a);
-        color: var(--text-primary, #fff);
+        border: 1px solid rgba(223, 255, 0, 0.2);
+        background: color-mix(in srgb, #1e2124 86%, transparent);
+        color: #e6e8ea;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         flex-shrink: 0;
-        box-shadow: var(--shadow-xs, 0 2px 8px rgba(0, 0, 0, 0.2));
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         transition: background 0.15s ease, border-color 0.15s ease;
     }
 
     .fab-menu__group-btn.is-expanded {
-        background: var(--primary-color, #4caf50);
-        border-color: var(--primary-color, #4caf50);
+        background: #ccff00;
+        border-color: #ccff00;
     }
 
     .fab-menu__group-icon {
@@ -113,19 +113,19 @@
         gap: 4px;
         padding: 6px 10px;
         border-radius: 9999px;
-        border: 1px solid var(--color-border-default);
-        background: var(--color-surface-elevated, #2a2a2a);
-        color: var(--text-primary, #fff);
-        font-size: var(--text-label-xs, 12px);
+        border: 1px solid rgba(223, 255, 0, 0.2);
+        background: color-mix(in srgb, #1e2124 86%, transparent);
+        color: #e6e8ea;
+        font-size: 0.75rem;
         cursor: pointer;
         white-space: nowrap;
         transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
 
     .fab-menu__sub-item.is-active {
-        background: var(--primary-color, #4caf50);
-        border-color: var(--primary-color, #4caf50);
-        color: var(--text-on-primary, #fff);
+        background: #ccff00;
+        border-color: #ccff00;
+        color: #000000;
     }
 
     .fab-menu__sub-icon {
