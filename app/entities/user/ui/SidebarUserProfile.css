@@ -1,9 +1,9 @@
 .sidebar-user {
-    --map-button-gap: var(--gap-section-md);
+    --map-button-gap: 0.75rem;
     --map-button-width: 100%;
-    --map-button-padding: var(--gap-section-sm) var(--gap-section-md);
+    --map-button-padding: 0.625rem 0.75rem;
     --map-button-border: 1px solid var(--color-border-default);
-    --map-button-radius: var(--radius-control-lg);
+    --map-button-radius: 1rem;
     --map-button-bg: var(--color-surface-softer);
     --map-button-color: var(--text-primary);
     --map-button-hover-bg: var(--color-surface-soft);
@@ -15,18 +15,18 @@
     --map-button-text-align: left;
     justify-content: flex-start;
     align-items: center;
-    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .sidebar-user__avatar {
-    width: var(--size-avatar-sm);
-    height: var(--size-avatar-sm);
-    border-radius: var(--radius-round);
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid var(--color-border-default);
     background: var(--color-surface-base);
-    transition: border-color var(--transition-fast);
+    transition: border-color 150ms ease;
 }
 
 .sidebar-user:hover .sidebar-user__avatar {
@@ -41,10 +41,10 @@
 }
 
 .sidebar-user__avatar-icon {
-    width: var(--size-icon-sm);
-    height: var(--size-icon-sm);
+    width: 0.5rem;
+    height: 0.5rem;
     color: var(--sidebar-icon-color);
-    transition: color var(--transition-fast);
+    transition: color 150ms ease;
 }
 
 .sidebar-user:hover .sidebar-user__avatar-icon {
@@ -57,7 +57,7 @@
     min-width: 0;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
 }
 
 .sidebar-user__name {
@@ -67,7 +67,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    transition: color var(--transition-fast);
+    transition: color 150ms ease;
 }
 
 .sidebar-user__subtitle {
@@ -83,12 +83,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--size-control-md);
-    height: var(--size-control-md);
-    border-radius: var(--radius-round);
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
     background: var(--color-surface-softer);
     flex-shrink: 0;
-    transition: background var(--transition-fast);
+    transition: background 150ms ease;
 }
 
 .sidebar-user:hover .sidebar-user__trailing {
@@ -96,10 +96,10 @@
 }
 
 .sidebar-user__chevron {
-    width: var(--size-icon-sm);
-    height: var(--size-icon-sm);
+    width: 0.5rem;
+    height: 0.5rem;
     color: var(--sidebar-icon-color);
-    transition: color var(--transition-fast);
+    transition: color 150ms ease;
 }
 
 .sidebar-user:hover .sidebar-user__chevron {

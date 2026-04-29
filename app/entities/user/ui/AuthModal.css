@@ -4,14 +4,14 @@
     --map-form-color: var(--text-on-dark);
     --map-form-font-size: var(--text-body-sm);
     --map-form-line-height: 1.5;
-    --map-form-padding: var(--gap-section-md);
+    --map-form-padding: 0.75rem;
     --map-form-placeholder: var(--color-text-inverse-40);
     --map-form-focus-border: var(--color-border-active);
     --map-form-focus-bg: var(--color-surface-soft-strong);
     width: 400px;
-    padding: var(--gap-section-xl);
+    padding: 1.5rem;
     border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-surface-lg);
+    border-radius: 1.5rem;
     background: var(--color-surface-canvas);
     box-shadow: var(--shadow-frame);
     color: var(--text-on-dark);
@@ -20,8 +20,8 @@
 .auth-modal__header {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-xs);
-    margin-bottom: var(--gap-section-lg);
+    gap: 0.375rem;
+    margin-bottom: 1rem;
 }
 
 .auth-modal__eyebrow {
@@ -43,17 +43,17 @@
 .auth-modal__fields {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-md);
+    gap: 0.75rem;
 }
 
 .auth-modal__error {
     display: flex;
     align-items: flex-start;
-    gap: var(--gap-section-xs);
+    gap: 0.375rem;
     font-size: var(--text-label-xs);
     color: var(--color-status-error);
-    padding: var(--gap-section-sm) var(--gap-section-md);
-    border-radius: var(--radius-surface-md);
+    padding: 0.625rem 0.75rem;
+    border-radius: 1rem;
     background: color-mix(in srgb, var(--color-status-error) 10%, transparent);
     border: 1px solid color-mix(in srgb, var(--color-status-error) 22%, transparent);
 }
@@ -61,14 +61,14 @@
 .auth-modal__actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--gap-section-sm);
-    margin-top: var(--gap-section-lg);
+    gap: 0.625rem;
+    margin-top: 1rem;
 }
 
 .auth-modal__button {
-    --map-button-padding: var(--gap-section-md) var(--gap-section-lg);
+    --map-button-padding: 0.75rem 1rem;
     --map-button-border: 1px solid var(--color-border-default);
-    --map-button-radius: var(--radius-surface-md);
+    --map-button-radius: 1rem;
     --map-button-color: var(--text-on-dark);
     --map-button-hover-bg: var(--color-surface-soft-hover);
     --map-button-hover-border: var(--color-border-active);
@@ -86,8 +86,8 @@
 }
 
 .auth-modal__footer {
-    margin-top: var(--gap-section-md);
-    padding-top: var(--gap-section-md);
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--color-border-subtle);
     text-align: center;
 }
@@ -98,7 +98,7 @@
     color: var(--text-secondary);
     font-size: var(--text-label-xs);
     cursor: pointer;
-    transition: color var(--transition-fast);
+    transition: color 150ms ease;
 }
 
 .auth-modal__toggle:hover {

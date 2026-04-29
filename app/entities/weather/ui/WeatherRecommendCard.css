@@ -1,11 +1,11 @@
 .weather-recommend-card {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-xs);
+    gap: 0.375rem;
     width: 100%;
-    padding: var(--gap-section-sm) var(--gap-section-md);
+    padding: 0.625rem 0.75rem;
     border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-surface-md);
+    border-radius: 1rem;
     background: var(--color-surface-soft);
     color: var(--text-primary);
     text-align: left;
@@ -21,7 +21,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--gap-section-sm);
+    gap: 0.625rem;
 }
 
 .weather-recommend-card__title {
@@ -79,13 +79,13 @@
 .weather-recommend-card__meta {
     display: flex;
     align-items: center;
-    gap: var(--gap-section-md);
+    gap: 0.75rem;
 }
 
 .weather-recommend-card__meta-item {
     display: inline-flex;
     align-items: center;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
     font-size: var(--text-label-xs);
     color: var(--text-secondary);
 }
@@ -93,12 +93,12 @@
 .weather-recommend-card__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
 }
 
 .weather-recommend-card__tag {
-    padding: 2px var(--gap-section-xs);
-    border-radius: var(--radius-control-sm);
+    padding: 2px 0.375rem;
+    border-radius: 0.5rem;
     background: var(--nav-active-bg);
     color: var(--primary-color);
     font-size: var(--text-label-xs);

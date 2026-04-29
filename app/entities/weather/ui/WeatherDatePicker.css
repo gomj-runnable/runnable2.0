@@ -1,10 +1,10 @@
 .weather-date-picker {
     background: var(--color-surface-elevated);
     border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-surface-md);
-    padding: var(--gap-section-sm);
+    border-radius: 1rem;
+    padding: 0.625rem;
     min-width: 240px;
-    backdrop-filter: var(--blur);
+    backdrop-filter: blur(4px);
     box-shadow: var(--shadow-md);
 }
 
@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--gap-section-xs);
+    margin-bottom: 0.375rem;
 }
 
 .weather-date-picker__month-label {
@@ -26,8 +26,8 @@
     border: none;
     cursor: pointer;
     color: var(--text-secondary);
-    padding: var(--gap-1);
-    border-radius: var(--radius-control-sm);
+    padding: 0.25rem;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,14 +41,14 @@
 .weather-date-picker__weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    margin-bottom: var(--gap-1);
+    margin-bottom: 0.25rem;
 }
 
 .weather-date-picker__weekday {
     text-align: center;
     font-size: var(--text-caption);
     color: var(--text-muted);
-    padding: var(--gap-1) 0;
+    padding: 0.25rem 0;
 }
 
 .weather-date-picker__grid {
@@ -63,12 +63,12 @@
     align-items: center;
     justify-content: center;
     font-size: var(--text-caption);
-    border-radius: var(--radius-control-sm);
+    border-radius: 0.5rem;
     cursor: pointer;
     border: none;
     background: none;
     color: var(--text-secondary);
-    transition: background var(--transition-fast);
+    transition: background 150ms ease;
     position: relative;
 }
 

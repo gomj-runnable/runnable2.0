@@ -1,6 +1,6 @@
 .map-sidebar-tabs {
     display: flex;
     flex-direction: row;
-    gap: var(--gap-section-2xs);
-    padding: var(--gap-section-sm) var(--gap-section-md);
+    gap: 0.25rem;
+    padding: 0.625rem 0.75rem;
 }

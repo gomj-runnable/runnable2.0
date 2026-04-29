@@ -11,10 +11,10 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     user-select: none;
-    padding: var(--gap-1) var(--gap-3);
+    padding: 0.25rem 0.625rem;
     margin: 0;
     background: color-mix(in srgb, var(--color-surface-default) 75%, transparent);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border-radius: var(--radius-surface-md) 0 0 0;
+    border-radius: 1rem 0 0 0;
 }

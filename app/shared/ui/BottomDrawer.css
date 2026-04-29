@@ -1,6 +1,6 @@
 .bottom-drawer {
-    padding: var(--gap-2) var(--gap-3);
+    padding: 0.375rem 0.625rem;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-2);
+    gap: 0.375rem;
 }

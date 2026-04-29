@@ -4,34 +4,34 @@
     display: flex;
     flex-direction: column;
     pointer-events: none;
-    z-index: var(--z-weather-overlay, 12);
+    z-index: 12;
 }
 
 .weather-overlay__topbar {
     display: flex;
     align-items: flex-start;
-    gap: var(--gap-section-sm);
-    padding: var(--gap-section-lg) var(--gap-section-lg);
+    gap: 0.625rem;
+    padding: 1rem 1rem;
     pointer-events: auto;
 }
 
 .weather-overlay__controls {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-xs);
+    gap: 0.375rem;
 }
 
 .weather-overlay__datetime-row {
     display: flex;
     align-items: center;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
 }
 
 
 .weather-overlay__bottombar {
     position: absolute;
-    bottom: var(--gap-section-lg);
-    left: var(--gap-section-lg);
+    bottom: 1rem;
+    left: 1rem;
     pointer-events: auto;
 }
 
@@ -42,15 +42,15 @@
 .weather-overlay__calendar-popover {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-sm);
-    padding: var(--gap-section-md);
+    gap: 0.625rem;
+    padding: 0.75rem;
 }
 
 .weather-overlay__calendar-popover-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--gap-section-sm);
+    gap: 0.625rem;
 }
 
 .weather-overlay__calendar-popover-title {
@@ -67,7 +67,7 @@
     width: 32px;
     height: 32px;
     border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-control-md);
+    border-radius: 0.75rem;
     background: var(--color-surface-soft);
     color: var(--text-primary);
     cursor: pointer;
@@ -83,11 +83,11 @@
 
 @media (max-width: 768px) {
     .weather-overlay__topbar {
-        padding: var(--gap-section-xs) var(--gap-section-sm);
+        padding: 0.375rem 0.625rem;
     }
 
     .weather-overlay__bottombar {
-        left: var(--gap-section-xs);
-        bottom: var(--gap-section-xs);
+        left: 0.375rem;
+        bottom: 0.375rem;
     }
 }

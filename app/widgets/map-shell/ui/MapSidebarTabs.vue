@@ -42,13 +42,13 @@ const handleSelect = (label: string) => {
 .map-sidebar-tabs {
     display: flex;
     flex-direction: row;
-    gap: var(--gap-section-2xs);
-    padding: var(--gap-section-sm) var(--gap-section-md);
+    gap: 0.25rem;
+    padding: 0.625rem 0.75rem;
 }
 
 .map-sidebar-tabs--collapsed {
     flex-direction: column;
     align-items: center;
-    padding: var(--gap-section-sm) var(--gap-section-2xs);
+    padding: 0.625rem 0.25rem;
 }
 </style>

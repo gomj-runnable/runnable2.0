@@ -1,12 +1,12 @@
 .weather-layer-toggle {
     display: flex;
     align-items: center;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
 }
 
 .weather-layer-toggle__divider {
     width: 1px;
     height: 20px;
     background: var(--color-border, rgba(255, 255, 255, 0.2));
-    margin-inline: var(--gap-section-3xs, 2px);
+    margin-inline: 2px;
 }

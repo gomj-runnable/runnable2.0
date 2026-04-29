@@ -4,7 +4,7 @@
     --map-form-color: var(--text-on-dark);
     --map-form-font-size: var(--text-body-sm);
     --map-form-line-height: 1.5;
-    --map-form-padding: var(--gap-section-md);
+    --map-form-padding: 0.75rem;
     --map-form-resize: vertical;
     --map-form-placeholder: var(--color-text-inverse-40);
     --map-form-focus-border: var(--color-border-active);
@@ -12,9 +12,9 @@
     --map-form-disabled-color: var(--color-text-inverse-60);
     --map-form-disabled-bg: var(--color-surface-softer);
     width: 480px;
-    padding: var(--gap-section-xl);
+    padding: 1.5rem;
     border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-surface-lg);
+    border-radius: 1.5rem;
     background: var(--color-surface-canvas);
     box-shadow: var(--shadow-frame);
     color: var(--text-on-dark);
@@ -23,8 +23,8 @@
 .route-save-modal__header {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-xs);
-    margin-bottom: var(--gap-section-lg);
+    gap: 0.375rem;
+    margin-bottom: 1rem;
 }
 
 .route-save-modal__eyebrow {
@@ -45,20 +45,20 @@
 .route-save-modal__fields {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-md);
+    gap: 0.75rem;
 }
 
 .route-save-modal__actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--gap-section-sm);
-    margin-top: var(--gap-section-lg);
+    gap: 0.625rem;
+    margin-top: 1rem;
 }
 
 .route-save-modal__button {
-    --map-button-padding: var(--gap-section-md) var(--gap-section-lg);
+    --map-button-padding: 0.75rem 1rem;
     --map-button-border: 1px solid var(--color-border-default);
-    --map-button-radius: var(--radius-surface-md);
+    --map-button-radius: 1rem;
     --map-button-color: var(--text-on-dark);
     --map-button-hover-bg: var(--color-surface-soft-hover);
     --map-button-hover-border: var(--color-border-active);
