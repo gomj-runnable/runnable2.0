@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { SeoulMonthlyWeather } from '#shared/types/weather'
 import type { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
+import { CalendarDate, Time } from '@internationalized/date'
+import type { DateValue } from '@internationalized/date'
 import WeatherLayerToggle from '~/entities/weather/ui/WeatherLayerToggle.vue'
-import WeatherDatePicker from '~/entities/weather/ui/WeatherDatePicker.vue'
 import WeatherLegend from '~/entities/weather/ui/WeatherLegend.vue'
 import ElevationLegend from '~/entities/weather/ui/ElevationLegend.vue'
 const props = defineProps<{
@@ -37,7 +38,7 @@ const emit = defineEmits<{
     'update:elevationActive': [active: boolean]
 }>()
 
-const isCalendarOpen = ref(false)
+const inputDate = useTemplateRef('inputDate')
 
 /** 고도 레이어 토글: 활성화 시 날씨 레이어를 끈다 */
 const handleElevationToggle = () => {
@@ -56,64 +57,52 @@ const handleLayerChange = (layer: WeatherLayerEnum | null) => {
     }
 }
 
-/** 날짜를 선택하고 캘린더 팝업을 닫는다 */
-const handleDateSelect = (date: string) => {
-    // 선택한 날짜를 부모에 전달
-    emit('update:selectedDate', date)
-    // 캘린더 팝업 닫기
-    isCalendarOpen.value = false
+/** props.selectedDate("YYYY-MM-DD") → CalendarDate 변환 */
+const dateValue = computed(() => {
+    const parts = props.selectedDate.split('-')
+    if (parts.length !== 3) return undefined
+    return new CalendarDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]))
+})
+
+/** props.selectedMonth("YYYYMM") → CalendarDate placeholder 변환 */
+const calendarPlaceholder = computed(() => {
+    const y = parseInt(props.selectedMonth.slice(0, 4))
+    const m = parseInt(props.selectedMonth.slice(4, 6))
+    return new CalendarDate(y, m, 1)
+})
+
+/** props.selectedHour("HH:mm") → Time 변환 */
+const timeValue = computed(() => {
+    const parts = props.selectedHour.split(':')
+    if (parts.length !== 2) return undefined
+    return new Time(parseInt(parts[0]), parseInt(parts[1]))
+})
+
+/** availableDates 기반 날짜 비활성 판정 */
+const isDateUnavailable = (date: DateValue) => {
+    const dateStr = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`
+    return props.availableDates.size > 0 && !props.availableDates.has(dateStr)
 }
 
-/** 선택 날짜에 데이터가 있는지 확인 */
-const hasDataForSelectedDate = computed(() => {
-    return props.availableDates.size > 0 && props.availableDates.has(props.selectedDate)
-})
+/** CalendarDate 선택 → 문자열로 변환하여 부모에 전달 */
+const handleDateChange = (value: DateValue | null) => {
+    if (!value) return
+    const dateStr = `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`
+    emit('update:selectedDate', dateStr)
+}
 
-/** 날짜 표시 (MM.DD) */
-const dateLabel = computed(() => {
-    const parts = props.selectedDate.split('-')
-    return parts.length === 3 ? `${parts[1]}.${parts[2]}` : props.selectedDate
-})
+/** 캘린더 월 이동 → selectedMonth 갱신 */
+const handlePlaceholderChange = (date: DateValue) => {
+    const monthStr = `${date.year}${String(date.month).padStart(2, '0')}`
+    emit('update:selectedMonth', monthStr)
+}
 
-/** 선택된 날짜에 해당하는 시간 옵션 목록을 반환한다 (데이터가 없으면 현재 시각 기본값) */
-const hourOptions = computed(() => {
-    const source = new Set<string>()
-
-    // 월별 데이터에서 선택 날짜에 해당하는 시간 슬롯 수집
-    if (props.monthlyData) {
-        for (const dong of props.monthlyData.dongs) {
-            for (const slot of dong.hourly) {
-                if (slot.date === props.selectedDate) {
-                    source.add(slot.time)
-                }
-            }
-        }
-    }
-
-    // 오름차순 정렬 후 반환
-    const sorted = Array.from(source).sort((a, b) => a.localeCompare(b))
-    if (sorted.length > 0) {
-        return sorted
-    }
-
-    // 데이터가 없으면 현재 시각을 기본값으로 제공
-    return [`${new Date().getHours().toString().padStart(2, '0')}:00`]
-})
-
-/** 시간 드롭다운 메뉴 아이템 목록 */
-const hourMenuItems = computed(() => [
-    hourOptions.value.map(hour => ({
-        label: hour,
-        active: props.selectedHour === hour,
-        onSelect: () => emit('update:selectedHour', hour)
-    }))
-])
-
-/** 시간 표시 (HH시) */
-const hourLabel = computed(() => {
-    const h = props.selectedHour.split(':')[0]
-    return `${h}시`
-})
+/** Time 변경 → 문자열로 변환하여 부모에 전달 */
+const handleTimeChange = (value: Time | null) => {
+    if (!value) return
+    const hourStr = `${String(value.hour).padStart(2, '0')}:${String(value.minute).padStart(2, '0')}`
+    emit('update:selectedHour', hourStr)
+}
 </script>
 
 <template>
@@ -125,50 +114,42 @@ const hourLabel = computed(() => {
                     @update:model-value="handleLayerChange"
                 />
                 <div class="weather-overlay__datetime-row">
-                    <UPopover v-model:open="isCalendarOpen" :overlay="false">
-                        <UButton
-                            id="popup-weather-calendar-trigger"
-                            :label="dateLabel"
-                            icon="i-lucide-calendar"
-                            size="sm"
-                            :variant="isCalendarOpen ? 'solid' : 'outline'"
-                            :color="isCalendarOpen ? 'primary' : 'neutral'"
-                            :class="{ 'is-no-data': !hasDataForSelectedDate && !isLoading }"
-                        />
-                        <template #content>
-                            <section class="weather-overlay__calendar-popover">
-                                <header class="weather-overlay__calendar-popover-header">
-                                    <h2 class="weather-overlay__calendar-popover-title">
-                                        날짜 선택
-                                    </h2>
-                                    <button
-                                        type="button"
-                                        class="weather-overlay__calendar-close"
-                                        aria-label="날짜 선택 닫기"
-                                        @click="isCalendarOpen = false"
-                                    >
-                                        <span class="i-lucide-x" />
-                                    </button>
-                                </header>
-                                <WeatherDatePicker
-                                    :model-value="selectedDate"
-                                    :month="selectedMonth"
-                                    :available-dates="availableDates"
-                                    @update:model-value="handleDateSelect"
-                                    @update:month="emit('update:selectedMonth', $event)"
+                    <UInputDate
+                        ref="inputDate"
+                        :model-value="dateValue"
+                        size="sm"
+                        :is-date-unavailable="isDateUnavailable"
+                        @update:model-value="handleDateChange"
+                    >
+                        <template #trailing>
+                            <UPopover>
+                                <UButton
+                                    color="neutral"
+                                    variant="subtle"
+                                    size="sm"
+                                    icon="i-lucide-calendar"
+                                    aria-label="날짜 선택"
                                 />
-                            </section>
+                                <template #content>
+                                    <UCalendar
+                                        :model-value="dateValue"
+                                        :placeholder="calendarPlaceholder"
+                                        :is-date-unavailable="isDateUnavailable"
+                                        class="p-2"
+                                        @update:model-value="handleDateChange"
+                                        @update:placeholder="handlePlaceholderChange"
+                                    />
+                                </template>
+                            </UPopover>
                         </template>
-                    </UPopover>
-                    <UDropdownMenu :items="hourMenuItems">
-                        <UButton
-                            :label="hourLabel"
-                            icon="i-lucide-clock-3"
-                            size="sm"
-                            variant="outline"
-                            color="neutral"
-                        />
-                    </UDropdownMenu>
+                    </UInputDate>
+                    <UInputTime
+                        :model-value="timeValue"
+                        icon="i-lucide-clock"
+                        size="sm"
+                        granularity="hour"
+                        @update:model-value="handleTimeChange"
+                    />
                     <span v-if="isLoading" class="i-lucide-loader-2 weather-overlay__spinner" />
                 </div>
             </div>

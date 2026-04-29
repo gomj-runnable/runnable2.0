@@ -1,17 +1,17 @@
 .facility-overlay {
     position: absolute;
-    top: var(--gap-section-lg);
-    right: var(--gap-section-lg);
+    top: 1rem;
+    right: 1rem;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
     pointer-events: auto;
-    z-index: var(--z-weather-overlay, 12);
+    z-index: 12;
 }
 
 .facility-overlay__chips {
     display: flex;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
     flex-wrap: wrap;
     justify-content: flex-end;
 }

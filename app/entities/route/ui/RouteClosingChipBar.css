@@ -1,5 +1,5 @@
 .route-closing-chip-bar {
     display: flex;
-    gap: var(--gap-section-2xs);
+    gap: 0.25rem;
     align-items: center;
 }

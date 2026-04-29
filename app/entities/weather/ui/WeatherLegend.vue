@@ -61,7 +61,7 @@ const pm10Items = [
                     <span>40°</span>
                 </div>
             </div>
-            <div class="weather-legend__list" style="margin-top: var(--gap-2)">
+            <div class="weather-legend__list mt-1.5">
                 <div class="weather-legend__item">
                     <span class="weather-legend__swatch weather-legend__swatch--no-data" />
                     데이터 없음
