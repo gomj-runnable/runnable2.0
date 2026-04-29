@@ -1,11 +1,11 @@
 .textfield-card {
-    --organization-card-border: color-mix(in srgb, var(--color-border-default) 96%, transparent);
-    --organization-card-border-hover: color-mix(in srgb, var(--color-border-accent-strong) 92%, transparent);
+    --organization-card-border: color-mix(in srgb, rgba(223, 255, 0, 0.2) 96%, transparent);
+    --organization-card-border-hover: color-mix(in srgb, rgba(223, 255, 0, 0.42) 92%, transparent);
     --organization-card-surface:
         linear-gradient(
             180deg,
-            color-mix(in srgb, var(--color-surface-elevated) 92%, transparent) 0%,
-            color-mix(in srgb, var(--color-surface-base) 98%, transparent) 100%
+            color-mix(in srgb, color-mix(in srgb, #1e2124 86%, transparent) 92%, transparent) 0%,
+            color-mix(in srgb, color-mix(in srgb, #1e2124 92%, transparent) 98%, transparent) 100%
         );
     gap: 0.75rem;
 }
@@ -26,9 +26,9 @@
 .textfield-card__delete-button {
     --map-button-width: 1.75rem;
     --map-button-height: 1.75rem;
-    --map-button-color: color-mix(in srgb, var(--text-secondary) 92%, transparent);
-    --map-button-hover-color: var(--text-on-dark);
-    --map-button-active-color: var(--text-on-dark);
+    --map-button-color: color-mix(in srgb, color-mix(in srgb, #e6e8ea 80%, transparent) 92%, transparent);
+    --map-button-hover-color: #e6e8ea;
+    --map-button-active-color: #e6e8ea;
     flex-shrink: 0;
 }
 
@@ -44,12 +44,12 @@
 
 .textfield-card :deep(.textfield__control) {
     min-height: 3rem;
-    border-color: color-mix(in srgb, var(--color-border-default) 92%, transparent);
+    border-color: color-mix(in srgb, rgba(223, 255, 0, 0.2) 92%, transparent);
     border-radius: 1rem;
-    background: color-mix(in srgb, var(--color-surface-softer) 84%, transparent);
+    background: color-mix(in srgb, rgba(255, 255, 255, 0.04) 84%, transparent);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 8%, transparent),
-        0 8px 24px color-mix(in srgb, var(--color-shadow-subtle) 42%, transparent);
+        inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+        0 8px 24px color-mix(in srgb, rgba(0, 0, 0, 0.12) 42%, transparent);
 }
 
 .textfield-card__title-field :deep(.textfield__label) {
@@ -67,15 +67,15 @@
 
 .textfield-card__title-field :deep(.textfield__input) {
     padding: 0;
-    font-size: var(--text-heading-md);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-heading);
-    letter-spacing: var(--letter-spacing-tight);
-    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #e6e8ea;
 }
 
 .textfield-card__title-field :deep(.textfield__input::placeholder) {
-    color: color-mix(in srgb, var(--text-primary) 56%, transparent);
+    color: color-mix(in srgb, #e6e8ea 56%, transparent);
 }
 
 .textfield-card__title-field :deep(.textfield__control:focus-within) {
@@ -85,25 +85,25 @@
 }
 
 .textfield-card :deep(.textfield__control:focus-within) {
-    border-color: var(--color-border-accent-strong);
-    background: color-mix(in srgb, var(--color-surface-base) 94%, transparent);
+    border-color: rgba(223, 255, 0, 0.42);
+    background: color-mix(in srgb, color-mix(in srgb, #1e2124 92%, transparent) 94%, transparent);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 10%, transparent),
-        0 0 0 3px var(--color-focus-ring-soft),
-        0 16px 32px color-mix(in srgb, var(--color-shadow-soft) 56%, transparent);
+        inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent),
+        0 0 0 3px rgba(204, 255, 0, 0.42),
+        0 16px 32px color-mix(in srgb, rgba(0, 0, 0, 0.16) 56%, transparent);
 }
 
 .textfield-card :deep(.textfield__label) {
-    color: color-mix(in srgb, var(--text-secondary) 96%, transparent);
-    letter-spacing: var(--letter-spacing-tight);
+    color: color-mix(in srgb, color-mix(in srgb, #e6e8ea 80%, transparent) 96%, transparent);
+    letter-spacing: -0.02em;
 }
 
 .textfield-card :deep(.textfield__input) {
-    font-size: var(--text-body-md);
+    font-size: 0.9375rem;
 }
 
 .textfield-card :deep(.textfield__supporting) {
-    color: color-mix(in srgb, var(--text-muted) 92%, transparent);
+    color: color-mix(in srgb, #8a949e 92%, transparent);
 }
 
 .textfield-card__fields :deep(.textfield__control) {
@@ -128,13 +128,13 @@
 .textfield-card__fields :deep(.textfield__input) {
     padding-top: 0;
     padding-bottom: 0;
-    font-size: var(--text-heading-xs);
-    line-height: var(--line-height-heading);
+    font-size: 1.125rem;
+    line-height: 1.2;
 }
 
 .textfield-card__field--comment :deep(.textfield__input) {
-    font-size: var(--text-body-sm);
-    line-height: var(--line-height-body);
+    font-size: 0.875rem;
+    line-height: 1.5;
 }
 
 .textfield-card__field.is-multiline {
@@ -150,13 +150,13 @@
     width: 100%;
     min-height: 3.875rem;
     padding: 0.625rem 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--color-border-default) 88%, transparent);
+    border: 1px solid color-mix(in srgb, rgba(223, 255, 0, 0.2) 88%, transparent);
     border-radius: 1rem;
-    background: color-mix(in srgb, var(--color-surface-softer) 56%, transparent);
-    color: var(--text-secondary);
+    background: color-mix(in srgb, rgba(255, 255, 255, 0.04) 56%, transparent);
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
     font-family: inherit;
-    font-size: var(--text-body-sm);
-    line-height: var(--line-height-body);
+    font-size: 0.875rem;
+    line-height: 1.5;
     resize: vertical;
     outline: none;
     box-sizing: border-box;
@@ -167,13 +167,13 @@
 }
 
 .textfield-card__textarea::placeholder {
-    color: color-mix(in srgb, var(--text-muted) 92%, transparent);
+    color: color-mix(in srgb, #8a949e 92%, transparent);
 }
 
 .textfield-card__textarea:focus {
-    border-color: var(--color-border-accent-strong);
-    background: color-mix(in srgb, var(--color-surface-base) 94%, transparent);
-    box-shadow: 0 0 0 3px var(--color-focus-ring-soft);
+    border-color: rgba(223, 255, 0, 0.42);
+    background: color-mix(in srgb, color-mix(in srgb, #1e2124 92%, transparent) 94%, transparent);
+    box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.42);
 }
 
 .textfield-card__textarea-wrap.is-disabled {

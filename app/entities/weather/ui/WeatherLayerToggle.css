@@ -7,6 +7,6 @@
 .weather-layer-toggle__divider {
     width: 1px;
     height: 20px;
-    background: var(--color-border, rgba(255, 255, 255, 0.2));
+    background: rgba(223, 255, 0, 0.2);
     margin-inline: 2px;
 }

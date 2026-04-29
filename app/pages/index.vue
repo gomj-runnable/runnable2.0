@@ -783,7 +783,6 @@ watch(overlayContext, (next, prev) => {
                     :selected-hour="weather.selectedHour.value"
                     :selected-month="weather.selectedMonth.value"
                     :active-layer="weather.activeLayer.value"
-                    :monthly-data="weather.monthlyData.value"
                     :is-loading="weather.isLoading.value"
                     :is-elevation-active="elevation.isElevationVisible.value"
                     :available-dates="weatherSources.filteredAvailableDates.value"

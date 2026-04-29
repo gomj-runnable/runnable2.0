@@ -12,10 +12,16 @@ async function seed() {
 
   console.log('🌱 Seed 작업 시작...')
 
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD
+  if (!adminPassword) {
+    console.error('ADMIN_SEED_PASSWORD env var is required.')
+    process.exit(1)
+  }
+
   const ADMIN_ID = 'admin_master_01'
   const adminData = {
     email: 'admin@runnable.local',
-    password: process.env.ADMIN_SEED_PASSWORD || '!runnable2242',
+    password: adminPassword,
     name: '최고관리자'
   }
 

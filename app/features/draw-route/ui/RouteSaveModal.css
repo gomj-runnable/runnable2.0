@@ -1,23 +1,23 @@
 .route-save-modal {
-    --map-form-label-color: var(--color-text-inverse-80);
-    --map-form-bg: var(--color-surface-soft);
-    --map-form-color: var(--text-on-dark);
-    --map-form-font-size: var(--text-body-sm);
+    --map-form-label-color: color-mix(in srgb, #e6e8ea 80%, transparent);
+    --map-form-bg: rgba(255, 255, 255, 0.06);
+    --map-form-color: #e6e8ea;
+    --map-form-font-size: 0.875rem;
     --map-form-line-height: 1.5;
     --map-form-padding: 0.75rem;
     --map-form-resize: vertical;
-    --map-form-placeholder: var(--color-text-inverse-40);
-    --map-form-focus-border: var(--color-border-active);
-    --map-form-focus-bg: var(--color-surface-soft-strong);
-    --map-form-disabled-color: var(--color-text-inverse-60);
-    --map-form-disabled-bg: var(--color-surface-softer);
+    --map-form-placeholder: color-mix(in srgb, #e6e8ea 40%, transparent);
+    --map-form-focus-border: rgba(255, 255, 0, 0.42);
+    --map-form-focus-bg: rgba(255, 255, 255, 0.08);
+    --map-form-disabled-color: color-mix(in srgb, #e6e8ea 60%, transparent);
+    --map-form-disabled-bg: rgba(255, 255, 255, 0.04);
     width: 480px;
     padding: 1.5rem;
-    border: 1px solid var(--color-border-default);
+    border: 1px solid rgba(223, 255, 0, 0.2);
     border-radius: 1.5rem;
-    background: var(--color-surface-canvas);
-    box-shadow: var(--shadow-frame);
-    color: var(--text-on-dark);
+    background: color-mix(in srgb, #1e2124 92%, transparent);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 40px rgba(0, 0, 0, 0.24);
+    color: #e6e8ea;
 }
 
 .route-save-modal__header {
@@ -28,18 +28,18 @@
 }
 
 .route-save-modal__eyebrow {
-    font-size: var(--text-label-xs);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: var(--letter-spacing-wider);
-    color: var(--color-text-inverse-60);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: color-mix(in srgb, #e6e8ea 60%, transparent);
 }
 
 .route-save-modal__title {
     margin: 0;
-    font-size: var(--text-heading-sm);
-    font-weight: var(--font-weight-bold);
+    font-size: 1.25rem;
+    font-weight: 700;
     line-height: 1.2;
-    color: var(--text-on-dark);
+    color: #e6e8ea;
 }
 
 .route-save-modal__fields {
@@ -57,26 +57,26 @@
 
 .route-save-modal__button {
     --map-button-padding: 0.75rem 1rem;
-    --map-button-border: 1px solid var(--color-border-default);
+    --map-button-border: 1px solid rgba(223, 255, 0, 0.2);
     --map-button-radius: 1rem;
-    --map-button-color: var(--text-on-dark);
-    --map-button-hover-bg: var(--color-surface-soft-hover);
-    --map-button-hover-border: var(--color-border-active);
-    font-size: var(--text-label-md);
-    font-weight: var(--font-weight-semibold);
+    --map-button-color: #e6e8ea;
+    --map-button-hover-bg: rgba(204, 255, 0, 0.12);
+    --map-button-hover-border: rgba(255, 255, 0, 0.42);
+    font-size: 0.875rem;
+    font-weight: 600;
     line-height: 1.4;
     min-width: 88px;
 }
 
 .route-save-modal__districts {
-    font-size: var(--text-body-sm);
-    color: var(--text-secondary);
-    line-height: var(--line-height-body);
+    font-size: 0.875rem;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
+    line-height: 1.5;
 }
 
 .route-save-modal__button--primary {
-    --map-button-border: 1px solid var(--color-border-active-strong);
-    --map-button-bg: var(--color-surface-emphasis);
-    --map-button-hover-bg: var(--color-surface-soft-active);
-    --map-button-hover-border: var(--color-border-active-strong);
+    --map-button-border: 1px solid rgba(255, 255, 0, 0.56);
+    --map-button-bg: rgba(255, 255, 0, 0.24);
+    --map-button-hover-bg: rgba(255, 255, 0, 0.18);
+    --map-button-hover-border: rgba(255, 255, 0, 0.56);
 }

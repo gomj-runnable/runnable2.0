@@ -1,16 +1,16 @@
 .organization-card {
-    --organization-card-border: color-mix(in srgb, var(--color-border-default) 88%, transparent);
-    --organization-card-border-hover: color-mix(in srgb, var(--color-border-strong) 92%, transparent);
+    --organization-card-border: color-mix(in srgb, rgba(223, 255, 0, 0.2) 88%, transparent);
+    --organization-card-border-hover: color-mix(in srgb, rgba(223, 255, 0, 0.34) 92%, transparent);
     --organization-card-surface:
         linear-gradient(
             180deg,
-            color-mix(in srgb, var(--color-surface-elevated) 94%, transparent) 0%,
-            color-mix(in srgb, var(--color-surface-base) 96%, transparent) 100%
+            color-mix(in srgb, color-mix(in srgb, #1e2124 86%, transparent) 94%, transparent) 0%,
+            color-mix(in srgb, color-mix(in srgb, #1e2124 92%, transparent) 96%, transparent) 100%
         );
     --organization-card-glow:
         radial-gradient(
             circle at top left,
-            color-mix(in srgb, var(--color-brand-secondary) 18%, transparent) 0%,
+            color-mix(in srgb, #ffff00 18%, transparent) 0%,
             transparent 48%
         );
     position: relative;
@@ -19,13 +19,13 @@
     gap: 0.75rem;
     width: 100%;
     padding: 1rem;
-    border: 1px solid var(--organization-card-border);
+    border: 1px solid rgba(223, 255, 0, 0.18);
     border-radius: 1.5rem;
-    background: var(--organization-card-surface);
+    background: color-mix(in srgb, #1e2124 92%, transparent);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 8%, transparent),
-        0 20px 48px color-mix(in srgb, var(--color-shadow-strong) 88%, transparent);
-    color: var(--text-primary);
+        inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+        0 20px 48px color-mix(in srgb, rgba(0, 0, 0, 0.24) 88%, transparent);
+    color: #e6e8ea;
     text-align: left;
     text-decoration: none;
     overflow: hidden;
@@ -48,7 +48,7 @@
 .organization-card__glow {
     position: absolute;
     inset: 0;
-    background: var(--organization-card-glow);
+    background: rgba(204, 255, 0, 0.12);
     opacity: 0.9;
     pointer-events: none;
     z-index: -1;
@@ -65,67 +65,67 @@
 
 .organization-card__eyebrow {
     margin: 0;
-    font-size: var(--text-label-xs);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--line-height-label);
-    letter-spacing: var(--letter-spacing-wider);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-secondary) 92%, transparent);
+    color: color-mix(in srgb, color-mix(in srgb, #e6e8ea 80%, transparent) 92%, transparent);
 }
 
 .organization-card__title {
     margin: 0;
-    font-size: var(--text-heading-xs);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-heading);
-    letter-spacing: var(--letter-spacing-tight);
-    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #e6e8ea;
 }
 
 .organization-card__description {
     margin: 0;
-    font-size: var(--text-body-sm);
-    line-height: var(--line-height-body);
-    color: color-mix(in srgb, var(--text-secondary) 94%, transparent);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, color-mix(in srgb, #e6e8ea 80%, transparent) 94%, transparent);
 }
 
 .organization-card__footer {
     padding-top: 0.625rem;
-    border-top: 1px solid color-mix(in srgb, var(--organization-card-border) 84%, transparent);
+    border-top: 1px solid color-mix(in srgb, rgba(223, 255, 0, 0.18) 84%, transparent);
 }
 
 .organization-card__meta {
     margin: 0;
-    font-size: var(--text-label-sm);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-label);
-    color: color-mix(in srgb, var(--text-primary) 72%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: color-mix(in srgb, #e6e8ea 72%, transparent);
 }
 
 .organization-card.is-interactive:hover,
 .organization-card.is-selected {
-    border-color: var(--organization-card-border-hover);
+    border-color: rgba(223, 255, 0, 0.28);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 10%, transparent),
-        0 28px 56px color-mix(in srgb, var(--color-shadow-strong) 92%, transparent);
+        inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent),
+        0 28px 56px color-mix(in srgb, rgba(0, 0, 0, 0.24) 92%, transparent);
     transform: translateY(-2px);
 }
 
 .organization-card.is-interactive:focus-visible {
     outline: none;
-    border-color: var(--color-border-active);
+    border-color: rgba(255, 255, 0, 0.42);
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 10%, transparent),
-        0 0 0 3px var(--color-focus-ring-soft),
-        0 28px 56px color-mix(in srgb, var(--color-shadow-strong) 92%, transparent);
+        inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent),
+        0 0 0 3px rgba(204, 255, 0, 0.42),
+        0 28px 56px color-mix(in srgb, rgba(0, 0, 0, 0.24) 92%, transparent);
 }
 
 .organization-card.is-selected {
     background:
         linear-gradient(
             180deg,
-            color-mix(in srgb, var(--color-surface-elevated) 96%, var(--color-brand-primary-12)) 0%,
-            color-mix(in srgb, var(--color-surface-base) 96%, var(--color-brand-primary-12)) 100%
+            color-mix(in srgb, color-mix(in srgb, #1e2124 86%, transparent) 96%, rgba(204, 255, 0, 0.12)) 0%,
+            color-mix(in srgb, color-mix(in srgb, #1e2124 92%, transparent) 96%, rgba(204, 255, 0, 0.12)) 100%
         );
 }
 
@@ -134,8 +134,8 @@
     cursor: default;
     pointer-events: none;
     box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--color-gray-0) 4%, transparent),
-        0 12px 24px color-mix(in srgb, var(--color-shadow-soft) 72%, transparent);
+        inset 0 1px 0 color-mix(in srgb, #ffffff 4%, transparent),
+        0 12px 24px color-mix(in srgb, rgba(0, 0, 0, 0.16) 72%, transparent);
 }
 
 @media (max-width: 768px) {

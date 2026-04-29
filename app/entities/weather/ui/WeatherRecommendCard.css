@@ -4,17 +4,17 @@
     gap: 0.375rem;
     width: 100%;
     padding: 0.625rem 0.75rem;
-    border: 1px solid var(--color-border-default);
+    border: 1px solid rgba(223, 255, 0, 0.2);
     border-radius: 1rem;
-    background: var(--color-surface-soft);
-    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e6e8ea;
     text-align: left;
     cursor: pointer;
     transition: background 0.15s ease;
 }
 
 .weather-recommend-card:hover {
-    background: var(--color-surface-soft-hover);
+    background: rgba(204, 255, 0, 0.12);
 }
 
 .weather-recommend-card__header {
@@ -25,9 +25,9 @@
 }
 
 .weather-recommend-card__title {
-    font-size: var(--text-label-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #e6e8ea;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -35,26 +35,26 @@
 
 .weather-recommend-card__score {
     flex-shrink: 0;
-    font-size: var(--text-label-sm);
-    font-weight: var(--font-weight-bold);
+    font-size: 0.8125rem;
+    font-weight: 700;
 }
 
 .weather-recommend-card__score.is-score-good {
-    color: var(--color-score-good);
+    color: #4caf72;
 }
 
 .weather-recommend-card__score.is-score-moderate {
-    color: var(--color-score-moderate);
+    color: #f0a030;
 }
 
 .weather-recommend-card__score.is-score-low {
-    color: var(--color-score-low);
+    color: #e05050;
 }
 
 .weather-recommend-card__score-bar {
     height: 4px;
     border-radius: 2px;
-    background: var(--color-border-default);
+    background: rgba(223, 255, 0, 0.2);
     overflow: hidden;
 }
 
@@ -65,15 +65,15 @@
 }
 
 .weather-recommend-card__score-fill.is-score-good {
-    background: var(--color-score-good);
+    background: #4caf72;
 }
 
 .weather-recommend-card__score-fill.is-score-moderate {
-    background: var(--color-score-moderate);
+    background: #f0a030;
 }
 
 .weather-recommend-card__score-fill.is-score-low {
-    background: var(--color-score-low);
+    background: #e05050;
 }
 
 .weather-recommend-card__meta {
@@ -86,8 +86,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    font-size: var(--text-label-xs);
-    color: var(--text-secondary);
+    font-size: 0.75rem;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
 }
 
 .weather-recommend-card__tags {
@@ -99,9 +99,9 @@
 .weather-recommend-card__tag {
     padding: 2px 0.375rem;
     border-radius: 0.5rem;
-    background: var(--nav-active-bg);
-    color: var(--primary-color);
-    font-size: var(--text-label-xs);
-    font-weight: var(--font-weight-medium);
+    background: color-mix(in srgb, #ccff00 16%, transparent);
+    color: #ccff00;
+    font-size: 0.75rem;
+    font-weight: 500;
     white-space: nowrap;
 }
