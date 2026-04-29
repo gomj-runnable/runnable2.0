@@ -44,13 +44,9 @@ const setSidebarOpen = (value: boolean) => {
                 />
             </template>
 
-            <template #logo>
+            <template #left>
                 <UIcon name="i-lucide-map-pin" class="size-5" />
                 <span class="font-semibold text-sm">Runnable</span>
-            </template>
-
-            <template #title>
-                Runnable
             </template>
         </UHeader>
 

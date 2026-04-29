@@ -18,9 +18,8 @@ export class ForecastService {
             const slots = await this.adapter.fetchSlots(serviceKey, requestedDate, now)
             return { slots, error: null }
         } catch (e) {
-            const message = e instanceof Error ? e.message : String(e)
             console.error('[ForecastService]', e)
-            return { slots: [], error: { source: 'forecast', message } }
+            return { slots: [], error: { source: 'forecast', message: '예보 데이터 조회 실패' } }
         }
     }
 }
