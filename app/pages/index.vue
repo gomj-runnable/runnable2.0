@@ -369,8 +369,8 @@ const fabGroups = computed(() => [
                 label: '현재 위치 검색',
                 icon: 'i-lucide-locate',
                 active: false,
-                visible: ['crosswalk', 'fountain', 'hospital', 'sidewalk'].some(
-                    (t) => facility.activeTypes.value.has(t as any) || (t === 'sidewalk' && sidewalk.isActive.value)
+                visible: (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
+                    (t) => facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
                 ),
                 onClick: () => facilityEffect.searchNearby()
             }
