@@ -47,5 +47,6 @@ const locale = defineLocale<Messages>({
     <UApp :locale="locale">
         <NuxtPage />
         <div id="modal-root" />
+        <UToaster />
     </UApp>
 </template>

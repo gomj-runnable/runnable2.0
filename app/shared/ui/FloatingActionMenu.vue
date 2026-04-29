@@ -1,10 +1,8 @@
 <script setup lang="ts">
 /**
- * FloatingActionMenu — 모바일 전용 FAB (Floating Action Button) 메뉴
+ * FloatingActionMenu — 모바일 전용 FAB + UPopover 메뉴
  *
- * 지도 위의 칩 버튼들을 모바일에서 하나의 플로팅 버튼으로 통합한다.
- * - FAB 클릭 → 세로 그룹 버튼 표시
- * - 그룹 클릭 → 가로 서브 아이템 확장
+ * 지도 위의 칩 버튼들을 모바일에서 하나의 플로팅 버튼 + popover로 통합한다.
  */
 export interface FloatingMenuItem {
     key: string
@@ -29,106 +27,144 @@ const props = defineProps<{
 }>()
 
 const isOpen = ref(false)
-const expandedGroupKey = ref<string | null>(null)
-
-const toggleMenu = () => {
-    if (isOpen.value) {
-        isOpen.value = false
-        expandedGroupKey.value = null
-    } else {
-        isOpen.value = true
-    }
-}
-
-const toggleGroup = (key: string) => {
-    expandedGroupKey.value = expandedGroupKey.value === key ? null : key
-}
 
 const visibleGroups = computed(() =>
-    props.groups.filter(
-        (g) => g.visible !== false && g.items.some((i) => i.visible !== false)
-    )
+    props.groups
+        .filter((g) => g.visible !== false)
+        .map((g) => ({
+            ...g,
+            items: g.items.filter((i) => i.visible !== false)
+        }))
+        .filter((g) => g.items.length > 0)
 )
-
-/** 배경 클릭 시 메뉴 닫기 */
-const handleBackdropClick = () => {
-    isOpen.value = false
-    expandedGroupKey.value = null
-}
 </script>
 
 <template>
     <Teleport to="body">
-        <!-- 배경 오버레이 -->
-        <Transition name="fab-backdrop">
-            <div
-                v-if="isOpen"
-                class="fab-menu__backdrop"
-                @click="handleBackdropClick"
-            />
-        </Transition>
-
-        <div class="fab-menu">
-            <!-- 그룹 목록 (세로 확장) -->
-            <Transition name="fab-groups">
-                <div v-if="isOpen" class="fab-menu__groups">
-                    <div
-                        v-for="group in visibleGroups"
-                        :key="group.key"
-                        class="fab-menu__group"
-                    >
-                        <!-- 서브 아이템 (가로 확장) -->
-                        <Transition name="fab-sub">
-                            <div
-                                v-if="expandedGroupKey === group.key"
-                                class="fab-menu__sub-items"
-                            >
-                                <template v-for="item in group.items" :key="item.key">
-                                    <button
-                                        v-if="item.visible !== false"
-                                        class="fab-menu__sub-item"
-                                        :class="{ 'is-active': item.active }"
-                                        @click="item.onClick()"
-                                    >
-                                        <span
-                                            v-if="item.dotColor"
-                                            class="fab-menu__dot"
-                                            :style="{ backgroundColor: item.dotColor }"
-                                        />
-                                        <span :class="item.icon" class="fab-menu__sub-icon" />
-                                        <span class="fab-menu__sub-label">{{ item.label }}</span>
-                                    </button>
-                                </template>
-                            </div>
-                        </Transition>
-
-                        <!-- 그룹 버튼 -->
-                        <button
-                            class="fab-menu__group-btn"
-                            :class="{ 'is-expanded': expandedGroupKey === group.key }"
-                            :aria-label="group.label"
-                            @click="toggleGroup(group.key)"
-                        >
-                            <span :class="group.icon" class="fab-menu__group-icon" />
-                        </button>
-                    </div>
-                </div>
-            </Transition>
-
-            <!-- FAB 트리거 -->
-            <button
-                class="fab-menu__trigger"
-                :class="{ 'is-open': isOpen }"
-                aria-label="메뉴 열기"
-                @click="toggleMenu"
+        <div class="fab-popover">
+            <UPopover
+                v-model:open="isOpen"
+                :content="{ side: 'top', align: 'end', sideOffset: 8 }"
             >
-                <span
-                    :class="isOpen ? 'i-lucide-x' : 'i-lucide-ellipsis'"
-                    class="fab-menu__trigger-icon"
+                <UButton
+                    icon="i-lucide-ellipsis"
+                    size="lg"
+                    color="neutral"
+                    variant="solid"
+                    square
+                    class="rounded-full shadow-lg"
+                    aria-label="메뉴 열기"
                 />
-            </button>
+
+                <template #content>
+                    <div class="fab-popover__panel">
+                        <div
+                            v-for="(group, gi) in visibleGroups"
+                            :key="group.key"
+                            class="fab-popover__group"
+                        >
+                            <div class="fab-popover__group-label">
+                                <UIcon :name="group.icon" class="size-4 opacity-60" />
+                                <span>{{ group.label }}</span>
+                            </div>
+                            <div class="fab-popover__items">
+                                <button
+                                    v-for="item in group.items"
+                                    :key="item.key"
+                                    class="fab-popover__item"
+                                    :class="{ 'fab-popover__item--active': item.active }"
+                                    @click="item.onClick()"
+                                >
+                                    <span
+                                        v-if="item.dotColor"
+                                        class="fab-popover__dot"
+                                        :style="{ backgroundColor: item.dotColor }"
+                                    />
+                                    <UIcon :name="item.icon" class="size-4" />
+                                    <span>{{ item.label }}</span>
+                                </button>
+                            </div>
+                            <USeparator v-if="gi < visibleGroups.length - 1" />
+                        </div>
+                    </div>
+                </template>
+            </UPopover>
         </div>
     </Teleport>
 </template>
 
-<style src="./FloatingActionMenu.css"></style>
+<style scoped>
+.fab-popover {
+    position: fixed;
+    bottom: 2.5rem;
+    right: 1.5rem;
+    z-index: 50;
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .fab-popover {
+        display: block;
+    }
+}
+
+.fab-popover__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+    min-width: 12rem;
+}
+
+.fab-popover__group-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--ui-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.fab-popover__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.fab-popover__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4375rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--ui-text-default);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fab-popover__item:hover {
+    background: var(--ui-bg-elevated);
+}
+
+.fab-popover__item--active {
+    color: var(--ui-primary);
+    background: color-mix(in srgb, var(--ui-primary) 10%, transparent);
+}
+
+.fab-popover__item--active:hover {
+    background: color-mix(in srgb, var(--ui-primary) 15%, transparent);
+}
+
+.fab-popover__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+</style>

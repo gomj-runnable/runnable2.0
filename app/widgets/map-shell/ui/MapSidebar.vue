@@ -16,7 +16,8 @@ const open = defineModel<boolean>('open', { default: true })
         variant="sidebar"
         :ui="{
             gap: 'h-[calc(100%-var(--ui-header-height))]',
-            container: 'absolute top-(--ui-header-height) bottom-0 h-[calc(100%-var(--ui-header-height))]'
+            container: 'absolute top-(--ui-header-height) bottom-0 h-[calc(100%-var(--ui-header-height))]',
+            footer: 'flex items-center justify-center gap-1.5 overflow-hidden p-2'
         }"
     >
         <template #default="{ state }">

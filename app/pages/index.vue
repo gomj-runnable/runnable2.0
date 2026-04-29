@@ -340,6 +340,13 @@ const showSimulationChip = computed(() => {
 const isMobile = ref(false)
 let mobileMediaQuery: MediaQueryList | null = null
 
+/** 모바일: 현재 위치 검색 버튼 노출 조건 */
+const fabNearbyVisible = computed(() =>
+    (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
+        (t) => facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
+    )
+)
+
 // ─── FAB 그룹 (모바일 전용 플로팅 메뉴) ─────────────────────────
 const fabGroups = computed(() => [
     {
@@ -364,16 +371,6 @@ const fabGroups = computed(() => [
                     }
                 }
             })),
-            {
-                key: 'search-nearby',
-                label: '현재 위치 검색',
-                icon: 'i-lucide-locate',
-                active: false,
-                visible: (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
-                    (t) => facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
-                ),
-                onClick: () => facilityEffect.searchNearby()
-            }
         ]
     },
     {
@@ -741,7 +738,7 @@ watch(overlayContext, (next, prev) => {
                             "
                             @logout="handleLogout"
                         />
-                        <div v-else class="flex justify-center p-2">
+                        <div v-else class="flex items-center justify-center py-2">
                             <UAvatar
                                 :src="authStore.user.value?.image ?? undefined"
                                 :alt="authStore.user.value?.name ?? '사용자'"
@@ -872,6 +869,18 @@ watch(overlayContext, (next, prev) => {
 
         <FloatingActionMenu :groups="fabGroups" />
 
+        <!-- 모바일 전용: 현재 위치 검색 플로팅 버튼 -->
+        <div v-if="fabNearbyVisible" class="fab-nearby">
+            <UButton
+                icon="i-lucide-locate"
+                label="현재 위치 검색"
+                size="sm"
+                color="neutral"
+                variant="solid"
+                @click="facilityEffect.searchNearby()"
+            />
+        </div>
+
         <!-- 모바일 전용: SecondPanel을 BottomDrawer로 표시 -->
         <BottomDrawer
             v-if="isMobile && sectionInfo.isOpen.value"
@@ -956,5 +965,19 @@ watch(overlayContext, (next, prev) => {
     border-radius: 6px;
     font-size: 13px;
     cursor: pointer;
+}
+
+.fab-nearby {
+    position: fixed;
+    bottom: 4rem;
+    right: 5.5rem;
+    z-index: 50;
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .fab-nearby {
+        display: block;
+    }
 }
 </style>

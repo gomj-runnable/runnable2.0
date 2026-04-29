@@ -7,6 +7,12 @@
 .weather-layer-toggle__divider {
     width: 1px;
     height: 20px;
-    background: rgba(223, 255, 0, 0.2);
+    background: var(--ui-border-accented);
     margin-inline: 2px;
+}
+
+@media (max-width: 1023px) {
+    .weather-layer-toggle {
+        display: none;
+    }
 }
