@@ -1,5 +1,5 @@
 import type { Ref, ShallowRef } from 'vue'
-import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
+import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { GradientSegment } from '#shared/types/gradient'
 import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
@@ -72,7 +72,7 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
             })
         })
 
-        gradientPolylines.set(entities as CesiumEntity[])
+        gradientPolylines.set(entities)
     }
 
     const clearGradientPolylines = () => {
