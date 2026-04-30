@@ -11,7 +11,7 @@ RUN pnpm install --frozen-lockfile
 
 # 소스 복사 & 빌드
 COPY . .
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # ── Stage 2: Runtime ──
 FROM node:20-slim
