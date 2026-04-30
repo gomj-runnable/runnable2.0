@@ -1,31 +1,82 @@
 <script setup lang="ts">
 /**
- * MapSidebar — USidebar 래퍼 (헤더 없음)
+ * MapSidebar — 반응형 네비게이션
  *
- * UHeader가 상단 헤더를 담당하므로 USidebar는 헤더 없이 본문+푸터만 렌더링한다.
- * collapsible="icon" 모드에서 접힘 시 탭 아이콘만 표시된다.
+ * 데스크톱(lg+): 세로 Nav Rail (collapsed, vertical, tooltip)
+ * 모바일(<lg): 가로 헤더 바 (horizontal)
  */
-const open = defineModel<boolean>('open', { default: true })
+import type { NavigationMenuItem } from '@nuxt/ui'
+import { NavKey, type NavKeyValue } from '../model/nav-key'
+
+const props = defineProps<{
+    /** 현재 활성화된 네비게이션 항목 (null이면 선택 없음) */
+    activeNav: NavKeyValue | null
+    /** 로그인 상태 */
+    isLoggedIn?: boolean
+}>()
+
+const emit = defineEmits<{
+    select: [value: NavKeyValue]
+}>()
+
+const makeItem = (label: NavKeyValue, icon: string): NavigationMenuItem => ({
+    label,
+    icon,
+    value: label,
+    active: props.activeNav === label,
+    onSelect: (e: Event) => {
+        e.preventDefault()
+        emit('select', label)
+    }
+})
+
+const topItems = computed(() => [
+    makeItem(NavKey.LIST, 'i-lucide-list'),
+    makeItem(NavKey.DRAW, 'i-lucide-pencil'),
+    makeItem(NavKey.EXPLORE, 'i-lucide-search')
+])
+
+const bottomItems = computed(() => [
+    {
+        ...makeItem(NavKey.AUTH, 'i-lucide-user'),
+        label: props.isLoggedIn ? '내 계정' : '로그인'
+    }
+])
+
+const tooltipProps = { delayDuration: 0, content: { side: 'right' as const } }
 </script>
 
 <template>
-    <USidebar
-        v-model:open="open"
-        collapsible="icon"
-        side="left"
-        variant="sidebar"
-        :ui="{
-            gap: 'h-[calc(100%-var(--ui-header-height))]',
-            container: 'absolute top-(--ui-header-height) bottom-0 h-[calc(100%-var(--ui-header-height))]',
-            footer: 'flex items-center justify-center gap-1.5 overflow-hidden p-2'
-        }"
-    >
-        <template #default="{ state }">
-            <slot :state="state" />
-        </template>
+    <!-- 데스크톱: 세로 Nav Rail -->
+    <nav class="hidden lg:flex flex-col items-center w-14 h-full shrink-0 py-2 bg-(--ui-bg-elevated) border-r border-(--ui-border) z-20">
+        <UNavigationMenu
+            orientation="vertical"
+            collapsed
+            :tooltip="tooltipProps"
+            :items="topItems"
+            color="primary"
+        />
+        <div class="flex-1" />
+        <UNavigationMenu
+            orientation="vertical"
+            collapsed
+            :tooltip="tooltipProps"
+            :items="bottomItems"
+            color="primary"
+        />
+    </nav>
 
-        <template #footer="{ state: footerState }">
-            <slot name="footer" :state="footerState" />
-        </template>
-    </USidebar>
+    <!-- 모바일: 가로 헤더 바 -->
+    <header class="flex lg:hidden items-center gap-2 w-full h-[var(--ui-header-height)] shrink-0 px-4 bg-(--ui-bg-elevated) border-b border-(--ui-border) z-20">
+        <UIcon name="i-lucide-map-pin" class="size-5 shrink-0" />
+        <UNavigationMenu
+            :items="topItems"
+            color="primary"
+        />
+        <div class="flex-1" />
+        <UNavigationMenu
+            :items="bottomItems"
+            color="primary"
+        />
+    </header>
 </template>

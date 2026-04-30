@@ -9,9 +9,7 @@ defineProps<{
 </script>
 
 <template>
-    <footer class="map-footer">
-        <span class="map-footer__label">{{ label }}</span>
+    <footer class="flex items-center justify-end pointer-events-none">
+        <span class="text-xs text-[#58616a] [font-variant-numeric:tabular-nums] whitespace-nowrap select-none py-1 px-2.5 m-0 bg-[color-mix(in_srgb,color-mix(in_srgb,#1e2124_92%,transparent)_75%,transparent)] backdrop-blur-[12px] rounded-[1rem_0_0_0]">{{ label }}</span>
     </footer>
 </template>
-
-<style scoped src="./MapFooter.css"></style>

@@ -47,8 +47,8 @@ const hasSearchableActive = computed(() =>
 </script>
 
 <template>
-    <div class="facility-overlay">
-        <div class="facility-overlay__chips">
+    <div class="absolute top-4 right-4 hidden md:flex flex-col gap-1 pointer-events-auto z-[12]">
+        <div class="flex gap-1 flex-wrap justify-end">
             <UButton
                 v-if="hasSearchableActive"
                 label="현재 위치 검색"
@@ -77,13 +77,13 @@ const hasSearchableActive = computed(() =>
             >
                 <template #leading>
                     <span
-                        class="facility-overlay__chip-dot"
+                        class="w-2 h-2 rounded-full shrink-0"
                         :style="{ backgroundColor: layer.color }"
                     />
                 </template>
             </UButton>
         </div>
-        <div class="facility-overlay__chips">
+        <div class="flex gap-1 flex-wrap justify-end">
             <UButton
                 label="지역 고도"
                 icon="i-lucide-mountain"
@@ -112,7 +112,7 @@ const hasSearchableActive = computed(() =>
                 @click="boundary.toggleDong"
             />
         </div>
-        <div class="facility-overlay__chips">
+        <div class="flex gap-1 flex-wrap justify-end">
             <UButton
                 v-if="showSimulation"
                 label="시뮬레이션"
@@ -136,5 +136,3 @@ const hasSearchableActive = computed(() =>
         </div>
     </div>
 </template>
-
-<style scoped src="./FacilityOverlay.css"></style>

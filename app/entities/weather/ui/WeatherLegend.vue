@@ -25,17 +25,17 @@ const pm10Items = [
 </script>
 
 <template>
-    <div class="weather-legend">
+    <div class="bg-[color-mix(in_srgb,#1e2124_86%,transparent)] border border-[rgba(223,255,0,0.2)] rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-[0_8px_24px_rgba(0,0,0,0.16)] min-w-[140px]">
         <!-- 날씨 레이어 -->
         <template v-if="activeLayer?.isWeather">
-            <p class="weather-legend__title">날씨</p>
-            <div class="weather-legend__list">
-                <div v-for="item in weatherItems" :key="item.label" class="weather-legend__item">
-                    <span class="weather-legend__swatch" :style="{ background: item.color }" />
+            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">날씨</p>
+            <div class="flex flex-col gap-1">
+                <div v-for="item in weatherItems" :key="item.label" class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+                    <span class="w-3 h-3 rounded-lg border border-[rgba(255,255,255,0.2)] shrink-0" :style="{ background: item.color }" />
                     {{ item.label }}
                 </div>
-                <div class="weather-legend__item">
-                    <span class="weather-legend__swatch weather-legend__swatch--no-data" />
+                <div class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+                    <span class="w-3 h-3 rounded-lg border border-dashed border-[rgba(255,255,255,0.2)] shrink-0 bg-[rgba(80,80,80,0.3)]" />
                     데이터 없음
                 </div>
             </div>
@@ -43,27 +43,27 @@ const pm10Items = [
 
         <!-- 온도 레이어 -->
         <template v-else-if="activeLayer?.isTemperature">
-            <p class="weather-legend__title">온도 (°C)</p>
+            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">온도 (°C)</p>
             <div
                 v-if="currentTemperature !== null && currentTemperature !== undefined"
-                class="weather-legend__current-temp"
+                class="flex items-baseline gap-1.5 mb-1.5"
             >
-                <span class="weather-legend__temp-value"
+                <span class="text-xl font-bold text-text-base leading-none"
                     >{{ currentTemperature.toFixed(1) }}°C</span
                 >
-                <span class="weather-legend__temp-label">현재</span>
+                <span class="text-xs text-meta">현재</span>
             </div>
-            <div class="weather-legend__gradient-bar">
-                <div class="weather-legend__gradient" />
-                <div class="weather-legend__gradient-labels">
+            <div class="flex flex-col gap-1">
+                <div class="h-[10px] rounded-lg bg-[linear-gradient(to_right,rgba(30,80,250,0.6),rgba(80,80,250,0.55),rgba(80,200,100,0.55),rgba(250,150,50,0.55),rgba(250,60,60,0.6))] border border-[rgba(255,255,255,0.2)]" />
+                <div class="flex justify-between text-xs text-meta">
                     <span>-10°</span>
                     <span>15°</span>
                     <span>40°</span>
                 </div>
             </div>
-            <div class="weather-legend__list mt-1.5">
-                <div class="weather-legend__item">
-                    <span class="weather-legend__swatch weather-legend__swatch--no-data" />
+            <div class="flex flex-col gap-1 mt-1.5">
+                <div class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+                    <span class="w-3 h-3 rounded-lg border border-dashed border-[rgba(255,255,255,0.2)] shrink-0 bg-[rgba(80,80,80,0.3)]" />
                     데이터 없음
                 </div>
             </div>
@@ -71,19 +71,17 @@ const pm10Items = [
 
         <!-- 미세먼지 레이어 -->
         <template v-else-if="activeLayer?.isPm10">
-            <p class="weather-legend__title">미세먼지 PM10</p>
-            <div class="weather-legend__list">
-                <div v-for="item in pm10Items" :key="item.label" class="weather-legend__item">
-                    <span class="weather-legend__swatch" :style="{ background: item.color }" />
+            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">미세먼지 PM10</p>
+            <div class="flex flex-col gap-1">
+                <div v-for="item in pm10Items" :key="item.label" class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+                    <span class="w-3 h-3 rounded-lg border border-[rgba(255,255,255,0.2)] shrink-0" :style="{ background: item.color }" />
                     {{ item.label }}
                 </div>
-                <div class="weather-legend__item">
-                    <span class="weather-legend__swatch weather-legend__swatch--no-data" />
+                <div class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+                    <span class="w-3 h-3 rounded-lg border border-dashed border-[rgba(255,255,255,0.2)] shrink-0 bg-[rgba(80,80,80,0.3)]" />
                     데이터 없음
                 </div>
             </div>
         </template>
     </div>
 </template>
-
-<style scoped src="./WeatherLegend.css"></style>

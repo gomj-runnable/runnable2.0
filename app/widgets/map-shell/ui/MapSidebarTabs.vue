@@ -30,7 +30,7 @@ const tabItems = computed<TabsItem[]>(() =>
 
 <template>
     <!-- 펼침: UTabs pill -->
-    <div v-if="!collapsed" class="map-sidebar-tabs">
+    <div v-if="!collapsed" class="p-[0.3125rem_0.375rem]">
         <UTabs
             :items="tabItems"
             :model-value="modelValue"
@@ -41,50 +41,15 @@ const tabItems = computed<TabsItem[]>(() =>
     </div>
 
     <!-- 접힘: 아이콘만 세로 중앙 정렬 -->
-    <div v-else class="map-sidebar-tabs--collapsed">
+    <div v-else class="flex flex-col items-center gap-1 py-2 px-1">
         <button
             v-for="item in props.items"
             :key="item.label"
-            class="collapsed-tab"
-            :class="{ 'collapsed-tab--active': modelValue === item.label }"
+            class="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--ui-text-muted)] cursor-pointer transition-[color,background-color] duration-150 hover:text-[var(--ui-text-default)]"
+            :class="item.label === modelValue ? 'text-[var(--ui-primary)] bg-[color-mix(in_srgb,var(--ui-primary)_15%,transparent)]' : ''"
             @click="emit('update:modelValue', item.label)"
         >
             <UIcon :name="item.icon" class="size-5" />
         </button>
     </div>
 </template>
-
-<style scoped>
-.map-sidebar-tabs {
-    padding: 0.3125rem 0.375rem;
-}
-
-.map-sidebar-tabs--collapsed {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 0.25rem;
-}
-
-.collapsed-tab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.5rem;
-    color: var(--ui-text-muted);
-    cursor: pointer;
-    transition: color 0.15s, background-color 0.15s;
-}
-
-.collapsed-tab:hover {
-    color: var(--ui-text-default);
-}
-
-.collapsed-tab--active {
-    color: var(--ui-primary);
-    background-color: color-mix(in srgb, var(--ui-primary) 15%, transparent);
-}
-</style>

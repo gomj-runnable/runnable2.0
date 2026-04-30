@@ -16,7 +16,7 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="route-closing-chip-bar">
+    <div class="flex gap-1 items-center">
         <UButton
             label="도착지 연결"
             icon="i-lucide-rotate-ccw"
@@ -47,5 +47,3 @@ defineEmits<{
         />
     </div>
 </template>
-
-<style scoped src="./RouteClosingChipBar.css"></style>

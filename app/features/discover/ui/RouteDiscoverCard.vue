@@ -32,32 +32,38 @@ const formatElevation = (high?: number, low?: number): string => {
 <template>
     <Card interactive :selected="selected" as="article" @click="$emit('select', route.routeId)">
         <template #header>
-            <div class="route-discover-card__header">
-                <h3 class="route-discover-card__title">{{ route.title }}</h3>
-                <span v-if="route.districts?.length" class="route-discover-card__district">
+            <div class="flex items-start justify-between gap-2.5">
+                <h3 class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base">{{ route.title }}</h3>
+                <span v-if="route.districts?.length" class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap">
                     {{ route.districts.join(' · ') }}
                 </span>
             </div>
         </template>
 
-        <div class="route-discover-card__stats">
-            <span v-if="route.distance" class="route-discover-card__stat">
+        <div class="flex flex-wrap gap-1.5 mt-1.5">
+            <span v-if="route.distance" class="stat text-sm text-text-muted">
                 {{ formatDistance(route.distance) }}
             </span>
             <span
                 v-if="formatElevation(route.highHeight, route.lowHeight)"
-                class="route-discover-card__stat"
+                class="stat text-sm text-text-muted"
             >
                 {{ formatElevation(route.highHeight, route.lowHeight) }}
             </span>
         </div>
 
         <template #meta>
-            <span v-if="route.authorName" class="route-discover-card__author">
+            <span v-if="route.authorName" class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed">
                 {{ route.authorName }}
             </span>
         </template>
     </Card>
 </template>
 
-<style scoped src="./RouteDiscoverCard.css"></style>
+<style scoped>
+.stat + .stat::before {
+    content: '·';
+    margin-right: 0.375rem;
+    color: color-mix(in srgb, #e6e8ea 80%, transparent);
+}
+</style>

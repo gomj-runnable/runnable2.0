@@ -23,8 +23,8 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="explore-panel">
-        <div class="explore-panel__header">
+    <div class="flex flex-col gap-3 w-full">
+        <div class="flex items-center justify-between">
             <div class="map-section-label">공개 경로</div>
             <UButton
                 label="추천"
@@ -41,13 +41,13 @@ defineEmits<{
         </template>
 
         <template v-else>
-            <div v-if="isLoading" class="explore-panel__empty">검색 중...</div>
+            <div v-if="isLoading" class="py-4 text-sm text-text-muted text-center">검색 중...</div>
 
-            <div v-else-if="routes.length === 0" class="explore-panel__empty">
+            <div v-else-if="routes.length === 0" class="py-4 text-sm text-text-muted text-center">
                 검색 결과가 없습니다
             </div>
 
-            <ul v-else class="explore-panel__list">
+            <ul v-else class="flex flex-col gap-2.5 list-none m-0 p-0">
                 <li v-for="route in routes" :key="route.routeId">
                     <Card
                         interactive
@@ -56,22 +56,22 @@ defineEmits<{
                         @click="$emit('select', route.routeId)"
                     >
                         <template #header>
-                            <div class="explore-panel__card-header">
-                                <h3 class="explore-panel__card-title">
+                            <div class="flex items-start justify-between gap-2.5">
+                                <h3 class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base">
                                     {{ route.title }}
                                 </h3>
-                                <span v-if="route.authorName" class="explore-panel__card-author">
+                                <span v-if="route.authorName" class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap">
                                     {{ route.authorName }}
                                 </span>
                             </div>
                         </template>
 
-                        <p v-if="route.description" class="explore-panel__card-description">
+                        <p v-if="route.description" class="m-0 text-sm leading-[1.5] text-text-muted">
                             {{ route.description }}
                         </p>
 
                         <template #meta>
-                            <span class="explore-panel__card-meta">
+                            <span class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed">
                                 {{ formatDistance(route.distance) }}
                             </span>
                         </template>
@@ -81,5 +81,3 @@ defineEmits<{
         </template>
     </div>
 </template>
-
-<style scoped src="./ExplorePanel.css"></style>

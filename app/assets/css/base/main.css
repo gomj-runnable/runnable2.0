@@ -7,6 +7,22 @@
 
 @theme {
   --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* 시맨틱 컬러 토큰 */
+  --color-text-base: #e6e8ea;
+  --color-text-muted: color-mix(in srgb, #e6e8ea 80%, transparent);
+  --color-text-dimmed: color-mix(in srgb, #e6e8ea 72%, transparent);
+  --color-text-faint: color-mix(in srgb, #e6e8ea 56%, transparent);
+  --color-meta: #8a949e;
+
+  --color-surface-dark: color-mix(in srgb, #1e2124 92%, transparent);
+  --color-surface-darker: color-mix(in srgb, #1e2124 86%, transparent);
+
+  --color-border-accent: rgba(223, 255, 0, 0.2);
+  --color-border-accent-focus: rgba(223, 255, 0, 0.28);
+  --color-accent-ring: rgba(204, 255, 0, 0.42);
+  --color-accent-tint: color-mix(in srgb, #ccff00 16%, transparent);
+  --color-accent-hover: rgba(204, 255, 0, 0.12);
 }
 
 html,

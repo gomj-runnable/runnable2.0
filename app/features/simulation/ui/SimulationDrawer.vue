@@ -78,19 +78,25 @@ const formatTime = (sec: number) => {
 <template>
     <BottomDrawer :open="open" @update:open="$emit('update:open', $event)">
         <!-- Row 1: Controls -->
-        <div class="sim-drawer__controls">
-            <button class="sim-drawer__btn sim-drawer__btn--play" @click="onPlayPause">
+        <div class="flex items-center gap-1.5">
+            <button
+                class="flex items-center justify-center w-8 h-8 border-none rounded-lg bg-[#ffff00] text-black cursor-pointer shrink-0 transition-[background] duration-150 hover:bg-[#ccff00]"
+                @click="onPlayPause"
+            >
                 <UIcon
                     :name="store.isPlaying.value ? 'i-lucide-pause' : 'i-lucide-play'"
-                    class="sim-drawer__btn-icon"
+                    class="w-2 h-2"
                 />
             </button>
 
-            <button class="sim-drawer__btn sim-drawer__btn--stop" @click="onStop">
-                <UIcon name="i-lucide-square" class="sim-drawer__btn-icon" />
+            <button
+                class="flex items-center justify-center w-8 h-8 border-none rounded-lg bg-[rgba(255,255,255,0.06)] text-text-muted cursor-pointer shrink-0 transition-[background] duration-150 hover:bg-[rgba(255,255,255,0.08)]"
+                @click="onStop"
+            >
+                <UIcon name="i-lucide-square" class="w-2 h-2" />
             </button>
 
-            <div class="sim-drawer__slider">
+            <div class="sim-drawer__slider flex-1 min-w-0">
                 <USlider
                     :model-value="sliderProgress"
                     :min="0"
@@ -104,7 +110,7 @@ const formatTime = (sec: number) => {
                 />
             </div>
 
-            <div class="sim-drawer__speed">
+            <div class="w-[72px] shrink-0">
                 <USelect
                     :model-value="store.playbackSpeed.value"
                     :items="speedItems"
@@ -115,39 +121,40 @@ const formatTime = (sec: number) => {
         </div>
 
         <!-- Row 2: Info -->
-        <div class="sim-drawer__info">
-            <div class="sim-drawer__info-item">
-                <span class="sim-drawer__info-label">시간</span>
-                <span class="sim-drawer__info-value">{{
+        <div class="flex justify-around gap-2.5 pt-1.5 border-t border-[rgba(223,255,0,0.18)]">
+            <div class="flex items-baseline gap-1">
+                <span class="text-xs font-semibold text-meta">시간</span>
+                <span class="text-xs text-text-base [font-variant-numeric:tabular-nums]">{{
                     formatTime(store.elapsedSeconds.value)
                 }}</span>
-                <span class="sim-drawer__info-total">/ {{ formatTime(totalSeconds) }}</span>
+                <span class="text-xs text-meta">/ {{ formatTime(totalSeconds) }}</span>
             </div>
 
-            <div class="sim-drawer__info-item">
-                <span class="sim-drawer__info-label">거리</span>
-                <span class="sim-drawer__info-value">{{
+            <div class="flex items-baseline gap-1">
+                <span class="text-xs font-semibold text-meta">거리</span>
+                <span class="text-xs text-text-base [font-variant-numeric:tabular-nums]">{{
                     formatDistance(displayInfo.distanceFromStart)
                 }}</span>
-                <span class="sim-drawer__info-total"
+                <span class="text-xs text-meta"
                     >/ {{ formatDistance(displayInfo.totalDistance) }}</span
                 >
             </div>
 
-            <div class="sim-drawer__info-item">
-                <span class="sim-drawer__info-label">고도</span>
-                <span class="sim-drawer__info-value">{{
+            <div class="flex items-baseline gap-1">
+                <span class="text-xs font-semibold text-meta">고도</span>
+                <span class="text-xs text-text-base [font-variant-numeric:tabular-nums]">{{
                     formatElevation(displayInfo.currentElevation)
                 }}</span>
             </div>
 
-            <div class="sim-drawer__info-item">
-                <span class="sim-drawer__info-label">경사</span>
+            <div class="flex items-baseline gap-1">
+                <span class="text-xs font-semibold text-meta">경사</span>
                 <span
-                    class="sim-drawer__info-value"
+                    class="text-xs [font-variant-numeric:tabular-nums]"
                     :class="{
-                        'is-uphill': displayInfo.currentGradient > 0,
-                        'is-downhill': displayInfo.currentGradient < 0
+                        'text-black': displayInfo.currentGradient > 0,
+                        'text-[#dfff00]': displayInfo.currentGradient < 0,
+                        'text-text-base': displayInfo.currentGradient === 0
                     }"
                     >{{ formatGradient(displayInfo.currentGradient) }}</span
                 >
@@ -156,4 +163,8 @@ const formatTime = (sec: number) => {
     </BottomDrawer>
 </template>
 
-<style scoped src="./SimulationDrawer.css"></style>
+<style scoped>
+.sim-drawer__slider :deep([data-slot="track"]) {
+    border: 1px solid rgba(223, 255, 0, 0.18);
+}
+</style>

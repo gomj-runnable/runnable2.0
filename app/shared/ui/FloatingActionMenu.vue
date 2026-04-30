@@ -41,7 +41,7 @@ const visibleGroups = computed(() =>
 
 <template>
     <Teleport to="body">
-        <div class="fab-popover">
+        <div class="fixed bottom-10 right-6 z-50 hidden max-lg:block">
             <UPopover
                 v-model:open="isOpen"
                 :content="{ side: 'top', align: 'end', sideOffset: 8 }"
@@ -57,27 +57,26 @@ const visibleGroups = computed(() =>
                 />
 
                 <template #content>
-                    <div class="fab-popover__panel">
+                    <div class="flex flex-col gap-2 p-2 max-h-[70vh] overflow-y-auto min-w-48">
                         <div
                             v-for="(group, gi) in visibleGroups"
                             :key="group.key"
-                            class="fab-popover__group"
                         >
-                            <div class="fab-popover__group-label">
+                            <div class="flex items-center gap-1.5 px-2 py-1 text-[0.6875rem] font-semibold text-[var(--ui-text-muted)] uppercase tracking-[0.025em]">
                                 <UIcon :name="group.icon" class="size-4 opacity-60" />
                                 <span>{{ group.label }}</span>
                             </div>
-                            <div class="fab-popover__items">
+                            <div class="flex flex-col gap-0.5">
                                 <button
                                     v-for="item in group.items"
                                     :key="item.key"
-                                    class="fab-popover__item"
-                                    :class="{ 'fab-popover__item--active': item.active }"
+                                    class="flex items-center gap-2 px-2 py-[0.4375rem] rounded-md text-[0.8125rem] text-[var(--ui-text-default)] cursor-pointer transition-[background] duration-150 hover:bg-[var(--ui-bg-elevated)]"
+                                    :class="item.active ? 'text-[var(--ui-primary)] bg-[color-mix(in_srgb,var(--ui-primary)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--ui-primary)_15%,transparent)]' : ''"
                                     @click="item.onClick()"
                                 >
                                     <span
                                         v-if="item.dotColor"
-                                        class="fab-popover__dot"
+                                        class="w-2 h-2 rounded-full shrink-0"
                                         :style="{ backgroundColor: item.dotColor }"
                                     />
                                     <UIcon :name="item.icon" class="size-4" />
@@ -92,79 +91,3 @@ const visibleGroups = computed(() =>
         </div>
     </Teleport>
 </template>
-
-<style scoped>
-.fab-popover {
-    position: fixed;
-    bottom: 2.5rem;
-    right: 1.5rem;
-    z-index: 50;
-    display: none;
-}
-
-@media (max-width: 1023px) {
-    .fab-popover {
-        display: block;
-    }
-}
-
-.fab-popover__panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    max-height: 70vh;
-    overflow-y: auto;
-    min-width: 12rem;
-}
-
-.fab-popover__group-label {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--ui-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-}
-
-.fab-popover__items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-}
-
-.fab-popover__item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4375rem 0.5rem;
-    border-radius: 0.375rem;
-    font-size: 0.8125rem;
-    color: var(--ui-text-default);
-    cursor: pointer;
-    transition: background 0.15s;
-}
-
-.fab-popover__item:hover {
-    background: var(--ui-bg-elevated);
-}
-
-.fab-popover__item--active {
-    color: var(--ui-primary);
-    background: color-mix(in srgb, var(--ui-primary) 10%, transparent);
-}
-
-.fab-popover__item--active:hover {
-    background: color-mix(in srgb, var(--ui-primary) 15%, transparent);
-}
-
-.fab-popover__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 9999px;
-    flex-shrink: 0;
-}
-</style>
