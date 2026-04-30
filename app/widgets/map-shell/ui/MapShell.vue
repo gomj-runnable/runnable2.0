@@ -18,7 +18,7 @@ const props = withDefaults(
 </script>
 
 <template>
-    <div class="flex h-screen">
+    <div class="flex flex-col lg:flex-row h-screen">
         <!-- Nav Rail: 전체 높이, 좌측 고정 -->
         <slot v-if="!props.hideSidebar" name="sidebar" />
 
