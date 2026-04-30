@@ -38,10 +38,10 @@ const POI_ICON: Record<string, string> = {
 </script>
 
 <template>
-    <div class="draw-route-panel">
+    <div class="flex flex-col gap-3 w-full">
         <div class="map-section-label">경로 그리기</div>
 
-        <div class="draw-route-panel__actions">
+        <div class="grid grid-cols-2 gap-2.5">
             <UButton
                 icon="i-lucide-rotate-ccw"
                 variant="outline"
@@ -62,11 +62,11 @@ const POI_ICON: Record<string, string> = {
 
         <div class="map-section-label">구간 목록</div>
 
-        <div class="draw-route-panel__section-list">
+        <div class="flex flex-col gap-2.5">
             <div
                 v-for="(sectionAttr, index) in sectionAttrs"
                 :key="`section-item-${index}`"
-                class="draw-route-panel__section-item"
+                class="flex flex-col gap-1"
             >
                 <TextfieldCard
                     :deletable="index > 0"
@@ -110,22 +110,22 @@ const POI_ICON: Record<string, string> = {
                 </TextfieldCard>
                 <div
                     v-if="(sectionPois?.[index] ?? []).length > 0"
-                    class="draw-route-panel__poi-list"
+                    class="flex flex-wrap gap-1 px-1"
                 >
                     <span
                         v-for="(poi, poiIndex) in sectionPois?.[index] ?? []"
                         :key="`poi-${index}-${poiIndex}`"
-                        class="draw-route-panel__poi-chip"
+                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[rgba(33,150,243,0.12)] text-[11px] text-[#cdd1d5] max-w-[120px]"
                         :title="poi.name"
                     >
                         <UIcon
                             :name="POI_ICON[poi.type] ?? 'i-lucide-map-pin'"
-                            class="draw-route-panel__poi-icon"
+                            class="shrink-0 text-[12px]"
                         />
-                        <span class="draw-route-panel__poi-name">{{ poi.name }}</span>
+                        <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{ poi.name }}</span>
                         <button
                             type="button"
-                            class="draw-route-panel__poi-remove"
+                            class="inline-flex items-center justify-center shrink-0 bg-none border-none cursor-pointer p-0 text-[#58616a] text-[10px] leading-none"
                             :aria-label="`${poi.name} 제거`"
                             @click.stop="$emit('removePoi', { sectionIndex: index, poiIndex })"
                         >
@@ -137,5 +137,3 @@ const POI_ICON: Record<string, string> = {
         </div>
     </div>
 </template>
-
-<style scoped src="./DrawRoutePanel.css"></style>

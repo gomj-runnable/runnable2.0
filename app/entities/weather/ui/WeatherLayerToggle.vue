@@ -26,7 +26,7 @@ const { toggleSource, isSourceActive } = useWeatherSourceStrategy()
 </script>
 
 <template>
-    <div class="weather-layer-toggle">
+    <div class="flex items-center gap-1 max-lg:hidden">
         <UButton
             v-for="layer in layers"
             :key="layer.value.key"
@@ -38,7 +38,7 @@ const { toggleSource, isSourceActive } = useWeatherSourceStrategy()
             :color="(modelValue?.equals(layer.value) ?? false) ? 'primary' : 'neutral'"
             @click="handleClick(layer.value)"
         />
-        <span class="weather-layer-toggle__divider" />
+        <span class="w-px h-5 bg-[var(--ui-border-accented)] mx-0.5" />
         <UButton
             v-for="src in WEATHER_SOURCES"
             :key="src.key"
@@ -52,5 +52,3 @@ const { toggleSource, isSourceActive } = useWeatherSourceStrategy()
         />
     </div>
 </template>
-
-<style scoped src="./WeatherLayerToggle.css"></style>

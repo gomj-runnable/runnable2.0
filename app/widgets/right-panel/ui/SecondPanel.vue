@@ -22,21 +22,21 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <div class="second-panel">
-        <div class="second-panel__header">
-            <h2 class="second-panel__title">{{ panelTitle }}</h2>
-            <div class="second-panel__header-actions">
+    <div class="flex flex-col gap-3 w-full h-full p-4 box-border overflow-y-auto">
+        <div class="flex items-center justify-between gap-2.5 shrink-0">
+            <h2 class="m-0 text-lg font-bold leading-[1.2] text-text-base">{{ panelTitle }}</h2>
+            <div class="flex items-center gap-2.5 shrink-0">
                 <button
                     type="button"
-                    class="second-panel__edit-btn"
-                    :class="{ 'is-active': isEditMode }"
+                    class="px-3 py-1 text-[0.8125rem] font-medium text-text-muted bg-[rgba(255,255,255,0.06)] border border-[rgba(223,255,0,0.18)] rounded-xl cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
+                    :class="isEditMode ? 'bg-[rgba(255,255,0,0.24)] border-[rgba(255,255,0,0.42)] text-text-base' : ''"
                     @click="emit('update:editMode', !isEditMode)"
                 >
                     {{ isEditMode ? '저장하기' : '수정하기' }}
                 </button>
                 <button
                     type="button"
-                    class="second-panel__close-btn"
+                    class="flex items-center justify-center w-7 h-7 text-text-muted bg-transparent border-none rounded-lg cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
                     aria-label="닫기"
                     @click="emit('close')"
                 >
@@ -45,47 +45,47 @@ const emit = defineEmits<{
             </div>
         </div>
 
-        <div class="second-panel__route-info">
-            <span class="second-panel__route-stat">
-                <span class="second-panel__route-stat-label">총 거리</span>
-                <span class="second-panel__route-stat-value">{{ totalDistance.toFixed(1) }}km</span>
+        <div class="flex gap-4 px-3 py-2.5 bg-[rgba(255,255,255,0.06)] rounded-2xl border border-[rgba(223,255,0,0.18)] shrink-0">
+            <span class="flex flex-col gap-1">
+                <span class="text-xs text-text-muted leading-[1.4]">총 거리</span>
+                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]">{{ totalDistance.toFixed(1) }}km</span>
             </span>
-            <span class="second-panel__route-stat">
-                <span class="second-panel__route-stat-label">예상 소요시간</span>
-                <span class="second-panel__route-stat-value">{{ totalTime }}</span>
+            <span class="flex flex-col gap-1">
+                <span class="text-xs text-text-muted leading-[1.4]">예상 소요시간</span>
+                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]">{{ totalTime }}</span>
             </span>
         </div>
 
-        <div class="second-panel__section-list">
+        <div class="flex flex-col gap-2.5">
             <div
                 v-for="section in sections"
                 :key="section.sectionId"
-                class="second-panel__section-card"
+                class="flex flex-col gap-2.5 p-3 bg-[rgba(255,255,255,0.06)] border border-[rgba(223,255,0,0.18)] rounded-2xl"
             >
-                <div class="second-panel__section-header">
-                    <span class="second-panel__section-name">
+                <div class="flex items-center justify-between gap-2.5">
+                    <span class="text-sm font-semibold text-text-base leading-[1.4]">
                         {{ section.attrs?.[0]?.name ?? '구간' }}
                     </span>
-                    <span v-if="section.geom" class="second-panel__section-distance">
+                    <span v-if="section.geom" class="text-xs text-text-muted leading-[1.4]">
                         {{ calculateSectionDistance(section).toFixed(1) }}km
                     </span>
                 </div>
 
-                <div v-if="!isEditMode" class="second-panel__section-body">
-                    <p v-if="section.attrs?.[0]?.comment" class="second-panel__section-comment">
+                <div v-if="!isEditMode" class="flex flex-col gap-1.5">
+                    <p v-if="section.attrs?.[0]?.comment" class="m-0 text-sm font-medium text-text-muted leading-[1.5]">
                         {{ section.attrs[0].comment }}
                     </p>
                     <p
                         v-if="section.attrs?.[0]?.description"
-                        class="second-panel__section-description"
+                        class="m-0 text-[0.8125rem] text-meta leading-[1.5]"
                     >
                         {{ section.attrs[0].description }}
                     </p>
                 </div>
 
-                <div class="second-panel__slider-row">
-                    <span class="second-panel__slider-label">페이스</span>
-                    <span class="second-panel__slider-value">
+                <div class="flex items-center justify-between gap-2.5">
+                    <span class="text-[0.8125rem] text-text-muted leading-[1.4]">페이스</span>
+                    <span class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]">
                         {{
                             userPaces[section.sectionId]?.pace != null
                                 ? formatPace(userPaces[section.sectionId]?.pace!)
@@ -99,13 +99,13 @@ const emit = defineEmits<{
                     :min="180"
                     :max="600"
                     :step="5"
-                    class="second-panel__slider"
+                    class="w-full"
                     @update:model-value="emit('update:pace', section.sectionId, $event)"
                 />
 
-                <div class="second-panel__slider-row">
-                    <span class="second-panel__slider-label">짐 무게</span>
-                    <span class="second-panel__slider-value">
+                <div class="flex items-center justify-between gap-2.5">
+                    <span class="text-[0.8125rem] text-text-muted leading-[1.4]">짐 무게</span>
+                    <span class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]">
                         {{
                             userPaces[section.sectionId]?.weight != null
                                 ? `${userPaces[section.sectionId]?.weight}kg`
@@ -119,7 +119,7 @@ const emit = defineEmits<{
                     :min="0"
                     :max="30"
                     :step="0.5"
-                    class="second-panel__slider"
+                    class="w-full"
                     @update:model-value="emit('update:weight', section.sectionId, $event)"
                 />
 
@@ -128,7 +128,7 @@ const emit = defineEmits<{
                     :value="userPaces[section.sectionId]?.strategy ?? ''"
                     rows="2"
                     placeholder="구간 전략을 입력하세요"
-                    class="second-panel__strategy-textarea"
+                    class="w-full resize-y px-3 py-2.5 text-sm text-text-base bg-[rgba(255,255,255,0.04)] border border-[rgba(223,255,0,0.18)] rounded-xl box-border font-[inherit] leading-[1.5] transition-[border-color] duration-150 outline-none placeholder:text-meta focus:border-[rgba(255,255,0,0.42)]"
                     @blur="
                         emit(
                             'update:strategy',
@@ -141,5 +141,3 @@ const emit = defineEmits<{
         </div>
     </div>
 </template>
-
-<style scoped src="./SecondPanel.css"></style>

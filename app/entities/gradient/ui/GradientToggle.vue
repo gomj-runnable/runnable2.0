@@ -15,7 +15,7 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
 </script>
 
 <template>
-    <div class="gradient-toggle">
+    <div class="flex items-center gap-1">
         <UButton
             label="경사도"
             icon="i-lucide-trending-up"
@@ -26,73 +26,71 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
         />
         <UTooltip v-if="active && difficultyLabel">
             <span
-                class="gradient-toggle__badge"
+                class="inline-flex items-center px-1.5 py-1 rounded-lg text-xs font-semibold text-black leading-[1.4] whitespace-nowrap cursor-default"
                 :style="{ backgroundColor: difficultyColor ?? undefined }"
             >
                 {{ difficultyLabel }}
             </span>
             <template #content>
-                <p class="gradient-toggle__tooltip-title">난이도 판정 기준</p>
-                <table class="gradient-toggle__tooltip-table">
+                <p class="text-xs font-semibold text-text-base mb-1.5">난이도 판정 기준</p>
+                <table class="border-collapse text-xs text-text-muted">
                     <thead>
                         <tr>
-                            <th />
-                            <th>거리</th>
-                            <th>상승고도</th>
-                            <th>최대경사</th>
+                            <th class="px-1.5 py-0.5 text-left" />
+                            <th class="px-1.5 py-0.5 text-left">거리</th>
+                            <th class="px-1.5 py-0.5 text-left">상승고도</th>
+                            <th class="px-1.5 py-0.5 text-left">최대경사</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
+                            <td class="px-1.5 py-0.5">
                                 <span
-                                    class="gradient-toggle__dot"
+                                    class="inline-block w-2 h-2 rounded-full mr-1 align-middle"
                                     style="background: #4caf50"
                                 />초급
                             </td>
-                            <td>~5km</td>
-                            <td>~100m</td>
-                            <td>~3%</td>
+                            <td class="px-1.5 py-0.5">~5km</td>
+                            <td class="px-1.5 py-0.5">~100m</td>
+                            <td class="px-1.5 py-0.5">~3%</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td class="px-1.5 py-0.5">
                                 <span
-                                    class="gradient-toggle__dot"
+                                    class="inline-block w-2 h-2 rounded-full mr-1 align-middle"
                                     style="background: #ffc107"
                                 />중급
                             </td>
-                            <td>5~10km</td>
-                            <td>100~300m</td>
-                            <td>3~7%</td>
+                            <td class="px-1.5 py-0.5">5~10km</td>
+                            <td class="px-1.5 py-0.5">100~300m</td>
+                            <td class="px-1.5 py-0.5">3~7%</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td class="px-1.5 py-0.5">
                                 <span
-                                    class="gradient-toggle__dot"
+                                    class="inline-block w-2 h-2 rounded-full mr-1 align-middle"
                                     style="background: #ff9800"
                                 />고급
                             </td>
-                            <td>10~20km</td>
-                            <td>300~600m</td>
-                            <td>7~12%</td>
+                            <td class="px-1.5 py-0.5">10~20km</td>
+                            <td class="px-1.5 py-0.5">300~600m</td>
+                            <td class="px-1.5 py-0.5">7~12%</td>
                         </tr>
                         <tr>
-                            <td>
+                            <td class="px-1.5 py-0.5">
                                 <span
-                                    class="gradient-toggle__dot"
+                                    class="inline-block w-2 h-2 rounded-full mr-1 align-middle"
                                     style="background: #f44336"
                                 />전문가
                             </td>
-                            <td>20km+</td>
-                            <td>600m+</td>
-                            <td>12%+</td>
+                            <td class="px-1.5 py-0.5">20km+</td>
+                            <td class="px-1.5 py-0.5">600m+</td>
+                            <td class="px-1.5 py-0.5">12%+</td>
                         </tr>
                     </tbody>
                 </table>
-                <p class="gradient-toggle__tooltip-note">세 기준 중 가장 높은 등급 적용</p>
+                <p class="text-xs text-meta mt-1.5 italic">세 기준 중 가장 높은 등급 적용</p>
             </template>
         </UTooltip>
     </div>
 </template>
-
-<style scoped src="./GradientToggle.css"></style>

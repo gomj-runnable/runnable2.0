@@ -9,7 +9,9 @@
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import MapShell from '~/widgets/map-shell/ui/MapShell.vue'
 import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
-import MapSidebarTabs from '~/widgets/map-shell/ui/MapSidebarTabs.vue'
+import AuthSlideOverContent from '~/entities/user/ui/AuthSlideOverContent.vue'
+import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
+import { NavKey } from '~/widgets/map-shell/model/nav-key'
 import DrawRoutePanel from '~/features/draw-route/ui/DrawRoutePanel.vue'
 import RouteElevationModal from '~/features/draw-route/ui/RouteElevationModal.vue'
 import RouteOverlayBottomBar from '~/features/draw-route/ui/RouteOverlayBottomBar.vue'
@@ -19,8 +21,6 @@ import WeatherOverlay from '~/features/weather-overlay/ui/WeatherOverlay.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
 import ExplorePanel from '~/features/explore/ui/ExplorePanel.vue'
-import SidebarUserProfile from '~/entities/user/ui/SidebarUserProfile.vue'
-import AuthModal from '~/entities/user/ui/AuthModal.vue'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
@@ -133,6 +133,16 @@ const routeDrawStore = useRouteDrawStore()
 
 const authStore = useAuthStore()
 const authEffect = useAuthSideeffect()
+
+// ─── SlideOver 네비게이션 ────────────────────────────────────────
+
+const slideOver = useSlideOverNav(activeNav)
+const authContentRef = ref<InstanceType<typeof AuthSlideOverContent> | null>(null)
+
+/** SlideOver에서 로그인 탭 진입 시 폼 초기화 */
+watch(slideOver.current, (nav) => {
+    if (nav === NavKey.AUTH) authContentRef.value?.reset()
+})
 
 // ─── 날씨·편의시설 ───────────────────────────────────────────────
 
@@ -560,15 +570,6 @@ onMounted(async () => {
     ])
 })
 
-// ─── 사이드바 탭 구성 ────────────────────────────────────────────
-
-/** 사이드바 네비게이션 탭 목록. 아이콘과 라벨로 구성된다. */
-const navItems = [
-    { icon: 'i-lucide-list', label: '목록' },
-    { icon: 'i-lucide-pencil', label: '그리기' },
-    { icon: 'i-lucide-search', label: '탐색' }
-] as const
-
 // ─── 탐색 ────────────────────────────────────────────────────────
 
 const explore = useExploreSearchSideeffect()
@@ -584,9 +585,9 @@ const dongOptions = computed(() => {
     return [FILTER_ALL, ...districtStore.getDongList(explore.filter.selectedSigungu.value)]
 })
 
-/** 인증 성공 시 모달을 닫는다. */
+/** 인증 성공 시 SlideOver를 닫는다. */
 const handleAuthSuccess = async () => {
-    authStore.closeAuthModal()
+    slideOver.close()
 }
 
 /** 로그아웃 버튼 클릭 시 세션을 종료하고 사용자 상태를 초기화한다. */
@@ -641,113 +642,12 @@ watch(overlayContext, (next, prev) => {
 <template>
     <div class="index-page">
         <MapShell :show-second-panel="sectionInfo.isOpen.value">
-            <template #sidebar="{ open: sidebarOpen, setSidebarOpen }">
-                <MapSidebar :open="sidebarOpen" @update:open="setSidebarOpen">
-                    <template #default="{ state }">
-                        <!-- 탭: 접힘 시 아이콘만 세로, 펼침 시 아이콘+라벨 가로 -->
-                        <MapSidebarTabs
-                            v-model="activeNav"
-                            :items="navItems"
-                            :collapsed="state === 'collapsed'"
-                        />
-
-                        <!-- 탭 콘텐츠: 펼침 시에만 표시 -->
-                        <div v-if="state === 'expanded'" class="flex flex-col gap-1 p-2 overflow-y-auto flex-1 min-h-0">
-                            <template v-if="activeNav === '목록'">
-                                <UInput
-                                    v-model="routeList.searchQuery"
-                                    type="search"
-                                    placeholder="경로 이름으로 검색"
-                                    icon="i-lucide-search"
-                                />
-                                <RouteListPanel
-                                    :routes="routeList.filteredRoutes"
-                                    :selected-route-id="routeList.selectedRouteId"
-                                    @select="handleRouteSelect"
-                                    @download="routeList.download"
-                                />
-                            </template>
-                            <DrawRoutePanel
-                                v-else-if="activeNav === '그리기'"
-                                :section-attrs="drawing.sectionDraft?.attrs ?? []"
-                                :section-pois="drawing.sectionPois"
-                                :active-section-index="drawing.activeSectionIndex"
-                                @reset="drawing.start"
-                                @save="drawing.openSaveModal"
-                                @update-section-attr="drawing.updateSectionAttr"
-                                @remove-section="drawing.removeSection"
-                                @remove-poi="
-                                    drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)
-                                "
-                                @select-section="drawing.activeSectionIndex = $event.index"
-                            />
-                            <template v-else-if="activeNav === '탐색'">
-                                <UInput
-                                    v-model="explore.searchQuery.value"
-                                    type="search"
-                                    placeholder="경로 이름으로 검색"
-                                    icon="i-lucide-search"
-                                    @keyup.enter="explore.search(explore.searchQuery.value)"
-                                />
-                                <div class="explore-filter-row">
-                                    <USelect
-                                        :model-value="explore.filter.selectedSigungu.value"
-                                        :items="sigunguOptions"
-                                        placeholder="시군구"
-                                        class="explore-filter-row__select"
-                                        @update:model-value="explore.filter.setSigungu($event)"
-                                    />
-                                    <USelect
-                                        :model-value="explore.filter.selectedDong.value"
-                                        :items="dongOptions"
-                                        placeholder="읍면동"
-                                        class="explore-filter-row__select"
-                                        :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
-                                        @update:model-value="explore.filter.selectedDong.value = $event"
-                                    />
-                                    <UButton variant="outline" color="neutral" size="sm" icon="i-lucide-rotate-ccw" label="초기화" @click="explore.filter.resetFilters" />
-                                </div>
-                                <ExplorePanel
-                                    :routes="explore.filteredResults.value"
-                                    :selected-route-id="explore.selectedRouteId.value"
-                                    :is-loading="explore.isSearching.value"
-                                    :recommend-active="showRecommend"
-                                    @select="handleExploreSelect"
-                                    @recommend="showRecommend = !showRecommend"
-                                >
-                                    <template #recommend>
-                                        <WeatherRecommendPanel
-                                            :routes="weatherRecommend.recommendedRoutes.value"
-                                            :is-loading="weatherRecommend.isLoading.value"
-                                            @select="handleRouteSelect"
-                                        />
-                                    </template>
-                                </ExplorePanel>
-                            </template>
-                        </div>
-                    </template>
-
-                    <template #footer="{ state: footerState }">
-                        <SidebarUserProfile
-                            v-if="footerState === 'expanded'"
-                            :username="authStore.user.value?.name"
-                            :image="authStore.user.value?.image ?? undefined"
-                            :subtitle="authStore.isLoggedIn.value ? '계정 설정' : '로그인하세요'"
-                            @click="
-                                authStore.isLoggedIn.value ? undefined : authStore.openLoginModal()
-                            "
-                            @logout="handleLogout"
-                        />
-                        <div v-else class="flex items-center justify-center py-2">
-                            <UAvatar
-                                :src="authStore.user.value?.image ?? undefined"
-                                :alt="authStore.user.value?.name ?? '사용자'"
-                                icon="i-lucide-user"
-                                size="sm"
-                            />
-                        </div>
-                    </template>
-                </MapSidebar>
+            <template #sidebar>
+                <MapSidebar
+                    :active-nav="slideOver.current.value"
+                    :is-logged-in="authStore.isLoggedIn.value"
+                    @select="slideOver.select"
+                />
             </template>
 
             <template #secondPanel>
@@ -867,6 +767,108 @@ watch(overlayContext, (next, prev) => {
             </template>
         </MapShell>
 
+        <!-- SlideOver: NavigationMenu 항목 클릭 시 탭 콘텐츠 표시 -->
+        <USlideover
+            v-model:open="slideOver.isOpen.value"
+            side="left"
+            :overlay="false"
+            :modal="false"
+            :transition="false"
+            :title="slideOver.meta.value.title"
+            :description="slideOver.meta.value.description"
+            :ui="{
+                content: 'top-(--ui-header-height)! lg:top-0! lg:start-14! max-w-full lg:max-w-sm slideover-from-rail',
+                header: 'hidden! lg:flex!'
+            }"
+        >
+            <template #body>
+                <!-- 목록 -->
+                <div v-if="slideOver.current.value === NavKey.LIST" class="flex flex-col gap-1">
+                    <UInput
+                        v-model="routeList.searchQuery"
+                        type="search"
+                        placeholder="경로 이름으로 검색"
+                        icon="i-lucide-search"
+                    />
+                    <RouteListPanel
+                        :routes="routeList.filteredRoutes"
+                        :selected-route-id="routeList.selectedRouteId"
+                        @select="handleRouteSelect"
+                        @download="routeList.download"
+                    />
+                </div>
+
+                <!-- 그리기 -->
+                <DrawRoutePanel
+                    v-else-if="slideOver.current.value === NavKey.DRAW"
+                    :section-attrs="drawing.sectionDraft?.attrs ?? []"
+                    :section-pois="drawing.sectionPois"
+                    :active-section-index="drawing.activeSectionIndex"
+                    @reset="drawing.start"
+                    @save="drawing.openSaveModal"
+                    @update-section-attr="drawing.updateSectionAttr"
+                    @remove-section="drawing.removeSection"
+                    @remove-poi="
+                        drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)
+                    "
+                    @select-section="drawing.activeSectionIndex = $event.index"
+                />
+
+                <!-- 탐색 -->
+                <div v-else-if="slideOver.current.value === NavKey.EXPLORE" class="flex flex-col gap-1">
+                    <UInput
+                        v-model="explore.searchQuery.value"
+                        type="search"
+                        placeholder="경로 이름으로 검색"
+                        icon="i-lucide-search"
+                        @keyup.enter="explore.search(explore.searchQuery.value)"
+                    />
+                    <div class="flex items-center gap-1">
+                        <USelect
+                            :model-value="explore.filter.selectedSigungu.value"
+                            :items="sigunguOptions"
+                            placeholder="시군구"
+                            class="flex-1 min-w-0"
+                            @update:model-value="explore.filter.setSigungu($event)"
+                        />
+                        <USelect
+                            :model-value="explore.filter.selectedDong.value"
+                            :items="dongOptions"
+                            placeholder="읍면동"
+                            class="flex-1 min-w-0"
+                            :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
+                            @update:model-value="explore.filter.selectedDong.value = $event"
+                        />
+                        <UButton variant="outline" color="neutral" size="sm" icon="i-lucide-rotate-ccw" label="초기화" @click="explore.filter.resetFilters" />
+                    </div>
+                    <ExplorePanel
+                        :routes="explore.filteredResults.value"
+                        :selected-route-id="explore.selectedRouteId.value"
+                        :is-loading="explore.isSearching.value"
+                        :recommend-active="showRecommend"
+                        @select="handleExploreSelect"
+                        @recommend="showRecommend = !showRecommend"
+                    >
+                        <template #recommend>
+                            <WeatherRecommendPanel
+                                :routes="weatherRecommend.recommendedRoutes.value"
+                                :is-loading="weatherRecommend.isLoading.value"
+                                @select="handleRouteSelect"
+                            />
+                        </template>
+                    </ExplorePanel>
+                </div>
+
+                <!-- 로그인 / 내 계정 -->
+                <AuthSlideOverContent
+                    v-else-if="slideOver.current.value === NavKey.AUTH"
+                    ref="authContentRef"
+                    @success="handleAuthSuccess"
+                    @logout="handleLogout"
+                />
+            </template>
+        </USlideover>
+
         <FloatingActionMenu :groups="fabGroups" />
 
         <!-- 모바일 전용: 현재 위치 검색 플로팅 버튼 -->
@@ -921,17 +923,8 @@ watch(overlayContext, (next, prev) => {
             @update:description="saveModal.routeForm.description = $event"
             @submit="saveModal.confirm"
         />
-        <AuthModal
-            :open="authStore.isAuthModalOpen.value"
-            :mode="authStore.authModalMode.value"
-            @update:open="authStore.isAuthModalOpen.value = $event"
-            @update:mode="authStore.authModalMode.value = $event"
-            @success="handleAuthSuccess"
-        />
     </div>
 </template>
-
-<style scoped src="~/assets/css/pages/index.css"></style>
 
 <style scoped>
 .route-info-guide-modal {
@@ -978,6 +971,38 @@ watch(overlayContext, (next, prev) => {
 @media (max-width: 1023px) {
     .fab-nearby {
         display: block;
+    }
+}
+</style>
+
+<style>
+/* SlideOver: Nav Rail 옆에서 열리는 애니메이션 (portal 렌더링이므로 unscoped) */
+.slideover-from-rail[data-state='open'] {
+    animation: rail-slide-in 200ms ease-out;
+}
+.slideover-from-rail[data-state='closed'] {
+    animation: rail-slide-out 150ms ease-in;
+}
+
+@keyframes rail-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(-1rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes rail-slide-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-1rem);
     }
 }
 </style>

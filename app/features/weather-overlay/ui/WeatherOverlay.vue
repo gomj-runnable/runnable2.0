@@ -94,14 +94,14 @@ const handleTimeChange = (value: any) => {
 </script>
 
 <template>
-    <div class="weather-overlay">
-        <div class="weather-overlay__topbar">
-            <div class="weather-overlay__controls">
+    <div class="absolute inset-0 flex flex-col !pointer-events-none z-[12]">
+        <div class="flex items-start gap-2.5 p-4 pointer-events-auto max-md:justify-center max-md:p-2">
+            <div class="flex flex-col gap-1.5 max-md:items-center">
                 <WeatherLayerToggle
                     :model-value="activeLayer"
                     @update:model-value="handleLayerChange"
                 />
-                <div v-if="activeLayer" class="weather-overlay__datetime-row">
+                <div v-if="activeLayer" class="flex items-center gap-1">
                     <UInputDate
                         ref="inputDate"
                         :model-value="dateValue"
@@ -138,17 +138,15 @@ const handleTimeChange = (value: any) => {
                         granularity="hour"
                         @update:model-value="handleTimeChange"
                     />
-                    <span v-if="isLoading" class="i-lucide-loader-2 weather-overlay__spinner" />
+                    <span v-if="isLoading" class="i-lucide-loader-2 animate-spin" />
                 </div>
             </div>
         </div>
-        <div v-if="activeLayer" class="weather-overlay__bottombar">
+        <div v-if="activeLayer" class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5">
             <WeatherLegend :active-layer="activeLayer" />
         </div>
-        <div v-else-if="isElevationActive" class="weather-overlay__bottombar">
+        <div v-else-if="isElevationActive" class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5">
             <ElevationLegend />
         </div>
     </div>
 </template>
-
-<style scoped src="./WeatherOverlay.css"></style>

@@ -36,11 +36,9 @@ defineEmits<{
         @update:open="$emit('update:open', $event)"
     >
         <template #content>
-            <div class="bottom-drawer">
+            <div class="px-2.5 py-1.5 flex flex-col gap-1.5">
                 <slot />
             </div>
         </template>
     </UDrawer>
 </template>
-
-<style scoped src="./BottomDrawer.css"></style>

@@ -16,28 +16,26 @@ defineEmits<{
 </script>
 
 <template>
-    <section class="weather-recommend-panel">
-        <header class="weather-recommend-panel__header">
-            <div class="weather-recommend-panel__title-row">
-                <span class="i-lucide-sparkles weather-recommend-panel__icon" />
-                <h2 class="weather-recommend-panel__title">오늘의 추천 경로</h2>
+    <section class="flex flex-col gap-2.5 w-full">
+        <header class="flex items-center justify-between gap-2.5">
+            <div class="flex items-center gap-1.5">
+                <span class="i-lucide-sparkles text-base text-[#ccff00]" />
+                <h2 class="m-0 text-sm font-semibold text-text-base">오늘의 추천 경로</h2>
             </div>
-            <span class="weather-recommend-panel__badge">AI 추천</span>
+            <span class="px-1.5 py-[2px] rounded-lg bg-[color-mix(in_srgb,#ccff00_16%,transparent)] text-[#ccff00] text-xs font-bold whitespace-nowrap">AI 추천</span>
         </header>
 
-        <div v-if="isLoading" class="weather-recommend-panel__loading">
-            <span class="i-lucide-loader-2 weather-recommend-panel__spinner" />
+        <div v-if="isLoading" class="flex items-center gap-1.5 py-3 text-sm text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+            <span class="i-lucide-loader-2 animate-spin" />
             <span>추천 경로를 불러오는 중...</span>
         </div>
 
-        <ul v-else-if="routes.length > 0" class="weather-recommend-panel__list">
+        <ul v-else-if="routes.length > 0" class="flex flex-col gap-1.5 list-none m-0 p-0">
             <li v-for="route in routes" :key="route.routeId">
                 <WeatherRecommendCard :route="route" @select="$emit('select', $event)" />
             </li>
         </ul>
 
-        <p v-else class="weather-recommend-panel__empty">현재 날씨에 맞는 공개 경로가 없습니다.</p>
+        <p v-else class="m-0 py-3 text-sm text-[color-mix(in_srgb,#e6e8ea_80%,transparent)] text-center">현재 날씨에 맞는 공개 경로가 없습니다.</p>
     </section>
 </template>
-
-<style scoped src="./WeatherRecommendPanel.css"></style>

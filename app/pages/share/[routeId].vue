@@ -32,22 +32,22 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="share-page">
-        <div v-if="isLoading" class="share-page__loading">경로를 불러오는 중...</div>
+    <div class="w-full h-screen flex flex-col bg-[var(--color-bg,#111)] text-[var(--color-text,#fff)]">
+        <div v-if="isLoading" class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]">경로를 불러오는 중...</div>
 
-        <div v-else-if="error" class="share-page__error">
+        <div v-else-if="error" class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]">
             {{ error }}
         </div>
 
-        <div v-else-if="sharedData" class="share-page__content">
-            <div class="share-page__header">
-                <h1 class="share-page__title">{{ sharedData.route.title }}</h1>
-                <p v-if="sharedData.route.description" class="share-page__desc">
+        <div v-else-if="sharedData" class="flex flex-col h-full">
+            <div class="px-5 py-4 border-b border-[var(--color-border,#333)]">
+                <h1 class="text-xl font-bold m-0 mb-1">{{ sharedData.route.title }}</h1>
+                <p v-if="sharedData.route.description" class="text-sm text-[var(--color-text-muted,#aaa)] m-0">
                     {{ sharedData.route.description }}
                 </p>
             </div>
 
-            <div class="share-page__info">
+            <div class="flex gap-4 px-5 py-2 text-[13px] text-[var(--color-text-muted,#aaa)]">
                 <span v-if="sharedData.route?.distance">
                     거리: {{ (Number(sharedData.route.distance) / 1000).toFixed(2) }}km
                 </span>
@@ -55,69 +55,7 @@ onMounted(async () => {
             </div>
 
             <!-- TODO: 3D 지도 뷰어 + 경로정보 마커 렌더링 -->
-            <div class="share-page__map-placeholder">3D 지도 뷰어 영역 (Phase 2에서 구현)</div>
+            <div class="flex-1 flex items-center justify-center text-sm text-[var(--color-text-muted,#666)] bg-[var(--color-surface,#1a1a1a)]">3D 지도 뷰어 영역 (Phase 2에서 구현)</div>
         </div>
     </div>
 </template>
-
-<style scoped>
-.share-page {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: var(--color-bg, #111);
-    color: var(--color-text, #fff);
-}
-
-.share-page__loading,
-.share-page__error {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    font-size: 16px;
-    color: var(--color-text-muted, #888);
-}
-
-.share-page__content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.share-page__header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--color-border, #333);
-}
-
-.share-page__title {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 4px;
-}
-
-.share-page__desc {
-    font-size: 14px;
-    color: var(--color-text-muted, #aaa);
-    margin: 0;
-}
-
-.share-page__info {
-    display: flex;
-    gap: 16px;
-    padding: 8px 20px;
-    font-size: 13px;
-    color: var(--color-text-muted, #aaa);
-}
-
-.share-page__map-placeholder {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: var(--color-text-muted, #666);
-    background: var(--color-surface, #1a1a1a);
-}
-</style>

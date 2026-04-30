@@ -15,14 +15,14 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="discover-district-selector">
+    <div class="flex flex-col gap-2.5 w-full">
         <div class="map-section-label">구역 선택</div>
-        <div class="discover-district-selector__grid">
+        <div class="flex flex-wrap gap-1.5">
             <button
                 v-for="district in guNames"
                 :key="district"
-                class="discover-district-selector__chip"
-                :class="{ 'is-active': modelValue === district }"
+                class="px-2.5 py-1 text-xs font-medium leading-[1.4] text-text-muted bg-transparent border border-border-accent rounded-full cursor-pointer transition-[background,color,border-color] duration-150 whitespace-nowrap hover:bg-accent-hover hover:text-text-base hover:border-[rgba(255,255,0,0.42)]"
+                :class="{ 'bg-accent-tint !text-[#ccff00] !border-[#ccff00]': modelValue === district }"
                 type="button"
                 @click="$emit('update:modelValue', modelValue === district ? null : district)"
             >
@@ -31,5 +31,3 @@ defineEmits<{
         </div>
     </div>
 </template>
-
-<style scoped src="./DiscoverDistrictSelector.css"></style>

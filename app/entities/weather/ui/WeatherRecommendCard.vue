@@ -33,39 +33,56 @@ const scoreColorClass = computed(() => {
 </script>
 
 <template>
-    <button type="button" class="weather-recommend-card" @click="$emit('select', route.routeId)">
-        <div class="weather-recommend-card__header">
-            <span class="weather-recommend-card__title">{{ route.title }}</span>
-            <span class="weather-recommend-card__score" :class="scoreColorClass">
+    <button
+        type="button"
+        class="flex flex-col gap-1.5 w-full px-3 py-2.5 border border-border-accent rounded-2xl bg-[rgba(255,255,255,0.06)] text-text-base text-left cursor-pointer transition-[background] duration-150 hover:bg-accent-hover"
+        @click="$emit('select', route.routeId)"
+    >
+        <div class="flex items-center justify-between gap-2.5">
+            <span class="text-sm font-semibold text-text-base overflow-hidden text-ellipsis whitespace-nowrap">{{ route.title }}</span>
+            <span
+                class="shrink-0 text-[0.8125rem] font-bold"
+                :class="{
+                    'text-[#4caf72]': scoreColorClass === 'is-score-good',
+                    'text-[#f0a030]': scoreColorClass === 'is-score-moderate',
+                    'text-[#e05050]': scoreColorClass === 'is-score-low',
+                }"
+            >
                 {{ route.score }}점
             </span>
         </div>
 
-        <div class="weather-recommend-card__score-bar">
+        <div class="h-1 rounded-sm bg-[rgba(223,255,0,0.2)] overflow-hidden">
             <div
-                class="weather-recommend-card__score-fill"
-                :class="scoreColorClass"
+                class="h-full rounded-sm transition-[width] duration-300"
+                :class="{
+                    'bg-[#4caf72]': scoreColorClass === 'is-score-good',
+                    'bg-[#f0a030]': scoreColorClass === 'is-score-moderate',
+                    'bg-[#e05050]': scoreColorClass === 'is-score-low',
+                }"
                 :style="{ width: `${route.score}%` }"
             />
         </div>
 
-        <div v-if="distanceLabel || elevationLabel" class="weather-recommend-card__meta">
-            <span v-if="distanceLabel" class="weather-recommend-card__meta-item">
+        <div v-if="distanceLabel || elevationLabel" class="flex items-center gap-3">
+            <span v-if="distanceLabel" class="inline-flex items-center gap-1 text-xs text-text-muted">
                 <span class="i-lucide-map-pin" />
                 {{ distanceLabel }}
             </span>
-            <span v-if="elevationLabel" class="weather-recommend-card__meta-item">
+            <span v-if="elevationLabel" class="inline-flex items-center gap-1 text-xs text-text-muted">
                 <span class="i-lucide-mountain" />
                 {{ elevationLabel }}
             </span>
         </div>
 
-        <div v-if="route.tags.length > 0" class="weather-recommend-card__tags">
-            <span v-for="tag in route.tags" :key="tag" class="weather-recommend-card__tag">
+        <div v-if="route.tags.length > 0" class="flex flex-wrap gap-1">
+            <span
+                v-for="tag in route.tags"
+                :key="tag"
+                class="px-1.5 py-[2px] rounded-lg bg-accent-tint text-[#ccff00] text-xs font-medium whitespace-nowrap"
+            >
                 {{ tag }}
             </span>
         </div>
     </button>
 </template>
-
-<style scoped src="./WeatherRecommendCard.css"></style>
