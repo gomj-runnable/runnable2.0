@@ -837,18 +837,21 @@ watch(overlayContext, (next, prev) => {
             </template>
         </MapShell>
 
-        <!-- SlideOver: NavigationMenu 항목 클릭 시 탭 콘텐츠 표시 -->
-        <USlideover
+        <!-- 탭 콘텐츠: 모바일=Modal / 데스크톱=SlideOver -->
+        <component
+            :is="isMobile ? 'UModal' : 'USlideover'"
             v-model:open="slideOver.isOpen.value"
-            side="left"
-            :overlay="false"
-            :modal="false"
-            :transition="false"
             :title="slideOver.meta.value.title"
             :description="slideOver.meta.value.description"
-            :ui="{
-                content: 'top-(--ui-header-height)! max-w-full lg:max-w-sm',
-                header: 'flex!'
+            v-bind="isMobile ? {} : {
+                side: 'left',
+                overlay: false,
+                modal: false,
+                transition: false,
+                ui: {
+                    content: 'top-(--ui-header-height)! max-w-full lg:max-w-sm',
+                    header: 'flex!'
+                }
             }"
         >
             <template #body>
@@ -945,7 +948,7 @@ watch(overlayContext, (next, prev) => {
                     @logout="handleLogout"
                 />
             </template>
-        </USlideover>
+        </component>
 
         <FloatingActionMenu :groups="fabGroups" />
 
