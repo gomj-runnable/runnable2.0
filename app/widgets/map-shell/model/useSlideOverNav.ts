@@ -71,5 +71,12 @@ export const useSlideOverNav = (activeNav: Ref<string>) => {
         }
     )
 
-    return { current, isOpen, meta, select, close }
+    /** 마지막으로 선택된 네비게이션 (닫혀도 active 표시용) */
+    const lastActive = computed(() => current.value ?? _lastNav.value)
+    const _lastNav = ref<NavKeyValue>(NavKey.LIST)
+    watch(current, (nav) => {
+        if (nav) _lastNav.value = nav
+    })
+
+    return { current, isOpen, meta, select, close, lastActive }
 }

@@ -44,6 +44,8 @@ const visibleGroups = computed(() =>
         <div class="fixed bottom-10 right-6 z-[9] hidden max-lg:block">
             <UPopover
                 v-model:open="isOpen"
+                :dismissible="false"
+                :modal="false"
                 :content="{ side: 'top', align: 'end', sideOffset: 8 }"
             >
                 <UButton
@@ -62,16 +64,18 @@ const visibleGroups = computed(() =>
                             v-for="(group, gi) in visibleGroups"
                             :key="group.key"
                         >
-                            <div class="flex items-center gap-1.5 px-2 py-1 text-[0.6875rem] font-semibold text-[var(--ui-text-muted)] uppercase tracking-[0.025em]">
+                            <div class="flex items-center gap-1.5 px-2 py-1 text-[0.6875rem] font-semibold text-(--ui-text-muted) uppercase tracking-[0.025em]">
                                 <UIcon :name="group.icon" class="size-4 opacity-60" />
                                 <span>{{ group.label }}</span>
                             </div>
                             <div class="flex flex-col gap-0.5">
-                                <button
+                                <UButton
                                     v-for="item in group.items"
                                     :key="item.key"
-                                    class="flex items-center gap-2 px-2 py-[0.4375rem] rounded-md text-[0.8125rem] text-[var(--ui-text-default)] cursor-pointer transition-[background] duration-150 hover:bg-[var(--ui-bg-elevated)]"
-                                    :class="item.active ? 'text-[var(--ui-primary)] bg-[color-mix(in_srgb,var(--ui-primary)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--ui-primary)_15%,transparent)]' : ''"
+                                    variant="ghost"
+                                    color="neutral"
+                                    class="flex items-center gap-2 px-2 py-[0.4375rem] rounded-md text-[0.8125rem] text-(--ui-text) justify-start hover:bg-(--ui-bg-elevated)"
+                                    :class="item.active ? 'text-(--ui-primary) bg-(--ui-primary)/10 hover:bg-(--ui-primary)/15' : ''"
                                     @click="item.onClick()"
                                 >
                                     <span
@@ -81,7 +85,7 @@ const visibleGroups = computed(() =>
                                     />
                                     <UIcon :name="item.icon" class="size-4" />
                                     <span>{{ item.label }}</span>
-                                </button>
+                                </UButton>
                             </div>
                             <USeparator v-if="gi < visibleGroups.length - 1" />
                         </div>

@@ -79,22 +79,22 @@ const formatTime = (sec: number) => {
     <BottomDrawer :open="open" @update:open="$emit('update:open', $event)">
         <!-- Row 1: Controls -->
         <div class="flex items-center gap-1.5">
-            <button
-                class="flex items-center justify-center w-8 h-8 border-none rounded-lg bg-[#ffff00] text-black cursor-pointer shrink-0 transition-[background] duration-150 hover:bg-[#ccff00]"
+            <UButton
+                :icon="store.isPlaying.value ? 'i-lucide-pause' : 'i-lucide-play'"
+                color="primary"
+                class="shrink-0"
+                size="sm"
                 @click="onPlayPause"
-            >
-                <UIcon
-                    :name="store.isPlaying.value ? 'i-lucide-pause' : 'i-lucide-play'"
-                    class="w-2 h-2"
-                />
-            </button>
+            />
 
-            <button
-                class="flex items-center justify-center w-8 h-8 border-none rounded-lg bg-[rgba(255,255,255,0.06)] text-text-muted cursor-pointer shrink-0 transition-[background] duration-150 hover:bg-[rgba(255,255,255,0.08)]"
+            <UButton
+                icon="i-lucide-square"
+                color="neutral"
+                variant="ghost"
+                class="shrink-0"
+                size="sm"
                 @click="onStop"
-            >
-                <UIcon name="i-lucide-square" class="w-2 h-2" />
-            </button>
+            />
 
             <div class="sim-drawer__slider flex-1 min-w-0">
                 <USlider
@@ -121,7 +121,7 @@ const formatTime = (sec: number) => {
         </div>
 
         <!-- Row 2: Info -->
-        <div class="flex justify-around gap-2.5 pt-1.5 border-t border-[rgba(223,255,0,0.18)]">
+        <div class="flex justify-around gap-2.5 pt-1.5 border-t border-(--ui-border)">
             <div class="flex items-baseline gap-1">
                 <span class="text-xs font-semibold text-meta">시간</span>
                 <span class="text-xs text-text-base [font-variant-numeric:tabular-nums]">{{

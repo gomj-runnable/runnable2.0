@@ -19,13 +19,13 @@ defineEmits<{
     <section class="flex flex-col gap-2.5 w-full">
         <header class="flex items-center justify-between gap-2.5">
             <div class="flex items-center gap-1.5">
-                <span class="i-lucide-sparkles text-base text-[#ccff00]" />
+                <span class="i-lucide-sparkles text-base text-(--ui-primary)" />
                 <h2 class="m-0 text-sm font-semibold text-text-base">오늘의 추천 경로</h2>
             </div>
-            <span class="px-1.5 py-[2px] rounded-lg bg-[color-mix(in_srgb,#ccff00_16%,transparent)] text-[#ccff00] text-xs font-bold whitespace-nowrap">AI 추천</span>
+            <span class="px-1.5 py-[2px] rounded-lg bg-(--ui-primary)/10 text-(--ui-primary) text-xs font-bold whitespace-nowrap">AI 추천</span>
         </header>
 
-        <div v-if="isLoading" class="flex items-center gap-1.5 py-3 text-sm text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
+        <div v-if="isLoading" class="flex items-center gap-1.5 py-3 text-sm text-(--ui-text-muted)">
             <span class="i-lucide-loader-2 animate-spin" />
             <span>추천 경로를 불러오는 중...</span>
         </div>
@@ -36,6 +36,6 @@ defineEmits<{
             </li>
         </ul>
 
-        <p v-else class="m-0 py-3 text-sm text-[color-mix(in_srgb,#e6e8ea_80%,transparent)] text-center">현재 날씨에 맞는 공개 경로가 없습니다.</p>
+        <p v-else class="m-0 py-3 text-sm text-(--ui-text-muted) text-center">현재 날씨에 맞는 공개 경로가 없습니다.</p>
     </section>
 </template>

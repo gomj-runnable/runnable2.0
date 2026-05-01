@@ -13,19 +13,19 @@ defineProps<{
         <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">경사도</p>
         <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1.5 text-xs text-text-muted">
-                <span class="w-3 h-3 rounded-lg border border-[rgba(255,255,255,0.2)] shrink-0" style="background: #4caf50" />
+                <span class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0" style="background: #4caf50" />
                 완만 (0~3%)
             </div>
             <div class="flex items-center gap-1.5 text-xs text-text-muted">
-                <span class="w-3 h-3 rounded-lg border border-[rgba(255,255,255,0.2)] shrink-0" style="background: #ffc107" />
+                <span class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0" style="background: #ffc107" />
                 약간 가파름 (3~7%)
             </div>
             <div class="flex items-center gap-1.5 text-xs text-text-muted">
-                <span class="w-3 h-3 rounded-lg border border-[rgba(255,255,255,0.2)] shrink-0" style="background: #ff9800" />
+                <span class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0" style="background: #ff9800" />
                 가파름 (7~12%)
             </div>
             <div class="flex items-center gap-1.5 text-xs text-text-muted">
-                <span class="w-3 h-3 rounded-lg border border-[rgba(255,255,255,0.2)] shrink-0" style="background: #f44336" />
+                <span class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0" style="background: #f44336" />
                 매우 가파름 (12%+)
             </div>
         </div>

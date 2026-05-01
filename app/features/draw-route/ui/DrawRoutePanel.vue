@@ -112,26 +112,30 @@ const POI_ICON: Record<string, string> = {
                     v-if="(sectionPois?.[index] ?? []).length > 0"
                     class="flex flex-wrap gap-1 px-1"
                 >
-                    <span
+                    <UBadge
                         v-for="(poi, poiIndex) in sectionPois?.[index] ?? []"
                         :key="`poi-${index}-${poiIndex}`"
-                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[rgba(33,150,243,0.12)] text-[11px] text-[#cdd1d5] max-w-[120px]"
+                        color="info"
+                        variant="subtle"
+                        size="sm"
+                        class="max-w-[120px]"
                         :title="poi.name"
                     >
                         <UIcon
                             :name="POI_ICON[poi.type] ?? 'i-lucide-map-pin'"
-                            class="shrink-0 text-[12px]"
+                            class="shrink-0"
                         />
                         <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{ poi.name }}</span>
-                        <button
-                            type="button"
-                            class="inline-flex items-center justify-center shrink-0 bg-none border-none cursor-pointer p-0 text-[#58616a] text-[10px] leading-none"
+                        <UButton
+                            icon="i-lucide-x"
+                            color="neutral"
+                            variant="ghost"
+                            size="xs"
+                            class="shrink-0 -mr-1"
                             :aria-label="`${poi.name} 제거`"
                             @click.stop="$emit('removePoi', { sectionIndex: index, poiIndex })"
-                        >
-                            <UIcon name="i-lucide-x" />
-                        </button>
-                    </span>
+                        />
+                    </UBadge>
                 </div>
             </div>
         </div>
