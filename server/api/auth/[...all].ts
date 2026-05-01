@@ -56,7 +56,7 @@ async function handleMemoryAuth(event: H3Event) {
         setCookie(event, 'better-auth.session_token', sessionToken, {
             path: '/',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production' || getRequestURL(event).protocol === 'https:',
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 30
         })
@@ -87,7 +87,7 @@ async function handleMemoryAuth(event: H3Event) {
         setCookie(event, 'better-auth.session_token', sessionToken, {
             path: '/',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production' || getRequestURL(event).protocol === 'https:',
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 30
         })

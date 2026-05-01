@@ -68,6 +68,8 @@ export interface CesiumViewer extends Viewer {
     }): Promise<DrawActionResult>
     /** 진행 중인 Cesium 드로잉 helper를 취소한다. */
     _cancelDrawAction(): void
+    /** 진행 중인 Cesium 드로잉을 현재 포인트로 완료한다. (모바일 우클릭 대체) */
+    _finishDrawAction(): void
 }
 
 declare global {

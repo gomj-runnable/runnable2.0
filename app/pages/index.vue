@@ -359,6 +359,24 @@ onBeforeUnmount(() => {
     mobileMediaQuery?.removeEventListener('change', onMediaChange)
 })
 
+/** 모바일: 경로 그리기 도움말 모달 표시 여부 */
+const showDrawingHelpModal = ref(false)
+
+/** 모바일에서 드로잉이 시작되면 자동으로 도움말 모달을 표시한다 */
+watch(
+    () => drawing.isDrawingActive,
+    (active) => {
+        if (active && isMobile.value) {
+            showDrawingHelpModal.value = true
+        }
+    }
+)
+
+/** 모바일에서 경로 그리기 초기화 시 도움말 모달을 표시한다 */
+const handleDrawingStartWithHelp = () => {
+    drawing.start()
+}
+
 /** 모바일: 현재 위치 검색 버튼 노출 조건 */
 const fabNearbyVisible = computed(() =>
     (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
@@ -774,6 +792,48 @@ watch(overlayContext, (next, prev) => {
                         </button>
                     </div>
                 </div>
+                <!-- 모바일: 드로잉 중 "완료" 플로팅 버튼 -->
+                <Teleport to="body">
+                    <div
+                        v-if="isMobile && drawing.isDrawingActive"
+                        class="drawing-finish-btn"
+                    >
+                        <UButton
+                            icon="i-lucide-check"
+                            label="경로 완성"
+                            size="lg"
+                            color="primary"
+                            class="rounded-full shadow-lg"
+                            @click="drawing.finish"
+                        />
+                    </div>
+                </Teleport>
+                <!-- 모바일: 경로 그리기 도움말 모달 -->
+                <UModal
+                    v-model:open="showDrawingHelpModal"
+                    title="경로 그리기 안내"
+                    :ui="{ footer: 'justify-end' }"
+                >
+                    <template #body>
+                        <div class="flex flex-col gap-3 text-sm">
+                            <div class="flex items-start gap-2">
+                                <UIcon name="i-lucide-hand" class="size-5 shrink-0 mt-0.5 text-(--ui-primary)" />
+                                <p><strong>지도를 탭</strong>하여 경로 구간을 추가하세요.</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <UIcon name="i-lucide-check-circle" class="size-5 shrink-0 mt-0.5 text-(--ui-primary)" />
+                                <p>구간을 2개 이상 추가한 뒤 하단의 <strong>"경로 완성"</strong> 버튼을 눌러 경로를 완성하세요.</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <UIcon name="i-lucide-rotate-ccw" class="size-5 shrink-0 mt-0.5 text-(--ui-text-muted)" />
+                                <p>사이드바의 <strong>"초기화"</strong> 버튼을 누르면 경로를 다시 그릴 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </template>
+                    <template #footer>
+                        <UButton label="확인" @click="showDrawingHelpModal = false" />
+                    </template>
+                </UModal>
             </template>
         </MapShell>
 
@@ -814,7 +874,7 @@ watch(overlayContext, (next, prev) => {
                     :section-attrs="drawing.sectionDraft?.attrs ?? []"
                     :section-pois="drawing.sectionPois"
                     :active-section-index="drawing.activeSectionIndex"
-                    @reset="drawing.start"
+                    @reset="handleDrawingStartWithHelp"
                     @save="drawing.openSaveModal"
                     @update-section-attr="drawing.updateSectionAttr"
                     @remove-section="drawing.removeSection"
@@ -990,6 +1050,14 @@ watch(overlayContext, (next, prev) => {
     .fab-nearby {
         display: block;
     }
+}
+
+.drawing-finish-btn {
+    position: fixed;
+    bottom: 4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
 }
 </style>
 

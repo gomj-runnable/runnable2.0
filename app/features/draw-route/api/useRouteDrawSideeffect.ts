@@ -60,6 +60,9 @@ interface UseRouteDrawSideeffectOptions {
  * @param options - store ref와 초기화 함수를 담은 의존성 옵션
  */
 const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
+    /** 현재 드로잉이 진행 중인지 여부 (모바일 "완료" 버튼 표시에 사용) */
+    const isDrawingActive = ref(false)
+
     /** 현재 지도에 그려진 구간 폴리라인 엔티티 목록 */
     const sectionPolylines = createEntityGroup(options.viewer)
 
@@ -196,12 +199,16 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         clearSectionGraphics()
         options.resetRouteDrawState()
 
+        isDrawingActive.value = true
+
         options.notify({ title: '경로 그리기', message: '좌클릭: 구간 추가\n우클릭: 완료' })
 
         const result = await options.viewer.value._drawAction({
             shapeType: 1,
             showLabel: true
         })
+
+        isDrawingActive.value = false
 
         if (!result || !('data' in result) || !result.data) {
             if (result && 'message' in result && result.message) {
@@ -240,8 +247,18 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return
         }
 
+        isDrawingActive.value = false
         options.viewer.value._cancelDrawAction()
         clearSectionGraphics()
+    }
+
+    /** 진행 중인 드로잉을 현재 포인트로 완료한다. (모바일 우클릭 대체) */
+    const finishDrawing = () => {
+        if (!options.viewer.value) {
+            return
+        }
+
+        options.viewer.value._finishDrawAction()
     }
 
     /**
@@ -321,6 +338,8 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     return {
         cancelDrawing,
+        finishDrawing,
+        isDrawingActive: readonly(isDrawingActive),
         handleDrawReset,
         handleDrawSave,
         handleUpdateSectionAttr,

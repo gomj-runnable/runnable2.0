@@ -11,7 +11,10 @@ const betterAuthInstance: AuthInstance = isMemoryMode
     ? null
     : betterAuth({
           secret: process.env.BETTER_AUTH_SECRET,
-          baseURL: process.env.BETTER_AUTH_URL,
+          baseURL: process.env.BETTER_AUTH_URL || `http://localhost:${process.env.PORT || 3000}`,
+          trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS
+              ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(',')
+              : undefined,
           database: drizzleAdapter(db!, {
               provider: 'pg',
               schema: {
