@@ -17,9 +17,7 @@ export default defineEventHandler(async (event) => {
     const routes = await routeRepository.searchPublicRoutes()
 
     // district 필터 적용 (sgg 배열에 해당 구가 포함된 경로만 반환)
-    const filtered = district
-        ? routes.filter((r) => r.sgg?.includes(district))
-        : routes
+    const filtered = district ? routes.filter((r) => r.sgg?.includes(district)) : routes
 
     // 정렬
     const sorted = [...filtered].sort((a, b) => {

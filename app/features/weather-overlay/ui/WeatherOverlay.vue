@@ -95,7 +95,9 @@ const handleTimeChange = (value: any) => {
 
 <template>
     <div class="absolute inset-0 flex flex-col !pointer-events-none z-[12]">
-        <div class="flex items-start gap-2.5 p-4 pointer-events-auto max-md:justify-center max-md:p-2">
+        <div
+            class="flex items-start gap-2.5 p-4 pointer-events-auto max-md:justify-center max-md:p-2"
+        >
             <div class="flex flex-col gap-1.5 max-md:items-center">
                 <WeatherLayerToggle
                     :model-value="activeLayer"
@@ -142,10 +144,16 @@ const handleTimeChange = (value: any) => {
                 </div>
             </div>
         </div>
-        <div v-if="activeLayer" class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5">
+        <div
+            v-if="activeLayer"
+            class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5"
+        >
             <WeatherLegend :active-layer="activeLayer" />
         </div>
-        <div v-else-if="isElevationActive" class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5">
+        <div
+            v-else-if="isElevationActive"
+            class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5"
+        >
             <ElevationLegend />
         </div>
     </div>

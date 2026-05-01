@@ -30,17 +30,18 @@ const handleSubmit = () => {
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between items-center">
                 <span class="text-sm font-semibold text-text-base">경로정보 남기기</span>
-                <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" @click="emit('cancel')" />
+                <UButton
+                    icon="i-lucide-x"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    @click="emit('cancel')"
+                />
             </div>
             <div class="text-[0.6875rem] text-meta">
                 {{ props.lng.toFixed(5) }}, {{ props.lat.toFixed(5) }}
             </div>
-            <UInput
-                v-model="name"
-                placeholder="장소명"
-                :maxlength="100"
-                size="sm"
-            />
+            <UInput v-model="name" placeholder="장소명" :maxlength="100" size="sm" />
             <UTextarea
                 v-model="description"
                 placeholder="이 구간에 대한 의견을 남겨주세요"

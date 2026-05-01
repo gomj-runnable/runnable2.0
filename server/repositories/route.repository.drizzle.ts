@@ -22,10 +22,7 @@ function getDb() {
 const routesWithAuthor = () =>
     getDb().select().from(routes).leftJoin(users, eq(routes.userId, users.id))
 
-const toSavedRoute = (
-    row: typeof routes.$inferSelect,
-    authorName?: string
-): SavedRoute => ({
+const toSavedRoute = (row: typeof routes.$inferSelect, authorName?: string): SavedRoute => ({
     routeId: row.routeId,
     userId: row.userId,
     title: row.title,
@@ -85,9 +82,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async getRoute(routeId: string): Promise<SavedRoute | null> {
-        const rows = await routesWithAuthor()
-            .where(eq(routes.routeId, routeId))
-            .limit(1)
+        const rows = await routesWithAuthor().where(eq(routes.routeId, routeId)).limit(1)
 
         const row = rows[0]
         if (!row) return null
@@ -95,8 +90,7 @@ class DrizzleRouteRepository implements IRouteRepository {
     }
 
     async listRoutes(): Promise<SavedRoute[]> {
-        const rows = await routesWithAuthor()
-            .orderBy(desc(routes.createdAt))
+        const rows = await routesWithAuthor().orderBy(desc(routes.createdAt))
 
         return rows.map((r) => toSavedRoute(r.routes, r.users?.name))
     }
@@ -116,12 +110,7 @@ class DrizzleRouteRepository implements IRouteRepository {
 
         if (query?.trim()) {
             const pattern = `%${escapeLikePattern(query.trim())}%`
-            conditions.push(
-                or(
-                    ilike(routes.title, pattern),
-                    ilike(routes.description, pattern)
-                )!
-            )
+            conditions.push(or(ilike(routes.title, pattern), ilike(routes.description, pattern))!)
         }
 
         const rows = await routesWithAuthor()

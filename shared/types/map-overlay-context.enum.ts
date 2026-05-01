@@ -15,9 +15,19 @@ export class MapOverlayContextEnum extends EnumBase {
     /** 그리기 탭에서 경로 그리는 중 */
     static readonly DRAWING = new MapOverlayContextEnum('drawing', '그리기', true, true)
     /** 목록 탭에서 경로 선택 */
-    static readonly LIST_SELECTED = new MapOverlayContextEnum('list_selected', '목록 선택', true, false)
+    static readonly LIST_SELECTED = new MapOverlayContextEnum(
+        'list_selected',
+        '목록 선택',
+        true,
+        false
+    )
     /** 탐색 탭에서 경로 선택 */
-    static readonly EXPLORE_SELECTED = new MapOverlayContextEnum('explore_selected', '탐색 선택', true, false)
+    static readonly EXPLORE_SELECTED = new MapOverlayContextEnum(
+        'explore_selected',
+        '탐색 선택',
+        true,
+        false
+    )
     /** 탐색 탭에서 추천 모드 활성 — 선택된 경로 카드가 가려짐 */
     static readonly RECOMMEND = new MapOverlayContextEnum('recommend', '추천', false, false)
 
@@ -32,13 +42,26 @@ export class MapOverlayContextEnum extends EnumBase {
         super(key, label)
     }
 
-    get isNone(): boolean { return this.key === 'none' }
-    get isDrawing(): boolean { return this.key === 'drawing' }
-    get isListSelected(): boolean { return this.key === 'list_selected' }
-    get isExploreSelected(): boolean { return this.key === 'explore_selected' }
-    get isRecommend(): boolean { return this.key === 'recommend' }
+    get isNone(): boolean {
+        return this.key === 'none'
+    }
+    get isDrawing(): boolean {
+        return this.key === 'drawing'
+    }
+    get isListSelected(): boolean {
+        return this.key === 'list_selected'
+    }
+    get isExploreSelected(): boolean {
+        return this.key === 'explore_selected'
+    }
+    get isRecommend(): boolean {
+        return this.key === 'recommend'
+    }
 
     static from(key: string): MapOverlayContextEnum {
-        return EnumBase.fromKey<MapOverlayContextEnum>(MapOverlayContextEnum, key) ?? MapOverlayContextEnum.NONE
+        return (
+            EnumBase.fromKey<MapOverlayContextEnum>(MapOverlayContextEnum, key) ??
+            MapOverlayContextEnum.NONE
+        )
     }
 }

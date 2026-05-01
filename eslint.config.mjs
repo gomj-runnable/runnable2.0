@@ -8,6 +8,8 @@ export default withNuxt(prettierConfig, {
   rules: {
     'prettier/prettier': 'error',
     'no-unused-vars': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
     'vue/multi-word-component-names': 'off'
   }
 })

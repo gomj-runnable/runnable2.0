@@ -130,12 +130,7 @@ const toggleMode = () => {
                 }}
             </button>
             <div class="auth-modal__actions">
-                <UButton
-                    variant="outline"
-                    color="neutral"
-                    label="취소"
-                    @click="close"
-                />
+                <UButton variant="outline" color="neutral" label="취소" @click="close" />
                 <UButton
                     variant="solid"
                     color="primary"

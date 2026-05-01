@@ -96,11 +96,21 @@ defineExpose({ reset })
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-sm font-medium">이메일</span>
-                <UInput v-model="form.email" type="email" placeholder="email@example.com" autocomplete="email" />
+                <UInput
+                    v-model="form.email"
+                    type="email"
+                    placeholder="email@example.com"
+                    autocomplete="email"
+                />
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-sm font-medium">비밀번호</span>
-                <UInput v-model="form.password" type="password" placeholder="비밀번호" autocomplete="current-password" />
+                <UInput
+                    v-model="form.password"
+                    type="password"
+                    placeholder="비밀번호"
+                    autocomplete="current-password"
+                />
             </label>
             <div v-if="form.error" class="text-sm text-(--ui-text-error) flex items-center gap-1">
                 <UIcon name="i-lucide-alert-circle" />
@@ -118,7 +128,11 @@ defineExpose({ reset })
                 class="text-sm text-center text-(--ui-text-muted) hover:text-(--ui-text-default) cursor-pointer"
                 @click="toggleMode"
             >
-                {{ mode === 'login' ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인' }}
+                {{
+                    mode === 'login'
+                        ? '계정이 없으신가요? 회원가입'
+                        : '이미 계정이 있으신가요? 로그인'
+                }}
             </button>
         </template>
     </div>

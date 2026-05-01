@@ -33,18 +33,26 @@ const props = withDefaults(
                     <slot name="secondPanel" />
                 </aside>
 
-                <div class="relative flex flex-col flex-1 overflow-hidden min-w-0 min-h-0 box-border">
+                <div
+                    class="relative flex flex-col flex-1 overflow-hidden min-w-0 min-h-0 box-border"
+                >
                     <section class="relative flex flex-auto w-full min-h-0 overflow-hidden">
                         <div class="relative flex-auto w-full h-full min-h-0 overflow-hidden">
                             <slot />
                         </div>
 
-                        <div v-if="$slots.footer" class="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+                        <div
+                            v-if="$slots.footer"
+                            class="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
+                        >
                             <slot name="footer" />
                         </div>
                     </section>
 
-                    <div v-if="$slots.overlay" class="absolute inset-0 pointer-events-none z-10 overflow-hidden [&>*]:pointer-events-auto">
+                    <div
+                        v-if="$slots.overlay"
+                        class="absolute inset-0 pointer-events-none z-10 overflow-hidden [&>*]:pointer-events-auto"
+                    >
                         <slot name="overlay" />
                     </div>
                 </div>

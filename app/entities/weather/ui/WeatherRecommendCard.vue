@@ -39,13 +39,16 @@ const scoreColorClass = computed(() => {
         @click="$emit('select', route.routeId)"
     >
         <div class="flex items-center justify-between gap-2.5">
-            <span class="text-sm font-semibold text-text-base overflow-hidden text-ellipsis whitespace-nowrap">{{ route.title }}</span>
+            <span
+                class="text-sm font-semibold text-text-base overflow-hidden text-ellipsis whitespace-nowrap"
+                >{{ route.title }}</span
+            >
             <span
                 class="shrink-0 text-[0.8125rem] font-bold"
                 :class="{
                     'text-green-500': scoreColorClass === 'is-score-good',
                     'text-amber-500': scoreColorClass === 'is-score-moderate',
-                    'text-red-500': scoreColorClass === 'is-score-low',
+                    'text-red-500': scoreColorClass === 'is-score-low'
                 }"
             >
                 {{ route.score }}점
@@ -58,18 +61,24 @@ const scoreColorClass = computed(() => {
                 :class="{
                     'bg-green-500': scoreColorClass === 'is-score-good',
                     'bg-amber-500': scoreColorClass === 'is-score-moderate',
-                    'bg-red-500': scoreColorClass === 'is-score-low',
+                    'bg-red-500': scoreColorClass === 'is-score-low'
                 }"
                 :style="{ width: `${route.score}%` }"
             />
         </div>
 
         <div v-if="distanceLabel || elevationLabel" class="flex items-center gap-3">
-            <span v-if="distanceLabel" class="inline-flex items-center gap-1 text-xs text-text-muted">
+            <span
+                v-if="distanceLabel"
+                class="inline-flex items-center gap-1 text-xs text-text-muted"
+            >
                 <span class="i-lucide-map-pin" />
                 {{ distanceLabel }}
             </span>
-            <span v-if="elevationLabel" class="inline-flex items-center gap-1 text-xs text-text-muted">
+            <span
+                v-if="elevationLabel"
+                class="inline-flex items-center gap-1 text-xs text-text-muted"
+            >
                 <span class="i-lucide-mountain" />
                 {{ elevationLabel }}
             </span>

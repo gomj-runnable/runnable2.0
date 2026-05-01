@@ -33,8 +33,13 @@ const formatElevation = (high?: number, low?: number): string => {
     <Card interactive :selected="selected" as="article" @click="$emit('select', route.routeId)">
         <template #header>
             <div class="flex items-start justify-between gap-2.5">
-                <h3 class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base">{{ route.title }}</h3>
-                <span v-if="route.districts?.length" class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap">
+                <h3 class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base">
+                    {{ route.title }}
+                </h3>
+                <span
+                    v-if="route.districts?.length"
+                    class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap"
+                >
                     {{ route.districts.join(' · ') }}
                 </span>
             </div>
@@ -53,7 +58,10 @@ const formatElevation = (high?: number, low?: number): string => {
         </div>
 
         <template #meta>
-            <span v-if="route.authorName" class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed">
+            <span
+                v-if="route.authorName"
+                class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed"
+            >
                 {{ route.authorName }}
             </span>
         </template>

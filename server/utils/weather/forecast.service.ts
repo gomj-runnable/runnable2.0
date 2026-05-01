@@ -9,7 +9,11 @@ export interface ForecastServiceResult {
 export class ForecastService {
     private readonly adapter = new ForecastAdapter()
 
-    async fetch(serviceKey: string, requestedDate: string, now: Date = new Date()): Promise<ForecastServiceResult> {
+    async fetch(
+        serviceKey: string,
+        requestedDate: string,
+        now: Date = new Date()
+    ): Promise<ForecastServiceResult> {
         if (!serviceKey.trim()) {
             return { slots: [], error: null }
         }

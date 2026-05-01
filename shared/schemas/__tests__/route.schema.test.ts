@@ -6,7 +6,7 @@ import {
     createRouteSchema,
     RouteDraftBuilder,
     RouteDraftAssembler,
-    RouteClosingModeEnum,
+    RouteClosingModeEnum
 } from '#shared/schemas/route.schema'
 
 // ─── geoJsonPointSchema ────────────────────────────────────────────────────
@@ -33,7 +33,10 @@ describe('geoJsonPointSchema', () => {
     })
 
     it('type이 Point가 아니면 실패한다', () => {
-        const result = geoJsonPointSchema.safeParse({ type: 'LineString', coordinates: [127.0, 37.5] })
+        const result = geoJsonPointSchema.safeParse({
+            type: 'LineString',
+            coordinates: [127.0, 37.5]
+        })
         expect(result.success).toBe(false)
     })
 
@@ -51,8 +54,8 @@ describe('geoJsonLineStringSchema', () => {
             type: 'LineString',
             coordinates: [
                 [127.0, 37.5, 10],
-                [127.1, 37.6, 20],
-            ],
+                [127.1, 37.6, 20]
+            ]
         }
         const result = geoJsonLineStringSchema.parse(data)
         expect(result.type).toBe('LineString')
@@ -67,7 +70,7 @@ describe('geoJsonLineStringSchema', () => {
     it('각 좌표가 3개 숫자가 아니면 실패한다', () => {
         const result = geoJsonLineStringSchema.safeParse({
             type: 'LineString',
-            coordinates: [[127.0, 37.5]], // 2개짜리 tuple은 실패
+            coordinates: [[127.0, 37.5]] // 2개짜리 tuple은 실패
         })
         expect(result.success).toBe(false)
     })
@@ -75,7 +78,7 @@ describe('geoJsonLineStringSchema', () => {
     it('type이 LineString이 아니면 실패한다', () => {
         const result = geoJsonLineStringSchema.safeParse({
             type: 'Point',
-            coordinates: [[127.0, 37.5, 10]],
+            coordinates: [[127.0, 37.5, 10]]
         })
         expect(result.success).toBe(false)
     })
@@ -94,7 +97,7 @@ describe('sectionAttrSchema', () => {
             seq: 2,
             name: '구간 A',
             comment: '메모',
-            description: '설명',
+            description: '설명'
         })
         expect(result.name).toBe('구간 A')
     })
@@ -128,7 +131,7 @@ describe('createRouteSchema', () => {
             distance: 5000,
             sgg: ['종로구'],
             emd: ['청운동'],
-            isPublic: false,
+            isPublic: false
         })
         expect(result.isPublic).toBe(false)
         expect(result.distance).toBe(5000)
@@ -162,7 +165,7 @@ describe('RouteDraftBuilder', () => {
         it('round-trip 모드이면 거리 × 2를 반환한다', () => {
             const builder = new RouteDraftBuilder({
                 distance: 1000,
-                closingMode: RouteClosingModeEnum.ROUND_TRIP,
+                closingMode: RouteClosingModeEnum.ROUND_TRIP
             })
             expect(builder.getDistance()).toBe(2000)
         })
@@ -171,7 +174,7 @@ describe('RouteDraftBuilder', () => {
             const builder = new RouteDraftBuilder({
                 distance: 1000,
                 closingMode: RouteClosingModeEnum.LOOP_CLOSE,
-                loopCloseDistance: 200,
+                loopCloseDistance: 200
             })
             expect(builder.getDistance()).toBe(1200)
         })
@@ -179,7 +182,7 @@ describe('RouteDraftBuilder', () => {
         it('loop-close 모드에서 loopCloseDistance가 없으면 거리만 반환한다', () => {
             const builder = new RouteDraftBuilder({
                 distance: 1000,
-                closingMode: RouteClosingModeEnum.LOOP_CLOSE,
+                closingMode: RouteClosingModeEnum.LOOP_CLOSE
             })
             expect(builder.getDistance()).toBe(1000)
         })
@@ -217,9 +220,9 @@ describe('RouteDraftBuilder', () => {
                     type: 'LineString',
                     coordinates: [
                         [127.0, 37.5, 15],
-                        [127.1, 37.6, 45],
-                    ],
-                },
+                        [127.1, 37.6, 45]
+                    ]
+                }
             })
             const { highHeight, lowHeight } = builder.getHeights()
             expect(highHeight).toBe(45)
@@ -292,7 +295,10 @@ describe('RouteDraftAssembler', () => {
     it('build()에서 closingMode가 반영된다', () => {
         const assembler = new RouteDraftAssembler()
         assembler
-            .withPositions([[127.0, 37.5, 0], [127.1, 37.6, 0]])
+            .withPositions([
+                [127.0, 37.5, 0],
+                [127.1, 37.6, 0]
+            ])
             .withDrawMetrics({ distance: 1000 })
             .withClosingMode(RouteClosingModeEnum.ROUND_TRIP)
 

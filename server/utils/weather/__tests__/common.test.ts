@@ -17,7 +17,7 @@ import {
     parseSlotDateTime,
     mapPm10Grade,
     mapConditionByCloudAndRain,
-    mapConditionByPrecipitation,
+    mapConditionByPrecipitation
 } from '../common'
 
 // KST는 UTC+9 이므로 UTC 기준 Date를 직접 생성해 테스트한다.

@@ -40,9 +40,7 @@ class InMemoryRouteRepository implements IRouteRepository {
         if (!query) return publicRoutes
         const q = query.toLowerCase()
         return publicRoutes.filter(
-            (r) =>
-                r.title.toLowerCase().includes(q) ||
-                r.description?.toLowerCase().includes(q)
+            (r) => r.title.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q)
         )
     }
 

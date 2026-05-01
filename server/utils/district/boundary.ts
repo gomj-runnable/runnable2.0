@@ -1,7 +1,9 @@
 import type { FeatureCollection } from 'geojson'
 
-const SGG_URL = 'https://raw.githubusercontent.com/southkorea/seoul-maps/master/juso/2015/json/seoul_municipalities_geo_simple.json'
-const EMD_URL = 'https://raw.githubusercontent.com/southkorea/seoul-maps/master/juso/2015/json/seoul_neighborhoods_geo_simple.json'
+const SGG_URL =
+    'https://raw.githubusercontent.com/southkorea/seoul-maps/master/juso/2015/json/seoul_municipalities_geo_simple.json'
+const EMD_URL =
+    'https://raw.githubusercontent.com/southkorea/seoul-maps/master/juso/2015/json/seoul_neighborhoods_geo_simple.json'
 
 let sggPromise: Promise<FeatureCollection> | null = null
 let emdPromise: Promise<FeatureCollection> | null = null

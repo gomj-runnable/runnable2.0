@@ -60,11 +60,10 @@ const visibleGroups = computed(() =>
 
                 <template #content>
                     <div class="flex flex-col gap-2 p-2 max-h-[70vh] overflow-y-auto min-w-48">
-                        <div
-                            v-for="(group, gi) in visibleGroups"
-                            :key="group.key"
-                        >
-                            <div class="flex items-center gap-1.5 px-2 py-1 text-[0.6875rem] font-semibold text-(--ui-text-muted) uppercase tracking-[0.025em]">
+                        <div v-for="(group, gi) in visibleGroups" :key="group.key">
+                            <div
+                                class="flex items-center gap-1.5 px-2 py-1 text-[0.6875rem] font-semibold text-(--ui-text-muted) uppercase tracking-[0.025em]"
+                            >
                                 <UIcon :name="group.icon" class="size-4 opacity-60" />
                                 <span>{{ group.label }}</span>
                             </div>
@@ -75,7 +74,11 @@ const visibleGroups = computed(() =>
                                     variant="ghost"
                                     color="neutral"
                                     class="flex items-center gap-2 px-2 py-[0.4375rem] rounded-md text-[0.8125rem] text-(--ui-text) justify-start hover:bg-(--ui-bg-elevated)"
-                                    :class="item.active ? 'text-(--ui-primary) bg-(--ui-primary)/10 hover:bg-(--ui-primary)/15' : ''"
+                                    :class="
+                                        item.active
+                                            ? 'text-(--ui-primary) bg-(--ui-primary)/10 hover:bg-(--ui-primary)/15'
+                                            : ''
+                                    "
                                     @click="item.onClick()"
                                 >
                                     <span

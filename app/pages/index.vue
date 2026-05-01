@@ -32,8 +32,11 @@ import {
 } from '~/entities/route/lib/usePoiSnapping'
 import { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
 import { useWeatherSideeffect } from '~/features/weather-overlay/api/useWeatherSideeffect'
-import { useWeatherSourceStrategy, WEATHER_SOURCES } from '~/entities/weather/model/useWeatherSourceStrategy'
-import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
+import {
+    useWeatherSourceStrategy,
+    WEATHER_SOURCES
+} from '~/entities/weather/model/useWeatherSourceStrategy'
+import { useFacilityStore, FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
@@ -72,7 +75,6 @@ import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
 import BottomDrawer from '~/shared/ui/BottomDrawer.vue'
-import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
@@ -349,7 +351,9 @@ const showSimulationChip = computed(() => {
 // ─── 모바일 감지 ────────────────────────────────────────────────
 const isMobile = ref(false)
 let mobileMediaQuery: MediaQueryList | null = null
-const onMediaChange = (e: MediaQueryListEvent) => { isMobile.value = e.matches }
+const onMediaChange = (e: MediaQueryListEvent) => {
+    isMobile.value = e.matches
+}
 
 onBeforeUnmount(() => {
     mobileMediaQuery?.removeEventListener('change', onMediaChange)
@@ -385,7 +389,7 @@ const fabGroups = computed(() => [
                         facility.toggleType(layer.type)
                     }
                 }
-            })),
+            }))
         ]
     },
     {
@@ -704,7 +708,10 @@ watch(overlayContext, (next, prev) => {
                     @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"
                 />
                 <RouteOverlayBottomBar
-                    v-if="overlayContext.showDrawingTools || (overlayContext.hasActiveRoute && elevationChart.profile)"
+                    v-if="
+                        overlayContext.showDrawingTools ||
+                        (overlayContext.hasActiveRoute && elevationChart.profile)
+                    "
                     :elevation-chip-label="elevationChart.title"
                     :elevation-chip-active="elevationChart.open"
                     :elevation-profile="elevationChart.profile"
@@ -811,14 +818,15 @@ watch(overlayContext, (next, prev) => {
                     @save="drawing.openSaveModal"
                     @update-section-attr="drawing.updateSectionAttr"
                     @remove-section="drawing.removeSection"
-                    @remove-poi="
-                        drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)
-                    "
+                    @remove-poi="drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)"
                     @select-section="drawing.activeSectionIndex = $event.index"
                 />
 
                 <!-- 탐색 -->
-                <div v-else-if="slideOver.current.value === NavKey.EXPLORE" class="flex flex-col gap-1">
+                <div
+                    v-else-if="slideOver.current.value === NavKey.EXPLORE"
+                    class="flex flex-col gap-1"
+                >
                     <UInput
                         v-model="explore.searchQuery.value"
                         type="search"
@@ -842,7 +850,14 @@ watch(overlayContext, (next, prev) => {
                             :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
                             @update:model-value="explore.filter.selectedDong.value = $event"
                         />
-                        <UButton variant="outline" color="neutral" size="sm" icon="i-lucide-rotate-ccw" label="초기화" @click="explore.filter.resetFilters" />
+                        <UButton
+                            variant="outline"
+                            color="neutral"
+                            size="sm"
+                            icon="i-lucide-rotate-ccw"
+                            label="초기화"
+                            @click="explore.filter.resetFilters"
+                        />
                     </div>
                     <ExplorePanel
                         :routes="explore.filteredResults.value"

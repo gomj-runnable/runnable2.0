@@ -1,4 +1,10 @@
-import type { DongWeather, SeoulMonthlyWeather, WeatherSourceKey, WeatherSourceError, MonthAvailability } from '#shared/types/weather'
+import type {
+    DongWeather,
+    SeoulMonthlyWeather,
+    WeatherSourceKey,
+    WeatherSourceError,
+    MonthAvailability
+} from '#shared/types/weather'
 import { ObservedService } from './observed.service'
 import { ForecastService } from './forecast.service'
 import { AirQualityService } from './airquality.service'
@@ -68,7 +74,11 @@ class WeatherFacade {
         // Forecast
         let forecastSlots: import('#shared/types/weather').HourlyWeather[] = []
         if (sources.includes('forecast') && openDataKey?.trim()) {
-            const result = await this.forecastService.fetch(openDataKey, formatDate(range.start), now)
+            const result = await this.forecastService.fetch(
+                openDataKey,
+                formatDate(range.start),
+                now
+            )
             forecastSlots = result.slots
             if (result.error) sourceErrors.push(result.error)
         }
@@ -126,7 +136,7 @@ class WeatherFacade {
             rangeEnd: formatDate(range.end),
             dongs,
             ...(sourceErrors.length > 0 && { sourceErrors }),
-            activeSources: sources.filter(s => s !== 'airquality' || airKoreaKey?.trim())
+            activeSources: sources.filter((s) => s !== 'airquality' || airKoreaKey?.trim())
         }
     }
 
@@ -164,9 +174,9 @@ class WeatherFacade {
 
         const sources = options.sources ?? ALL_SOURCES
         const allDates = new Set<string>()
-        if (sources.includes('observed')) observedDates.forEach(d => allDates.add(d))
-        if (sources.includes('forecast')) forecastDates.forEach(d => allDates.add(d))
-        if (sources.includes('airquality')) airDates.forEach(d => allDates.add(d))
+        if (sources.includes('observed')) observedDates.forEach((d) => allDates.add(d))
+        if (sources.includes('forecast')) forecastDates.forEach((d) => allDates.add(d))
+        if (sources.includes('airquality')) airDates.forEach((d) => allDates.add(d))
 
         return {
             month,

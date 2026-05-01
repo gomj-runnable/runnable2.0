@@ -32,17 +32,30 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="w-full h-screen flex flex-col bg-[var(--color-bg,#111)] text-[var(--color-text,#fff)]">
-        <div v-if="isLoading" class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]">경로를 불러오는 중...</div>
+    <div
+        class="w-full h-screen flex flex-col bg-[var(--color-bg,#111)] text-[var(--color-text,#fff)]"
+    >
+        <div
+            v-if="isLoading"
+            class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]"
+        >
+            경로를 불러오는 중...
+        </div>
 
-        <div v-else-if="error" class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]">
+        <div
+            v-else-if="error"
+            class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]"
+        >
             {{ error }}
         </div>
 
         <div v-else-if="sharedData" class="flex flex-col h-full">
             <div class="px-5 py-4 border-b border-[var(--color-border,#333)]">
                 <h1 class="text-xl font-bold m-0 mb-1">{{ sharedData.route.title }}</h1>
-                <p v-if="sharedData.route.description" class="text-sm text-[var(--color-text-muted,#aaa)] m-0">
+                <p
+                    v-if="sharedData.route.description"
+                    class="text-sm text-[var(--color-text-muted,#aaa)] m-0"
+                >
                     {{ sharedData.route.description }}
                 </p>
             </div>
@@ -55,7 +68,11 @@ onMounted(async () => {
             </div>
 
             <!-- TODO: 3D 지도 뷰어 + 경로정보 마커 렌더링 -->
-            <div class="flex-1 flex items-center justify-center text-sm text-[var(--color-text-muted,#666)] bg-[var(--color-surface,#1a1a1a)]">3D 지도 뷰어 영역 (Phase 2에서 구현)</div>
+            <div
+                class="flex-1 flex items-center justify-center text-sm text-[var(--color-text-muted,#666)] bg-[var(--color-surface,#1a1a1a)]"
+            >
+                3D 지도 뷰어 영역 (Phase 2에서 구현)
+            </div>
         </div>
     </div>
 </template>

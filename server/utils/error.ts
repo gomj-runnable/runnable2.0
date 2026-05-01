@@ -64,7 +64,10 @@ export function withExceptionHandler<T>(
 
             // Zod ValidationError → 400 (스키마 세부사항 노출 방지)
             if (error instanceof Error && error.name === 'ZodError') {
-                console.warn(`[Validation] ${event.method} ${getRequestURL(event).pathname}:`, error.message)
+                console.warn(
+                    `[Validation] ${event.method} ${getRequestURL(event).pathname}:`,
+                    error.message
+                )
                 throw badRequest('요청 데이터가 유효하지 않습니다.')
             }
 

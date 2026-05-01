@@ -22,7 +22,9 @@ defineEmits<{
     <div class="flex flex-col gap-3 w-full">
         <div class="map-section-label">저장된 경로</div>
 
-        <div v-if="routes.length === 0" class="py-4 text-sm text-text-muted text-center">저장된 경로가 없습니다</div>
+        <div v-if="routes.length === 0" class="py-4 text-sm text-text-muted text-center">
+            저장된 경로가 없습니다
+        </div>
 
         <ul v-else class="flex flex-col gap-2.5 list-none m-0 p-0">
             <li v-for="route in routes" :key="route.routeId">
@@ -34,7 +36,9 @@ defineEmits<{
                 >
                     <template #header>
                         <div class="flex items-start justify-between gap-2.5">
-                            <h3 class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base">
+                            <h3
+                                class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base"
+                            >
                                 {{ route.title }}
                             </h3>
                             <UButton
@@ -53,10 +57,15 @@ defineEmits<{
 
                     <template #meta>
                         <div class="flex items-center gap-2.5">
-                            <span class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed">
+                            <span
+                                class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed"
+                            >
                                 {{ formatDistance(route.distance) }}
                             </span>
-                            <span v-if="route.sgg?.length" class="text-xs font-medium text-text-muted">
+                            <span
+                                v-if="route.sgg?.length"
+                                class="text-xs font-medium text-text-muted"
+                            >
                                 {{ route.sgg.join(' · ') }}
                             </span>
                         </div>

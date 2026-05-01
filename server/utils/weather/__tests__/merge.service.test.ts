@@ -15,7 +15,7 @@ const makeSlot = (
     temperature,
     pm10: null,
     pm10Grade: null,
-    source,
+    source
 })
 
 describe('mergeWeatherSlots', () => {
@@ -26,13 +26,13 @@ describe('mergeWeatherSlots', () => {
         const observed = [
             makeSlot('2025-04-08', '10:00', 'observed', 15),
             makeSlot('2025-04-08', '11:00', 'observed', 16),
-            makeSlot('2025-04-08', '12:00', 'observed', 17),
+            makeSlot('2025-04-08', '12:00', 'observed', 17)
         ]
         const result = mergeWeatherSlots({
             rangeStart,
             rangeEnd,
             observedSlots: observed,
-            forecastSlots: [],
+            forecastSlots: []
         })
         expect(result).toHaveLength(3)
         expect(result.every((s) => s.source === 'observed')).toBe(true)
@@ -41,13 +41,13 @@ describe('mergeWeatherSlots', () => {
     it('예보 슬롯만 있을 때 범위 내 슬롯을 반환한다', () => {
         const forecast = [
             makeSlot('2025-04-08', '10:00', 'forecast', 15),
-            makeSlot('2025-04-08', '11:00', 'forecast', 16),
+            makeSlot('2025-04-08', '11:00', 'forecast', 16)
         ]
         const result = mergeWeatherSlots({
             rangeStart,
             rangeEnd,
             observedSlots: [],
-            forecastSlots: forecast,
+            forecastSlots: forecast
         })
         expect(result).toHaveLength(2)
         expect(result.every((s) => s.source === 'forecast')).toBe(true)
@@ -60,7 +60,7 @@ describe('mergeWeatherSlots', () => {
             rangeStart,
             rangeEnd,
             observedSlots: observed,
-            forecastSlots: forecast,
+            forecastSlots: forecast
         })
         expect(result).toHaveLength(1)
         expect(result[0]!.source).toBe('observed')
@@ -74,7 +74,7 @@ describe('mergeWeatherSlots', () => {
             rangeStart,
             rangeEnd,
             observedSlots: observed,
-            forecastSlots: forecast,
+            forecastSlots: forecast
         })
         expect(result).toHaveLength(2)
         const sources = result.map((s) => s.source)
@@ -84,15 +84,15 @@ describe('mergeWeatherSlots', () => {
 
     it('범위 밖 슬롯은 포함되지 않는다', () => {
         const observed = [
-            makeSlot('2025-04-08', '09:00', 'observed', 5),  // rangeStart 이전
+            makeSlot('2025-04-08', '09:00', 'observed', 5), // rangeStart 이전
             makeSlot('2025-04-08', '10:00', 'observed', 10), // 범위 내
-            makeSlot('2025-04-08', '14:00', 'observed', 30), // rangeEnd 이후
+            makeSlot('2025-04-08', '14:00', 'observed', 30) // rangeEnd 이후
         ]
         const result = mergeWeatherSlots({
             rangeStart,
             rangeEnd,
             observedSlots: observed,
-            forecastSlots: [],
+            forecastSlots: []
         })
         expect(result).toHaveLength(1)
         expect(result[0]!.time).toBe('10:00')
@@ -103,7 +103,7 @@ describe('mergeWeatherSlots', () => {
             rangeStart,
             rangeEnd,
             observedSlots: [],
-            forecastSlots: [],
+            forecastSlots: []
         })
         expect(result).toHaveLength(0)
     })
@@ -115,7 +115,7 @@ describe('mergeWeatherSlots', () => {
             rangeStart: singlePoint,
             rangeEnd: singlePoint,
             observedSlots: observed,
-            forecastSlots: [],
+            forecastSlots: []
         })
         expect(result).toHaveLength(1)
     })
@@ -124,13 +124,13 @@ describe('mergeWeatherSlots', () => {
         const observed = [
             makeSlot('2025-04-08', '12:00', 'observed', 17),
             makeSlot('2025-04-08', '10:00', 'observed', 15),
-            makeSlot('2025-04-08', '11:00', 'observed', 16),
+            makeSlot('2025-04-08', '11:00', 'observed', 16)
         ]
         const result = mergeWeatherSlots({
             rangeStart,
             rangeEnd,
             observedSlots: observed,
-            forecastSlots: [],
+            forecastSlots: []
         })
         expect(result.map((s) => s.time)).toEqual(['10:00', '11:00', '12:00'])
     })
@@ -144,7 +144,7 @@ describe('mergeWeatherSlots', () => {
             rangeStart,
             rangeEnd,
             observedSlots: observed,
-            forecastSlots: forecast,
+            forecastSlots: forecast
         })
         expect(result[0]!.source).toBe('observed')
         expect(result[0]!.temperature).toBe(55)

@@ -1,5 +1,8 @@
-import type { HourlyWeather } from '#shared/types/weather'
-import { VilageFcstOriginalResponse, type VilageFcstOriginalItem } from '#shared/types/weather'
+import type {
+    HourlyWeather,
+    VilageFcstOriginalResponse,
+    type VilageFcstOriginalItem
+} from '#shared/types/weather'
 import { WeatherConditionEnum } from '#shared/types/weather-condition.enum'
 import {
     addDays,
@@ -92,7 +95,8 @@ const mapConditionByPtySky = (
     tmp: number
 ): HourlyWeather['condition'] => {
     if (pty !== null && pty > 0) {
-        return WeatherConditionEnum.fromKmaCode(pty, sky ?? 4, tmp).key as HourlyWeather['condition']
+        return WeatherConditionEnum.fromKmaCode(pty, sky ?? 4, tmp)
+            .key as HourlyWeather['condition']
     }
     if (sky !== null) {
         return WeatherConditionEnum.fromKmaCode(0, sky).key as HourlyWeather['condition']
@@ -165,8 +169,5 @@ export class ForecastAdapter implements IForecastAdapter {
 }
 
 /** @deprecated 직접 ForecastAdapter 인스턴스를 사용하거나 WeatherService를 통해 접근하세요 */
-export const fetchForecastWeatherSlots = (
-    serviceKey: string,
-    requestedDate: string,
-    now?: Date
-) => new ForecastAdapter().fetchSlots(serviceKey, requestedDate, now)
+export const fetchForecastWeatherSlots = (serviceKey: string, requestedDate: string, now?: Date) =>
+    new ForecastAdapter().fetchSlots(serviceKey, requestedDate, now)

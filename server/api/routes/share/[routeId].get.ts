@@ -23,10 +23,10 @@ export default defineEventHandler(async (event) => {
     // 경로정보는 아직 repository 미구현 — db가 있을 때만 조회
     const routeInfoItems = db
         ? await db
-            .select()
-            .from(routeInfos)
-            .where(eq(routeInfos.routeId, routeId))
-            .orderBy(routeInfos.createdAt)
+              .select()
+              .from(routeInfos)
+              .where(eq(routeInfos.routeId, routeId))
+              .orderBy(routeInfos.createdAt)
         : []
 
     return { route, sections, routeInfos: routeInfoItems }

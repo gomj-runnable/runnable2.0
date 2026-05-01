@@ -21,7 +21,9 @@ class MemoryAuthService implements IAuthService {
         const token = getCookie(event, 'better-auth.session_token')
         if (token) {
             const userId = memorySessions.get(token)
-            const user = userId ? Array.from(memoryUsers.values()).find((u) => u.id === userId) : null
+            const user = userId
+                ? Array.from(memoryUsers.values()).find((u) => u.id === userId)
+                : null
             if (user) {
                 return { userId: user.id, name: user.name, email: user.email }
             }

@@ -54,25 +54,42 @@ describe('createInitialSectionPointRanges', () => {
 describe('createWaypointBasedSectionRanges', () => {
     it('waypoint가 1개 이하이면 초기 구간 범위를 반환한다', () => {
         const positions: [number, number, number][] = [
-            [0, 0, 0], [1, 0, 0], [2, 0, 0]
+            [0, 0, 0],
+            [1, 0, 0],
+            [2, 0, 0]
         ]
         const result = createWaypointBasedSectionRanges(positions, [[0, 0, 0]])
         // createInitialSectionPointRanges(3) = [{start:0,end:1},{start:1,end:2}]
-        expect(result).toEqual([{ start: 0, end: 1 }, { start: 1, end: 2 }])
+        expect(result).toEqual([
+            { start: 0, end: 1 },
+            { start: 1, end: 2 }
+        ])
     })
 
     it('최적화 포인트가 1개 이하이면 초기 구간 범위를 반환한다', () => {
-        const result = createWaypointBasedSectionRanges([[0, 0, 0]], [[0, 0, 0], [1, 0, 0]])
+        const result = createWaypointBasedSectionRanges(
+            [[0, 0, 0]],
+            [
+                [0, 0, 0],
+                [1, 0, 0]
+            ]
+        )
         expect(result).toEqual([])
     })
 
     it('waypoint 기준으로 구간 범위를 생성한다', () => {
         // 5개 최적화 포인트, 3개 waypoint → 2개 구간
         const optimized: [number, number, number][] = [
-            [0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0]
+            [0, 0, 0],
+            [1, 0, 0],
+            [2, 0, 0],
+            [3, 0, 0],
+            [4, 0, 0]
         ]
         const waypoints: [number, number, number][] = [
-            [0, 0, 0], [2, 0, 0], [4, 0, 0]
+            [0, 0, 0],
+            [2, 0, 0],
+            [4, 0, 0]
         ]
         const result = createWaypointBasedSectionRanges(optimized, waypoints)
         expect(result).toHaveLength(2)
@@ -83,10 +100,13 @@ describe('createWaypointBasedSectionRanges', () => {
 
     it('마지막 구간의 end는 항상 optimizedPositions의 마지막 인덱스이다', () => {
         const optimized: [number, number, number][] = [
-            [0, 0, 0], [1, 0, 0], [2, 0, 0]
+            [0, 0, 0],
+            [1, 0, 0],
+            [2, 0, 0]
         ]
         const waypoints: [number, number, number][] = [
-            [0, 0, 0], [2, 0, 0]
+            [0, 0, 0],
+            [2, 0, 0]
         ]
         const result = createWaypointBasedSectionRanges(optimized, waypoints)
         expect(result[result.length - 1]!.end).toBe(2)
@@ -97,13 +117,15 @@ describe('createWaypointBasedSectionRanges', () => {
 describe('updateSectionDraftAttr', () => {
     const baseDraft: CreateSectionSchema = {
         routeId: 'draft-route',
-        attrs: [
-            { seq: 0, name: undefined, comment: undefined, description: undefined }
-        ]
+        attrs: [{ seq: 0, name: undefined, comment: undefined, description: undefined }]
     }
 
     it('지정한 필드를 업데이트한 새 객체를 반환한다', () => {
-        const updated = updateSectionDraftAttr(baseDraft, { index: 0, field: 'name', value: '구간1' })
+        const updated = updateSectionDraftAttr(baseDraft, {
+            index: 0,
+            field: 'name',
+            value: '구간1'
+        })
         expect(updated.attrs![0]!.name).toBe('구간1')
     })
 
@@ -119,7 +141,11 @@ describe('updateSectionDraftAttr', () => {
 
     it('attrs가 없는 인덱스에 업데이트하면 기본값으로 생성된다', () => {
         const emptyDraft: CreateSectionSchema = { routeId: 'draft-route', attrs: [] }
-        const updated = updateSectionDraftAttr(emptyDraft, { index: 2, field: 'name', value: '신규' })
+        const updated = updateSectionDraftAttr(emptyDraft, {
+            index: 2,
+            field: 'name',
+            value: '신규'
+        })
         expect(updated.attrs![2]!.name).toBe('신규')
         expect(updated.attrs![2]!.seq).toBe(2)
     })
@@ -139,7 +165,7 @@ describe('removeSectionDraftAttr', () => {
     it('지정한 인덱스의 속성을 제거한다', () => {
         const result = removeSectionDraftAttr(draftWith3, 1)
         expect(result.attrs).toHaveLength(2)
-        expect(result.attrs!.find(a => a.name === 'B')).toBeUndefined()
+        expect(result.attrs!.find((a) => a.name === 'B')).toBeUndefined()
     })
 
     it('제거 후 나머지 속성의 seq가 재정렬된다', () => {

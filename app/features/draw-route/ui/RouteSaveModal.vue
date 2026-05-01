@@ -63,11 +63,7 @@ defineEmits<{
 
                 <label class="route-save-modal__field map-form-field">
                     <span class="map-form-label">거리</span>
-                    <UInput
-                        :model-value="formatDistance(distance)"
-                        placeholder="0.00"
-                        disabled
-                    />
+                    <UInput :model-value="formatDistance(distance)" placeholder="0.00" disabled />
                 </label>
 
                 <div v-if="districts?.length" class="route-save-modal__field map-form-field">
@@ -80,18 +76,8 @@ defineEmits<{
         </template>
 
         <template #footer="{ close }">
-            <UButton
-                variant="outline"
-                color="neutral"
-                label="취소"
-                @click="close"
-            />
-            <UButton
-                variant="solid"
-                color="primary"
-                label="저장"
-                @click="$emit('submit')"
-            />
+            <UButton variant="outline" color="neutral" label="취소" @click="close" />
+            <UButton variant="solid" color="primary" label="저장" @click="$emit('submit')" />
         </template>
     </UModal>
 </template>
