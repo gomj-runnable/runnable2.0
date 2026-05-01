@@ -12,8 +12,6 @@ spec:
         app: runnable-migrate
     spec:
       restartPolicy: Never
-      imagePullSecrets:
-        - name: dockerhub-secret
       initContainers:
         - name: wait-db
           image: postgres:17-alpine
@@ -41,7 +39,8 @@ spec:
               memory: 64Mi
       containers:
         - name: migrate
-          image: myeongjunkim0615/runnable:migrate
+          image: runnable-migrate:latest
+          imagePullPolicy: Never
           env:
             - name: POSTGRES_USER
               valueFrom:

@@ -3,17 +3,16 @@
 //
 // 트리거:
 //   - GitHub Pull Request  → 코드 품질 검사만 (lint, typecheck, test)
-//   - master 브랜치 push   → 품질 검사 + Docker Push + 원격 서버 배포
-//   - 수동 (Build Now)     → 품질 검사 + Docker Push + 원격 서버 배포
+//   - master 브랜치 push   → 품질 검사 + Nuxt 빌드 + Minikube 배포
+//   - 수동 (Build Now)     → 품질 검사 + Nuxt 빌드 + Minikube 배포
 //
 // 사전 준비 (Jenkins 관리):
-//   1. Credentials:
-//      - 'dockerhub-credentials'  : Docker Hub 계정 (Username with password)
-//      - 'deploy-ssh-key'         : 원격 서버 SSH 키 (SSH Username with private key)
-//   2. Tools:
+//   1. Tools:
 //      - NodeJS 설치 (이름: 'NodeJS-20')  — Jenkins Global Tool Configuration
-//   3. Plugins:
-//      - NodeJS Plugin, Docker Pipeline, SSH Agent, GitHub Integration
+//   2. Plugins:
+//      - NodeJS Plugin, GitHub Integration
+//   3. 로컬 환경:
+//      - minikube, kubectl, docker 설치 (brew)
 // =============================================================================
 
 pipeline {
@@ -24,10 +23,8 @@ pipeline {
     }
 
     environment {
-        DOCKER_REPO    = 'myeongjunkim0615/runnable'
-        DEPLOY_HOST    = credentials('deploy-host')       // 원격 서버 주소
-        DEPLOY_PATH    = credentials('deploy-path')       // 원격 서버 프로젝트 경로
         BUILD_TAG      = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
+        PATH           = "/opt/homebrew/bin:${env.PATH}"
     }
 
     options {
@@ -84,7 +81,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'master'
-                    triggeredBy 'UserIdCause'   // 수동 트리거
+                    triggeredBy 'UserIdCause'
                 }
             }
             steps {
@@ -93,37 +90,7 @@ pipeline {
         }
 
         // =====================================================================
-        // 4. Docker 이미지 빌드 & Push
-        // =====================================================================
-        stage('Docker Push') {
-            when {
-                anyOf {
-                    branch 'master'
-                    triggeredBy 'UserIdCause'
-                }
-            }
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        // App 이미지
-                        def appImage = docker.build("${DOCKER_REPO}:${BUILD_TAG}", '.')
-                        appImage.push()
-                        appImage.push('latest')
-
-                        // Migrate 이미지
-                        def migrateImage = docker.build(
-                            "${DOCKER_REPO}:migrate-${BUILD_TAG}",
-                            '-f Dockerfile.migrate .'
-                        )
-                        migrateImage.push()
-                        migrateImage.push('migrate')
-                    }
-                }
-            }
-        }
-
-        // =====================================================================
-        // 5. 원격 서버 롤링 업데이트
+        // 4. Minikube Docker 이미지 빌드 + 배포
         // =====================================================================
         stage('Deploy') {
             when {
@@ -133,20 +100,31 @@ pipeline {
                 }
             }
             steps {
-                sshagent(credentials: ['deploy-ssh-key']) {
-                    sh """
-                        scp -o StrictHostKeyChecking=no \
-                            jenkins/scripts/remote-deploy.sh \
-                            ${DEPLOY_HOST}:/tmp/runnable-deploy.sh
+                sh '''#!/bin/bash
+                    set -euo pipefail
 
-                        ssh -o StrictHostKeyChecking=no ${DEPLOY_HOST} \
-                            "chmod +x /tmp/runnable-deploy.sh && \
-                             /tmp/runnable-deploy.sh \
-                                '${DOCKER_REPO}' \
-                                '${BUILD_TAG}' \
-                                '${DEPLOY_PATH}'"
-                    """
-                }
+                    export PATH="/opt/homebrew/bin:$PATH"
+
+                    echo "==> minikube Docker 환경 설정"
+                    eval $(minikube docker-env)
+
+                    echo "==> App 이미지 빌드 (minikube 내부)"
+                    docker build -t runnable-app:latest -f minikube/Dockerfile .
+
+                    echo "==> Migrate 이미지 빌드 (minikube 내부)"
+                    docker build -t runnable-migrate:latest -f minikube/Dockerfile.migrate .
+
+                    echo "==> DB 마이그레이션 실행"
+                    kubectl delete job runnable-migrate -n runnable --ignore-not-found
+                    kubectl apply -f minikube/k8s/migration-job.yaml
+                    kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=120s
+
+                    echo "==> App 롤링 재시작"
+                    kubectl rollout restart deployment/runnable-app -n runnable
+                    kubectl rollout status deployment/runnable-app -n runnable --timeout=180s
+
+                    echo "==> 배포 완료: $(date)"
+                '''
             }
         }
     }
