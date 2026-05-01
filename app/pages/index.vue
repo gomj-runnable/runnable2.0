@@ -491,6 +491,7 @@ watch(activeNav, (next) => {
 
             <template #overlay>
                 <WeatherOverlay
+                    :style="!isMobile && slideOver.isOpen.value ? { left: '24rem', transition: 'left 300ms ease' } : { transition: 'left 300ms ease' }"
                     :selected-date="weather.selectedDate.value"
                     :selected-hour="weather.selectedHour.value"
                     :selected-month="weather.selectedMonth.value"
@@ -639,26 +640,19 @@ watch(activeNav, (next) => {
             </template>
         </MapShell>
 
-        <!-- 탭 콘텐츠: 모바일=Modal / 데스크톱=SlideOver -->
-        <component
-            :is="isMobile ? 'UModal' : 'USlideover'"
+        <!-- 탭 콘텐츠: SlideOver (모바일·데스크톱 공통) -->
+        <USlideover
             v-model:open="slideOver.isOpen.value"
             :title="slideOver.meta.value.title"
             :description="slideOver.meta.value.description"
-            v-bind="
-                isMobile
-                    ? {}
-                    : {
-                          side: 'left',
-                          overlay: false,
-                          modal: false,
-                          transition: false,
-                          ui: {
-                              content: 'top-(--ui-header-height)! max-w-full lg:max-w-sm',
-                              header: 'flex!'
-                          }
-                      }
-            "
+            side="left"
+            :overlay="false"
+            :modal="false"
+            :dismissible="false"
+            :ui="{
+                content: 'top-(--ui-header-height)! max-w-[75vw] lg:max-w-sm',
+                header: 'flex!'
+            }"
         >
             <template #body>
                 <!-- 목록 -->
@@ -754,7 +748,22 @@ watch(activeNav, (next) => {
                     @logout="handleLogout"
                 />
             </template>
-        </component>
+        </USlideover>
+
+        <!-- 모바일: SlideOver 닫혔을 때 다시 열기 탭 -->
+        <div
+            v-if="isMobile && !slideOver.isOpen.value"
+            class="fixed top-1/2 left-0 z-30 -translate-y-1/2"
+        >
+            <UButton
+                icon="i-lucide-chevron-right"
+                size="xs"
+                color="neutral"
+                variant="solid"
+                class="rounded-l-none rounded-r-lg shadow-lg opacity-70"
+                @click="slideOver.select(slideOver.lastActive.value)"
+            />
+        </div>
 
         <FloatingActionMenu :groups="fabGroups" />
 
