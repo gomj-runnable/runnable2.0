@@ -18,6 +18,7 @@ interface CesiumDrawState {
     positions: Cartesian3[]
     floatingPosition: Cartesian3 | null
     resolve: (result: DrawActionResult) => void
+    _cleanupTouch?: () => void
 }
 
 interface MapInitOptions {
@@ -158,6 +159,7 @@ export const useMapInit = (options?: MapInitOptions) => {
             return
         }
 
+        drawState._cleanupTouch?.()
         drawState.handler.destroy()
         removeDrawPreview(viewer, drawState)
     }
@@ -331,6 +333,54 @@ export const useMapInit = (options?: MapInitOptions) => {
                             : null
                     )
                 }, CesiumLib.ScreenSpaceEventType.RIGHT_CLICK)
+
+                // 모바일 롱프레스로 드로잉 완료 (500ms 이상 터치)
+                const LONG_PRESS_MS = 500
+                const MOVE_THRESHOLD = 10
+                let longPressTimer: ReturnType<typeof setTimeout> | null = null
+                let touchStartPos: { x: number; y: number } | null = null
+
+                const clearLongPress = () => {
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer)
+                        longPressTimer = null
+                    }
+                    touchStartPos = null
+                }
+
+                const onTouchStart = (e: TouchEvent) => {
+                    if (e.touches.length !== 1 || drawState.positions.length < 2) return
+                    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+                    longPressTimer = setTimeout(() => {
+                        viewer._finishDrawAction()
+                    }, LONG_PRESS_MS)
+                }
+
+                const onTouchMove = (e: TouchEvent) => {
+                    if (!touchStartPos || !longPressTimer) return
+                    const dx = e.touches[0].clientX - touchStartPos.x
+                    const dy = e.touches[0].clientY - touchStartPos.y
+                    if (Math.sqrt(dx * dx + dy * dy) > MOVE_THRESHOLD) {
+                        clearLongPress()
+                    }
+                }
+
+                const onTouchEnd = () => clearLongPress()
+
+                const canvas = rawViewer.canvas
+                canvas.addEventListener('touchstart', onTouchStart, { passive: true })
+                canvas.addEventListener('touchmove', onTouchMove, { passive: true })
+                canvas.addEventListener('touchend', onTouchEnd)
+                canvas.addEventListener('touchcancel', onTouchEnd)
+
+                // 기존 destroyDrawState 호출 시 터치 리스너도 정리되도록 참조 저장
+                drawState._cleanupTouch = () => {
+                    clearLongPress()
+                    canvas.removeEventListener('touchstart', onTouchStart)
+                    canvas.removeEventListener('touchmove', onTouchMove)
+                    canvas.removeEventListener('touchend', onTouchEnd)
+                    canvas.removeEventListener('touchcancel', onTouchEnd)
+                }
             })
     }
 
