@@ -223,6 +223,23 @@ export const useMapInit = (options?: MapInitOptions) => {
             current.resolve(null)
         }
 
+        viewer._finishDrawAction = () => {
+            const current = activeDrawState
+
+            if (!current) {
+                return
+            }
+
+            activeDrawState = null
+            destroyDrawState(viewer, current)
+
+            current.resolve(
+                current.positions.length >= 2
+                    ? createDrawActionData(current.positions)
+                    : null
+            )
+        }
+
         viewer._drawAction = (drawOptions) =>
             new Promise((resolve) => {
                 if (drawOptions.shapeType !== 1) {
