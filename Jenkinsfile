@@ -53,24 +53,12 @@ pipeline {
         }
 
         stage('Build') {
-            when {
-                anyOf {
-                    branch 'master'
-                    triggeredBy 'UserIdCause'
-                }
-            }
             steps {
                 sh 'pnpm build'
             }
         }
 
         stage('Docker Push') {
-            when {
-                anyOf {
-                    branch 'master'
-                    triggeredBy 'UserIdCause'
-                }
-            }
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
