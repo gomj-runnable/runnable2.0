@@ -32,7 +32,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     weatherKor: process.env.WEATHER_KOR ?? '',
     openData: process.env.OPEN_DATA ?? '',
-    airKoreaKey: process.env.OPEN_DATA ?? '',
+    airKoreaKey: process.env.AIR_KOREA_KEY || process.env.OPEN_DATA || '',
     routeMode: process.env.ROUTE_MODE ?? 'NONE',
     tmapApi: process.env.TMAP_API ?? '',
     public: {

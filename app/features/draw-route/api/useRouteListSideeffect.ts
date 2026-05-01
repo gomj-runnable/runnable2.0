@@ -1,6 +1,6 @@
 import type { Ref, ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
-import { createEntityGroup } from '~/widgets/map-shell/lib/useEntityCleanup'
+import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import type { RouteSectionBase, SavedRoute, SavedSection } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'

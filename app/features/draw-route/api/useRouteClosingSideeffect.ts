@@ -4,7 +4,7 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingMode } from '~/entities/route/model/useRouteClosingStore'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
-import { createEntityGroup } from '~/widgets/map-shell/lib/useEntityCleanup'
+import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 
 /**
