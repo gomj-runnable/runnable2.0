@@ -9,13 +9,9 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS-20'
-    }
-
     environment {
         BUILD_TAG    = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
-        PATH         = "/opt/homebrew/bin:${env.PATH}"
+        PATH         = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
         DOCKER_IMAGE = "myeongjunkim0615/runnable"
     }
 
