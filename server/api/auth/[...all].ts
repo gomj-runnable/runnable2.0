@@ -47,9 +47,21 @@ async function handleMemoryAuth(event: H3Event) {
         }
         memoryCsrfTokens.delete(csrfToken)
 
+        const email = body?.email?.trim()
+        const password = body?.password
+        const name = body?.name?.trim() || 'User'
+
+        if (!email || !password) {
+            throw createError({ statusCode: 400, message: '이메일과 비밀번호를 입력해주세요.' })
+        }
+
+        if (memoryUsers.has(email)) {
+            throw createError({ statusCode: 409, message: '이미 가입된 이메일입니다.' })
+        }
+
         const id = `user-${Date.now()}`
-        const user = { id, name: body.name || 'User', email: body.email, password: body.password }
-        memoryUsers.set(body.email, user)
+        const user = { id, name, email, password }
+        memoryUsers.set(email, user)
 
         const sessionToken = randomBytes(32).toString('hex')
         memorySessions.set(sessionToken, id)
@@ -61,7 +73,7 @@ async function handleMemoryAuth(event: H3Event) {
             maxAge: 60 * 60 * 24 * 30
         })
         return {
-            user: { id, name: user.name, email: user.email },
+            user: { id, name, email },
             session: { id: `session-${id}`, userId: id, token: sessionToken }
         }
     }
@@ -75,8 +87,15 @@ async function handleMemoryAuth(event: H3Event) {
         }
         memoryCsrfTokens.delete(csrfToken)
 
-        const user = memoryUsers.get(body.email)
-        if (!user || user.password !== body.password) {
+        const email = body?.email?.trim()
+        const password = body?.password
+
+        if (!email || !password) {
+            throw createError({ statusCode: 400, message: '이메일과 비밀번호를 입력해주세요.' })
+        }
+
+        const user = memoryUsers.get(email)
+        if (!user || user.password !== password) {
             throw createError({
                 statusCode: 401,
                 message: '이메일 또는 비밀번호가 올바르지 않습니다.'
@@ -135,5 +154,16 @@ export default defineEventHandler(async (event) => {
     if (!auth) {
         throw createError({ statusCode: 503, message: 'Auth is disabled.' })
     }
-    return fromWebHandler(auth.handler)(event)
+    try {
+        return await fromWebHandler(auth.handler)(event)
+    } catch (error) {
+        // better-auth 내부 에러를 클라이언트에 적절히 전파
+        if (error && typeof error === 'object' && 'statusCode' in error) {
+            throw error
+        }
+        throw createError({
+            statusCode: 500,
+            message: error instanceof Error ? error.message : '인증 처리 중 오류가 발생했습니다.'
+        })
+    }
 })
