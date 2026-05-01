@@ -128,6 +128,26 @@ const {
 
 const routeDrawStore = useRouteDrawStore()
 
+// ─── 키보드 단축키 ──────────────────────────────────────────────
+
+defineShortcuts({
+    escape: () => {
+        if (drawing.isDrawingActive) {
+            drawing.finish()
+        } else if (slideOver.isOpen.value) {
+            slideOver.close()
+        }
+    },
+    meta_s: {
+        handler: () => {
+            if (drawing.sectionDraft) {
+                drawing.openSaveModal()
+            }
+        },
+        usingInput: true
+    }
+})
+
 // ─── 인증 ────────────────────────────────────────────────────────
 
 const authStore = useAuthStore()
