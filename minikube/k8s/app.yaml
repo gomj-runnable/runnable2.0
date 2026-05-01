@@ -18,8 +18,6 @@ spec:
       labels:
         app: runnable-app
     spec:
-      imagePullSecrets:
-        - name: dockerhub-secret
       containers:
         - name: app
           image: runnable-app:latest

@@ -452,7 +452,6 @@ watch(activeNav, (next) => {
         explore.search(explore.searchQuery.value)
     }
 })
-
 </script>
 
 <template>
@@ -585,10 +584,7 @@ watch(activeNav, (next) => {
                 </div>
                 <!-- 모바일: 드로잉 중 "완료" 플로팅 버튼 -->
                 <Teleport to="body">
-                    <div
-                        v-if="isMobile && drawing.isDrawingActive"
-                        class="drawing-finish-btn"
-                    >
+                    <div v-if="isMobile && drawing.isDrawingActive" class="drawing-finish-btn">
                         <UButton
                             icon="i-lucide-check"
                             label="경로 완성"
@@ -608,16 +604,31 @@ watch(activeNav, (next) => {
                     <template #body>
                         <div class="flex flex-col gap-3 text-sm">
                             <div class="flex items-start gap-2">
-                                <UIcon name="i-lucide-hand" class="size-5 shrink-0 mt-0.5 text-(--ui-primary)" />
+                                <UIcon
+                                    name="i-lucide-hand"
+                                    class="size-5 shrink-0 mt-0.5 text-(--ui-primary)"
+                                />
                                 <p><strong>지도를 탭</strong>하여 경로 구간을 추가하세요.</p>
                             </div>
                             <div class="flex items-start gap-2">
-                                <UIcon name="i-lucide-check-circle" class="size-5 shrink-0 mt-0.5 text-(--ui-primary)" />
-                                <p>구간을 2개 이상 추가한 뒤 하단의 <strong>"경로 완성"</strong> 버튼을 눌러 경로를 완성하세요.</p>
+                                <UIcon
+                                    name="i-lucide-check-circle"
+                                    class="size-5 shrink-0 mt-0.5 text-(--ui-primary)"
+                                />
+                                <p>
+                                    구간을 2개 이상 추가한 뒤 하단의
+                                    <strong>"경로 완성"</strong> 버튼을 눌러 경로를 완성하세요.
+                                </p>
                             </div>
                             <div class="flex items-start gap-2">
-                                <UIcon name="i-lucide-rotate-ccw" class="size-5 shrink-0 mt-0.5 text-(--ui-text-muted)" />
-                                <p>사이드바의 <strong>"초기화"</strong> 버튼을 누르면 경로를 다시 그릴 수 있습니다.</p>
+                                <UIcon
+                                    name="i-lucide-rotate-ccw"
+                                    class="size-5 shrink-0 mt-0.5 text-(--ui-text-muted)"
+                                />
+                                <p>
+                                    사이드바의 <strong>"초기화"</strong> 버튼을 누르면 경로를 다시
+                                    그릴 수 있습니다.
+                                </p>
                             </div>
                         </div>
                     </template>
@@ -634,16 +645,20 @@ watch(activeNav, (next) => {
             v-model:open="slideOver.isOpen.value"
             :title="slideOver.meta.value.title"
             :description="slideOver.meta.value.description"
-            v-bind="isMobile ? {} : {
-                side: 'left',
-                overlay: false,
-                modal: false,
-                transition: false,
-                ui: {
-                    content: 'top-(--ui-header-height)! max-w-full lg:max-w-sm',
-                    header: 'flex!'
-                }
-            }"
+            v-bind="
+                isMobile
+                    ? {}
+                    : {
+                          side: 'left',
+                          overlay: false,
+                          modal: false,
+                          transition: false,
+                          ui: {
+                              content: 'top-(--ui-header-height)! max-w-full lg:max-w-sm',
+                              header: 'flex!'
+                          }
+                      }
+            "
         >
             <template #body>
                 <!-- 목록 -->
