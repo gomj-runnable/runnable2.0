@@ -1,8 +1,5 @@
 import { VilageFcstOriginalResponse } from '#shared/types/weather'
-import type {
-    HourlyWeather,
-    VilageFcstOriginalItem
-} from '#shared/types/weather'
+import type { HourlyWeather, VilageFcstOriginalItem } from '#shared/types/weather'
 import { WeatherConditionEnum } from '#shared/types/weather-condition.enum'
 import {
     addDays,
