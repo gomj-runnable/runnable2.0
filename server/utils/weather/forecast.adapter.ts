@@ -1,7 +1,7 @@
+import { VilageFcstOriginalResponse } from '#shared/types/weather'
 import type {
     HourlyWeather,
-    VilageFcstOriginalResponse,
-    type VilageFcstOriginalItem
+    VilageFcstOriginalItem
 } from '#shared/types/weather'
 import { WeatherConditionEnum } from '#shared/types/weather-condition.enum'
 import {
