@@ -349,6 +349,11 @@ const showSimulationChip = computed(() => {
 // ─── 모바일 감지 ────────────────────────────────────────────────
 const isMobile = ref(false)
 let mobileMediaQuery: MediaQueryList | null = null
+const onMediaChange = (e: MediaQueryListEvent) => { isMobile.value = e.matches }
+
+onBeforeUnmount(() => {
+    mobileMediaQuery?.removeEventListener('change', onMediaChange)
+})
 
 /** 모바일: 현재 위치 검색 버튼 노출 조건 */
 const fabNearbyVisible = computed(() =>
@@ -552,9 +557,7 @@ onMounted(async () => {
     // 모바일 미디어쿼리 리스너
     mobileMediaQuery = window.matchMedia('(max-width: 1023px)')
     isMobile.value = mobileMediaQuery.matches
-    mobileMediaQuery.addEventListener('change', (e) => {
-        isMobile.value = e.matches
-    })
+    mobileMediaQuery.addEventListener('change', onMediaChange)
 
     await init()
     viewer.value = window.viewer
@@ -644,7 +647,7 @@ watch(overlayContext, (next, prev) => {
         <MapShell :show-second-panel="sectionInfo.isOpen.value">
             <template #sidebar>
                 <MapSidebar
-                    :active-nav="slideOver.current.value"
+                    :active-nav="slideOver.lastActive.value"
                     :is-logged-in="authStore.isLoggedIn.value"
                     @select="slideOver.select"
                 />
@@ -777,8 +780,8 @@ watch(overlayContext, (next, prev) => {
             :title="slideOver.meta.value.title"
             :description="slideOver.meta.value.description"
             :ui="{
-                content: 'top-(--ui-header-height)! lg:top-0! lg:start-14! max-w-full lg:max-w-sm slideover-from-rail',
-                header: 'hidden! lg:flex!'
+                content: 'top-(--ui-header-height)! max-w-full lg:max-w-sm',
+                header: 'flex!'
             }"
         >
             <template #body>

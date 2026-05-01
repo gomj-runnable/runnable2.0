@@ -43,9 +43,9 @@ const scoreColorClass = computed(() => {
             <span
                 class="shrink-0 text-[0.8125rem] font-bold"
                 :class="{
-                    'text-[#4caf72]': scoreColorClass === 'is-score-good',
-                    'text-[#f0a030]': scoreColorClass === 'is-score-moderate',
-                    'text-[#e05050]': scoreColorClass === 'is-score-low',
+                    'text-green-500': scoreColorClass === 'is-score-good',
+                    'text-amber-500': scoreColorClass === 'is-score-moderate',
+                    'text-red-500': scoreColorClass === 'is-score-low',
                 }"
             >
                 {{ route.score }}점
@@ -56,9 +56,9 @@ const scoreColorClass = computed(() => {
             <div
                 class="h-full rounded-sm transition-[width] duration-300"
                 :class="{
-                    'bg-[#4caf72]': scoreColorClass === 'is-score-good',
-                    'bg-[#f0a030]': scoreColorClass === 'is-score-moderate',
-                    'bg-[#e05050]': scoreColorClass === 'is-score-low',
+                    'bg-green-500': scoreColorClass === 'is-score-good',
+                    'bg-amber-500': scoreColorClass === 'is-score-moderate',
+                    'bg-red-500': scoreColorClass === 'is-score-low',
                 }"
                 :style="{ width: `${route.score}%` }"
             />
@@ -79,7 +79,7 @@ const scoreColorClass = computed(() => {
             <span
                 v-for="tag in route.tags"
                 :key="tag"
-                class="px-1.5 py-[2px] rounded-lg bg-accent-tint text-[#ccff00] text-xs font-medium whitespace-nowrap"
+                class="px-1.5 py-[2px] rounded-lg bg-accent-tint text-(--ui-primary) text-xs font-medium whitespace-nowrap"
             >
                 {{ tag }}
             </span>

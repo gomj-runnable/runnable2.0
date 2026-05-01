@@ -43,6 +43,7 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- difficulty colors below are data visualization values — do not replace with theme tokens -->
                         <tr>
                             <td class="px-1.5 py-0.5">
                                 <span

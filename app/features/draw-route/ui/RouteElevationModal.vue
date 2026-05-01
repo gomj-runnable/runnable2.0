@@ -80,26 +80,26 @@ const chartGeometry = computed(() => {
         @update:open="$emit('update:open', $event)"
     >
         <template #body>
-            <div v-if="profile" class="w-[min(820px,100%)] bg-[linear-gradient(180deg,rgb(7_10_16/0.06)_0%,rgb(7_10_16/0.42)_100%)] rounded-3xl">
+            <div v-if="profile" class="w-[min(820px,100%)] bg-(--ui-bg-elevated) rounded-3xl">
 
             <div class="grid grid-cols-3 gap-2.5 mb-3 max-[540px]:grid-cols-1">
                 <article
                     v-for="item in summaryItems"
                     :key="item.label"
-                    class="flex flex-col gap-1 p-3 border border-[rgb(255_255_255/0.08)] rounded-2xl bg-[rgb(255_255_255/0.04)]"
+                    class="flex flex-col gap-1 p-3 border border-(--ui-border) rounded-2xl bg-(--ui-bg-elevated)"
                 >
-                    <span class="text-xs text-[rgb(255_255_255/0.58)]">{{ item.label }}</span>
+                    <span class="text-xs text-(--ui-text-muted)">{{ item.label }}</span>
                     <strong class="text-[0.9375rem] font-semibold">{{ item.value }}</strong>
                 </article>
             </div>
 
-            <div class="overflow-hidden border border-[rgb(255_255_255/0.08)] rounded-2xl bg-[linear-gradient(180deg,rgb(255_255_255/0.04)_0%,rgb(255_255_255/0.02)_100%),rgb(7_10_16/0.8)]">
+            <div class="overflow-hidden border border-(--ui-border) rounded-2xl bg-(--ui-bg-elevated)">
                 <div class="flex items-center justify-between gap-3 px-3 pt-3 flex-wrap">
                     <div class="flex gap-1.5 flex-wrap justify-end">
                         <span
                             v-for="section in profile.sections"
                             :key="`${section.label}-${section.startIndex}`"
-                            class="inline-flex items-center gap-1 px-2.5 py-1 border border-[rgb(255_255_255/0.08)] rounded-full bg-[rgb(255_255_255/0.04)] text-xs text-[rgb(255_255_255/0.78)]"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 border border-(--ui-border) rounded-full bg-(--ui-bg-elevated) text-xs text-(--ui-text-dimmed)"
                         >
                             <span
                                 class="w-2 h-2 rounded-full"
@@ -202,7 +202,7 @@ const chartGeometry = computed(() => {
                 </svg>
             </div>
 
-            <footer class="flex justify-between gap-2.5 mt-3 text-xs text-[rgb(255_255_255/0.58)] max-[720px]:flex-col">
+            <footer class="flex justify-between gap-2.5 mt-3 text-xs text-(--ui-text-muted) max-[720px]:flex-col">
                 <span>섹션별 선 색상은 지도 구간 색상과 동일합니다.</span>
                 <span>500m 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
             </footer>

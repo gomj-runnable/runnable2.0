@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
- * MapSidebar — 반응형 네비게이션
+ * MapSidebar — UHeader 기반 반응형 네비게이션
  *
- * 데스크톱(lg+): 세로 Nav Rail (collapsed, vertical, tooltip)
- * 모바일(<lg): 가로 헤더 바 (horizontal)
+ * 데스크톱(lg+): 왼쪽 로고 · 중앙 탭 · 우측 계정
+ * 모바일(<lg): 로고 + 햄버거 토글 → drawer 메뉴
  */
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { NavKey, type NavKeyValue } from '../model/nav-key'
@@ -42,41 +42,27 @@ const bottomItems = computed(() => [
         label: props.isLoggedIn ? '내 계정' : '로그인'
     }
 ])
-
-const tooltipProps = { delayDuration: 0, content: { side: 'right' as const } }
 </script>
 
 <template>
-    <!-- 데스크톱: 세로 Nav Rail -->
-    <nav class="hidden lg:flex flex-col items-center w-14 h-full shrink-0 py-2 bg-(--ui-bg-elevated) border-r border-(--ui-border) z-20">
-        <UNavigationMenu
-            orientation="vertical"
-            collapsed
-            :tooltip="tooltipProps"
-            :items="topItems"
-            color="primary"
-        />
-        <div class="flex-1" />
-        <UNavigationMenu
-            orientation="vertical"
-            collapsed
-            :tooltip="tooltipProps"
-            :items="bottomItems"
-            color="primary"
-        />
-    </nav>
+    <UHeader title="Runnable" mode="drawer">
+        <template #title>
+            <img src="/logo/runnable_logo_main.svg" alt="Runnable" class="h-6 w-auto" />
+        </template>
 
-    <!-- 모바일: 가로 헤더 바 -->
-    <header class="flex lg:hidden items-center gap-2 w-full h-[var(--ui-header-height)] shrink-0 px-4 bg-(--ui-bg-elevated) border-b border-(--ui-border) z-20">
-        <UIcon name="i-lucide-map-pin" class="size-5 shrink-0" />
-        <UNavigationMenu
-            :items="topItems"
-            color="primary"
-        />
-        <div class="flex-1" />
-        <UNavigationMenu
-            :items="bottomItems"
-            color="primary"
-        />
-    </header>
+        <UNavigationMenu :items="topItems" color="primary" />
+
+        <template #right>
+            <UNavigationMenu :items="bottomItems" color="primary" />
+        </template>
+
+        <template #body>
+            <UNavigationMenu
+                orientation="vertical"
+                :items="[...topItems, ...bottomItems]"
+                color="primary"
+                class="w-full"
+            />
+        </template>
+    </UHeader>
 </template>
