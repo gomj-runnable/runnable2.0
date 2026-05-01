@@ -2,7 +2,7 @@ import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
 import { WEATHER_SOURCES } from '~/entities/weather/model/useWeatherSourceStrategy'
 import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
-import { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
+import type { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
 import type { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import type { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import type { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
@@ -29,8 +29,8 @@ interface FabGroupsOptions {
     }
     activeNav: Ref<string>
     closing: {
-        mode: { isLoopClose: boolean; isRoundTrip: boolean } | null
-        setMode: (mode: unknown) => void
+        mode: RouteClosingModeEnum | null
+        setMode: (mode: RouteClosingModeEnum | null) => void
     }
     routeInfoStore: ReturnType<typeof useRouteInfoStore>
     isSimDrawerOpen: Ref<boolean>
@@ -63,7 +63,8 @@ export const useFabGroups = (options: FabGroupsOptions) => {
     /** 모바일: 현재 위치 검색 버튼 노출 조건 */
     const fabNearbyVisible = computed(() =>
         (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
-            (t) => facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
+            (t) =>
+                facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
         )
     )
 
@@ -147,7 +148,8 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     key: 'temperature',
                     label: '온도',
                     icon: 'i-lucide-thermometer',
-                    active: weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ?? false,
+                    active:
+                        weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ?? false,
                     onClick: () => {
                         const next = weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE)
                             ? null

@@ -236,9 +236,7 @@ export const useMapInit = (options?: MapInitOptions) => {
             destroyDrawState(viewer, current)
 
             current.resolve(
-                current.positions.length >= 2
-                    ? createDrawActionData(current.positions)
-                    : null
+                current.positions.length >= 2 ? createDrawActionData(current.positions) : null
             )
         }
 
@@ -350,7 +348,7 @@ export const useMapInit = (options?: MapInitOptions) => {
 
                 const onTouchStart = (e: TouchEvent) => {
                     if (e.touches.length !== 1 || drawState.positions.length < 2) return
-                    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+                    touchStartPos = { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY }
                     longPressTimer = setTimeout(() => {
                         viewer._finishDrawAction()
                     }, LONG_PRESS_MS)
@@ -358,8 +356,8 @@ export const useMapInit = (options?: MapInitOptions) => {
 
                 const onTouchMove = (e: TouchEvent) => {
                     if (!touchStartPos || !longPressTimer) return
-                    const dx = e.touches[0].clientX - touchStartPos.x
-                    const dy = e.touches[0].clientY - touchStartPos.y
+                    const dx = e.touches[0]!.clientX - touchStartPos.x
+                    const dy = e.touches[0]!.clientY - touchStartPos.y
                     if (Math.sqrt(dx * dx + dy * dy) > MOVE_THRESHOLD) {
                         clearLongPress()
                     }
@@ -367,7 +365,7 @@ export const useMapInit = (options?: MapInitOptions) => {
 
                 const onTouchEnd = () => clearLongPress()
 
-                const canvas = rawViewer.canvas
+                const canvas = rawViewer.canvas as HTMLCanvasElement
                 canvas.addEventListener('touchstart', onTouchStart, { passive: true })
                 canvas.addEventListener('touchmove', onTouchMove, { passive: true })
                 canvas.addEventListener('touchend', onTouchEnd)
