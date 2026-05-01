@@ -32,11 +32,8 @@ import {
 } from '~/entities/route/lib/usePoiSnapping'
 import { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
 import { useWeatherSideeffect } from '~/features/weather-overlay/api/useWeatherSideeffect'
-import {
-    useWeatherSourceStrategy,
-    WEATHER_SOURCES
-} from '~/entities/weather/model/useWeatherSourceStrategy'
-import { useFacilityStore, FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
+import { useWeatherSourceStrategy } from '~/entities/weather/model/useWeatherSourceStrategy'
+import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
@@ -64,7 +61,6 @@ import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
 import { useSimulationSideeffect } from '~/features/simulation/api/useSimulationSideeffect'
 import { useWeatherRecommendStore } from '~/entities/weather/model/useWeatherRecommendStore'
-import { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
 import { useWeatherRecommendSideeffect } from '~/features/weather-overlay/api/useWeatherRecommendSideeffect'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
 import { useMapInit } from '~/shared/lib/map/useMapInit'
@@ -76,8 +72,9 @@ import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommen
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
 import BottomDrawer from '~/shared/ui/BottomDrawer.vue'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
-import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
-import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
+import { useMobileDetect } from '~/shared/lib/useMobileDetect'
+import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
+import { useFabGroups } from '~/widgets/map-shell/model/useFabGroups'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -283,25 +280,6 @@ const gradientEffect = useGradientSideeffect({
 // ─── 추천 경로 토글 ──────────────────────────────────────────────
 const showRecommend = ref(false)
 
-// ─── 오버레이 가시성 컨텍스트 ────────────────────────────────────
-/**
- * 현재 탭·선택 상태·추천 모드에 따라 오버레이 UI 그룹의 표출 컨텍스트를 결정한다.
- * 경로 카드가 화면에서 보이지 않으면 연관 오버레이도 함께 숨긴다.
- */
-const overlayContext = computed<MapOverlayContextEnum>(() => {
-    if (activeNav.value === '그리기' && drawing.sectionDraft) {
-        return MapOverlayContextEnum.DRAWING
-    }
-    if (activeNav.value === '목록' && routeList.selectedRouteId) {
-        return MapOverlayContextEnum.LIST_SELECTED
-    }
-    if (activeNav.value === '탐색') {
-        if (showRecommend.value) return MapOverlayContextEnum.RECOMMEND
-        if (explore.selectedRouteId.value) return MapOverlayContextEnum.EXPLORE_SELECTED
-    }
-    return MapOverlayContextEnum.NONE
-})
-
 const handleRouteInfoSubmit = async (payload: { name: string; description: string }) => {
     const pos = routeInfoEffect.clickedPosition.value
     if (!pos) return
@@ -329,6 +307,9 @@ const handleRouteInfoSubmit = async (payload: { name: string; description: strin
     }
 }
 
+// ─── 탐색 (overlayContext보다 앞에 선언 필요) ───────────────────
+const explore = useExploreSearchSideeffect()
+
 const simulation = useSimulationStore()
 const simulationEffect = useSimulationSideeffect({ viewer })
 
@@ -338,26 +319,23 @@ const weatherRecommendEffect = useWeatherRecommendSideeffect()
 // ─── 시뮬레이션 Drawer ──────────────────────────────────────────
 const isSimDrawerOpen = ref(false)
 
-/** 경로정보 Chip 표출 조건: overlayContext에 활성 경로가 있을 때 */
-const showRouteInfoChip = computed(() => overlayContext.value.hasActiveRoute)
-
-/** 시뮬레이션 Chip 표출 조건: 활성 경로 + 목록 탭에서는 구간정보 열림 필요 */
-const showSimulationChip = computed(() => {
-    if (!overlayContext.value.hasActiveRoute) return false
-    if (overlayContext.value.isListSelected) return sectionInfo.isOpen.value
-    return true
+// ─── 오버레이 가시성 컨텍스트 ────────────────────────────────────
+const { overlayContext, showRouteInfoChip, showSimulationChip } = useOverlayContext({
+    activeNav,
+    sectionDraft: computed(() => drawing.sectionDraft),
+    selectedRouteId: routeList.selectedRouteId,
+    exploreSelectedRouteId: computed(() => explore.selectedRouteId.value),
+    showRecommend,
+    routeInfoStore,
+    routeInfoEffect,
+    simulation,
+    simulationEffect,
+    isSimDrawerOpen,
+    sectionInfo
 })
 
 // ─── 모바일 감지 ────────────────────────────────────────────────
-const isMobile = ref(false)
-let mobileMediaQuery: MediaQueryList | null = null
-const onMediaChange = (e: MediaQueryListEvent) => {
-    isMobile.value = e.matches
-}
-
-onBeforeUnmount(() => {
-    mobileMediaQuery?.removeEventListener('change', onMediaChange)
-})
+const { isMobile } = useMobileDetect()
 
 /** 모바일: 경로 그리기 도움말 모달 표시 여부 */
 const showDrawingHelpModal = ref(false)
@@ -377,210 +355,28 @@ const handleDrawingStartWithHelp = () => {
     drawing.start()
 }
 
-/** 모바일: 현재 위치 검색 버튼 노출 조건 */
-const fabNearbyVisible = computed(() =>
-    (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
-        (t) => facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
-    )
-)
-
 // ─── FAB 그룹 (모바일 전용 플로팅 메뉴) ─────────────────────────
-const fabGroups = computed(() => [
-    {
-        key: 'facility',
-        label: '시설물',
-        icon: 'i-lucide-building-2',
-        items: [
-            ...FACILITY_LAYERS.map((layer) => ({
-                key: layer.type,
-                label: layer.label,
-                icon: layer.icon,
-                dotColor: layer.color,
-                active:
-                    layer.type === 'sidewalk'
-                        ? sidewalk.isActive.value
-                        : facility.activeTypes.value.has(layer.type),
-                onClick: () => {
-                    if (layer.type === 'sidewalk') {
-                        sidewalk.toggleActive()
-                    } else {
-                        facility.toggleType(layer.type)
-                    }
-                }
-            }))
-        ]
-    },
-    {
-        key: 'map-layer',
-        label: '지도 레이어',
-        icon: 'i-lucide-layers',
-        items: [
-            {
-                key: 'elevation',
-                label: '지역 고도',
-                icon: 'i-lucide-mountain',
-                active: elevation.isElevationVisible.value,
-                onClick: () => {
-                    const next = !elevation.isElevationVisible.value
-                    elevation.isElevationVisible.value = next
-                    if (next) weather.activeLayer.value = null
-                }
-            },
-            {
-                key: 'gu',
-                label: '시군구',
-                icon: 'i-lucide-map',
-                active: boundary.isGuActive.value,
-                onClick: () => boundary.toggleGu()
-            },
-            {
-                key: 'dong',
-                label: '읍면동',
-                icon: 'i-lucide-map-pin',
-                active: boundary.isDongActive.value,
-                onClick: () => boundary.toggleDong()
-            }
-        ]
-    },
-    {
-        key: 'weather',
-        label: '날씨',
-        icon: 'i-lucide-cloud-sun',
-        items: [
-            {
-                key: 'weather-layer',
-                label: '날씨',
-                icon: 'i-lucide-cloud-sun',
-                active: weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER) ?? false,
-                onClick: () => {
-                    const next = weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER)
-                        ? null
-                        : WeatherLayerEnum.WEATHER
-                    weather.activeLayer.value = next
-                    if (next && elevation.isElevationVisible.value)
-                        elevation.isElevationVisible.value = false
-                }
-            },
-            {
-                key: 'temperature',
-                label: '온도',
-                icon: 'i-lucide-thermometer',
-                active: weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ?? false,
-                onClick: () => {
-                    const next = weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE)
-                        ? null
-                        : WeatherLayerEnum.TEMPERATURE
-                    weather.activeLayer.value = next
-                    if (next && elevation.isElevationVisible.value)
-                        elevation.isElevationVisible.value = false
-                }
-            },
-            {
-                key: 'pm10',
-                label: '미세먼지',
-                icon: 'i-lucide-wind',
-                active: weather.activeLayer.value?.equals(WeatherLayerEnum.PM10) ?? false,
-                onClick: () => {
-                    const next = weather.activeLayer.value?.equals(WeatherLayerEnum.PM10)
-                        ? null
-                        : WeatherLayerEnum.PM10
-                    weather.activeLayer.value = next
-                    if (next && elevation.isElevationVisible.value)
-                        elevation.isElevationVisible.value = false
-                }
-            },
-            ...WEATHER_SOURCES.map((src) => ({
-                key: `source-${src.key}`,
-                label: src.label,
-                icon: src.icon,
-                active: weatherSources.isSourceActive(src.key),
-                onClick: () => weatherSources.toggleSource(src.key)
-            }))
-        ]
-    },
-    {
-        key: 'route-tools',
-        label: '경로 도구',
-        icon: 'i-lucide-route',
-        visible:
-            overlayContext.value.showDrawingTools ||
-            (overlayContext.value.hasActiveRoute && !!elevationChart.profile),
-        items: [
-            {
-                key: 'elevation-chart',
-                label: elevationChart.title,
-                icon: 'i-lucide-chart-line',
-                active: elevationChart.open,
-                visible: !!elevationChart.profile,
-                onClick: () => elevationChart.setOpen(!elevationChart.open)
-            },
-            {
-                key: 'loop-close',
-                label: '도착지 연결',
-                icon: 'i-lucide-rotate-ccw',
-                active: closing.mode?.isLoopClose ?? false,
-                visible: activeNav.value === '그리기',
-                onClick: () =>
-                    closing.setMode(
-                        closing.mode?.isLoopClose ? null : RouteClosingModeEnum.LOOP_CLOSE
-                    )
-            },
-            {
-                key: 'round-trip',
-                label: '왕복 코스',
-                icon: 'i-lucide-arrow-left-right',
-                active: closing.mode?.isRoundTrip ?? false,
-                visible: activeNav.value === '그리기',
-                onClick: () =>
-                    closing.setMode(
-                        closing.mode?.isRoundTrip ? null : RouteClosingModeEnum.ROUND_TRIP
-                    )
-            },
-            {
-                key: 'gradient',
-                label: '경사도',
-                icon: 'i-lucide-trending-up',
-                active: gradient.isGradientVisible.value,
-                onClick: () => gradient.toggleGradient()
-            }
-        ]
-    },
-    {
-        key: 'features',
-        label: '기능',
-        icon: 'i-lucide-play-circle',
-        visible: showSimulationChip.value || showRouteInfoChip.value,
-        items: [
-            {
-                key: 'simulation',
-                label: '시뮬레이션',
-                icon: 'i-lucide-play-circle',
-                active: isSimDrawerOpen.value,
-                visible: showSimulationChip.value,
-                onClick: () => {
-                    isSimDrawerOpen.value = !isSimDrawerOpen.value
-                }
-            },
-            {
-                key: 'route-info',
-                label: '경로정보',
-                icon: 'i-lucide-message-circle',
-                active: routeInfoStore.isAddingRouteInfo.value,
-                visible: showRouteInfoChip.value,
-                onClick: () => routeInfoStore.toggleAddingMode()
-            }
-        ]
-    }
-])
+const { fabGroups, fabNearbyVisible } = useFabGroups({
+    facility,
+    sidewalk,
+    elevation,
+    boundary,
+    weather,
+    weatherSources,
+    gradient,
+    overlayContext,
+    elevationChart,
+    activeNav,
+    closing,
+    routeInfoStore,
+    isSimDrawerOpen,
+    showSimulationChip,
+    showRouteInfoChip
+})
 
 // ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
 
 onMounted(async () => {
-    // 모바일 미디어쿼리 리스너
-    mobileMediaQuery = window.matchMedia('(max-width: 1023px)')
-    isMobile.value = mobileMediaQuery.matches
-    mobileMediaQuery.addEventListener('change', onMediaChange)
-
     await init()
     viewer.value = window.viewer
     await Promise.all([
@@ -597,7 +393,6 @@ onMounted(async () => {
 
 // ─── 탐색 ────────────────────────────────────────────────────────
 
-const explore = useExploreSearchSideeffect()
 const districtStore = useDistrictStore()
 const districtEffect = useDistrictSideeffect()
 
@@ -638,30 +433,6 @@ watch(activeNav, (next) => {
     }
 })
 
-/**
- * 오버레이 컨텍스트가 바뀌면 이전 컨텍스트에서 활성화된 상호작용 UI를 일괄 정리한다.
- * - 경로정보 추가 모드 해제
- * - 시뮬레이션 Drawer 닫기 + 재생 정지
- * - 경로정보 마커 팝업 닫기
- */
-watch(overlayContext, (next, prev) => {
-    if (next.key === prev.key) return
-
-    // 활성 경로가 사라진 경우: 연관 오버레이 일괄 정리
-    if (!next.hasActiveRoute) {
-        // 경로정보 추가 모드 해제
-        if (routeInfoStore.isAddingRouteInfo.value) {
-            routeInfoEffect.cancelAdding()
-        }
-        // 시뮬레이션 Drawer 닫기 + 재생 정지
-        isSimDrawerOpen.value = false
-        if (!simulation.playbackState.value.isStopped) {
-            simulationEffect.stopPlayback()
-        }
-        // 경로정보 마커 팝업 닫기
-        routeInfoStore.selectedMarkerRouteInfo.value = null
-    }
-})
 </script>
 
 <template>

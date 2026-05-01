@@ -1,24 +1,12 @@
-import { eq } from 'drizzle-orm'
-import { routeInfos } from '../../../../database/schema'
-import { db } from '../../../../utils/db'
-import { memoryRouteInfos } from '../../../../utils/memoryStore'
+import { routeInfoRepository } from '../../../../repositories'
+import { badRequest } from '../../../../utils/error'
 
 /** GET /api/routes/:routeId/feedbacks — 경로에 달린 경로정보 목록 조회 (인증 불필요) */
 export default defineEventHandler(async (event) => {
     const routeId = getRouterParam(event, 'routeId')
     if (!routeId) {
-        throw createError({ statusCode: 400, message: '경로 ID가 필요합니다.' })
+        throw badRequest('경로 ID가 필요합니다.')
     }
 
-    if (!db) {
-        return memoryRouteInfos.filter((item) => item.routeId === routeId)
-    }
-
-    const items = await db
-        .select()
-        .from(routeInfos)
-        .where(eq(routeInfos.routeId, routeId))
-        .orderBy(routeInfos.createdAt)
-
-    return items
+    return routeInfoRepository.findByRouteId(routeId)
 })

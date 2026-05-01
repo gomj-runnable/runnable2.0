@@ -2,6 +2,19 @@ import { createAuthClient } from 'better-auth/vue'
 import type { AuthUser } from '../model/useAuthStore'
 import { useAuthStore } from '../model/useAuthStore'
 
+/** better-auth 응답의 user 객체를 AuthUser로 변환한다. */
+const toAuthUser = (user: {
+    id: string
+    name: string
+    email: string
+    image?: string | null
+}): AuthUser => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image
+})
+
 /** better-auth 클라이언트 싱글톤. 최초 호출 시 생성되고 이후 재사용된다. */
 let authClient: ReturnType<typeof createAuthClient> | null = null
 
@@ -30,12 +43,7 @@ export const useAuthSideeffect = () => {
         try {
             const { data } = await getClient().getSession()
             if (data?.user) {
-                store.user.value = {
-                    id: data.user.id,
-                    name: data.user.name,
-                    email: data.user.email,
-                    image: data.user.image
-                }
+                store.user.value = toAuthUser(data.user)
             }
         } catch {
             store.user.value = null
@@ -53,12 +61,7 @@ export const useAuthSideeffect = () => {
         const { data, error } = await getClient().signIn.email({ email, password })
         if (error) throw new Error(error.message ?? '로그인에 실패했습니다.')
         if (data?.user) {
-            store.user.value = {
-                id: data.user.id,
-                name: data.user.name,
-                email: data.user.email,
-                image: data.user.image
-            } satisfies AuthUser
+            store.user.value = toAuthUser(data.user)
         }
         store.closeAuthModal()
     }
@@ -75,12 +78,7 @@ export const useAuthSideeffect = () => {
         const { data, error } = await getClient().signUp.email({ name, email, password })
         if (error) throw new Error(error.message ?? '회원가입에 실패했습니다.')
         if (data?.user) {
-            store.user.value = {
-                id: data.user.id,
-                name: data.user.name,
-                email: data.user.email,
-                image: data.user.image
-            } satisfies AuthUser
+            store.user.value = toAuthUser(data.user)
         }
         store.closeAuthModal()
     }

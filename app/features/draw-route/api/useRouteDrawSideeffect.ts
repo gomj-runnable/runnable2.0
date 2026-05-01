@@ -1,6 +1,6 @@
 import type { Ref, ShallowRef } from 'vue'
 import type { DrawActionData, CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
-import { createEntityGroup } from '~/widgets/map-shell/lib/useEntityCleanup'
+import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
