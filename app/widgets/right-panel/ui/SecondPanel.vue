@@ -29,7 +29,11 @@ const emit = defineEmits<{
                 <button
                     type="button"
                     class="px-3 py-1 text-[0.8125rem] font-medium text-text-muted bg-[rgba(255,255,255,0.06)] border border-[rgba(223,255,0,0.18)] rounded-xl cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
-                    :class="isEditMode ? 'bg-[rgba(255,255,0,0.24)] border-[rgba(255,255,0,0.42)] text-text-base' : ''"
+                    :class="
+                        isEditMode
+                            ? 'bg-[rgba(255,255,0,0.24)] border-[rgba(255,255,0,0.42)] text-text-base'
+                            : ''
+                    "
                     @click="emit('update:editMode', !isEditMode)"
                 >
                     {{ isEditMode ? '저장하기' : '수정하기' }}
@@ -45,14 +49,20 @@ const emit = defineEmits<{
             </div>
         </div>
 
-        <div class="flex gap-4 px-3 py-2.5 bg-[rgba(255,255,255,0.06)] rounded-2xl border border-[rgba(223,255,0,0.18)] shrink-0">
+        <div
+            class="flex gap-4 px-3 py-2.5 bg-[rgba(255,255,255,0.06)] rounded-2xl border border-[rgba(223,255,0,0.18)] shrink-0"
+        >
             <span class="flex flex-col gap-1">
                 <span class="text-xs text-text-muted leading-[1.4]">총 거리</span>
-                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]">{{ totalDistance.toFixed(1) }}km</span>
+                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]"
+                    >{{ totalDistance.toFixed(1) }}km</span
+                >
             </span>
             <span class="flex flex-col gap-1">
                 <span class="text-xs text-text-muted leading-[1.4]">예상 소요시간</span>
-                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]">{{ totalTime }}</span>
+                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]">{{
+                    totalTime
+                }}</span>
             </span>
         </div>
 
@@ -72,7 +82,10 @@ const emit = defineEmits<{
                 </div>
 
                 <div v-if="!isEditMode" class="flex flex-col gap-1.5">
-                    <p v-if="section.attrs?.[0]?.comment" class="m-0 text-sm font-medium text-text-muted leading-[1.5]">
+                    <p
+                        v-if="section.attrs?.[0]?.comment"
+                        class="m-0 text-sm font-medium text-text-muted leading-[1.5]"
+                    >
                         {{ section.attrs[0].comment }}
                     </p>
                     <p
@@ -85,7 +98,9 @@ const emit = defineEmits<{
 
                 <div class="flex items-center justify-between gap-2.5">
                     <span class="text-[0.8125rem] text-text-muted leading-[1.4]">페이스</span>
-                    <span class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]">
+                    <span
+                        class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]"
+                    >
                         {{
                             userPaces[section.sectionId]?.pace != null
                                 ? formatPace(userPaces[section.sectionId]?.pace!)
@@ -100,12 +115,16 @@ const emit = defineEmits<{
                     :max="600"
                     :step="5"
                     class="w-full"
-                    @update:model-value="emit('update:pace', section.sectionId, $event)"
+                    @update:model-value="
+                        (v: number | undefined) => emit('update:pace', section.sectionId, v ?? 300)
+                    "
                 />
 
                 <div class="flex items-center justify-between gap-2.5">
                     <span class="text-[0.8125rem] text-text-muted leading-[1.4]">짐 무게</span>
-                    <span class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]">
+                    <span
+                        class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]"
+                    >
                         {{
                             userPaces[section.sectionId]?.weight != null
                                 ? `${userPaces[section.sectionId]?.weight}kg`
@@ -120,7 +139,9 @@ const emit = defineEmits<{
                     :max="30"
                     :step="0.5"
                     class="w-full"
-                    @update:model-value="emit('update:weight', section.sectionId, $event)"
+                    @update:model-value="
+                        (v: number | undefined) => emit('update:weight', section.sectionId, v ?? 0)
+                    "
                 />
 
                 <textarea

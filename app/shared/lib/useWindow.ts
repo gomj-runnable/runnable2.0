@@ -47,6 +47,15 @@ export type DrawActionResult = CommonResponse<DrawActionData> | CommonError | nu
  * 지도 초기화(`useMapInit`) 후 전역에서 접근하며, 그래픽 생성·제거·드로잉에 사용한다.
  */
 export interface CesiumViewer extends Viewer {
+    screenSpaceCameraController: {
+        rotateEventTypes: unknown
+        zoomEventTypes: unknown
+        enableRotate: boolean
+        enableTilt: boolean
+        enableZoom: boolean
+        enableTranslate: boolean
+        enableLook: boolean
+    }
     /**
      * 앱이 Cesium 위에 직접 올린 폴리라인 드로잉 helper.
      * `shapeType: 1`은 폴리라인(경로) 드로잉을 의미한다.
