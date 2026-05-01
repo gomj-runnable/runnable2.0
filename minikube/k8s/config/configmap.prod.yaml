@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runnable-config
+  namespace: runnable
+data:
+  NODE_ENV: production
+  PORT: "3000"
+  TZ: Asia/Seoul
+  BETTER_AUTH_URL: https://macmini.tail070e2e.ts.net
+  BETTER_AUTH_TRUSTED_ORIGINS: https://macmini.tail070e2e.ts.net,http://localhost:3000
+  USE_DATABASE_MODE: POSTGRES
+  ROUTE_MODE: TMAP
