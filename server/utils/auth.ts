@@ -25,7 +25,8 @@ const betterAuthInstance: AuthInstance = isMemoryMode
               }
           }),
           emailAndPassword: {
-              enabled: true
+              enabled: true,
+              minPasswordLength: 6
           },
           user: {
               additionalFields: {
