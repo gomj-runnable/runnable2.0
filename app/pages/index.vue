@@ -491,7 +491,11 @@ watch(activeNav, (next) => {
 
             <template #overlay>
                 <WeatherOverlay
-                    :style="!isMobile && slideOver.isOpen.value ? { left: '24rem', transition: 'left 300ms ease' } : { transition: 'left 300ms ease' }"
+                    :style="
+                        !isMobile && slideOver.isOpen.value
+                            ? { left: '24rem', transition: 'left 300ms ease' }
+                            : { transition: 'left 300ms ease' }
+                    "
                     :selected-date="weather.selectedDate.value"
                     :selected-hour="weather.selectedHour.value"
                     :selected-month="weather.selectedMonth.value"
