@@ -52,25 +52,23 @@ pipeline {
         }
 
         // =====================================================================
-        // 2. 코드 품질 검사 (병렬)
+        // 2. 코드 품질 검사
         // =====================================================================
-        stage('Quality Gate') {
-            parallel {
-                stage('Lint') {
-                    steps {
-                        sh 'pnpm lint'
-                    }
-                }
-                stage('Typecheck') {
-                    steps {
-                        sh 'pnpm typecheck'
-                    }
-                }
-                stage('Test') {
-                    steps {
-                        sh 'pnpm test'
-                    }
-                }
+        stage('Lint') {
+            steps {
+                sh 'pnpm lint'
+            }
+        }
+
+        stage('Typecheck') {
+            steps {
+                sh 'pnpm typecheck'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'pnpm test'
             }
         }
 
