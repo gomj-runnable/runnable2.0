@@ -10,6 +10,6 @@ data:
   # 배포서버 접속 URL로 변경 필요 (예: http://<minikube-ip>:30000)
   BETTER_AUTH_URL: http://localhost:30000
   # 쉼표로 구분된 허용 origin 목록 (BETTER_AUTH_URL 외 추가 접속 경로)
-  BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:30000
+  BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:30000,https://macmini.tail070e2e.ts.net
   USE_DATABASE_MODE: POSTGRES
   ROUTE_MODE: TMAP

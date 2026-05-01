@@ -34,6 +34,11 @@ kubectl apply -f "$K8S_DIR/postgres.yaml"
 echo "==> PostgreSQL 준비 대기"
 kubectl -n runnable rollout status deployment/postgres --timeout=120s
 
+echo "==> DB 마이그레이션 실행"
+kubectl delete job runnable-migrate -n runnable --ignore-not-found
+kubectl apply -f "$K8S_DIR/migration-job.yaml"
+kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=120s
+
 kubectl apply -f "$K8S_DIR/app.yaml"
 
 echo "==> App Pod 강제 재시작 (새 이미지 반영)"
