@@ -82,12 +82,12 @@ export class VilageFcstOriginalResponse {
 
 /** 에어코리아 실시간 대기오염 측정 아이템 */
 export interface AirKoreaRltmItem {
-    dataTime: string       // "2026-04-10 14:00"
-    stationName: string    // "종로구"
-    pm10Value: string      // "45" 또는 "-"
-    pm10Grade: string      // "1"~"4" 또는 "-"
-    pm25Value: string      // "23" 또는 "-"
-    pm25Grade: string      // "1"~"4" 또는 "-"
+    dataTime: string // "2026-04-10 14:00"
+    stationName: string // "종로구"
+    pm10Value: string // "45" 또는 "-"
+    pm10Grade: string // "1"~"4" 또는 "-"
+    pm25Value: string // "23" 또는 "-"
+    pm25Grade: string // "1"~"4" 또는 "-"
 }
 
 /** 에어코리아 실시간 대기오염 API 원본 응답 */

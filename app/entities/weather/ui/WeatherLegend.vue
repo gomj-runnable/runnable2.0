@@ -25,17 +25,30 @@ const pm10Items = [
 </script>
 
 <template>
-    <div class="bg-(--ui-bg-elevated)/85 border border-(--ui-border) rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-lg min-w-[140px]">
+    <div
+        class="bg-(--ui-bg-elevated)/85 border border-(--ui-border) rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-lg min-w-[140px]"
+    >
         <!-- 날씨 레이어 -->
         <template v-if="activeLayer?.isWeather">
             <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">날씨</p>
             <div class="flex flex-col gap-1">
-                <div v-for="item in weatherItems" :key="item.label" class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
-                    <span class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0" :style="{ background: item.color }" />
+                <div
+                    v-for="item in weatherItems"
+                    :key="item.label"
+                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                >
+                    <span
+                        class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0"
+                        :style="{ background: item.color }"
+                    />
                     {{ item.label }}
                 </div>
-                <div class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
-                    <span class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]" />
+                <div
+                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                >
+                    <span
+                        class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
+                    />
                     데이터 없음
                 </div>
             </div>
@@ -43,7 +56,9 @@ const pm10Items = [
 
         <!-- 온도 레이어 -->
         <template v-else-if="activeLayer?.isTemperature">
-            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">온도 (°C)</p>
+            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">
+                온도 (°C)
+            </p>
             <div
                 v-if="currentTemperature !== null && currentTemperature !== undefined"
                 class="flex items-baseline gap-1.5 mb-1.5"
@@ -54,7 +69,9 @@ const pm10Items = [
                 <span class="text-xs text-meta">현재</span>
             </div>
             <div class="flex flex-col gap-1">
-                <div class="h-[10px] rounded-lg bg-[linear-gradient(to_right,rgba(30,80,250,0.6),rgba(80,80,250,0.55),rgba(80,200,100,0.55),rgba(250,150,50,0.55),rgba(250,60,60,0.6))] border border-(--ui-border)" />
+                <div
+                    class="h-[10px] rounded-lg bg-[linear-gradient(to_right,rgba(30,80,250,0.6),rgba(80,80,250,0.55),rgba(80,200,100,0.55),rgba(250,150,50,0.55),rgba(250,60,60,0.6))] border border-(--ui-border)"
+                />
                 <div class="flex justify-between text-xs text-meta">
                     <span>-10°</span>
                     <span>15°</span>
@@ -62,8 +79,12 @@ const pm10Items = [
                 </div>
             </div>
             <div class="flex flex-col gap-1 mt-1.5">
-                <div class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
-                    <span class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]" />
+                <div
+                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                >
+                    <span
+                        class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
+                    />
                     데이터 없음
                 </div>
             </div>
@@ -71,14 +92,27 @@ const pm10Items = [
 
         <!-- 미세먼지 레이어 -->
         <template v-else-if="activeLayer?.isPm10">
-            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">미세먼지 PM10</p>
+            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">
+                미세먼지 PM10
+            </p>
             <div class="flex flex-col gap-1">
-                <div v-for="item in pm10Items" :key="item.label" class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
-                    <span class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0" :style="{ background: item.color }" />
+                <div
+                    v-for="item in pm10Items"
+                    :key="item.label"
+                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                >
+                    <span
+                        class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0"
+                        :style="{ background: item.color }"
+                    />
                     {{ item.label }}
                 </div>
-                <div class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]">
-                    <span class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]" />
+                <div
+                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                >
+                    <span
+                        class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
+                    />
                     데이터 없음
                 </div>
             </div>

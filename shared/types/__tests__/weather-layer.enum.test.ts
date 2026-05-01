@@ -70,7 +70,7 @@ const makeWeather = (overrides: Partial<HourlyWeather> = {}): HourlyWeather => (
     pm10: 45,
     pm10Grade: 'moderate',
     source: 'forecast',
-    ...overrides,
+    ...overrides
 })
 
 describe('WeatherLayerEnum.resolveColor()', () => {

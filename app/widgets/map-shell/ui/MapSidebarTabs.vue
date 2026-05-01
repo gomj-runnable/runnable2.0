@@ -46,7 +46,11 @@ const tabItems = computed<TabsItem[]>(() =>
             v-for="item in props.items"
             :key="item.label"
             class="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--ui-text-muted)] cursor-pointer transition-[color,background-color] duration-150 hover:text-[var(--ui-text-default)]"
-            :class="item.label === modelValue ? 'text-[var(--ui-primary)] bg-[color-mix(in_srgb,var(--ui-primary)_15%,transparent)]' : ''"
+            :class="
+                item.label === modelValue
+                    ? 'text-[var(--ui-primary)] bg-[color-mix(in_srgb,var(--ui-primary)_15%,transparent)]'
+                    : ''
+            "
             @click="emit('update:modelValue', item.label)"
         >
             <UIcon :name="item.icon" class="size-5" />

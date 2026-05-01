@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type { IRouteRepository } from '../route.repository'
 import type { RouteDraftInput } from '#shared/types/route'
 
@@ -16,8 +16,6 @@ import type { RouteDraftInput } from '#shared/types/route'
 // 실제로는 매 테스트마다 새 인스턴스가 필요하다.
 // vitest는 모듈 캐시를 공유하므로 vi.resetModules + dynamic import로 해결한다.
 
-import { vi } from 'vitest'
-
 async function createFreshRepository(): Promise<IRouteRepository> {
     vi.resetModules()
     const mod = await import('../route.repository.memory')
@@ -28,7 +26,7 @@ const sampleInput = (overrides: Partial<RouteDraftInput> = {}): RouteDraftInput 
     title: '테스트 경로',
     description: '설명',
     isPublic: true,
-    ...overrides,
+    ...overrides
 })
 
 describe('InMemoryRouteRepository', () => {

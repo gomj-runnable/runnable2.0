@@ -34,7 +34,10 @@ describe('isGeoJsonLineString', () => {
     it('올바른 LineString 객체에 대해 true를 반환한다', () => {
         const lineString: GeoJsonLineString = {
             type: 'LineString',
-            coordinates: [[127, 37, 0], [128, 38, 0]]
+            coordinates: [
+                [127, 37, 0],
+                [128, 38, 0]
+            ]
         }
         expect(isGeoJsonLineString(lineString)).toBe(true)
     })
@@ -73,7 +76,10 @@ describe('extractLineStringGeometry', () => {
     it('LineString을 직접 전달하면 그대로 반환한다', () => {
         const geom: GeoJsonLineString = {
             type: 'LineString',
-            coordinates: [[127, 37, 0], [128, 38, 0]]
+            coordinates: [
+                [127, 37, 0],
+                [128, 38, 0]
+            ]
         }
         expect(extractLineStringGeometry(geom)).toBe(geom)
     })
@@ -83,7 +89,10 @@ describe('extractLineStringGeometry', () => {
             type: 'Feature' as const,
             geometry: {
                 type: 'LineString' as const,
-                coordinates: [[127, 37, 0], [128, 38, 0]] as [number, number, number][]
+                coordinates: [
+                    [127, 37, 0],
+                    [128, 38, 0]
+                ] as [number, number, number][]
             },
             properties: {}
         }
@@ -110,16 +119,26 @@ describe('geomToRouteDrawPositions', () => {
     it('좌표를 그대로 GeoJsonPosition 배열로 반환한다', () => {
         const geom: GeoJsonLineString = {
             type: 'LineString',
-            coordinates: [[127, 37, 10], [128, 38, 20]]
+            coordinates: [
+                [127, 37, 10],
+                [128, 38, 20]
+            ]
         }
         const result = geomToRouteDrawPositions(geom)
-        expect(result).toEqual([[127, 37, 10], [128, 38, 20]])
+        expect(result).toEqual([
+            [127, 37, 10],
+            [128, 38, 20]
+        ])
     })
 
     it('닫힌 링(첫 좌표와 마지막 좌표가 같음)은 마지막 포인트를 제거한다', () => {
         const geom: GeoJsonLineString = {
             type: 'LineString',
-            coordinates: [[127, 37, 0], [128, 38, 0], [127, 37, 0]]
+            coordinates: [
+                [127, 37, 0],
+                [128, 38, 0],
+                [127, 37, 0]
+            ]
         }
         const result = geomToRouteDrawPositions(geom)
         expect(result).toHaveLength(2)

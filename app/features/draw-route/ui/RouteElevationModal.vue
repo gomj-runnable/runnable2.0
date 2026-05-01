@@ -81,146 +81,182 @@ const chartGeometry = computed(() => {
     >
         <template #body>
             <div v-if="profile" class="w-[min(820px,100%)] bg-(--ui-bg-elevated) rounded-3xl">
-
-            <div class="grid grid-cols-3 gap-2.5 mb-3 max-[540px]:grid-cols-1">
-                <article
-                    v-for="item in summaryItems"
-                    :key="item.label"
-                    class="flex flex-col gap-1 p-3 border border-(--ui-border) rounded-2xl bg-(--ui-bg-elevated)"
-                >
-                    <span class="text-xs text-(--ui-text-muted)">{{ item.label }}</span>
-                    <strong class="text-[0.9375rem] font-semibold">{{ item.value }}</strong>
-                </article>
-            </div>
-
-            <div class="overflow-hidden border border-(--ui-border) rounded-2xl bg-(--ui-bg-elevated)">
-                <div class="flex items-center justify-between gap-3 px-3 pt-3 flex-wrap">
-                    <div class="flex gap-1.5 flex-wrap justify-end">
-                        <span
-                            v-for="section in profile.sections"
-                            :key="`${section.label}-${section.startIndex}`"
-                            class="inline-flex items-center gap-1 px-2.5 py-1 border border-(--ui-border) rounded-full bg-(--ui-bg-elevated) text-xs text-(--ui-text-dimmed)"
-                        >
-                            <span
-                                class="w-2 h-2 rounded-full"
-                                :style="{ backgroundColor: section.color }"
-                            />
-                            {{ section.label }}
-                        </span>
-                    </div>
+                <div class="grid grid-cols-3 gap-2.5 mb-3 max-[540px]:grid-cols-1">
+                    <article
+                        v-for="item in summaryItems"
+                        :key="item.label"
+                        class="flex flex-col gap-1 p-3 border border-(--ui-border) rounded-2xl bg-(--ui-bg-elevated)"
+                    >
+                        <span class="text-xs text-(--ui-text-muted)">{{ item.label }}</span>
+                        <strong class="text-[0.9375rem] font-semibold">{{ item.value }}</strong>
+                    </article>
                 </div>
 
-                <svg
-                    v-if="chartGeometry"
-                    :viewBox="`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`"
-                    class="block w-full h-auto"
+                <div
+                    class="overflow-hidden border border-(--ui-border) rounded-2xl bg-(--ui-bg-elevated)"
                 >
-                    <defs>
-                        <linearGradient id="route-elevation-gradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#ffe09b" stop-opacity="0.28" />
-                            <stop offset="100%" stop-color="#ffe09b" stop-opacity="0.02" />
-                        </linearGradient>
-                    </defs>
+                    <div class="flex items-center justify-between gap-3 px-3 pt-3 flex-wrap">
+                        <div class="flex gap-1.5 flex-wrap justify-end">
+                            <span
+                                v-for="section in profile.sections"
+                                :key="`${section.label}-${section.startIndex}`"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 border border-(--ui-border) rounded-full bg-(--ui-bg-elevated) text-xs text-(--ui-text-dimmed)"
+                            >
+                                <span
+                                    class="w-2 h-2 rounded-full"
+                                    :style="{ backgroundColor: section.color }"
+                                />
+                                {{ section.label }}
+                            </span>
+                        </div>
+                    </div>
 
-                    <g>
-                        <line
-                            v-for="tick in chartGeometry.distanceTicks"
-                            :key="tick.value"
-                            :x1="tick.x"
-                            :x2="tick.x"
-                            y1="24"
-                            :y2="chartGeometry.baselineY"
-                            class="elevation-grid-line"
+                    <svg
+                        v-if="chartGeometry"
+                        :viewBox="`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`"
+                        class="block w-full h-auto"
+                    >
+                        <defs>
+                            <linearGradient
+                                id="route-elevation-gradient"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                            >
+                                <stop offset="0%" stop-color="#ffe09b" stop-opacity="0.28" />
+                                <stop offset="100%" stop-color="#ffe09b" stop-opacity="0.02" />
+                            </linearGradient>
+                        </defs>
+
+                        <g>
+                            <line
+                                v-for="tick in chartGeometry.distanceTicks"
+                                :key="tick.value"
+                                :x1="tick.x"
+                                :x2="tick.x"
+                                y1="24"
+                                :y2="chartGeometry.baselineY"
+                                class="elevation-grid-line"
+                            />
+                        </g>
+
+                        <path :d="chartGeometry.areaPath" fill="url(#route-elevation-gradient)" />
+
+                        <path
+                            v-for="section in chartGeometry.sectionSegments"
+                            :key="`${section.label}-${section.startIndex}`"
+                            :d="section.path"
+                            class="elevation-line"
+                            :style="{ stroke: section.color }"
                         />
-                    </g>
 
-                    <path
-                        :d="chartGeometry.areaPath"
-                        fill="url(#route-elevation-gradient)"
-                    />
-
-                    <path
-                        v-for="section in chartGeometry.sectionSegments"
-                        :key="`${section.label}-${section.startIndex}`"
-                        :d="section.path"
-                        class="elevation-line"
-                        :style="{ stroke: section.color }"
-                    />
-
-                    <g
-                        v-if="chartGeometry.highestPoint"
-                        :transform="`translate(${chartGeometry.highestPoint.x}, ${chartGeometry.highestPoint.y})`"
-                        class="elevation-marker elevation-marker--highest"
-                    >
-                        <rect x="-8" y="-8" width="16" height="16" rx="8" />
-                        <path d="M -3 0 L -0.5 3 L 4 -3" />
-                    </g>
-                    <g
-                        v-if="chartGeometry.lowestPoint"
-                        :transform="`translate(${chartGeometry.lowestPoint.x}, ${chartGeometry.lowestPoint.y})`"
-                        class="elevation-marker elevation-marker--lowest"
-                    >
-                        <rect x="-8" y="-8" width="16" height="16" rx="8" />
-                        <path d="M -3 0 L -0.5 3 L 4 -3" />
-                    </g>
-
-                    <g v-if="chartGeometry.highestPoint">
-                        <text
-                            :x="chartGeometry.highestPoint.x"
-                            :y="chartGeometry.highestPoint.y - 12"
-                            text-anchor="middle"
-                            class="elevation-marker-label elevation-marker-label--highest"
+                        <g
+                            v-if="chartGeometry.highestPoint"
+                            :transform="`translate(${chartGeometry.highestPoint.x}, ${chartGeometry.highestPoint.y})`"
+                            class="elevation-marker elevation-marker--highest"
                         >
-                            최고 {{ formatElevation(profile.maxElevation) }}
-                        </text>
-                    </g>
-
-                    <g v-if="chartGeometry.lowestPoint">
-                        <text
-                            :x="chartGeometry.lowestPoint.x"
-                            :y="chartGeometry.lowestPoint.y + 22"
-                            text-anchor="middle"
-                            class="elevation-marker-label elevation-marker-label--lowest"
+                            <rect x="-8" y="-8" width="16" height="16" rx="8" />
+                            <path d="M -3 0 L -0.5 3 L 4 -3" />
+                        </g>
+                        <g
+                            v-if="chartGeometry.lowestPoint"
+                            :transform="`translate(${chartGeometry.lowestPoint.x}, ${chartGeometry.lowestPoint.y})`"
+                            class="elevation-marker elevation-marker--lowest"
                         >
-                            최저 {{ formatElevation(profile.minElevation) }}
-                        </text>
-                    </g>
+                            <rect x="-8" y="-8" width="16" height="16" rx="8" />
+                            <path d="M -3 0 L -0.5 3 L 4 -3" />
+                        </g>
 
-                    <g
-                        v-for="tick in chartGeometry.distanceTicks"
-                        :key="`label-${tick.value}`"
-                    >
-                        <text
-                            :x="tick.x"
-                            :y="CHART_HEIGHT - 8"
-                            text-anchor="middle"
-                            class="elevation-tick-label"
-                        >
-                            {{ formatTickLabel(tick.value) }}
-                        </text>
-                    </g>
-                </svg>
-            </div>
+                        <g v-if="chartGeometry.highestPoint">
+                            <text
+                                :x="chartGeometry.highestPoint.x"
+                                :y="chartGeometry.highestPoint.y - 12"
+                                text-anchor="middle"
+                                class="elevation-marker-label elevation-marker-label--highest"
+                            >
+                                최고 {{ formatElevation(profile.maxElevation) }}
+                            </text>
+                        </g>
 
-            <footer class="flex justify-between gap-2.5 mt-3 text-xs text-(--ui-text-muted) max-[720px]:flex-col">
-                <span>섹션별 선 색상은 지도 구간 색상과 동일합니다.</span>
-                <span>500m 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
-            </footer>
+                        <g v-if="chartGeometry.lowestPoint">
+                            <text
+                                :x="chartGeometry.lowestPoint.x"
+                                :y="chartGeometry.lowestPoint.y + 22"
+                                text-anchor="middle"
+                                class="elevation-marker-label elevation-marker-label--lowest"
+                            >
+                                최저 {{ formatElevation(profile.minElevation) }}
+                            </text>
+                        </g>
 
+                        <g v-for="tick in chartGeometry.distanceTicks" :key="`label-${tick.value}`">
+                            <text
+                                :x="tick.x"
+                                :y="CHART_HEIGHT - 8"
+                                text-anchor="middle"
+                                class="elevation-tick-label"
+                            >
+                                {{ formatTickLabel(tick.value) }}
+                            </text>
+                        </g>
+                    </svg>
+                </div>
+
+                <footer
+                    class="flex justify-between gap-2.5 mt-3 text-xs text-(--ui-text-muted) max-[720px]:flex-col"
+                >
+                    <span>섹션별 선 색상은 지도 구간 색상과 동일합니다.</span>
+                    <span>500m 간격 눈금과 최고·최저 고도를 함께 표시합니다.</span>
+                </footer>
             </div>
         </template>
     </UModal>
 </template>
 
 <style scoped>
-.elevation-grid-line { stroke: rgb(255 255 255 / 0.08); stroke-width: 1; }
-.elevation-line { fill: none; stroke: #f1c25b; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.elevation-marker rect { stroke-width: 2; }
-.elevation-marker path { fill: none; stroke: #09111a; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; }
-.elevation-marker--highest rect { fill: #fff2b8; stroke: #f7c948; }
-.elevation-marker--lowest rect { fill: #cfe9ff; stroke: #57b9ff; }
-.elevation-marker-label { font-size: 12px; font-weight: 700; }
-.elevation-marker-label--highest { fill: #fff2b8; }
-.elevation-marker-label--lowest { fill: #cfe9ff; }
-.elevation-tick-label { fill: rgb(255 255 255 / 0.58); font-size: 12px; font-weight: 600; }
+.elevation-grid-line {
+    stroke: rgb(255 255 255 / 0.08);
+    stroke-width: 1;
+}
+.elevation-line {
+    fill: none;
+    stroke: #f1c25b;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.elevation-marker rect {
+    stroke-width: 2;
+}
+.elevation-marker path {
+    fill: none;
+    stroke: #09111a;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.2;
+}
+.elevation-marker--highest rect {
+    fill: #fff2b8;
+    stroke: #f7c948;
+}
+.elevation-marker--lowest rect {
+    fill: #cfe9ff;
+    stroke: #57b9ff;
+}
+.elevation-marker-label {
+    font-size: 12px;
+    font-weight: 700;
+}
+.elevation-marker-label--highest {
+    fill: #fff2b8;
+}
+.elevation-marker-label--lowest {
+    fill: #cfe9ff;
+}
+.elevation-tick-label {
+    fill: rgb(255 255 255 / 0.58);
+    font-size: 12px;
+    font-weight: 600;
+}
 </style>

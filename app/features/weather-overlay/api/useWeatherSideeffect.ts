@@ -191,7 +191,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
                 weatherErrorNotified = true
                 notify({
                     title: '날씨 데이터 일부 실패',
-                    message: data.sourceErrors.map(e => `[${e.source}] ${e.message}`).join('\n'),
+                    message: data.sourceErrors.map((e) => `[${e.source}] ${e.message}`).join('\n'),
                     tone: NotificationToneEnum.WARNING
                 })
             }

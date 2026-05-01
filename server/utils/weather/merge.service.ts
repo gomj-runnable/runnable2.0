@@ -1,11 +1,5 @@
 import type { HourlyWeather, WeatherSlotSource } from '#shared/types/weather'
-import {
-    addHours,
-    formatDate,
-    formatHour,
-    parseSlotDateTime,
-    toSlotDateTimeKey
-} from './common'
+import { addHours, formatDate, formatHour, parseSlotDateTime, toSlotDateTimeKey } from './common'
 
 interface MergeWeatherSlotsOptions {
     rangeStart: Date
@@ -30,7 +24,6 @@ export const mergeWeatherSlots = ({
     observedSlots,
     forecastSlots
 }: MergeWeatherSlotsOptions): HourlyWeather[] => {
-
     const preferredByHour = new Map<string, HourlyWeather>()
 
     const putWithPriority = (slot: HourlyWeather) => {

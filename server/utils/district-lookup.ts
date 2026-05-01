@@ -18,7 +18,10 @@ function getEmdByGu(): Promise<Map<string, PolygonFeature[]>> {
                 const gu = guCode ? GU_BY_CODE.get(guCode)?.name : undefined
                 if (!gu) continue
                 let list = map.get(gu)
-                if (!list) { list = []; map.set(gu, list) }
+                if (!list) {
+                    list = []
+                    map.set(gu, list)
+                }
                 list.push(f as PolygonFeature)
             }
             return map

@@ -10,6 +10,9 @@ defineProps<{
 
 <template>
     <footer class="flex items-center justify-end pointer-events-none">
-        <span class="text-xs text-(--ui-text-muted) [font-variant-numeric:tabular-nums] whitespace-nowrap select-none py-1 px-2.5 m-0 bg-(--ui-bg-elevated)/75 backdrop-blur-[12px] rounded-[1rem_0_0_0]">{{ label }}</span>
+        <span
+            class="text-xs text-(--ui-text-muted) [font-variant-numeric:tabular-nums] whitespace-nowrap select-none py-1 px-2.5 m-0 bg-(--ui-bg-elevated)/75 backdrop-blur-[12px] rounded-[1rem_0_0_0]"
+            >{{ label }}</span
+        >
     </footer>
 </template>

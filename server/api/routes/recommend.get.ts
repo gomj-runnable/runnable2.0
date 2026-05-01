@@ -59,7 +59,12 @@ export default defineEventHandler(async (event) => {
 const resolveCurrentWeather = (
     monthlyWeather: Awaited<ReturnType<typeof weatherFacade.requestByDate>> | null
 ): WeatherMetrics => {
-    const fallback: WeatherMetrics = { temperature: 20, precipitation: 0, windSpeed: 3, humidity: 60 }
+    const fallback: WeatherMetrics = {
+        temperature: 20,
+        precipitation: 0,
+        windSpeed: 3,
+        humidity: 60
+    }
     if (!monthlyWeather) return fallback
 
     const now = new Date()
@@ -120,7 +125,8 @@ const calculateSuitability = (
         return 15
     }
 
-    const base = scoreTemperate(weather.temperature) * 0.4 +
+    const base =
+        scoreTemperate(weather.temperature) * 0.4 +
         scoreRain(weather.precipitation) * 0.35 +
         scoreWind(weather.windSpeed) * 0.25
 
@@ -129,8 +135,11 @@ const calculateSuitability = (
     const isHot = weather.temperature > 30
     const isRainy = weather.precipitation > 0
     const isCold = weather.temperature < 0
-    const isPerfect = weather.temperature >= 15 && weather.temperature <= 25 &&
-        weather.precipitation <= 0 && weather.windSpeed < 5
+    const isPerfect =
+        weather.temperature >= 15 &&
+        weather.temperature <= 25 &&
+        weather.precipitation <= 0 &&
+        weather.windSpeed < 5
 
     let bonus = 0
     if (isPerfect && elevDiff > 100) bonus += 5

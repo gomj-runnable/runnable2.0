@@ -49,19 +49,38 @@ const menuItems = [
         :content="{ side: 'top', align: 'start', sideOffset: 10 }"
         :ui="{ content: 'dropdown-profiles-menu' }"
     >
-        <button type="button" class="map-button flex gap-2.5 w-full px-3 py-2 border-none rounded-lg bg-transparent cursor-pointer items-center transition-[color,background] duration-150" @click="$emit('click')">
+        <button
+            type="button"
+            class="map-button flex gap-2.5 w-full px-3 py-2 border-none rounded-lg bg-transparent cursor-pointer items-center transition-[color,background] duration-150"
+            @click="$emit('click')"
+        >
             <slot name="icon">
-                <img v-if="image" :src="image" :alt="username" class="w-6 h-6 rounded-full object-cover shrink-0" />
-                <div v-else class="w-6 h-6 rounded-full shrink-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--ui-text-muted)_15%,transparent)]">
+                <img
+                    v-if="image"
+                    :src="image"
+                    :alt="username"
+                    class="w-6 h-6 rounded-full object-cover shrink-0"
+                />
+                <div
+                    v-else
+                    class="w-6 h-6 rounded-full shrink-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--ui-text-muted)_15%,transparent)]"
+                >
                     <UIcon name="i-lucide-user" class="w-3.5 h-3.5 text-inherit" />
                 </div>
             </slot>
 
             <div class="flex flex-1 min-w-0 flex-row items-center justify-between gap-2">
                 <slot>
-                    <span class="text-[0.8125rem] font-medium text-[var(--ui-text-default)] overflow-hidden text-ellipsis whitespace-nowrap">{{ username }}</span>
+                    <span
+                        class="text-[0.8125rem] font-medium text-[var(--ui-text-default)] overflow-hidden text-ellipsis whitespace-nowrap"
+                        >{{ username }}</span
+                    >
                 </slot>
-                <span v-if="subtitle" class="text-[0.6875rem] text-[var(--ui-text-muted)] overflow-hidden text-ellipsis whitespace-nowrap">{{ subtitle }}</span>
+                <span
+                    v-if="subtitle"
+                    class="text-[0.6875rem] text-[var(--ui-text-muted)] overflow-hidden text-ellipsis whitespace-nowrap"
+                    >{{ subtitle }}</span
+                >
             </div>
 
             <div class="hidden">
@@ -70,16 +89,26 @@ const menuItems = [
         </button>
     </UDropdownMenu>
 
-    <button v-else type="button" class="map-button flex gap-2.5 w-full px-3 py-2 border-none rounded-lg bg-transparent cursor-pointer items-center transition-[color,background] duration-150" @click="$emit('click')">
+    <button
+        v-else
+        type="button"
+        class="map-button flex gap-2.5 w-full px-3 py-2 border-none rounded-lg bg-transparent cursor-pointer items-center transition-[color,background] duration-150"
+        @click="$emit('click')"
+    >
         <slot name="icon">
-            <div class="w-6 h-6 rounded-full shrink-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--ui-text-muted)_15%,transparent)]">
+            <div
+                class="w-6 h-6 rounded-full shrink-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--ui-text-muted)_15%,transparent)]"
+            >
                 <UIcon name="i-lucide-user" class="w-3.5 h-3.5 text-inherit" />
             </div>
         </slot>
 
         <div class="flex flex-1 min-w-0 flex-row items-center justify-between gap-2">
             <slot>
-                <span class="text-[0.8125rem] font-medium text-[var(--ui-text-default)] overflow-hidden text-ellipsis whitespace-nowrap">로그인</span>
+                <span
+                    class="text-[0.8125rem] font-medium text-[var(--ui-text-default)] overflow-hidden text-ellipsis whitespace-nowrap"
+                    >로그인</span
+                >
             </slot>
         </div>
 

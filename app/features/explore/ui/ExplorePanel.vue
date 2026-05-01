@@ -57,21 +57,31 @@ defineEmits<{
                     >
                         <template #header>
                             <div class="flex items-start justify-between gap-2.5">
-                                <h3 class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base">
+                                <h3
+                                    class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base"
+                                >
                                     {{ route.title }}
                                 </h3>
-                                <span v-if="route.authorName" class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap">
+                                <span
+                                    v-if="route.authorName"
+                                    class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap"
+                                >
                                     {{ route.authorName }}
                                 </span>
                             </div>
                         </template>
 
-                        <p v-if="route.description" class="m-0 text-sm leading-[1.5] text-text-muted">
+                        <p
+                            v-if="route.description"
+                            class="m-0 text-sm leading-[1.5] text-text-muted"
+                        >
                             {{ route.description }}
                         </p>
 
                         <template #meta>
-                            <span class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed">
+                            <span
+                                class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed"
+                            >
                                 {{ formatDistance(route.distance) }}
                             </span>
                         </template>

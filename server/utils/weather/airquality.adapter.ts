@@ -4,14 +4,15 @@ import { parseNumber, mapPm10Grade } from './common'
 import type { IAirQualityAdapter } from './common'
 import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 
-const AIRKOREA_BASE_URL = 'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty'
+const AIRKOREA_BASE_URL =
+    'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty'
 const CACHE_TTL_MS = 60 * 60 * 1000 // 1시간
 const MAX_CONCURRENT = 5
 
 export interface AirQualitySlot {
     stationName: string
     guCode: string
-    dataTime: string   // "2026-04-10 14:00"
+    dataTime: string // "2026-04-10 14:00"
     pm10: number | null
     pm10Grade: ReturnType<typeof mapPm10Grade> | null
 }
@@ -41,9 +42,7 @@ const runWithConcurrency = async <T>(
     return results
 }
 
-const guNameToCode = new Map<string, string>(
-    SEOUL_GU_DATA.map(gu => [gu.name, gu.code])
-)
+const guNameToCode = new Map<string, string>(SEOUL_GU_DATA.map((gu) => [gu.name, gu.code]))
 
 const parseAirKoreaItems = (items: AirKoreaRltmItem[]): AirQualitySlot[] => {
     const slots: AirQualitySlot[] = []
@@ -104,7 +103,7 @@ export class AirQualityAdapter implements IAirQualityAdapter {
             return this.cachedResult!
         }
 
-        const guNames = SEOUL_GU_DATA.map(gu => gu.name)
+        const guNames = SEOUL_GU_DATA.map((gu) => gu.name)
 
         const tasks = guNames.map((name) => async () => {
             const items = await this.fetchStationRltm(serviceKey, name)

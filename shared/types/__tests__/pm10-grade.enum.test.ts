@@ -101,7 +101,7 @@ describe('Pm10GradeEnum 인스턴스 속성', () => {
             Pm10GradeEnum.GOOD.color,
             Pm10GradeEnum.MODERATE.color,
             Pm10GradeEnum.BAD.color,
-            Pm10GradeEnum.VERY_BAD.color,
+            Pm10GradeEnum.VERY_BAD.color
         ]
         const unique = new Set(colors)
         expect(unique.size).toBe(4)

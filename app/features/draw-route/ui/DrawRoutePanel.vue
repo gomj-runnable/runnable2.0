@@ -121,11 +121,10 @@ const POI_ICON: Record<string, string> = {
                         class="max-w-[120px]"
                         :title="poi.name"
                     >
-                        <UIcon
-                            :name="POI_ICON[poi.type] ?? 'i-lucide-map-pin'"
-                            class="shrink-0"
-                        />
-                        <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{ poi.name }}</span>
+                        <UIcon :name="POI_ICON[poi.type] ?? 'i-lucide-map-pin'" class="shrink-0" />
+                        <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{
+                            poi.name
+                        }}</span>
                         <UButton
                             icon="i-lucide-x"
                             color="neutral"

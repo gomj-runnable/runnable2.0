@@ -38,7 +38,9 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="absolute left-1/2 bottom-4 -translate-x-1/2 z-[4] flex items-center gap-1.5 pointer-events-auto max-md:hidden">
+    <div
+        class="absolute left-1/2 bottom-4 -translate-x-1/2 z-[4] flex items-center gap-1.5 pointer-events-auto max-md:hidden"
+    >
         <UButton
             v-if="elevationProfile"
             :label="elevationChipLabel"

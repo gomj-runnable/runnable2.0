@@ -24,17 +24,17 @@ export const SEOUL_GU_DATA: SeoulGuMeta[] = [
     { name: '성동구', code: '11200', lng: 127.0368, lat: 37.5633, nx: 61, ny: 127 },
     { name: '성북구', code: '11290', lng: 127.0167, lat: 37.5894, nx: 61, ny: 127 },
     { name: '송파구', code: '11710', lng: 127.1059, lat: 37.5145, nx: 62, ny: 126 },
-    { name: '양천구', code: '11470', lng: 126.8666, lat: 37.5170, nx: 58, ny: 126 },
+    { name: '양천구', code: '11470', lng: 126.8666, lat: 37.517, nx: 58, ny: 126 },
     { name: '영등포구', code: '11560', lng: 126.8962, lat: 37.5261, nx: 58, ny: 126 },
-    { name: '용산구', code: '11170', lng: 126.9810, lat: 37.5311, nx: 60, ny: 126 },
+    { name: '용산구', code: '11170', lng: 126.981, lat: 37.5311, nx: 60, ny: 126 },
     { name: '은평구', code: '11380', lng: 126.9291, lat: 37.6026, nx: 59, ny: 127 },
-    { name: '종로구', code: '11110', lng: 126.9790, lat: 37.5735, nx: 60, ny: 127 },
-    { name: '중구', code: '11140', lng: 126.9975, lat: 37.5640, nx: 60, ny: 127 },
-    { name: '중랑구', code: '11260', lng: 127.0925, lat: 37.6066, nx: 62, ny: 128 },
+    { name: '종로구', code: '11110', lng: 126.979, lat: 37.5735, nx: 60, ny: 127 },
+    { name: '중구', code: '11140', lng: 126.9975, lat: 37.564, nx: 60, ny: 127 },
+    { name: '중랑구', code: '11260', lng: 127.0925, lat: 37.6066, nx: 62, ny: 128 }
 ]
 
 /** code → SeoulGuMeta (O(1) 조회) */
-export const GU_BY_CODE = new Map(SEOUL_GU_DATA.map(g => [g.code, g]))
+export const GU_BY_CODE = new Map(SEOUL_GU_DATA.map((g) => [g.code, g]))
 
 /** name → SeoulGuMeta (O(1) 조회) */
-export const GU_BY_NAME = new Map(SEOUL_GU_DATA.map(g => [g.name, g]))
+export const GU_BY_NAME = new Map(SEOUL_GU_DATA.map((g) => [g.name, g]))

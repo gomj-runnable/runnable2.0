@@ -3,7 +3,7 @@ import {
     routeOptimizationModeSchema,
     routeOptimizeRequestSchema,
     RouteOptimizeRequestBody,
-    RouteOptimizeResponseBody,
+    RouteOptimizeResponseBody
 } from '#shared/schemas/route-optimization.schema'
 
 // ─── routeOptimizationModeSchema ──────────────────────────────────────────
@@ -41,7 +41,7 @@ describe('routeOptimizationModeSchema', () => {
 describe('routeOptimizeRequestSchema', () => {
     const validPositions: [number, number, number][] = [
         [127.0, 37.5, 0],
-        [127.1, 37.6, 10],
+        [127.1, 37.6, 10]
     ]
 
     it('유효한 요청 객체를 파싱한다', () => {
@@ -53,7 +53,7 @@ describe('routeOptimizeRequestSchema', () => {
     it('positions가 1개이면 실패한다(최소 2개 필요)', () => {
         const result = routeOptimizeRequestSchema.safeParse({
             positions: [[127.0, 37.5, 0]],
-            mode: 'NONE',
+            mode: 'NONE'
         })
         expect(result.success).toBe(false)
     })
@@ -66,15 +66,18 @@ describe('routeOptimizeRequestSchema', () => {
     it('mode가 유효하지 않으면 실패한다', () => {
         const result = routeOptimizeRequestSchema.safeParse({
             positions: validPositions,
-            mode: 'INVALID',
+            mode: 'INVALID'
         })
         expect(result.success).toBe(false)
     })
 
     it('각 좌표가 3개 숫자가 아니면 실패한다', () => {
         const result = routeOptimizeRequestSchema.safeParse({
-            positions: [[127.0, 37.5], [127.1, 37.6]], // 2개짜리 좌표
-            mode: 'NONE',
+            positions: [
+                [127.0, 37.5],
+                [127.1, 37.6]
+            ], // 2개짜리 좌표
+            mode: 'NONE'
         })
         expect(result.success).toBe(false)
     })
@@ -86,9 +89,9 @@ describe('RouteOptimizeRequestBody', () => {
     const raw = {
         positions: [
             [127.0, 37.5, 0],
-            [127.1, 37.6, 10],
+            [127.1, 37.6, 10]
         ],
-        mode: 'TMAP',
+        mode: 'TMAP'
     }
 
     it('fromRaw()이 유효한 데이터로 인스턴스를 생성한다', () => {
@@ -127,7 +130,7 @@ describe('RouteOptimizeRequestBody', () => {
 describe('RouteOptimizeResponseBody', () => {
     const positions: [number, number, number][] = [
         [127.0, 37.5, 0],
-        [127.1, 37.6, 10],
+        [127.1, 37.6, 10]
     ]
 
     it('success()가 optimized=true인 인스턴스를 생성한다', () => {

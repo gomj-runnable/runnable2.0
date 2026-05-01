@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { formatPace, formatTime, calculateSectionDistance, calculateTotalTime, calculateTotalDistance } from '~/entities/route/lib/usePaceCalculator'
+import {
+    formatPace,
+    formatTime,
+    calculateSectionDistance,
+    calculateTotalTime,
+    calculateTotalDistance
+} from '~/entities/route/lib/usePaceCalculator'
 import type { SavedSection } from '#shared/types/route'
 
 // ─── 헬퍼 ──────────────────────────────────────────────────────────────────
@@ -18,27 +24,27 @@ const makeSection = (coords: [number, number][]): SavedSection =>
 // ─── formatPace ────────────────────────────────────────────────────────────
 describe('formatPace', () => {
     it('0초는 0\'00" 형식이다', () => {
-        expect(formatPace(0)).toBe("0'00\"")
+        expect(formatPace(0)).toBe('0\'00"')
     })
 
     it('60초는 1\'00" 형식이다', () => {
-        expect(formatPace(60)).toBe("1'00\"")
+        expect(formatPace(60)).toBe('1\'00"')
     })
 
     it('90초는 1\'30" 형식이다', () => {
-        expect(formatPace(90)).toBe("1'30\"")
+        expect(formatPace(90)).toBe('1\'30"')
     })
 
     it('3600초는 60\'00" 형식이다', () => {
-        expect(formatPace(3600)).toBe("60'00\"")
+        expect(formatPace(3600)).toBe('60\'00"')
     })
 
     it('330초는 5\'30" 형식이다', () => {
-        expect(formatPace(330)).toBe("5'30\"")
+        expect(formatPace(330)).toBe('5\'30"')
     })
 
     it('초(seconds) 부분이 한 자리일 때 두 자리로 패딩된다', () => {
-        expect(formatPace(61)).toBe("1'01\"")
+        expect(formatPace(61)).toBe('1\'01"')
     })
 })
 
@@ -96,8 +102,14 @@ describe('calculateTotalDistance', () => {
     })
 
     it('여러 구간의 거리를 합산한다', () => {
-        const sec1 = makeSection([[126.977, 37.5665], [126.978, 37.5665]])
-        const sec2 = makeSection([[126.978, 37.5665], [126.979, 37.5665]])
+        const sec1 = makeSection([
+            [126.977, 37.5665],
+            [126.978, 37.5665]
+        ])
+        const sec2 = makeSection([
+            [126.978, 37.5665],
+            [126.979, 37.5665]
+        ])
         const total = calculateTotalDistance([sec1, sec2])
         const sum = calculateSectionDistance(sec1) + calculateSectionDistance(sec2)
         expect(total).toBeCloseTo(sum, 10)
@@ -111,14 +123,20 @@ describe('calculateTotalTime', () => {
     })
 
     it('pace가 없는 구간은 기본값 330(초/km)으로 계산한다', () => {
-        const section = makeSection([[126.977, 37.5665], [126.9882, 37.5665]])
+        const section = makeSection([
+            [126.977, 37.5665],
+            [126.9882, 37.5665]
+        ])
         const distKm = calculateSectionDistance(section)
         const expected = Math.round(330 * distKm)
         expect(calculateTotalTime([section], {})).toBe(expected)
     })
 
     it('pace가 주어진 구간은 해당 pace로 계산한다', () => {
-        const section = makeSection([[126.977, 37.5665], [126.9882, 37.5665]])
+        const section = makeSection([
+            [126.977, 37.5665],
+            [126.9882, 37.5665]
+        ])
         section.sectionId = 'sec-test'
         const distKm = calculateSectionDistance(section)
         const pace = 300

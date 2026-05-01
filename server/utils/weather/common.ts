@@ -174,4 +174,3 @@ export const mapConditionByPrecipitation = (
     if (cloudCover <= 70) return 'partly-cloudy'
     return 'cloudy'
 }
-

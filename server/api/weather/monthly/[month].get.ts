@@ -6,9 +6,10 @@ const VALID_SOURCES: WeatherSourceKey[] = ['observed', 'forecast', 'airquality']
 
 const parseSources = (raw?: string): WeatherSourceKey[] => {
     if (!raw) return [...VALID_SOURCES]
-    return raw.split(',')
-        .map(s => s.trim() as WeatherSourceKey)
-        .filter(s => VALID_SOURCES.includes(s))
+    return raw
+        .split(',')
+        .map((s) => s.trim() as WeatherSourceKey)
+        .filter((s) => VALID_SOURCES.includes(s))
 }
 
 export default defineEventHandler(async (event) => {

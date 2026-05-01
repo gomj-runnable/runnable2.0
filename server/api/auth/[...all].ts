@@ -1,4 +1,12 @@
-import { fromWebHandler, getCookie, setCookie, deleteCookie, getRequestURL, readBody, getHeader } from 'h3'
+import {
+    fromWebHandler,
+    getCookie,
+    setCookie,
+    deleteCookie,
+    getRequestURL,
+    readBody,
+    getHeader
+} from 'h3'
 import type { H3Event } from 'h3'
 import { randomBytes } from 'crypto'
 import { auth } from '#server/utils/auth'
@@ -13,7 +21,6 @@ import { isMemoryMode } from '#server/utils/config'
 
 /** 메모리 모드 전용 CSRF 토큰 저장소. 요청마다 새 토큰을 발급한다. */
 const memoryCsrfTokens = new Map<string, number>()
-
 
 async function handleMemoryAuth(event: H3Event) {
     const url = getRequestURL(event)
@@ -46,7 +53,13 @@ async function handleMemoryAuth(event: H3Event) {
 
         const sessionToken = randomBytes(32).toString('hex')
         memorySessions.set(sessionToken, id)
-        setCookie(event, 'better-auth.session_token', sessionToken, { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
+        setCookie(event, 'better-auth.session_token', sessionToken, {
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30
+        })
         return {
             user: { id, name: user.name, email: user.email },
             session: { id: `session-${id}`, userId: id, token: sessionToken }
@@ -71,7 +84,13 @@ async function handleMemoryAuth(event: H3Event) {
         }
         const sessionToken = randomBytes(32).toString('hex')
         memorySessions.set(sessionToken, user.id)
-        setCookie(event, 'better-auth.session_token', sessionToken, { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
+        setCookie(event, 'better-auth.session_token', sessionToken, {
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30
+        })
         return {
             user: { id: user.id, name: user.name, email: user.email },
             session: {
@@ -87,7 +106,9 @@ async function handleMemoryAuth(event: H3Event) {
         const token = getCookie(event, 'better-auth.session_token')
         if (token) {
             const userId = memorySessions.get(token)
-            const user = userId ? Array.from(memoryUsers.values()).find((u) => u.id === userId) : null
+            const user = userId
+                ? Array.from(memoryUsers.values()).find((u) => u.id === userId)
+                : null
             if (user) {
                 return {
                     user: { id: user.id, name: user.name, email: user.email },

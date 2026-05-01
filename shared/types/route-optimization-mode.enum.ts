@@ -8,7 +8,11 @@ export class RouteOptimizationModeEnum extends EnumBase {
     static readonly NONE = new RouteOptimizationModeEnum('NONE', '없음', false)
     static readonly TMAP = new RouteOptimizationModeEnum('TMAP', 'TMap 보행자', true)
     static readonly OSRM = new RouteOptimizationModeEnum('OSRM', 'OSRM 보행자', true)
-    static readonly BUILDING_AVOID = new RouteOptimizationModeEnum('BUILDING-AVOID', '건물 회피', false)
+    static readonly BUILDING_AVOID = new RouteOptimizationModeEnum(
+        'BUILDING-AVOID',
+        '건물 회피',
+        false
+    )
 
     private constructor(
         key: string,
@@ -25,7 +29,9 @@ export class RouteOptimizationModeEnum extends EnumBase {
 
     /** key 문자열로 인스턴스를 찾는다 */
     static from(key: string): RouteOptimizationModeEnum {
-        return EnumBase.fromKey<RouteOptimizationModeEnum>(RouteOptimizationModeEnum, key)
-            ?? RouteOptimizationModeEnum.NONE
+        return (
+            EnumBase.fromKey<RouteOptimizationModeEnum>(RouteOptimizationModeEnum, key) ??
+            RouteOptimizationModeEnum.NONE
+        )
     }
 }
