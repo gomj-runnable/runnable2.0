@@ -153,10 +153,10 @@ pipeline {
 
                     echo "==> Tailscale Funnel 연결"
                     if command -v tailscale &>/dev/null; then
-                        sudo tailscale funnel --https=443 off 2>/dev/null || true
-                        sudo tailscale funnel --bg --https=443 "http://localhost:${LOCAL_PORT}"
+                        tailscale funnel --https=443 off 2>/dev/null || true
+                        tailscale funnel --bg --https=443 "http://localhost:${LOCAL_PORT}" || echo "    Funnel 설정 실패 (sudo 필요할 수 있음)"
                         echo "    외부 URL:"
-                        tailscale funnel status 2>/dev/null | grep "https://" | head -1
+                        tailscale funnel status 2>/dev/null | grep "https://" | head -1 || true
                     fi
 
                     echo "==> 배포 완료"
