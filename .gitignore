@@ -28,6 +28,8 @@ logs
 # 예: configmap.local.yaml, secret.prod.yaml, README.local.md
 *.local.*
 *.prod.*
+*.dev.*
+**/secret*.yaml
 !*.example.*
 
 # Static uploads & MCP
