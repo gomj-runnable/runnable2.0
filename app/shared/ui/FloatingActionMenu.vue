@@ -41,7 +41,7 @@ const visibleGroups = computed(() =>
 
 <template>
     <Teleport to="body">
-        <div class="fixed bottom-10 right-6 z-[9] hidden max-lg:block">
+        <div class="fixed bottom-10 right-6 z-20 hidden max-lg:block">
             <UPopover
                 v-model:open="isOpen"
                 :dismissible="false"

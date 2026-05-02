@@ -830,7 +830,7 @@ watch(activeNav, (next) => {
 .route-info-guide-modal {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 50;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -864,7 +864,7 @@ watch(activeNav, (next) => {
     position: fixed;
     bottom: 4rem;
     right: 5.5rem;
-    z-index: 50;
+    z-index: 35;
     display: none;
 }
 
@@ -879,7 +879,7 @@ watch(activeNav, (next) => {
     bottom: 4rem;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 50;
+    z-index: 35;
 }
 </style>
 

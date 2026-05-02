@@ -26,7 +26,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-    <UCard class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] min-w-[260px]">
+    <UCard class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 min-w-[260px]">
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between items-center">
                 <span class="text-sm font-semibold text-text-base">경로정보 남기기</span>
