@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgis/postgis:17-3.5-alpine
+          image: imresamu/postgis:17-3.5-alpine
           args: ["-c", "timezone=Asia/Seoul"]
           ports:
             - containerPort: 5432

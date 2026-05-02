@@ -86,7 +86,9 @@ pipeline {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
-                    echo "==> K8s 리소스 적용"
+                    echo "==> PostGIS 이미지 준비 + K8s 리소스 적용"
+                    eval $(minikube docker-env)
+                    docker pull imresamu/postgis:17-3.5-alpine || true
                     kubectl apply -f minikube/k8s/postgres.yaml
                     kubectl -n runnable rollout status deployment/postgres --timeout=120s
 
