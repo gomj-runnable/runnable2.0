@@ -59,6 +59,11 @@ spec:
                   key: POSTGRES_DB
             - name: DATABASE_URL
               value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+            - name: ADMIN_SEED_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: runnable-secret
+                  key: ADMIN_SEED_PASSWORD
           resources:
             requests:
               cpu: 100m
