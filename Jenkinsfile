@@ -2,8 +2,7 @@
 // Jenkinsfile — Runnable CI/CD Pipeline
 //
 // 트리거: master push / 수동
-// 흐름: 품질검사 → 호스트 빌드 → Docker 이미지 → Docker Hub push
-// 배포: Docker Hub webhook → macmini에서 rolling update (별도 스크립트)
+// 흐름: 품질검사 → 호스트 빌드 → Docker Hub push → minikube 배포
 // =============================================================================
 
 pipeline {
@@ -67,6 +66,24 @@ pipeline {
                     docker push ${DOCKER_IMAGE}:${BUILD_TAG}
 
                     echo "==> 완료: ${DOCKER_IMAGE}:${BUILD_TAG}"
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+
+                    echo "==> minikube Docker 환경으로 이미지 빌드"
+                    eval $(minikube docker-env)
+                    docker build --no-cache -t runnable-app:latest -f minikube/Dockerfile .
+
+                    echo "==> Rolling Restart"
+                    kubectl -n runnable rollout restart deployment/runnable-app
+                    kubectl -n runnable rollout status deployment/runnable-app --timeout=180s
+
+                    echo "==> 배포 완료"
                 '''
             }
         }
