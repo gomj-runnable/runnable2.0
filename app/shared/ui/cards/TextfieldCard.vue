@@ -135,17 +135,21 @@ defineEmits<{
                 />
             </div>
             <div v-else-if="title || eyebrow">
-                <p v-if="eyebrow" class="text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-dimmed)]">{{ eyebrow }}</p>
-                <p v-if="title" class="text-lg font-bold text-[var(--ui-text-highlighted)]">{{ title }}</p>
+                <p
+                    v-if="eyebrow"
+                    class="text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-dimmed)]"
+                >
+                    {{ eyebrow }}
+                </p>
+                <p v-if="title" class="text-lg font-bold text-[var(--ui-text-highlighted)]">
+                    {{ title }}
+                </p>
             </div>
         </template>
 
         <div class="flex flex-col gap-1.5">
             <slot>
-                <div
-                    v-for="(field, index) in fields"
-                    :key="field.id"
-                >
+                <div v-for="(field, index) in fields" :key="field.id">
                     <template v-if="field.multiline">
                         <UTextarea
                             :model-value="field.modelValue ?? ''"
@@ -197,7 +201,9 @@ defineEmits<{
         <template #footer>
             <slot name="footer">
                 <slot name="meta">
-                    <p v-if="meta" class="text-xs font-medium text-[var(--ui-text-dimmed)]">{{ meta }}</p>
+                    <p v-if="meta" class="text-xs font-medium text-[var(--ui-text-dimmed)]">
+                        {{ meta }}
+                    </p>
                 </slot>
             </slot>
         </template>
