@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { RouteDiscoverCard } from '#shared/types/discover'
-import { formatDistance } from '~/shared/lib/useFormatUtils'
+import { getRouteInfoItems as getBaseRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 
 defineProps<{
     /** 경로 카드 데이터 */
@@ -15,10 +15,7 @@ defineEmits<{
 }>()
 
 function getRouteInfoItems(route: RouteDiscoverCard) {
-    const items: { key: string; value: string }[] = []
-    if (route.distance) items.push({ key: '거리', value: formatDistance(route.distance) })
-    if (route.highHeight) items.push({ key: '최고 고도', value: `${Math.round(route.highHeight)}m` })
-    if (route.lowHeight) items.push({ key: '최저 고도', value: `${Math.round(route.lowHeight)}m` })
+    const items = getBaseRouteInfoItems(route)
     if (route.authorName) items.push({ key: '작성자', value: route.authorName })
     return items
 }

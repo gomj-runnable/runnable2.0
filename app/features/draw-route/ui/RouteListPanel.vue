@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
-import { formatDistance } from '~/shared/lib/useFormatUtils'
+import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 
 defineProps<{
     /** 저장된 경로 목록 */
@@ -15,15 +15,6 @@ defineEmits<{
     /** 다운로드 버튼 클릭 시 해당 경로 ID를 전달 */
     download: [routeId: string]
 }>()
-
-function getRouteInfoItems(route: SavedRoute) {
-    const items: { key: string; value: string }[] = []
-    if (route.distance) items.push({ key: '거리', value: formatDistance(route.distance) })
-    if (route.highHeight) items.push({ key: '최고 고도', value: `${route.highHeight}m` })
-    if (route.lowHeight) items.push({ key: '최저 고도', value: `${route.lowHeight}m` })
-    if (route.sgg?.length) items.push({ key: '지역', value: route.sgg.join(' · ') })
-    return items
-}
 </script>
 
 <template>

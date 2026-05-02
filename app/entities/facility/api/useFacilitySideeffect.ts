@@ -54,16 +54,23 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
     const entityToFacilityMap = new Map<Entity, Facility>()
 
     /**
-     * 시설물 목록을 서버에서 한 번만 가져온다.
-     * 이미 데이터가 있으면 요청을 생략한다.
+     * 현재 카메라 위치 기반으로 시설물을 검색한다.
+     * 활성 유형 중 검색 가능한 유형만 서버에 요청한다.
      */
     const fetchFacilities = async () => {
-        if (facilities.value.length > 0) return
+        const lat = camera.centerLat.value
+        const lng = camera.centerLng.value
+        if (lat === null || lng === null) return
 
         isLoading.value = true
 
         try {
-            const data = await $fetch<Facility[]>('/api/facilities')
+            const types = ALL_FACILITY_TYPES.filter((t) => activeTypes.value.has(t))
+            if (types.length === 0) return
+
+            const data = await $fetch<Facility[]>('/api/facilities/nearby', {
+                query: { lat, lng, types: types.join(',') }
+            })
             facilities.value = data
         } finally {
             isLoading.value = false
