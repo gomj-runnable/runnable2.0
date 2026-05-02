@@ -67,6 +67,7 @@ import { useMapInit } from '~/shared/lib/map/useMapInit'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 import RouteInfoInputForm from '~/entities/route/ui/RouteInfoInputForm.vue'
 import RouteInfoMarkerPopup from '~/entities/route/ui/RouteInfoMarkerPopup.vue'
+import FacilityMarkerPopup from '~/entities/facility/ui/FacilityMarkerPopup.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
@@ -570,6 +571,11 @@ watch(activeNav, (next) => {
                             : undefined
                     "
                     @close="routeInfoStore.selectedMarkerRouteInfo.value = null"
+                />
+                <FacilityMarkerPopup
+                    v-if="facility.selectedFacility.value"
+                    :facility="facility.selectedFacility.value"
+                    @close="facility.selectedFacility.value = null"
                 />
                 <!-- 그리기 완료 후 경로정보 안내 모달 -->
                 <div
