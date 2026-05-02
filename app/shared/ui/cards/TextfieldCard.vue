@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Card from '~/shared/ui/cards/Card.vue'
-
 /** 카드 내 단일 입력 필드의 설정 타입 */
 type TextfieldCardField = {
     /** 필드를 식별하는 고유 id */
@@ -86,18 +84,17 @@ defineEmits<{
 </script>
 
 <template>
-    <Card
+    <UCard
+        variant="subtle"
         class="textfield-card"
-        :title="title"
-        :eyebrow="eyebrow"
-        :meta="meta"
-        :selected="selected"
-        :disabled="disabled"
-        as="article"
+        :class="{
+            'ring-2 ring-[var(--ui-primary)]': selected,
+            'opacity-50 pointer-events-none': disabled
+        }"
         @click="$emit('click', $event)"
     >
-        <template v-if="titleField" #title>
-            <div class="textfield-card__title-row">
+        <template #header>
+            <div v-if="titleField" class="textfield-card__title-row">
                 <div class="textfield-card__title-field">
                     <UInput
                         :model-value="titleField.modelValue ?? ''"
@@ -113,6 +110,8 @@ defineEmits<{
                         :required="titleField.required"
                         :color="titleField.invalid ? 'error' : undefined"
                         :autofocus="titleField.autofocus"
+                        variant="none"
+                        :ui="{ base: 'text-lg font-bold' }"
                         @update:model-value="
                             $emit('update:field', {
                                 id: titleField.id,
@@ -128,50 +127,43 @@ defineEmits<{
                     variant="ghost"
                     color="neutral"
                     icon="i-lucide-trash-2"
+                    size="sm"
                     square
-                    class="textfield-card__delete-button"
                     aria-label="휴지통"
                     title="휴지통"
                     @click.stop="$emit('delete')"
                 />
             </div>
+            <div v-else-if="title || eyebrow">
+                <p v-if="eyebrow" class="text-xs font-semibold uppercase tracking-wide text-[var(--ui-text-dimmed)]">{{ eyebrow }}</p>
+                <p v-if="title" class="text-lg font-bold text-[var(--ui-text-highlighted)]">{{ title }}</p>
+            </div>
         </template>
 
-        <div class="textfield-card__fields">
+        <div class="flex flex-col gap-1.5">
             <slot>
                 <div
                     v-for="(field, index) in fields"
                     :key="field.id"
-                    class="textfield-card__field"
-                    :class="[
-                        `textfield-card__field--${field.id}`,
-                        { 'is-multiline': field.multiline }
-                    ]"
                 >
                     <template v-if="field.multiline">
-                        <label
-                            class="textfield-card__textarea-wrap"
-                            :class="{ 'is-disabled': disabled || field.disabled }"
-                        >
-                            <textarea
-                                :value="field.modelValue ?? ''"
-                                :name="field.name"
-                                :placeholder="field.placeholder"
-                                :rows="field.rows ?? 3"
-                                :disabled="disabled || field.disabled"
-                                :readonly="field.readonly"
-                                :required="field.required"
-                                :maxlength="field.maxLength"
-                                class="textfield-card__textarea"
-                                @input="
-                                    $emit('update:field', {
-                                        id: field.id,
-                                        value: ($event.target as HTMLTextAreaElement).value,
-                                        index
-                                    })
-                                "
-                            />
-                        </label>
+                        <UTextarea
+                            :model-value="field.modelValue ?? ''"
+                            :placeholder="field.placeholder"
+                            :rows="field.rows ?? 3"
+                            :disabled="disabled || field.disabled"
+                            :readonly="field.readonly"
+                            :required="field.required"
+                            :maxlength="field.maxLength"
+                            variant="outline"
+                            @update:model-value="
+                                $emit('update:field', {
+                                    id: field.id,
+                                    value: $event,
+                                    index
+                                })
+                            "
+                        />
                     </template>
 
                     <UInput
@@ -189,6 +181,7 @@ defineEmits<{
                         :required="field.required"
                         :color="field.invalid ? 'error' : undefined"
                         :autofocus="field.autofocus"
+                        variant="outline"
                         @update:model-value="
                             $emit('update:field', {
                                 id: field.id,
@@ -201,10 +194,12 @@ defineEmits<{
             </slot>
         </div>
 
-        <template v-if="$slots.footer" #footer>
-            <slot name="footer" />
+        <template #footer>
+            <slot name="footer">
+                <slot name="meta">
+                    <p v-if="meta" class="text-xs font-medium text-[var(--ui-text-dimmed)]">{{ meta }}</p>
+                </slot>
+            </slot>
         </template>
-    </Card>
+    </UCard>
 </template>
-
-<style scoped src="./TextfieldCard.css"></style>

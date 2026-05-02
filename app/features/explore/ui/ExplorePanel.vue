@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
-import Card from '~/shared/ui/cards/Card.vue'
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 defineProps<{
@@ -20,6 +19,15 @@ defineEmits<{
     /** 추천 모드 토글 */
     recommend: []
 }>()
+
+function getRouteInfoItems(route: SavedRoute) {
+    const items: { key: string; value: string }[] = []
+    if (route.distance) items.push({ key: '거리', value: formatDistance(route.distance) })
+    if (route.highHeight) items.push({ key: '최고 고도', value: `${route.highHeight}m` })
+    if (route.lowHeight) items.push({ key: '최저 고도', value: `${route.lowHeight}m` })
+    if (route.sgg?.length) items.push({ key: '지역', value: route.sgg.join(' · ') })
+    return items
+}
 </script>
 
 <template>
@@ -49,43 +57,56 @@ defineEmits<{
 
             <ul v-else class="flex flex-col gap-2.5 list-none m-0 p-0">
                 <li v-for="route in routes" :key="route.routeId">
-                    <Card
-                        interactive
-                        :selected="selectedRouteId === route.routeId"
-                        as="article"
+                    <UCard
+                        variant="subtle"
+                        :title="route.title"
+                        :description="route.description"
+                        class="cursor-pointer"
+                        :class="{ 'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId }"
                         @click="$emit('select', route.routeId)"
                     >
                         <template #header>
-                            <div class="flex items-start justify-between gap-2.5">
-                                <h3
-                                    class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base"
-                                >
-                                    {{ route.title }}
-                                </h3>
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <p class="text-lg font-semibold text-[var(--ui-text-highlighted)]">{{ route.title }}</p>
+                                    <p v-if="route.description" class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ route.description }}</p>
+                                </div>
                                 <span
                                     v-if="route.authorName"
-                                    class="shrink-0 text-xs font-medium text-text-muted whitespace-nowrap"
+                                    class="shrink-0 text-xs font-medium text-[var(--ui-text-muted)] whitespace-nowrap"
                                 >
                                     {{ route.authorName }}
                                 </span>
                             </div>
                         </template>
 
-                        <p
-                            v-if="route.description"
-                            class="m-0 text-sm leading-[1.5] text-text-muted"
+                        <UScrollArea
+                            orientation="vertical"
+                            :items="getRouteInfoItems(route)"
+                            :virtualize="{ lanes: 2, gap: 8 }"
+                            :ui="{ root: 'max-h-28' }"
                         >
-                            {{ route.description }}
-                        </p>
+                            <template #default="{ item }">
+                                <div class="flex justify-between text-sm py-0.5">
+                                    <dt class="text-[var(--ui-text-dimmed)]">{{ item.key }}</dt>
+                                    <dd class="font-medium m-0">{{ item.value }}</dd>
+                                </div>
+                            </template>
+                        </UScrollArea>
 
-                        <template #meta>
-                            <span
-                                class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed"
-                            >
-                                {{ formatDistance(route.distance) }}
-                            </span>
+                        <template #footer>
+                            <div class="flex items-center gap-2">
+                                <UButton
+                                    variant="ghost"
+                                    color="neutral"
+                                    size="xs"
+                                    icon="i-lucide-download"
+                                    label="다운로드"
+                                    @click.stop
+                                />
+                            </div>
                         </template>
-                    </Card>
+                    </UCard>
                 </li>
             </ul>
         </template>
