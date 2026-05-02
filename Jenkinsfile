@@ -53,6 +53,17 @@ pipeline {
             }
         }
 
+        stage('Infra Check') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+                    echo "==> Colima/minikube 상태 확인"
+                    colima status || colima start
+                    minikube status || minikube start
+                '''
+            }
+        }
+
         stage('Docker Push') {
             steps {
                 sh '''#!/bin/bash
@@ -74,10 +85,6 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
-
-                    echo "==> Colima/minikube 상태 확인"
-                    colima status || colima start
-                    minikube status || minikube start
 
                     echo "==> minikube Docker 환경으로 이미지 빌드"
                     eval $(minikube docker-env)
