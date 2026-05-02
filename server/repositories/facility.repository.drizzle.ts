@@ -25,10 +25,11 @@ function toFacility(row: typeof facilities.$inferSelect): Facility {
 export const facilityRepository: IFacilityRepository = {
     async findNearby(lat, lng, radius, types) {
         const db = getDb()
+        const typesArray = `{${types.join(',')}}`
         const rows = await db.execute(sql`
             SELECT *
             FROM facilities
-            WHERE type = ANY(${types})
+            WHERE type = ANY(${typesArray}::text[])
               AND ST_DWithin(
                     geom,
                     ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
