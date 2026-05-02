@@ -20,6 +20,8 @@ export const useFacilityStore = () => {
     const isLoading = useState<boolean>('facility.isLoading', () => false)
     /** 현재 위치 기반 POI 검색 진행 중 여부 */
     const isSearching = useState<boolean>('facility.isSearching', () => false)
+    /** 마커 클릭으로 선택된 시설물 (팝업 표시용) */
+    const selectedFacility = useState<Facility | null>('facility.selected', () => null)
 
     /**
      * 특정 유형이 현재 활성 상태인지 확인한다.
@@ -60,6 +62,7 @@ export const useFacilityStore = () => {
         activeTypes,
         isLoading,
         isSearching,
+        selectedFacility,
         isTypeActive,
         toggleType,
         facilitiesByType

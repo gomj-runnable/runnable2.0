@@ -20,12 +20,12 @@ import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
 const CROSSWALK_NO_SIGNAL_COLOR = '#FF9800'
 
-const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', 'hospital']
+const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', 'hospital', 'toilet']
 
 const getLayerColor = (type: FacilityType) => FacilityTypeEnum.from(type)?.color ?? '#FFFFFF'
 
 /** POI 현재 위치 검색 대상 유형 */
-const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital']
+const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital', 'toilet']
 
 interface UseFacilitySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -188,8 +188,9 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         }
     }
 
-    /** Cesium 화면 클릭 → 시설물 엔티티 감지 → onPoiClick 콜백 호출 */
+    /** Cesium 화면 클릭 → 시설물 엔티티 감지 → 팝업 표시 또는 POI 연결 */
     let clickHandler: CesiumDrawHandler | null = null
+    const facilityStore = useFacilityStore()
 
     watch(
         viewer,
@@ -197,7 +198,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             clickHandler?.destroy()
             clickHandler = null
 
-            if (!v || !onPoiClick) return
+            if (!v) return
 
             const C = getCesiumRuntime()
             const handler = new C.ScreenSpaceEventHandler(v.scene.canvas)
@@ -207,18 +208,26 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
                 const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
 
-                if (!picked?.id) return
+                if (!picked?.id) {
+                    facilityStore.selectedFacility.value = null
+                    return
+                }
 
                 const entity = picked.id as Entity
                 const facility = entityToFacilityMap.get(entity)
 
                 if (!facility) return
 
-                const poi = facilityToPoiDraft(facility)
-
-                if (poi) {
-                    onPoiClick(poi)
+                // POI 콜백이 있으면 경로 연결, 없으면 팝업 표시
+                if (onPoiClick) {
+                    const poi = facilityToPoiDraft(facility)
+                    if (poi) {
+                        onPoiClick(poi)
+                        return
+                    }
                 }
+
+                facilityStore.selectedFacility.value = facility
             }, C.ScreenSpaceEventType.LEFT_CLICK)
 
             clickHandler = handler

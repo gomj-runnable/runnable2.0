@@ -41,6 +41,13 @@ export class FacilityTypeEnum extends EnumBase {
         '#F44336',
         'HOSPITAL'
     )
+    static readonly TOILET = new FacilityTypeEnum(
+        'toilet',
+        '화장실',
+        'i-lucide-door-open',
+        '#795548',
+        null
+    )
 
     private constructor(
         key: string,
