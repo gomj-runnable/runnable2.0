@@ -1,12 +1,11 @@
 import { defineEventHandler, getQuery, createError } from 'h3'
-import { seoulFacilities } from '../../data/facilities'
-import { haversineDistance } from '../../utils/haversine'
+import { facilityRepository } from '../../repositories'
 import type { FacilityType } from '#shared/types/facility'
 
 /** 검색 반경 기본값 (미터) */
 const DEFAULT_RADIUS_M = 1000
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const lat = parseFloat(query.lat as string)
     const lng = parseFloat(query.lng as string)
@@ -21,13 +20,5 @@ export default defineEventHandler((event) => {
         ? (typesParam.split(',').filter(Boolean) as FacilityType[])
         : (['crosswalk', 'fountain', 'hospital', 'toilet'] as FacilityType[])
 
-    // Bounding Box 사전 필터링 → Haversine 계산 대상 축소
-    const latDelta = radius / 111_320
-    const lngDelta = radius / (111_320 * Math.cos((lat * Math.PI) / 180))
-
-    return seoulFacilities.filter((f) => {
-        if (!requestedTypes.includes(f.type)) return false
-        if (Math.abs(f.lat - lat) > latDelta || Math.abs(f.lng - lng) > lngDelta) return false
-        return haversineDistance(lat, lng, f.lat, f.lng) <= radius
-    })
+    return facilityRepository.findNearby(lat, lng, radius, requestedTypes)
 })
