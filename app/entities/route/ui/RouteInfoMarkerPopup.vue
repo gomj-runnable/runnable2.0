@@ -13,7 +13,7 @@ defineEmits<{
 
 <template>
     <UCard
-        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] min-w-[220px] max-w-[320px]"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 min-w-[220px] max-w-[320px]"
     >
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between items-center">
