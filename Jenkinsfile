@@ -86,6 +86,10 @@ pipeline {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
+                    echo "==> K8s 리소스 적용"
+                    kubectl apply -f minikube/k8s/postgres.yaml
+                    kubectl -n runnable rollout status deployment/postgres --timeout=120s
+
                     echo "==> minikube Docker 환경으로 이미지 빌드"
                     eval $(minikube docker-env)
                     docker build --no-cache -t runnable-app:latest -f minikube/Dockerfile .
