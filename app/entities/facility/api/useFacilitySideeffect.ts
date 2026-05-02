@@ -25,7 +25,7 @@ const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', '
 const getLayerColor = (type: FacilityType) => FacilityTypeEnum.from(type)?.color ?? '#FFFFFF'
 
 /** POI 현재 위치 검색 대상 유형 */
-const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital', 'toilet']
+const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital', 'toilet', 'locker']
 
 interface UseFacilitySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
