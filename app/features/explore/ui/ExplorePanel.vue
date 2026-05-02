@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
-import { formatDistance } from '~/shared/lib/useFormatUtils'
+import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 
 defineProps<{
     /** 공개 경로 목록 */
@@ -19,15 +19,6 @@ defineEmits<{
     /** 추천 모드 토글 */
     recommend: []
 }>()
-
-function getRouteInfoItems(route: SavedRoute) {
-    const items: { key: string; value: string }[] = []
-    if (route.distance) items.push({ key: '거리', value: formatDistance(route.distance) })
-    if (route.highHeight) items.push({ key: '최고 고도', value: `${route.highHeight}m` })
-    if (route.lowHeight) items.push({ key: '최저 고도', value: `${route.lowHeight}m` })
-    if (route.sgg?.length) items.push({ key: '지역', value: route.sgg.join(' · ') })
-    return items
-}
 </script>
 
 <template>
@@ -94,18 +85,6 @@ function getRouteInfoItems(route: SavedRoute) {
                             </template>
                         </UScrollArea>
 
-                        <template #footer>
-                            <div class="flex items-center gap-2">
-                                <UButton
-                                    variant="ghost"
-                                    color="neutral"
-                                    size="xs"
-                                    icon="i-lucide-download"
-                                    label="다운로드"
-                                    @click.stop
-                                />
-                            </div>
-                        </template>
                     </UCard>
                 </li>
             </ul>
