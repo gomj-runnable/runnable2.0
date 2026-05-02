@@ -20,12 +20,12 @@ import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
 const CROSSWALK_NO_SIGNAL_COLOR = '#FF9800'
 
-const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', 'hospital', 'toilet']
+const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'locker', 'toilet']
 
 const getLayerColor = (type: FacilityType) => FacilityTypeEnum.from(type)?.color ?? '#FFFFFF'
 
 /** POI 현재 위치 검색 대상 유형 */
-const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital', 'toilet', 'locker']
+const SEARCHABLE_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'toilet', 'locker']
 
 interface UseFacilitySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
