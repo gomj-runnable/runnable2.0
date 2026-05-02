@@ -53,6 +53,9 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
     /** Entity → Facility 역참조 맵 (클릭 시 POI 데이터 추출에 사용) */
     const entityToFacilityMap = new Map<Entity, Facility>()
 
+    /** 중복 요청 방지 플래그 */
+    let fetchInFlight = false
+
     /**
      * 현재 카메라 위치 기반으로 시설물을 검색한다.
      * 활성 유형 중 검색 가능한 유형만 서버에 요청한다.
@@ -61,19 +64,22 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         const lat = camera.centerLat.value
         const lng = camera.centerLng.value
         if (lat === null || lng === null) return
+        if (fetchInFlight) return
 
+        const types = ALL_FACILITY_TYPES.filter((t) => activeTypes.value.has(t))
+        if (types.length === 0) return
+
+        fetchInFlight = true
         isLoading.value = true
 
         try {
-            const types = ALL_FACILITY_TYPES.filter((t) => activeTypes.value.has(t))
-            if (types.length === 0) return
-
             const data = await $fetch<Facility[]>('/api/facilities/nearby', {
                 query: { lat, lng, types: types.join(',') }
             })
             facilities.value = data
         } finally {
             isLoading.value = false
+            fetchInFlight = false
         }
     }
 
@@ -272,6 +278,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         const lng = camera.centerLng.value
 
         if (lat === null || lng === null) return
+        if (isSearching.value) return
 
         isSearching.value = true
 
@@ -290,7 +297,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             )
             facilities.value = [...unchanged, ...data]
 
-            // 활성 레이어 재렌더링
+            // 활성 레이어 재렌더링: 기존 엔티티를 먼저 제거 후 추가
             for (const type of activeSearchTypes) {
                 if (activeTypes.value.has(type)) {
                     showLayer(type)
