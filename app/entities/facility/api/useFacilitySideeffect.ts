@@ -5,7 +5,7 @@ import type { CesiumDrawHandler, CesiumRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
-import { FACILITY_LAYERS, useFacilityStore } from '~/entities/facility/model/useFacilityStore'
+import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import {

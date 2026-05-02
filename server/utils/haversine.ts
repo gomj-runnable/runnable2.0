@@ -1,10 +1,5 @@
 /** 두 WGS84 좌표 간 거리를 미터 단위로 반환한다 (Haversine 공식) */
-export function haversineDistance(
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number
-): number {
+export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6_371_000
     const toRad = (deg: number) => (deg * Math.PI) / 180
     const dLat = toRad(lat2 - lat1)

@@ -32,7 +32,9 @@ defineEmits<{
                     :title="route.title"
                     :description="route.description"
                     class="cursor-pointer"
-                    :class="{ 'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId }"
+                    :class="{
+                        'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId
+                    }"
                     @click="$emit('select', route.routeId)"
                 >
                     <UScrollArea
