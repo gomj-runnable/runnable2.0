@@ -53,14 +53,25 @@ defineEmits<{
                         :title="route.title"
                         :description="route.description"
                         class="cursor-pointer"
-                        :class="{ 'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId }"
+                        :class="{
+                            'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId
+                        }"
                         @click="$emit('select', route.routeId)"
                     >
                         <template #header>
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <p class="text-lg font-semibold text-[var(--ui-text-highlighted)]">{{ route.title }}</p>
-                                    <p v-if="route.description" class="mt-1 text-sm text-[var(--ui-text-muted)]">{{ route.description }}</p>
+                                    <p
+                                        class="text-lg font-semibold text-[var(--ui-text-highlighted)]"
+                                    >
+                                        {{ route.title }}
+                                    </p>
+                                    <p
+                                        v-if="route.description"
+                                        class="mt-1 text-sm text-[var(--ui-text-muted)]"
+                                    >
+                                        {{ route.description }}
+                                    </p>
                                 </div>
                                 <span
                                     v-if="route.authorName"
@@ -84,7 +95,6 @@ defineEmits<{
                                 </div>
                             </template>
                         </UScrollArea>
-
                     </UCard>
                 </li>
             </ul>

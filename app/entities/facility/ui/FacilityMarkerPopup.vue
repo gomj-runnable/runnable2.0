@@ -45,7 +45,9 @@ const enumInstance = computed(() => FacilityTypeEnum.from(props.facility.type))
         <dl class="flex flex-col gap-1 text-[0.8125rem] m-0">
             <div v-if="facility.description" class="flex gap-2">
                 <dt class="text-[var(--ui-text-dimmed)] shrink-0">주소</dt>
-                <dd class="m-0 text-[var(--ui-text-muted)] break-words">{{ facility.description }}</dd>
+                <dd class="m-0 text-[var(--ui-text-muted)] break-words">
+                    {{ facility.description }}
+                </dd>
             </div>
             <div v-if="facility.hours" class="flex gap-2">
                 <dt class="text-[var(--ui-text-dimmed)] shrink-0">시간</dt>
