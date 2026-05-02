@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
-import Card from '~/shared/ui/cards/Card.vue'
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 defineProps<{
@@ -16,6 +15,15 @@ defineEmits<{
     /** 다운로드 버튼 클릭 시 해당 경로 ID를 전달 */
     download: [routeId: string]
 }>()
+
+function getRouteInfoItems(route: SavedRoute) {
+    const items: { key: string; value: string }[] = []
+    if (route.distance) items.push({ key: '거리', value: formatDistance(route.distance) })
+    if (route.highHeight) items.push({ key: '최고 고도', value: `${route.highHeight}m` })
+    if (route.lowHeight) items.push({ key: '최저 고도', value: `${route.lowHeight}m` })
+    if (route.sgg?.length) items.push({ key: '지역', value: route.sgg.join(' · ') })
+    return items
+}
 </script>
 
 <template>
@@ -28,49 +36,41 @@ defineEmits<{
 
         <ul v-else class="flex flex-col gap-2.5 list-none m-0 p-0">
             <li v-for="route in routes" :key="route.routeId">
-                <Card
-                    interactive
-                    :selected="selectedRouteId === route.routeId"
-                    as="article"
+                <UCard
+                    variant="subtle"
+                    :title="route.title"
+                    :description="route.description"
+                    class="cursor-pointer"
+                    :class="{ 'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId }"
                     @click="$emit('select', route.routeId)"
                 >
-                    <template #header>
-                        <div class="flex items-start justify-between gap-2.5">
-                            <h3
-                                class="m-0 text-lg font-bold leading-[1.2] tracking-[-0.02em] text-text-base"
-                            >
-                                {{ route.title }}
-                            </h3>
+                    <UScrollArea
+                        orientation="vertical"
+                        :items="getRouteInfoItems(route)"
+                        :virtualize="{ lanes: 2, gap: 8 }"
+                        :ui="{ root: 'max-h-28' }"
+                    >
+                        <template #default="{ item }">
+                            <div class="flex justify-between text-sm py-0.5">
+                                <dt class="text-[var(--ui-text-dimmed)]">{{ item.key }}</dt>
+                                <dd class="font-medium m-0">{{ item.value }}</dd>
+                            </div>
+                        </template>
+                    </UScrollArea>
+
+                    <template #footer>
+                        <div class="flex items-center gap-2">
                             <UButton
                                 variant="outline"
                                 color="neutral"
+                                size="sm"
                                 icon="i-lucide-download"
                                 label="경로 다운로드"
                                 @click.stop="$emit('download', route.routeId)"
                             />
                         </div>
                     </template>
-
-                    <p v-if="route.description" class="m-0 text-sm leading-[1.5] text-text-muted">
-                        {{ route.description }}
-                    </p>
-
-                    <template #meta>
-                        <div class="flex items-center gap-2.5">
-                            <span
-                                class="text-[0.8125rem] font-medium leading-[1.4] text-text-dimmed"
-                            >
-                                {{ formatDistance(route.distance) }}
-                            </span>
-                            <span
-                                v-if="route.sgg?.length"
-                                class="text-xs font-medium text-text-muted"
-                            >
-                                {{ route.sgg.join(' · ') }}
-                            </span>
-                        </div>
-                    </template>
-                </Card>
+                </UCard>
             </li>
         </ul>
     </div>
