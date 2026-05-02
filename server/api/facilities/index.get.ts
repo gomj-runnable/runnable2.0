@@ -1,6 +1,6 @@
 import { defineEventHandler } from 'h3'
-import { seoulFacilities } from '../../data/facilities'
+import { facilityRepository } from '../../repositories'
 
-export default defineEventHandler(() => {
-    return seoulFacilities
+export default defineEventHandler(async () => {
+    return facilityRepository.findAll()
 })

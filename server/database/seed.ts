@@ -8,7 +8,9 @@ async function seed() {
 
     const { db } = await import('../utils/db')
     const { users, userAccounts } = await import('./schema/users')
+    const { facilities } = await import('./schema/facilities')
     const { hashPassword } = await import('better-auth/crypto')
+    const { sql } = await import('drizzle-orm')
 
     console.log('🌱 Seed 작업 시작...')
 
@@ -66,6 +68,81 @@ async function seed() {
                 })
         })
         console.log('✅ 관리자 계정 설정 완료 (ID: ' + ADMIN_ID + ')')
+
+        // 2. 시설물 데���터 적재
+        await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)
+
+        const { readFileSync } = await import('node:fs')
+        const { resolve } = await import('node:path')
+
+        const dataDir = resolve(import.meta.dirname, '../data/facilities')
+        const files = ['hospitals.json', 'toilets.json', 'fountains.json', 'lockers.json']
+
+        let totalInserted = 0
+        for (const file of files) {
+            const data = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8'))
+            if (!data.length) continue
+
+            // 500건씩 배치 insert
+            const BATCH_SIZE = 500
+            for (let i = 0; i < data.length; i += BATCH_SIZE) {
+                const batch = data.slice(i, i + BATCH_SIZE)
+                await db
+                    .insert(facilities)
+                    .values(
+                        batch.map(
+                            (f: {
+                                id: string
+                                type: string
+                                name: string
+                                description?: string
+                                lng: number
+                                lat: number
+                                hours?: string
+                                tel?: string
+                            }) => ({
+                                id: f.id,
+                                type: f.type,
+                                name: f.name,
+                                description: f.description ?? null,
+                                lng: f.lng.toString(),
+                                lat: f.lat.toString(),
+                                hours: f.hours ?? null,
+                                tel: f.tel ?? null
+                            })
+                        )
+                    )
+                    .onConflictDoUpdate({
+                        target: facilities.id,
+                        set: {
+                            type: sql`excluded.type`,
+                            name: sql`excluded.name`,
+                            description: sql`excluded.description`,
+                            lng: sql`excluded.lng`,
+                            lat: sql`excluded.lat`,
+                            hours: sql`excluded.hours`,
+                            tel: sql`excluded.tel`
+                        }
+                    })
+            }
+            totalInserted += data.length
+            console.log(`  📦 ${file}: ${data.length}건`)
+        }
+
+        // geom 컬럼 일괄 업데이트
+        await db.execute(sql`
+            ALTER TABLE facilities ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326)
+        `)
+        await db.execute(sql`
+            UPDATE facilities
+            SET geom = ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)
+            WHERE geom IS NULL
+        `)
+        await db.execute(sql`
+            CREATE INDEX IF NOT EXISTS facility_geom_idx ON facilities USING GIST (geom)
+        `)
+
+        console.log(`✅ 시설물 데이터 적재 완료 (총 ${totalInserted}건)`)
     } catch (error) {
         console.error('❌ Seed 작업 중 예외 발생:', error)
         process.exit(1)

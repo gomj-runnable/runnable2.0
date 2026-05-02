@@ -1,3 +1,4 @@
 export * from './schema/users'
 export * from './schema/routes'
 export * from './schema/routeInfos'
+export * from './schema/facilities'

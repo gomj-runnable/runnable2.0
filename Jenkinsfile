@@ -75,9 +75,19 @@ pipeline {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
+                    echo "==> Colima/minikube 상태 확인"
+                    colima status || colima start
+                    minikube status || minikube start
+
                     echo "==> minikube Docker 환경으로 이미지 빌드"
                     eval $(minikube docker-env)
                     docker build --no-cache -t runnable-app:latest -f minikube/Dockerfile .
+
+                    echo "==> Migration 이미지 빌드 및 실행"
+                    docker build --no-cache -t runnable-migrate:latest -f minikube/Dockerfile.migrate .
+                    kubectl delete job runnable-migrate -n runnable --ignore-not-found
+                    kubectl apply -f minikube/k8s/migration-job.yaml
+                    kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=120s
 
                     echo "==> Rolling Restart"
                     kubectl -n runnable rollout restart deployment/runnable-app
