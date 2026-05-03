@@ -28,10 +28,10 @@ const emit = defineEmits<{
             <div class="flex items-center gap-2.5 shrink-0">
                 <button
                     type="button"
-                    class="px-3 py-1 text-[0.8125rem] font-medium text-text-muted bg-[rgba(255,255,255,0.06)] border border-[rgba(223,255,0,0.18)] rounded-xl cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
+                    class="px-3 py-1 text-[0.8125rem] font-medium text-text-muted bg-accent-tint border border-border-accent rounded-xl cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
                     :class="
                         isEditMode
-                            ? 'bg-[rgba(255,255,0,0.24)] border-[rgba(255,255,0,0.42)] text-text-base'
+                            ? 'bg-accent-tint border-[var(--ui-primary)] text-text-base'
                             : ''
                     "
                     @click="emit('update:editMode', !isEditMode)"
@@ -50,7 +50,7 @@ const emit = defineEmits<{
         </div>
 
         <div
-            class="flex gap-4 px-3 py-2.5 bg-[rgba(255,255,255,0.06)] rounded-2xl border border-[rgba(223,255,0,0.18)] shrink-0"
+            class="flex gap-4 px-3 py-2.5 bg-accent-tint rounded-2xl border border-border-accent shrink-0"
         >
             <span class="flex flex-col gap-1">
                 <span class="text-xs text-text-muted leading-[1.4]">총 거리</span>
@@ -70,7 +70,7 @@ const emit = defineEmits<{
             <div
                 v-for="section in sections"
                 :key="section.sectionId"
-                class="flex flex-col gap-2.5 p-3 bg-[rgba(255,255,255,0.06)] border border-[rgba(223,255,0,0.18)] rounded-2xl"
+                class="flex flex-col gap-2.5 p-3 bg-accent-tint border border-border-accent rounded-2xl"
             >
                 <div class="flex items-center justify-between gap-2.5">
                     <span class="text-sm font-semibold text-text-base leading-[1.4]">
@@ -149,7 +149,7 @@ const emit = defineEmits<{
                     :value="userPaces[section.sectionId]?.strategy ?? ''"
                     rows="2"
                     placeholder="구간 전략을 입력하세요"
-                    class="w-full resize-y px-3 py-2.5 text-sm text-text-base bg-[rgba(255,255,255,0.04)] border border-[rgba(223,255,0,0.18)] rounded-xl box-border font-[inherit] leading-[1.5] transition-[border-color] duration-150 outline-none placeholder:text-meta focus:border-[rgba(255,255,0,0.42)]"
+                    class="w-full resize-y px-3 py-2.5 text-sm text-text-base bg-accent-tint border border-border-accent rounded-xl box-border font-[inherit] leading-[1.5] transition-[border-color] duration-150 outline-none placeholder:text-meta focus:border-[var(--ui-primary)]"
                     @blur="
                         emit(
                             'update:strategy',

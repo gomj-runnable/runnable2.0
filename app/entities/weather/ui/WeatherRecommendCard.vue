@@ -33,65 +33,67 @@ const scoreColorClass = computed(() => {
 </script>
 
 <template>
-    <button
-        type="button"
-        class="flex flex-col gap-1.5 w-full px-3 py-2.5 border border-border-accent rounded-2xl bg-[rgba(255,255,255,0.06)] text-text-base text-left cursor-pointer transition-[background] duration-150 hover:bg-accent-hover"
+    <UCard
+        variant="subtle"
+        class="cursor-pointer"
         @click="$emit('select', route.routeId)"
     >
-        <div class="flex items-center justify-between gap-2.5">
-            <span
-                class="text-sm font-semibold text-text-base overflow-hidden text-ellipsis whitespace-nowrap"
-                >{{ route.title }}</span
-            >
-            <span
-                class="shrink-0 text-[0.8125rem] font-bold"
-                :class="{
-                    'text-green-500': scoreColorClass === 'is-score-good',
-                    'text-amber-500': scoreColorClass === 'is-score-moderate',
-                    'text-red-500': scoreColorClass === 'is-score-low'
-                }"
-            >
-                {{ route.score }}점
-            </span>
-        </div>
+        <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2.5">
+                <span
+                    class="text-sm font-semibold text-[var(--ui-text-highlighted)] overflow-hidden text-ellipsis whitespace-nowrap"
+                    >{{ route.title }}</span
+                >
+                <span
+                    class="shrink-0 text-[0.8125rem] font-bold"
+                    :class="{
+                        'text-green-500': scoreColorClass === 'is-score-good',
+                        'text-amber-500': scoreColorClass === 'is-score-moderate',
+                        'text-red-500': scoreColorClass === 'is-score-low'
+                    }"
+                >
+                    {{ route.score }}점
+                </span>
+            </div>
 
-        <div class="h-1 rounded-sm bg-[rgba(223,255,0,0.2)] overflow-hidden">
-            <div
-                class="h-full rounded-sm transition-[width] duration-300"
-                :class="{
-                    'bg-green-500': scoreColorClass === 'is-score-good',
-                    'bg-amber-500': scoreColorClass === 'is-score-moderate',
-                    'bg-red-500': scoreColorClass === 'is-score-low'
-                }"
-                :style="{ width: `${route.score}%` }"
-            />
-        </div>
+            <div class="h-1 rounded-sm bg-[var(--ui-bg-accented)] overflow-hidden">
+                <div
+                    class="h-full rounded-sm transition-[width] duration-300"
+                    :class="{
+                        'bg-green-500': scoreColorClass === 'is-score-good',
+                        'bg-amber-500': scoreColorClass === 'is-score-moderate',
+                        'bg-red-500': scoreColorClass === 'is-score-low'
+                    }"
+                    :style="{ width: `${route.score}%` }"
+                />
+            </div>
 
-        <div v-if="distanceLabel || elevationLabel" class="flex items-center gap-3">
-            <span
-                v-if="distanceLabel"
-                class="inline-flex items-center gap-1 text-xs text-text-muted"
-            >
-                <span class="i-lucide-map-pin" />
-                {{ distanceLabel }}
-            </span>
-            <span
-                v-if="elevationLabel"
-                class="inline-flex items-center gap-1 text-xs text-text-muted"
-            >
-                <span class="i-lucide-mountain" />
-                {{ elevationLabel }}
-            </span>
-        </div>
+            <div v-if="distanceLabel || elevationLabel" class="flex items-center gap-3">
+                <span
+                    v-if="distanceLabel"
+                    class="inline-flex items-center gap-1 text-xs text-[var(--ui-text-muted)]"
+                >
+                    <span class="i-lucide-map-pin" />
+                    {{ distanceLabel }}
+                </span>
+                <span
+                    v-if="elevationLabel"
+                    class="inline-flex items-center gap-1 text-xs text-[var(--ui-text-muted)]"
+                >
+                    <span class="i-lucide-mountain" />
+                    {{ elevationLabel }}
+                </span>
+            </div>
 
-        <div v-if="route.tags.length > 0" class="flex flex-wrap gap-1">
-            <span
-                v-for="tag in route.tags"
-                :key="tag"
-                class="px-1.5 py-[2px] rounded-lg bg-accent-tint text-(--ui-primary) text-xs font-medium whitespace-nowrap"
-            >
-                {{ tag }}
-            </span>
+            <div v-if="route.tags.length > 0" class="flex flex-wrap gap-1">
+                <span
+                    v-for="tag in route.tags"
+                    :key="tag"
+                    class="px-1.5 py-[2px] rounded-lg bg-[var(--ui-bg-accented)] text-[var(--ui-primary)] text-xs font-medium whitespace-nowrap"
+                >
+                    {{ tag }}
+                </span>
+            </div>
         </div>
-    </button>
+    </UCard>
 </template>

@@ -35,7 +35,7 @@ const pm10Items = [
                 <div
                     v-for="item in weatherItems"
                     :key="item.label"
-                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                    class="flex items-center gap-1.5 text-xs text-text-muted"
                 >
                     <span
                         class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0"
@@ -44,7 +44,7 @@ const pm10Items = [
                     {{ item.label }}
                 </div>
                 <div
-                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                    class="flex items-center gap-1.5 text-xs text-text-muted"
                 >
                     <span
                         class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
@@ -80,7 +80,7 @@ const pm10Items = [
             </div>
             <div class="flex flex-col gap-1 mt-1.5">
                 <div
-                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                    class="flex items-center gap-1.5 text-xs text-text-muted"
                 >
                     <span
                         class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
@@ -99,7 +99,7 @@ const pm10Items = [
                 <div
                     v-for="item in pm10Items"
                     :key="item.label"
-                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                    class="flex items-center gap-1.5 text-xs text-text-muted"
                 >
                     <span
                         class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0"
@@ -108,7 +108,7 @@ const pm10Items = [
                     {{ item.label }}
                 </div>
                 <div
-                    class="flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,#e6e8ea_80%,transparent)]"
+                    class="flex items-center gap-1.5 text-xs text-text-muted"
                 >
                     <span
                         class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"

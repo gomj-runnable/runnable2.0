@@ -165,6 +165,6 @@ const formatTime = (sec: number) => {
 
 <style scoped>
 .sim-drawer__slider :deep([data-slot='track']) {
-    border: 1px solid rgba(223, 255, 0, 0.18);
+    border: 1px solid var(--ui-border);
 }
 </style>
