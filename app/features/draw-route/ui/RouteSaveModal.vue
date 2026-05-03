@@ -12,6 +12,8 @@ defineProps<{
     distance?: number
     /** 경로가 통과하는 행정구역 (자동 감지) */
     districts?: string[]
+    /** 수정 모드 여부 */
+    isEditing?: boolean
 }>()
 
 defineEmits<{
@@ -29,8 +31,8 @@ defineEmits<{
 <template>
     <UModal
         :open="open"
-        title="경로 저장"
-        description="경로 정보를 입력하세요"
+        :title="isEditing ? '경로 수정' : '경로 저장'"
+        :description="isEditing ? '경로 정보를 수정하세요' : '경로 정보를 입력하세요'"
         :ui="{ footer: 'justify-end' }"
         @update:open="$emit('update:open', $event)"
     >
@@ -77,7 +79,12 @@ defineEmits<{
 
         <template #footer="{ close }">
             <UButton variant="outline" color="neutral" label="취소" @click="close" />
-            <UButton variant="solid" color="primary" label="저장" @click="$emit('submit')" />
+            <UButton
+                variant="solid"
+                color="primary"
+                :label="isEditing ? '수정' : '저장'"
+                @click="$emit('submit')"
+            />
         </template>
     </UModal>
 </template>

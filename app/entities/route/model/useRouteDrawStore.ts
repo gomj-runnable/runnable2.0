@@ -55,6 +55,9 @@ export const useRouteDrawStore = () => {
     /** 목록에서 현재 선택된 경로 ID */
     const selectedRouteId = useState<string | null>('routeDraw.selectedRouteId', () => null)
 
+    /** 수정 모드에서 편집 중인 경로 ID. null이면 새 경로 생성 모드 */
+    const editingRouteId = useState<string | null>('routeDraw.editingRouteId', () => null)
+
     /** 저장 모달(RouteSaveModal)의 열림 상태 */
     const isRouteSaveModalOpen = useState('routeDraw.isRouteSaveModalOpen', () => false)
 
@@ -117,6 +120,7 @@ export const useRouteDrawStore = () => {
      * 새 경로 드로잉을 시작하거나 저장을 취소할 때 호출한다.
      */
     const resetRouteDrawState = () => {
+        editingRouteId.value = null
         drawnPositions.value = null
         drawMetrics.value = null
         sectionDraft.value = null
@@ -139,6 +143,7 @@ export const useRouteDrawStore = () => {
         activeNav,
         routes,
         selectedRouteId,
+        editingRouteId,
         drawnPositions,
         drawMetrics,
         sectionDraft,
