@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
 import type { PoiDraftInput } from '#shared/types/facility'
+import { getSectionColor } from '~/entities/route/lib/useRouteDrawUtils'
 import TextfieldCard from '~/shared/ui/cards/TextfieldCard.vue'
 
 defineProps<{
@@ -71,6 +72,7 @@ const POI_ICON: Record<string, string> = {
                 <TextfieldCard
                     :deletable="index > 0"
                     :selected="activeSectionIndex === index"
+                    :section-color="getSectionColor(index)"
                     :title-field="{
                         id: 'name',
                         modelValue: sectionAttr.name || '',
@@ -103,11 +105,7 @@ const POI_ICON: Record<string, string> = {
                     @click="$emit('selectSection', { index })"
                     @keydown.enter="$emit('selectSection', { index })"
                     @delete="$emit('removeSection', { index })"
-                >
-                    <template #meta>
-                        {{ `포인트 ${index + 1}` }}
-                    </template>
-                </TextfieldCard>
+                />
                 <div
                     v-if="(sectionPois?.[index] ?? []).length > 0"
                     class="flex flex-wrap gap-1 px-1"
