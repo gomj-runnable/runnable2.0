@@ -1,23 +1,23 @@
 .route-save-modal {
-    --map-form-label-color: color-mix(in srgb, #e6e8ea 80%, transparent);
-    --map-form-bg: rgba(255, 255, 255, 0.06);
-    --map-form-color: #e6e8ea;
+    --map-form-label-color: var(--ui-text-muted);
+    --map-form-bg: var(--ui-bg-elevated);
+    --map-form-color: var(--ui-text-highlighted);
     --map-form-font-size: 0.875rem;
     --map-form-line-height: 1.5;
     --map-form-padding: 0.75rem;
     --map-form-resize: vertical;
-    --map-form-placeholder: color-mix(in srgb, #e6e8ea 40%, transparent);
-    --map-form-focus-border: rgba(255, 255, 0, 0.42);
-    --map-form-focus-bg: rgba(255, 255, 255, 0.08);
-    --map-form-disabled-color: color-mix(in srgb, #e6e8ea 60%, transparent);
-    --map-form-disabled-bg: rgba(255, 255, 255, 0.04);
+    --map-form-placeholder: var(--ui-text-dimmed);
+    --map-form-focus-border: var(--ui-border-accented);
+    --map-form-focus-bg: var(--ui-bg-elevated);
+    --map-form-disabled-color: var(--ui-text-dimmed);
+    --map-form-disabled-bg: var(--ui-bg-accented);
     width: 480px;
     padding: 1.5rem;
-    border: 1px solid rgba(223, 255, 0, 0.2);
+    border: 1px solid var(--ui-border);
     border-radius: 1.5rem;
-    background: color-mix(in srgb, #1e2124 92%, transparent);
+    background: var(--ui-bg-elevated);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 40px rgba(0, 0, 0, 0.24);
-    color: #e6e8ea;
+    color: var(--ui-text-highlighted);
 }
 
 .route-save-modal__header {
@@ -31,7 +31,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.06em;
-    color: color-mix(in srgb, #e6e8ea 60%, transparent);
+    color: var(--ui-text-dimmed);
 }
 
 .route-save-modal__title {
@@ -39,7 +39,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.2;
-    color: #e6e8ea;
+    color: var(--ui-text-highlighted);
 }
 
 .route-save-modal__fields {
@@ -57,11 +57,11 @@
 
 .route-save-modal__button {
     --map-button-padding: 0.75rem 1rem;
-    --map-button-border: 1px solid rgba(223, 255, 0, 0.2);
+    --map-button-border: 1px solid var(--ui-border);
     --map-button-radius: 1rem;
-    --map-button-color: #e6e8ea;
-    --map-button-hover-bg: rgba(204, 255, 0, 0.12);
-    --map-button-hover-border: rgba(255, 255, 0, 0.42);
+    --map-button-color: var(--ui-text-highlighted);
+    --map-button-hover-bg: var(--ui-bg-accented);
+    --map-button-hover-border: var(--ui-border-accented);
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.4;
@@ -70,13 +70,13 @@
 
 .route-save-modal__districts {
     font-size: 0.875rem;
-    color: color-mix(in srgb, #e6e8ea 80%, transparent);
+    color: var(--ui-text-muted);
     line-height: 1.5;
 }
 
 .route-save-modal__button--primary {
-    --map-button-border: 1px solid rgba(255, 255, 0, 0.56);
-    --map-button-bg: rgba(255, 255, 0, 0.24);
-    --map-button-hover-bg: rgba(255, 255, 0, 0.18);
-    --map-button-hover-border: rgba(255, 255, 0, 0.56);
+    --map-button-border: 1px solid var(--ui-primary);
+    --map-button-bg: color-mix(in srgb, var(--ui-primary) 20%, transparent);
+    --map-button-hover-bg: color-mix(in srgb, var(--ui-primary) 15%, transparent);
+    --map-button-hover-border: var(--ui-primary);
 }
