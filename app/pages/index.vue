@@ -50,6 +50,7 @@ import { useSectionInfoStore } from '~/entities/route/model/useSectionInfoStore'
 import {
     calculateTotalDistance,
     calculateTotalTime,
+    calculateRangeDistance,
     formatTime
 } from '~/entities/route/lib/usePaceCalculator'
 import { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
@@ -235,6 +236,13 @@ const boundaryEffect = useBoundarySideeffect({ viewer })
 // ─── 구간 정보 ──────────────────────────────────────────────────
 const sectionInfo = useSectionInfoStore()
 
+const sectionDistances = computed(() => {
+    const positions = routeDrawStore.drawnPositions.value
+    const ranges = routeDrawStore.sectionPointRanges.value
+    if (!positions?.length || !ranges.length) return []
+    return ranges.map((range) => calculateRangeDistance(positions, range))
+})
+
 const sectionTotalDistance = computed(() => calculateTotalDistance(sectionInfo.sections.value))
 const sectionTotalTime = computed(() =>
     formatTime(calculateTotalTime(sectionInfo.sections.value, sectionInfo.userPaces.value))
@@ -253,6 +261,23 @@ const handleRouteSelect = async (routeId: string) => {
     if (sections) {
         sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
     }
+}
+
+/** 목록에서 내 경로를 수정 모드로 열어 그리기 탭으로 전환한다 */
+const handleRouteEdit = async (routeId: string) => {
+    stopSimulationForRouteChange()
+    const sections = await routeList.select(routeId)
+    if (!sections?.length) return
+
+    const route = routeList.filteredRoutes.find((r: any) => r.routeId === routeId)
+    routeDrawStore.editingRouteId.value = routeId
+    routeDrawStore.routeForm.value = {
+        title: route?.title ?? '',
+        description: route?.description ?? ''
+    }
+
+    // 그리기 탭으로 전환 (드로잉은 시작하지 않음 - 기존 데이터로 로드)
+    activeNav.value = '그리기'
 }
 
 // 경로 선택/해제 시 경로정보 로드/정리
@@ -453,6 +478,25 @@ const handleExploreSelect = async (routeId: string) => {
         }
     } catch (e) {
         console.error('[ExploreSelect] 구간 로드 실패:', e)
+    }
+}
+
+/** 탐색 탭에서 경로를 가져오기(fork)한다. 중복 시 알림을 표시한다. */
+const handleExploreImport = async (routeId: string) => {
+    try {
+        await $fetch(`/api/routes/fork/${routeId}`, { method: 'POST' })
+        notification.notify({
+            title: '경로 가져오기 완료',
+            message: '내 경로 목록에 추가되었습니다.',
+            tone: NotificationToneEnum.SUCCESS
+        })
+    } catch (e: any) {
+        const message = e?.data?.message ?? '경로 가져오기에 실패했습니다.'
+        notification.notify({
+            title: '경로 가져오기',
+            message,
+            tone: NotificationToneEnum.WARNING
+        })
     }
 }
 
@@ -689,8 +733,10 @@ watch(activeNav, (next) => {
                     <RouteListPanel
                         :routes="routeList.filteredRoutes"
                         :selected-route-id="routeList.selectedRouteId"
+                        :current-user-id="authStore.user.value?.id"
                         @select="handleRouteSelect"
                         @download="routeList.download"
+                        @edit="handleRouteEdit"
                     />
                 </div>
 
@@ -698,12 +744,14 @@ watch(activeNav, (next) => {
                 <DrawRoutePanel
                     v-else-if="slideOver.current.value === NavKey.DRAW"
                     :section-attrs="drawing.sectionDraft?.attrs ?? []"
+                    :section-distances="sectionDistances"
                     :section-pois="drawing.sectionPois"
                     :active-section-index="drawing.activeSectionIndex"
                     @reset="handleDrawingStartWithHelp"
                     @save="drawing.openSaveModal"
                     @update-section-attr="drawing.updateSectionAttr"
                     @remove-section="drawing.removeSection"
+                    @add-section="drawing.addSection"
                     @remove-poi="drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)"
                     @select-section="drawing.activeSectionIndex = $event.index"
                 />
@@ -751,6 +799,7 @@ watch(activeNav, (next) => {
                         :is-loading="explore.isSearching.value"
                         :recommend-active="showRecommend"
                         @select="handleExploreSelect"
+                        @import="handleExploreImport"
                         @recommend="showRecommend = !showRecommend"
                     >
                         <template #recommend>
@@ -838,6 +887,7 @@ watch(activeNav, (next) => {
             :title="saveModal.routeForm.title"
             :description="saveModal.routeForm.description"
             :distance="saveModal.routeDistance"
+            :is-editing="!!saveModal.editingRouteId"
             @update:open="saveModal.open = $event"
             @update:title="saveModal.routeForm.title = $event"
             @update:description="saveModal.routeForm.description = $event"

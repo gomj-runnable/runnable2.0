@@ -265,6 +265,27 @@ export const removeSectionDraftAttr = (draft: CreateSectionSchema, index: number
  * @param index - 제거할 구간의 인덱스. 0이거나 마지막 인덱스를 초과하면 변경 없이 원본을 반환한다.
  * @returns `index`의 구간이 제거되고 직전 구간의 `end`가 확장된 새 범위 배열 (불변 업데이트)
  */
+/**
+ * 구간 범위 배열에서 특정 인덱스의 구간을 중간 지점에서 둘로 분할한다.
+ * 경로 그리기 도중 새로운 구간을 삽입할 때 호출한다.
+ *
+ * @param ranges - 현재 구간 범위 배열
+ * @param index - 분할할 구간의 인덱스
+ * @returns 해당 구간이 둘로 분할된 새 범위 배열 (불변 업데이트)
+ */
+export const splitSectionPointRange = (
+    ranges: SectionPointRange[],
+    index: number
+): SectionPointRange[] => {
+    const range = ranges[index]
+    if (!range || range.end - range.start < 2) return ranges
+
+    const mid = Math.floor((range.start + range.end) / 2)
+    const nextRanges = [...ranges]
+    nextRanges.splice(index, 1, { start: range.start, end: mid }, { start: mid, end: range.end })
+    return nextRanges
+}
+
 export const mergeSectionPointRanges = (ranges: SectionPointRange[], index: number) => {
     if (index <= 0 || index >= ranges.length) {
         return ranges

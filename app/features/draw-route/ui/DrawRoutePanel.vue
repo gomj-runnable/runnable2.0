@@ -7,6 +7,8 @@ import TextfieldCard from '~/shared/ui/cards/TextfieldCard.vue'
 defineProps<{
     /** 경로 구간별 속성 목록 (제목·요약·설명) */
     sectionAttrs: SectionAttrSchema[]
+    /** 구간별 거리 (km) */
+    sectionDistances?: number[]
     /** 구간 인덱스별 연결된 POI 배열 */
     sectionPois?: Record<number, PoiDraftInput[]>
     /** 현재 POI 연결 대상 구간 인덱스 */
@@ -28,6 +30,8 @@ defineEmits<{
     removePoi: [payload: { sectionIndex: number; poiIndex: number }]
     /** 구간 카드 클릭 시 해당 인덱스를 전달 (POI 연결 활성화) */
     selectSection: [payload: { index: number }]
+    /** 특정 구간 뒤에 새 구간을 삽입할 때 해당 인덱스를 전달 */
+    addSection: [payload: { index: number }]
 }>()
 
 /** POI 타입별 아이콘 */
@@ -69,6 +73,12 @@ const POI_ICON: Record<string, string> = {
                 :key="`section-item-${index}`"
                 class="flex flex-col gap-1"
             >
+                <div
+                    v-if="sectionDistances?.[index] != null"
+                    class="text-xs text-[var(--ui-text-muted)] px-1 mb-0.5"
+                >
+                    {{ sectionDistances[index]!.toFixed(2) }}km
+                </div>
                 <TextfieldCard
                     :deletable="index > 0"
                     :selected="activeSectionIndex === index"
@@ -134,6 +144,16 @@ const POI_ICON: Record<string, string> = {
                         />
                     </UBadge>
                 </div>
+                <UButton
+                    v-if="(sectionDistances?.[index] ?? 0) > 0"
+                    icon="i-lucide-split"
+                    variant="ghost"
+                    color="neutral"
+                    size="xs"
+                    label="구간 나누기"
+                    class="self-center mt-1"
+                    @click.stop="$emit('addSection', { index })"
+                />
             </div>
         </div>
     </div>

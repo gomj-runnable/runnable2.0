@@ -11,6 +11,7 @@ import {
     createInitialSectionPointRanges,
     mergeSectionPointRanges,
     removeSectionDraftAttr,
+    splitSectionPointRange,
     syncSectionAttrs,
     updateSectionDraftAttr
 } from '~/entities/route/lib/useRouteDrawDraft'
@@ -325,6 +326,31 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         redrawSectionGraphics()
     }
 
+    /**
+     * 특정 구간을 중간 지점에서 둘로 분할하여 새 구간을 삽입한다.
+     * 구간 범위와 속성 배열을 함께 갱신한 뒤 지도 그래픽을 다시 그린다.
+     */
+    const handleAddSection = ({ index }: { index: number }) => {
+        if (!options.sectionDraft.value) return
+
+        const nextRanges = splitSectionPointRange(options.sectionPointRanges.value, index)
+        if (nextRanges.length === options.sectionPointRanges.value.length) {
+            options.notify({
+                title: '구간 나누기 불가',
+                message: '포인트가 충분하지 않아 구간을 나눌 수 없습니다.',
+                tone: NotificationToneEnum.WARNING
+            })
+            return
+        }
+
+        options.sectionPointRanges.value = nextRanges
+        options.sectionDraft.value = {
+            ...options.sectionDraft.value,
+            attrs: syncSectionAttrs(options.sectionDraft.value.attrs ?? [], nextRanges)
+        }
+        redrawSectionGraphics()
+    }
+
     if (options.closingMode) {
         watch(options.closingMode, () => {
             redrawSectionGraphics()
@@ -344,6 +370,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         handleDrawSave,
         handleUpdateSectionAttr,
         handleRemoveSection,
+        handleAddSection,
         redrawSectionGraphics,
         hideSectionPolylines: () => sectionPolylines.hide(),
         showSectionPolylines: () => sectionPolylines.show()
