@@ -201,6 +201,14 @@ pipeline {
     post {
         success { echo "Pipeline SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }
         failure { echo "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }
+        always {
+            sh '''#!/bin/bash
+                # 빌드 성공/실패 무관하게 Pod가 Running이면 포트포워드 보장
+                if kubectl -n runnable get pods 2>/dev/null | grep -q Running; then
+                    bash minikube/scripts/portforward.sh start || true
+                fi
+            '''
+        }
         cleanup { cleanWs() }
     }
 }
