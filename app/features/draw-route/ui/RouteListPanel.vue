@@ -15,6 +15,17 @@ defineEmits<{
     /** 다운로드 버튼 클릭 시 해당 경로 ID를 전달 */
     download: [routeId: string]
 }>()
+
+/** 펼쳐진 카드의 routeId Set */
+const expandedIds = ref<Set<string>>(new Set())
+
+function toggleExpand(routeId: string) {
+    if (expandedIds.value.has(routeId)) {
+        expandedIds.value.delete(routeId)
+    } else {
+        expandedIds.value.add(routeId)
+    }
+}
 </script>
 
 <template>
@@ -29,29 +40,58 @@ defineEmits<{
             <li v-for="route in routes" :key="route.routeId">
                 <UCard
                     variant="subtle"
-                    :title="route.title"
-                    :description="route.description"
                     class="cursor-pointer"
                     :class="{
                         'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId
                     }"
                     @click="$emit('select', route.routeId)"
                 >
-                    <UScrollArea
-                        orientation="vertical"
-                        :items="getRouteInfoItems(route)"
-                        :virtualize="{ lanes: 2, gap: 8 }"
-                        :ui="{ root: 'max-h-28' }"
-                    >
-                        <template #default="{ item }">
-                            <div class="flex justify-between text-sm py-0.5">
-                                <dt class="text-[var(--ui-text-dimmed)]">{{ item.key }}</dt>
-                                <dd class="font-medium m-0">{{ item.value }}</dd>
+                    <template #header>
+                        <div class="flex items-center gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="font-semibold text-[var(--ui-text-highlighted)] truncate">
+                                    {{ route.title }}
+                                </p>
+                                <p
+                                    v-if="route.description"
+                                    class="text-sm text-[var(--ui-text-muted)] mt-0.5 line-clamp-1"
+                                >
+                                    {{ route.description }}
+                                </p>
                             </div>
-                        </template>
-                    </UScrollArea>
+                            <UButton
+                                :icon="
+                                    expandedIds.has(route.routeId)
+                                        ? 'i-lucide-chevron-up'
+                                        : 'i-lucide-chevron-down'
+                                "
+                                variant="ghost"
+                                color="neutral"
+                                size="sm"
+                                square
+                                aria-label="상세 정보 토글"
+                                @click.stop="toggleExpand(route.routeId)"
+                            />
+                        </div>
+                    </template>
 
-                    <template #footer>
+                    <template v-if="expandedIds.has(route.routeId)" #default>
+                        <UScrollArea
+                            orientation="vertical"
+                            :items="getRouteInfoItems(route)"
+                            :virtualize="{ lanes: 2, gap: 8 }"
+                            :ui="{ root: 'max-h-28' }"
+                        >
+                            <template #default="{ item }">
+                                <div class="flex justify-between text-sm py-0.5">
+                                    <dt class="text-[var(--ui-text-dimmed)]">{{ item.key }}</dt>
+                                    <dd class="font-medium m-0">{{ item.value }}</dd>
+                                </div>
+                            </template>
+                        </UScrollArea>
+                    </template>
+
+                    <template v-if="expandedIds.has(route.routeId)" #footer>
                         <div class="flex items-center gap-2">
                             <UButton
                                 variant="outline"
