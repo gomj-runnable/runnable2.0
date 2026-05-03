@@ -10,6 +10,8 @@ defineProps<{
     totalDistance: number
     totalTime: string
     isEditMode: boolean
+    /** 읽기 전용 모드 (탐색 탭에서 사용) */
+    readOnly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -23,81 +25,88 @@ const emit = defineEmits<{
 
 <template>
     <div class="flex flex-col gap-3 w-full h-full p-4 box-border overflow-y-auto">
+        <!-- 헤더 -->
         <div class="flex items-center justify-between gap-2.5 shrink-0">
-            <h2 class="m-0 text-lg font-bold leading-[1.2] text-text-base">{{ panelTitle }}</h2>
-            <div class="flex items-center gap-2.5 shrink-0">
-                <button
-                    type="button"
-                    class="px-3 py-1 text-[0.8125rem] font-medium text-text-muted bg-accent-tint border border-border-accent rounded-xl cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
-                    :class="
-                        isEditMode ? 'bg-accent-tint border-[var(--ui-primary)] text-text-base' : ''
-                    "
+            <h2 class="m-0 text-lg font-bold leading-[1.2] text-[var(--ui-text-highlighted)]">
+                {{ panelTitle }}
+            </h2>
+            <div class="flex items-center gap-2 shrink-0">
+                <UButton
+                    v-if="!readOnly"
+                    :label="isEditMode ? '저장하기' : '수정하기'"
+                    size="xs"
+                    :variant="isEditMode ? 'solid' : 'outline'"
+                    :color="isEditMode ? 'primary' : 'neutral'"
                     @click="emit('update:editMode', !isEditMode)"
-                >
-                    {{ isEditMode ? '저장하기' : '수정하기' }}
-                </button>
-                <button
-                    type="button"
-                    class="flex items-center justify-center w-7 h-7 text-text-muted bg-transparent border-none rounded-lg cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
+                />
+                <UButton
+                    icon="i-lucide-x"
+                    variant="ghost"
+                    color="neutral"
+                    size="xs"
                     aria-label="닫기"
                     @click="emit('close')"
-                >
-                    <UIcon name="i-lucide-x" />
-                </button>
+                />
             </div>
         </div>
 
-        <div
-            class="flex gap-4 px-3 py-2.5 bg-accent-tint rounded-2xl border border-border-accent shrink-0"
-        >
-            <span class="flex flex-col gap-1">
-                <span class="text-xs text-text-muted leading-[1.4]">총 거리</span>
-                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]"
-                    >{{ totalDistance.toFixed(1) }}km</span
-                >
-            </span>
-            <span class="flex flex-col gap-1">
-                <span class="text-xs text-text-muted leading-[1.4]">예상 소요시간</span>
-                <span class="text-[0.9375rem] font-semibold text-text-base leading-[1.4]">{{
-                    totalTime
-                }}</span>
-            </span>
-        </div>
+        <!-- 요약 카드 -->
+        <UCard variant="subtle" :ui="{ body: 'p-3' }">
+            <div class="flex gap-4">
+                <span class="flex flex-col gap-1">
+                    <span class="text-xs text-[var(--ui-text-muted)]">총 거리</span>
+                    <span class="text-[0.9375rem] font-semibold text-[var(--ui-text-highlighted)]">
+                        {{ totalDistance.toFixed(1) }}km
+                    </span>
+                </span>
+                <span class="flex flex-col gap-1">
+                    <span class="text-xs text-[var(--ui-text-muted)]">예상 소요시간</span>
+                    <span class="text-[0.9375rem] font-semibold text-[var(--ui-text-highlighted)]">
+                        {{ totalTime }}
+                    </span>
+                </span>
+            </div>
+        </UCard>
 
+        <!-- 구간 목록 -->
         <div class="flex flex-col gap-2.5">
-            <div
+            <UCard
                 v-for="section in sections"
                 :key="section.sectionId"
-                class="flex flex-col gap-2.5 p-3 bg-accent-tint border border-border-accent rounded-2xl"
+                variant="subtle"
+                :ui="{ body: 'p-3' }"
             >
+                <!-- 구간 헤더 -->
                 <div class="flex items-center justify-between gap-2.5">
-                    <span class="text-sm font-semibold text-text-base leading-[1.4]">
+                    <span class="text-sm font-semibold text-[var(--ui-text-highlighted)]">
                         {{ section.attrs?.[0]?.name ?? '구간' }}
                     </span>
-                    <span v-if="section.geom" class="text-xs text-text-muted leading-[1.4]">
+                    <span v-if="section.geom" class="text-xs text-[var(--ui-text-muted)]">
                         {{ calculateSectionDistance(section).toFixed(1) }}km
                     </span>
                 </div>
 
-                <div v-if="!isEditMode" class="flex flex-col gap-1.5">
+                <!-- 코멘트/설명 (보기 모드) -->
+                <div v-if="!isEditMode" class="flex flex-col gap-1.5 mt-2">
                     <p
                         v-if="section.attrs?.[0]?.comment"
-                        class="m-0 text-sm font-medium text-text-muted leading-[1.5]"
+                        class="m-0 text-sm font-medium text-[var(--ui-text-muted)]"
                     >
                         {{ section.attrs[0].comment }}
                     </p>
                     <p
                         v-if="section.attrs?.[0]?.description"
-                        class="m-0 text-[0.8125rem] text-meta leading-[1.5]"
+                        class="m-0 text-[0.8125rem] text-[var(--ui-text-dimmed)]"
                     >
                         {{ section.attrs[0].description }}
                     </p>
                 </div>
 
-                <div class="flex items-center justify-between gap-2.5">
-                    <span class="text-[0.8125rem] text-text-muted leading-[1.4]">페이스</span>
+                <!-- 페이스 -->
+                <div class="flex items-center justify-between gap-2.5 mt-2">
+                    <span class="text-[0.8125rem] text-[var(--ui-text-muted)]">페이스</span>
                     <span
-                        class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]"
+                        class="text-[0.8125rem] font-medium text-[var(--ui-text-highlighted)] [font-variant-numeric:tabular-nums]"
                     >
                         {{
                             userPaces[section.sectionId]?.pace != null
@@ -107,21 +116,22 @@ const emit = defineEmits<{
                     </span>
                 </div>
                 <USlider
-                    v-if="isEditMode"
+                    v-if="isEditMode && !readOnly"
                     :model-value="userPaces[section.sectionId]?.pace ?? 300"
                     :min="180"
                     :max="600"
                     :step="5"
-                    class="w-full"
+                    class="w-full mt-1"
                     @update:model-value="
                         (v: number | undefined) => emit('update:pace', section.sectionId, v ?? 300)
                     "
                 />
 
-                <div class="flex items-center justify-between gap-2.5">
-                    <span class="text-[0.8125rem] text-text-muted leading-[1.4]">짐 무게</span>
+                <!-- 짐 무게 -->
+                <div class="flex items-center justify-between gap-2.5 mt-2">
+                    <span class="text-[0.8125rem] text-[var(--ui-text-muted)]">짐 무게</span>
                     <span
-                        class="text-[0.8125rem] font-medium text-text-base leading-[1.4] [font-variant-numeric:tabular-nums]"
+                        class="text-[0.8125rem] font-medium text-[var(--ui-text-highlighted)] [font-variant-numeric:tabular-nums]"
                     >
                         {{
                             userPaces[section.sectionId]?.weight != null
@@ -131,23 +141,26 @@ const emit = defineEmits<{
                     </span>
                 </div>
                 <USlider
-                    v-if="isEditMode"
+                    v-if="isEditMode && !readOnly"
                     :model-value="userPaces[section.sectionId]?.weight ?? 0"
                     :min="0"
                     :max="30"
                     :step="0.5"
-                    class="w-full"
+                    class="w-full mt-1"
                     @update:model-value="
                         (v: number | undefined) => emit('update:weight', section.sectionId, v ?? 0)
                     "
                 />
 
-                <textarea
-                    v-if="isEditMode"
-                    :value="userPaces[section.sectionId]?.strategy ?? ''"
-                    rows="2"
+                <!-- 구간 전략 -->
+                <UTextarea
+                    v-if="isEditMode && !readOnly"
+                    :model-value="userPaces[section.sectionId]?.strategy ?? ''"
+                    :rows="2"
+                    autoresize
                     placeholder="구간 전략을 입력하세요"
-                    class="w-full resize-y px-3 py-2.5 text-sm text-text-base bg-accent-tint border border-border-accent rounded-xl box-border font-[inherit] leading-[1.5] transition-[border-color] duration-150 outline-none placeholder:text-meta focus:border-[var(--ui-primary)]"
+                    variant="subtle"
+                    class="mt-2"
                     @blur="
                         emit(
                             'update:strategy',
@@ -156,7 +169,7 @@ const emit = defineEmits<{
                         )
                     "
                 />
-            </div>
+            </UCard>
         </div>
     </div>
 </template>

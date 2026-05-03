@@ -442,11 +442,23 @@ const handleExploreSelect = async (routeId: string) => {
     explore.selectRoute(routeId)
     const route = explore.searchResults.value.find((r) => r.routeId === routeId)
     await exploreSelectRoute(routeId, route?.title)
+
+    try {
+        const sections = await explore.fetchSections(routeId)
+        if (sections.length) {
+            sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1], {
+                readOnly: true,
+                title: route?.title ?? '경로 미리보기'
+            })
+        }
+    } catch (e) {
+        console.error('[ExploreSelect] 구간 로드 실패:', e)
+    }
 }
 
 /** 탐색 탭 진입 시 공개 경로 자동 로드 (미로드 상태일 때만 실행) */
 watch(activeNav, (next) => {
-    if (next !== '목록') {
+    if (next !== '목록' && next !== '탐색') {
         sectionInfo.close()
     }
     if (next === '탐색' && explore.searchResults.value.length === 0 && !explore.isSearching.value) {
@@ -474,6 +486,7 @@ watch(activeNav, (next) => {
                     :total-distance="sectionTotalDistance"
                     :total-time="sectionTotalTime"
                     :is-edit-mode="sectionInfo.isEditMode.value"
+                    :read-only="sectionInfo.readOnly.value"
                     @update:edit-mode="sectionInfo.isEditMode.value = $event"
                     @update:pace="sectionInfo.updatePace"
                     @update:weight="sectionInfo.updateWeight"
@@ -802,6 +815,7 @@ watch(activeNav, (next) => {
                 :total-distance="sectionTotalDistance"
                 :total-time="sectionTotalTime"
                 :is-edit-mode="sectionInfo.isEditMode.value"
+                :read-only="sectionInfo.readOnly.value"
                 @update:edit-mode="sectionInfo.isEditMode.value = $event"
                 @update:pace="sectionInfo.updatePace"
                 @update:weight="sectionInfo.updateWeight"

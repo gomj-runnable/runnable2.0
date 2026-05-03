@@ -8,12 +8,19 @@ export const useSectionInfoStore = () => {
     const sections = useState<SavedSection[]>('sectionInfo.sections', () => [])
     const userPaces = useState<Record<string, UserPace>>('sectionInfo.userPaces', () => ({}))
     const isEditMode = useState<boolean>('sectionInfo.isEditMode', () => false)
+    const readOnly = useState<boolean>('sectionInfo.readOnly', () => false)
 
-    const open = (routeId: string, routeSections: SavedSection[]) => {
+    const open = (
+        routeId: string,
+        routeSections: SavedSection[],
+        options?: { readOnly?: boolean; title?: string }
+    ) => {
         selectedRouteId.value = routeId
         sections.value = routeSections
+        panelTitle.value = options?.title ?? '구간 정보'
         isOpen.value = true
         isEditMode.value = false
+        readOnly.value = options?.readOnly ?? false
         // Initialize userPaces for each section if not exists
         const paces: Record<string, UserPace> = {}
         for (const section of routeSections) {
@@ -34,6 +41,7 @@ export const useSectionInfoStore = () => {
         selectedRouteId.value = null
         sections.value = []
         isEditMode.value = false
+        readOnly.value = false
     }
 
     const updatePace = (sectionId: string, pace: number) => {
@@ -64,6 +72,7 @@ export const useSectionInfoStore = () => {
         sections,
         userPaces,
         isEditMode,
+        readOnly,
         open,
         close,
         updatePace,
