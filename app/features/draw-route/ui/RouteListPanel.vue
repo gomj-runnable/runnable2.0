@@ -7,6 +7,8 @@ defineProps<{
     routes: SavedRoute[]
     /** 현재 선택된 경로 ID (없으면 null) */
     selectedRouteId: string | null
+    /** 현재 로그인 사용자 ID (소유권 판별용) */
+    currentUserId?: string | null
 }>()
 
 defineEmits<{
@@ -14,6 +16,8 @@ defineEmits<{
     select: [routeId: string]
     /** 다운로드 버튼 클릭 시 해당 경로 ID를 전달 */
     download: [routeId: string]
+    /** 수정 버튼 클릭 시 해당 경로 ID를 전달 */
+    edit: [routeId: string]
 }>()
 
 /** 펼쳐진 카드의 routeId Set */
@@ -100,6 +104,15 @@ function toggleExpand(routeId: string) {
                                 icon="i-lucide-download"
                                 label="경로 다운로드"
                                 @click.stop="$emit('download', route.routeId)"
+                            />
+                            <UButton
+                                v-if="currentUserId && route.userId === currentUserId"
+                                variant="outline"
+                                color="primary"
+                                size="sm"
+                                icon="i-lucide-pencil"
+                                label="수정"
+                                @click.stop="$emit('edit', route.routeId)"
                             />
                         </div>
                     </template>

@@ -25,5 +25,26 @@ export const useRouteSaveSideeffect = () => {
             }
         })
 
-    return { saveRoute }
+    /**
+     * 기존 경로와 구간을 업데이트한다.
+     * 서버에서 기존 구간을 삭제하고 새 구간으로 교체한다.
+     */
+    const updateRoute = (
+        routeId: string,
+        route: RouteDraftInput,
+        sections: RouteSectionDraftInput[]
+    ) =>
+        $fetch(`/api/routes/${routeId}`, {
+            method: 'PUT',
+            body: {
+                route,
+                sections: sections.map((section) => ({
+                    geom: section.geom,
+                    attrs: section.attrs,
+                    pois: section.pois
+                }))
+            }
+        })
+
+    return { saveRoute, updateRoute }
 }
