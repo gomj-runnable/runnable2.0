@@ -39,7 +39,12 @@ pipeline {
         }
 
         stage('Lint') {
-            steps { sh 'pnpm lint' }
+            steps {
+                sh '''
+                    pnpm lint --fix
+                    pnpm lint
+                '''
+            }
         }
 
         stage('Typecheck') {

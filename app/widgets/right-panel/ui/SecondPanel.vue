@@ -30,9 +30,7 @@ const emit = defineEmits<{
                     type="button"
                     class="px-3 py-1 text-[0.8125rem] font-medium text-text-muted bg-accent-tint border border-border-accent rounded-xl cursor-pointer transition duration-150 hover:bg-accent-hover hover:text-text-base"
                     :class="
-                        isEditMode
-                            ? 'bg-accent-tint border-[var(--ui-primary)] text-text-base'
-                            : ''
+                        isEditMode ? 'bg-accent-tint border-[var(--ui-primary)] text-text-base' : ''
                     "
                     @click="emit('update:editMode', !isEditMode)"
                 >
