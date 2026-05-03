@@ -59,6 +59,8 @@ const props = withDefaults(
         disabled?: boolean
         /** 삭제 버튼 표시 여부 */
         deletable?: boolean
+        /** 구간 컬러 마커 (title row 좌측에 표시) */
+        sectionColor?: string
     }>(),
     {
         title: undefined,
@@ -68,7 +70,8 @@ const props = withDefaults(
         fields: () => [],
         selected: false,
         disabled: false,
-        deletable: true
+        deletable: true,
+        sectionColor: undefined
     }
 )
 
@@ -94,34 +97,36 @@ defineEmits<{
         @click="$emit('click', $event)"
     >
         <template #header>
-            <div v-if="titleField" class="textfield-card__title-row">
-                <div class="textfield-card__title-field">
-                    <UInput
-                        :model-value="titleField.modelValue ?? ''"
-                        :placeholder="titleField.placeholder"
-                        :type="titleField.type ?? 'text'"
-                        :name="titleField.name"
-                        :autocomplete="titleField.autocomplete"
-                        :inputmode="titleField.inputmode"
-                        :icon="titleField.leadingIcon"
-                        :trailing-icon="titleField.trailingIcon"
-                        :disabled="disabled || titleField.disabled"
-                        :readonly="titleField.readonly"
-                        :required="titleField.required"
-                        :color="titleField.invalid ? 'error' : undefined"
-                        :autofocus="titleField.autofocus"
-                        variant="none"
-                        :ui="{ base: 'text-lg font-bold' }"
-                        @update:model-value="
-                            $emit('update:field', {
-                                id: titleField.id,
-                                value: $event,
-                                index: -1
-                            })
-                        "
-                    />
-                </div>
-
+            <div v-if="titleField" class="flex items-center gap-2">
+                <span
+                    v-if="sectionColor"
+                    class="shrink-0 size-5 rounded ring ring-inset ring-accented"
+                    :style="{ backgroundColor: sectionColor }"
+                />
+                <UInput
+                    :model-value="titleField.modelValue ?? ''"
+                    :placeholder="titleField.placeholder"
+                    :type="titleField.type ?? 'text'"
+                    :name="titleField.name"
+                    :autocomplete="titleField.autocomplete"
+                    :inputmode="titleField.inputmode"
+                    :icon="titleField.leadingIcon"
+                    :trailing-icon="titleField.trailingIcon"
+                    :disabled="disabled || titleField.disabled"
+                    :readonly="titleField.readonly"
+                    :required="titleField.required"
+                    :color="titleField.invalid ? 'error' : undefined"
+                    :autofocus="titleField.autofocus"
+                    class="min-w-0 flex-1"
+                    variant="outline"
+                    @update:model-value="
+                        $emit('update:field', {
+                            id: titleField.id,
+                            value: $event,
+                            index: -1
+                        })
+                    "
+                />
                 <UButton
                     v-if="deletable"
                     variant="ghost"
@@ -159,6 +164,7 @@ defineEmits<{
                             :readonly="field.readonly"
                             :required="field.required"
                             :maxlength="field.maxLength"
+                            class="w-full"
                             variant="outline"
                             @update:model-value="
                                 $emit('update:field', {
@@ -185,6 +191,7 @@ defineEmits<{
                         :required="field.required"
                         :color="field.invalid ? 'error' : undefined"
                         :autofocus="field.autofocus"
+                        class="w-full"
                         variant="outline"
                         @update:model-value="
                             $emit('update:field', {
@@ -198,7 +205,7 @@ defineEmits<{
             </slot>
         </div>
 
-        <template #footer>
+        <template v-if="$slots.footer || $slots.meta || meta" #footer>
             <slot name="footer">
                 <slot name="meta">
                     <p v-if="meta" class="text-xs font-medium text-[var(--ui-text-dimmed)]">
