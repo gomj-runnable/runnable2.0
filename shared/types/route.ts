@@ -42,6 +42,8 @@ export interface RouteBase {
     sgg?: string[]
     /** 경로가 통과하는 서울 읍면동 목록 */
     emd?: string[]
+    /** 가져오기(fork) 시 원본 경로 ID */
+    sourceRouteId?: string
 }
 
 export type RouteDraftInput = RouteBase

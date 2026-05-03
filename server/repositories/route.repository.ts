@@ -25,4 +25,8 @@ export interface IRouteRepository {
     createSection(routeId: string, input: CreateSectionInput): Promise<SavedSection>
     createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]>
     getSectionsByRouteId(routeId: string): Promise<SavedSection[]>
+    /** 경로의 모든 구간을 삭제한다 */
+    deleteSectionsByRouteId(routeId: string): Promise<void>
+    /** 특정 사용자가 이미 해당 원본 경로를 가져왔는지 확인한다 */
+    hasRouteFromSource(userId: string, sourceRouteId: string): Promise<boolean>
 }

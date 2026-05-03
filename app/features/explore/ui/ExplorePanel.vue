@@ -16,6 +16,8 @@ defineProps<{
 defineEmits<{
     /** 경로 카드 클릭 시 선택된 경로 ID를 전달 */
     select: [routeId: string]
+    /** 경로 가져오기 버튼 클릭 시 경로 ID를 전달 */
+    import: [routeId: string]
     /** 추천 모드 토글 */
     recommend: []
 }>()
@@ -95,6 +97,17 @@ defineEmits<{
                                 </div>
                             </template>
                         </UScrollArea>
+
+                        <template #footer>
+                            <UButton
+                                icon="i-lucide-folder-input"
+                                variant="outline"
+                                color="neutral"
+                                size="sm"
+                                label="경로 가져오기"
+                                @click.stop="$emit('import', route.routeId)"
+                            />
+                        </template>
                     </UCard>
                 </li>
             </ul>

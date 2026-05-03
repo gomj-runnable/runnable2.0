@@ -75,6 +75,18 @@ class InMemoryRouteRepository implements IRouteRepository {
     async getSectionsByRouteId(routeId: string): Promise<SavedSection[]> {
         return Array.from(this.sections.values()).filter((s) => s.routeId === routeId)
     }
+
+    async deleteSectionsByRouteId(routeId: string): Promise<void> {
+        for (const [id, section] of this.sections) {
+            if (section.routeId === routeId) this.sections.delete(id)
+        }
+    }
+
+    async hasRouteFromSource(userId: string, sourceRouteId: string): Promise<boolean> {
+        return Array.from(this.routes.values()).some(
+            (r) => r.userId === userId && r.sourceRouteId === sourceRouteId
+        )
+    }
 }
 
 /** 서버 생애 주기 동안 유지되는 인메모리 저장소 싱글턴. Postgres 전환 시 이 export만 교체한다. */
