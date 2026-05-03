@@ -2,7 +2,7 @@
 // Jenkinsfile — Runnable CI/CD Pipeline
 //
 // 트리거: master push / 수동
-// 흐름: 품질검사 → 빌드 → 인프라 → Docker Hub → DB 마이그레이션 → 배포 → 공개
+// 흐름: 품질검사 → 빌드 → 인프라 → Docker Hub → K8s 배포 → 포트포워드 → 헬스체크
 // =============================================================================
 
 pipeline {
@@ -100,7 +100,7 @@ pipeline {
             }
         }
 
-        // ── 5. K8s 리소스 + DB 마이그레이션 + Seed ──
+        // ── 5. K8s 리소스 + DB 마이그레이션 ──
         stage('Migrate') {
             steps {
                 sh '''#!/bin/bash
@@ -130,12 +130,12 @@ pipeline {
                     kubectl apply -f minikube/k8s/migration-job.yaml
                     kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=300s
 
-                    echo "==> DB 마이그레이션 + Seed 완료"
+                    echo "==> DB 마이그레이션 완료"
                 '''
             }
         }
 
-        // ── 6. App 배포 + 외부 공개 ──
+        // ── 6. App 배포 ──
         stage('Deploy') {
             steps {
                 sh '''#!/bin/bash
@@ -148,29 +148,46 @@ pipeline {
                     kubectl -n runnable rollout restart deployment/runnable-app
                     kubectl -n runnable rollout status deployment/runnable-app --timeout=180s
 
-                    echo "==> 포트포워드 설정"
-                    lsof -ti:${LOCAL_PORT} 2>/dev/null | xargs kill -9 2>/dev/null || true
-                    nohup kubectl port-forward -n runnable svc/runnable-app ${LOCAL_PORT}:3000 --address=127.0.0.1 > /tmp/runnable-portforward.log 2>&1 &
-                    sleep 3
+                    echo "==> 배포 완료"
+                '''
+            }
+        }
+
+        // ── 7. 포트포워드 + 헬스체크 (workspace 무관) ──
+        stage('Expose') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+
+                    echo "==> 포트포워드 시작 (PID 파일 기반, 빌드 종료 후에도 지속)"
+                    bash minikube/scripts/portforward.sh start
 
                     echo "==> 헬스체크"
-                    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${LOCAL_PORT}" --max-time 10 2>/dev/null || echo "000")
+                    for i in 1 2 3 4 5; do
+                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${LOCAL_PORT}" --max-time 5 2>/dev/null || echo "000")
+                        if [ "$HTTP_CODE" = "200" ]; then
+                            echo "    OK (HTTP 200)"
+                            break
+                        fi
+                        echo "    시도 ${i}/5 — HTTP ${HTTP_CODE}"
+                        sleep 2
+                    done
+
                     if [ "$HTTP_CODE" != "200" ]; then
-                        echo "    경고: HTTP ${HTTP_CODE}"
-                        kubectl -n runnable logs deployment/runnable-app --tail=10
-                    else
-                        echo "    OK (HTTP ${HTTP_CODE})"
+                        echo "ERROR: 헬스체크 실패 (HTTP ${HTTP_CODE})"
+                        kubectl -n runnable logs deployment/runnable-app --tail=20
+                        exit 1
                     fi
 
                     echo "==> Tailscale Funnel 연결"
                     if command -v tailscale &>/dev/null; then
                         tailscale funnel --https=443 off 2>/dev/null || true
-                        tailscale funnel --bg --https=443 "http://localhost:${LOCAL_PORT}" || echo "    Funnel 설정 실패 (sudo 필요할 수 있음)"
+                        tailscale funnel --bg --https=443 "http://localhost:${LOCAL_PORT}" || echo "    Funnel 설정 실패"
                         echo "    외부 URL:"
                         tailscale funnel status 2>/dev/null | grep "https://" | head -1 || true
                     fi
 
-                    echo "==> 배포 완료"
+                    echo "==> 외부 공개 완료"
                 '''
             }
         }
