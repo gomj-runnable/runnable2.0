@@ -33,11 +33,7 @@ const scoreColorClass = computed(() => {
 </script>
 
 <template>
-    <UCard
-        variant="subtle"
-        class="cursor-pointer"
-        @click="$emit('select', route.routeId)"
-    >
+    <UCard variant="subtle" class="cursor-pointer" @click="$emit('select', route.routeId)">
         <div class="flex flex-col gap-1.5">
             <div class="flex items-center justify-between gap-2.5">
                 <span

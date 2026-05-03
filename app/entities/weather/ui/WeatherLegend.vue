@@ -43,9 +43,7 @@ const pm10Items = [
                     />
                     {{ item.label }}
                 </div>
-                <div
-                    class="flex items-center gap-1.5 text-xs text-text-muted"
-                >
+                <div class="flex items-center gap-1.5 text-xs text-text-muted">
                     <span
                         class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
                     />
@@ -79,9 +77,7 @@ const pm10Items = [
                 </div>
             </div>
             <div class="flex flex-col gap-1 mt-1.5">
-                <div
-                    class="flex items-center gap-1.5 text-xs text-text-muted"
-                >
+                <div class="flex items-center gap-1.5 text-xs text-text-muted">
                     <span
                         class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
                     />
@@ -107,9 +103,7 @@ const pm10Items = [
                     />
                     {{ item.label }}
                 </div>
-                <div
-                    class="flex items-center gap-1.5 text-xs text-text-muted"
-                >
+                <div class="flex items-center gap-1.5 text-xs text-text-muted">
                     <span
                         class="w-3 h-3 rounded-lg border border-dashed border-(--ui-border) shrink-0 bg-[rgba(80,80,80,0.3)]"
                     />

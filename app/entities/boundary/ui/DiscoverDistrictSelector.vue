@@ -23,7 +23,8 @@ defineEmits<{
                 :key="district"
                 class="px-2.5 py-1 text-xs font-medium leading-[1.4] text-text-muted bg-transparent border border-border-accent rounded-full cursor-pointer transition-[background,color,border-color] duration-150 whitespace-nowrap hover:bg-accent-hover hover:text-text-base hover:border-[var(--ui-primary)]"
                 :class="{
-                    'bg-accent-tint !text-[var(--ui-primary)] !border-[var(--ui-primary)]': modelValue === district
+                    'bg-accent-tint !text-[var(--ui-primary)] !border-[var(--ui-primary)]':
+                        modelValue === district
                 }"
                 type="button"
                 @click="$emit('update:modelValue', modelValue === district ? null : district)"
