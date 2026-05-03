@@ -1,5 +1,7 @@
 import type { SavedSection } from '#shared/types/route'
+import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { UserPace } from '#shared/types/user-route'
+import type { SectionPointRange } from '~/entities/route/lib/useRouteDrawDraft'
 import { length as turfLength, lineString } from '@turf/turf'
 
 /** 초를 "M'SS\"" 형식으로 변환 (예: 330 → "5'30\"") */
@@ -21,6 +23,17 @@ export const formatTime = (totalSeconds: number): string => {
 export const calculateSectionDistance = (section: SavedSection): number => {
     if (!section.geom?.coordinates || section.geom.coordinates.length < 2) return 0
     const line = lineString(section.geom.coordinates)
+    return turfLength(line, { units: 'kilometers' })
+}
+
+/** 포인트 배열과 범위로부터 구간 거리를 계산한다 (km). 그리기 모드용. */
+export const calculateRangeDistance = (
+    positions: GeoJsonPosition[],
+    range: SectionPointRange
+): number => {
+    const coords = positions.slice(range.start, range.end + 1)
+    if (coords.length < 2) return 0
+    const line = lineString(coords.map((c) => [c[0], c[1]]))
     return turfLength(line, { units: 'kilometers' })
 }
 

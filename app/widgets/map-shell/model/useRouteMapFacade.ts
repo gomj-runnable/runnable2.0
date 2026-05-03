@@ -347,13 +347,20 @@ export const useRouteMapFacade = (
 
         try {
             const { routeDraftPayload, sectionPayloads } = buildSavePayload()
+            const editId = store.editingRouteId.value
 
-            const saveResult = (await saveEffect.saveRoute(routeDraftPayload, sectionPayloads)) as {
-                route: { routeId: string }
+            if (editId) {
+                await saveEffect.updateRoute(editId, routeDraftPayload, sectionPayloads)
+            } else {
+                const saveResult = (await saveEffect.saveRoute(
+                    routeDraftPayload,
+                    sectionPayloads
+                )) as {
+                    route: { routeId: string }
+                }
+                await facadeOptions?.onAfterSave?.(saveResult.route.routeId)
             }
-            const savedRouteId = saveResult.route.routeId
 
-            await facadeOptions?.onAfterSave?.(savedRouteId)
             await listEffect.fetchRoutes()
 
             store.isRouteSaveModalOpen.value = false
@@ -361,8 +368,8 @@ export const useRouteMapFacade = (
             showRouteInfoGuide.value = false
             store.activeNav.value = '목록'
             notification.notify({
-                title: '저장 완료',
-                message: '경로가 저장되었습니다.',
+                title: editId ? '수정 완료' : '저장 완료',
+                message: editId ? '경로가 수정되었습니다.' : '경로가 저장되었습니다.',
                 tone: NotificationToneEnum.SUCCESS
             })
         } catch (error) {
@@ -437,6 +444,7 @@ export const useRouteMapFacade = (
         openSaveModal: () => drawEffect.handleDrawSave(),
         updateSectionAttr: drawEffect.handleUpdateSectionAttr,
         removeSection: drawEffect.handleRemoveSection,
+        addSection: drawEffect.handleAddSection,
         addPoiToSection,
         removePoiFromSection
     })
@@ -445,6 +453,7 @@ export const useRouteMapFacade = (
         open: store.isRouteSaveModalOpen,
         routeForm: store.routeForm,
         routeDistance: store.routeDistance,
+        editingRouteId: store.editingRouteId,
         confirm: confirmSave
     })
 

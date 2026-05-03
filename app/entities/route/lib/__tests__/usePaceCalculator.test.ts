@@ -4,7 +4,8 @@ import {
     formatTime,
     calculateSectionDistance,
     calculateTotalTime,
-    calculateTotalDistance
+    calculateTotalDistance,
+    calculateRangeDistance
 } from '~/entities/route/lib/usePaceCalculator'
 import type { SavedSection } from '#shared/types/route'
 
@@ -142,5 +143,35 @@ describe('calculateTotalTime', () => {
         const pace = 300
         const expected = Math.round(pace * distKm)
         expect(calculateTotalTime([section], { 'sec-test': { pace } as any })).toBe(expected)
+    })
+})
+
+// ─── calculateRangeDistance ──────────────────────────────────────────────
+describe('calculateRangeDistance', () => {
+    it('포인트가 2개 미만이면 0을 반환한다', () => {
+        const positions = [[127.0, 37.5, 0]] as [number, number, number][]
+        expect(calculateRangeDistance(positions, { start: 0, end: 0 })).toBe(0)
+    })
+
+    it('두 지점 사이의 거리를 km 단위로 반환한다', () => {
+        const positions = [
+            [126.977, 37.5665, 0],
+            [126.9882, 37.5665, 0]
+        ] as [number, number, number][]
+        const dist = calculateRangeDistance(positions, { start: 0, end: 1 })
+        expect(dist).toBeGreaterThan(0)
+        expect(dist).toBeLessThan(5)
+    })
+
+    it('범위로 슬라이스된 구간만 계산한다', () => {
+        const positions = [
+            [126.977, 37.5665, 0],
+            [126.98, 37.5665, 0],
+            [126.983, 37.5665, 0],
+            [126.9882, 37.5665, 0]
+        ] as [number, number, number][]
+        const partDist = calculateRangeDistance(positions, { start: 0, end: 1 })
+        const fullDist = calculateRangeDistance(positions, { start: 0, end: 3 })
+        expect(fullDist).toBeGreaterThan(partDist)
     })
 })

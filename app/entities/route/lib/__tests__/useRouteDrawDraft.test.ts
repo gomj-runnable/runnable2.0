@@ -6,6 +6,7 @@ import {
     updateSectionDraftAttr,
     removeSectionDraftAttr,
     mergeSectionPointRanges,
+    splitSectionPointRange,
     syncSectionAttrs,
     type SectionPointRange
 } from '~/entities/route/lib/useRouteDrawDraft'
@@ -250,5 +251,46 @@ describe('syncSectionAttrs', () => {
         const result = syncSectionAttrs(attrs, ranges)
         expect(result[0]!.name).toBe('유지됨')
         expect(result[0]!.comment).toBe('코멘트')
+    })
+})
+
+// ─── splitSectionPointRange ─────────────────────────────────────────────
+describe('splitSectionPointRange', () => {
+    it('구간을 중간 지점에서 둘로 분할한다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 4 }]
+        const result = splitSectionPointRange(ranges, 0)
+
+        expect(result).toHaveLength(2)
+        expect(result[0]).toEqual({ start: 0, end: 2 })
+        expect(result[1]).toEqual({ start: 2, end: 4 })
+    })
+
+    it('포인트가 2개 미만인 구간은 분할하지 않는다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 1 }]
+        const result = splitSectionPointRange(ranges, 0)
+
+        expect(result).toHaveLength(1)
+    })
+
+    it('여러 구간 중 특정 구간만 분할한다', () => {
+        const ranges: SectionPointRange[] = [
+            { start: 0, end: 2 },
+            { start: 2, end: 6 },
+            { start: 6, end: 8 }
+        ]
+        const result = splitSectionPointRange(ranges, 1)
+
+        expect(result).toHaveLength(4)
+        expect(result[0]).toEqual({ start: 0, end: 2 })
+        expect(result[1]).toEqual({ start: 2, end: 4 })
+        expect(result[2]).toEqual({ start: 4, end: 6 })
+        expect(result[3]).toEqual({ start: 6, end: 8 })
+    })
+
+    it('범위 밖 인덱스는 원본을 반환한다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 4 }]
+        const result = splitSectionPointRange(ranges, 5)
+
+        expect(result).toEqual(ranges)
     })
 })
