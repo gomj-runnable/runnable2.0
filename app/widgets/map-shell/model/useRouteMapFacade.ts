@@ -462,7 +462,8 @@ export const useRouteMapFacade = (
         filteredRoutes,
         selectedRouteId: store.selectedRouteId,
         select: selectRoute,
-        download: downloadRouteGpx
+        download: downloadRouteGpx,
+        refresh: () => listEffect.fetchRoutes()
     })
 
     const elevationChart = reactive({

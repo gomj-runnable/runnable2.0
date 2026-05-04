@@ -517,6 +517,7 @@ const handleExploreSelect = async (routeId: string) => {
 const handleExploreImport = async (routeId: string) => {
     try {
         await $fetch(`/api/routes/fork/${routeId}`, { method: 'POST' })
+        await routeList.refresh()
         notification.notify({
             title: '경로 가져오기 완료',
             message: '내 경로 목록에 추가되었습니다.',
