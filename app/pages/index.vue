@@ -46,13 +46,7 @@ import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
 import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
 import SecondPanel from '~/widgets/right-panel/ui/SecondPanel.vue'
-import { useSectionInfoStore } from '~/entities/route/model/useSectionInfoStore'
-import {
-    calculateTotalDistance,
-    calculateTotalTime,
-    calculateRangeDistance,
-    formatTime
-} from '~/entities/route/lib/usePaceCalculator'
+import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
 import { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
 import { useElevationLayerSideeffect } from '~/features/elevation-layer/api/useElevationLayerSideeffect'
 import { useGradientStore } from '~/entities/gradient/model/useGradientStore'
@@ -232,109 +226,6 @@ const cameraEffect = useCameraSideeffect({ viewer, ...camera })
 const boundary = useBoundaryStore()
 const boundaryEffect = useBoundarySideeffect({ viewer })
 
-// ─── 구간 정보 ──────────────────────────────────────────────────
-const sectionInfo = useSectionInfoStore()
-
-const sectionDistances = computed(() => {
-    const positions = routeDrawStore.drawnPositions.value
-    const ranges = routeDrawStore.sectionPointRanges.value
-    if (!positions?.length || !ranges.length) return []
-    return ranges.map((range) => calculateRangeDistance(positions, range))
-})
-
-const sectionTotalDistance = computed(() => calculateTotalDistance(sectionInfo.sections.value))
-const sectionTotalTime = computed(() =>
-    formatTime(calculateTotalTime(sectionInfo.sections.value, sectionInfo.userPaces.value))
-)
-
-// ─── Step 네비게이션 (경로목록 → 구간정보) ─────────────────────────
-const showStepBackConfirm = ref(false)
-
-/** SlideOver 제목: 구간정보가 열려있으면 덮어쓴다 */
-const slideOverTitle = computed(() => {
-    if (
-        sectionInfo.isOpen.value &&
-        (slideOver.current.value === NavKey.LIST || slideOver.current.value === NavKey.EXPLORE)
-    ) {
-        return sectionInfo.panelTitle.value
-    }
-    return slideOver.meta.value.title
-})
-const slideOverDescription = computed(() => {
-    if (
-        sectionInfo.isOpen.value &&
-        (slideOver.current.value === NavKey.LIST || slideOver.current.value === NavKey.EXPLORE)
-    ) {
-        return '구간별 페이스·짐 무게·전략을 설정합니다'
-    }
-    return slideOver.meta.value.description
-})
-
-/** 구간정보 → 경로목록으로 돌아가기 (항상 경고) */
-const handleStepBack = () => {
-    showStepBackConfirm.value = true
-}
-const confirmStepBack = () => {
-    showStepBackConfirm.value = false
-    sectionInfo.close()
-}
-
-/** 선택 경로가 바뀌면 기존 시뮬레이션을 즉시 정지한다. */
-const stopSimulationForRouteChange = () => {
-    if (!simulation.playbackState.value.isStopped) {
-        simulationEffect.stopPlayback()
-    }
-}
-
-const handleRouteSelect = async (routeId: string) => {
-    stopSimulationForRouteChange()
-    const sections = await routeList.select(routeId)
-    if (sections) {
-        sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
-    }
-}
-
-/** 목록에서 내 경로를 수정 모드로 열어 그리기 탭으로 전환한다 */
-const handleRouteEdit = async (routeId: string) => {
-    stopSimulationForRouteChange()
-    const sections = await routeList.select(routeId)
-    if (!sections?.length) return
-
-    const route = routeList.filteredRoutes.find((r: any) => r.routeId === routeId)
-    routeDrawStore.editingRouteId.value = routeId
-    routeDrawStore.routeForm.value = {
-        title: route?.title ?? '',
-        description: route?.description ?? ''
-    }
-
-    // 그리기 탭으로 전환 (드로잉은 시작하지 않음 - 기존 데이터로 로드)
-    activeNav.value = '그리기'
-}
-
-// 경로 선택/해제 시 경로정보 로드/정리
-watch(
-    () => routeList.selectedRouteId,
-    (routeId) => {
-        if (routeId) {
-            routeInfoEffect.fetchRouteInfos(routeId)
-        } else {
-            routeInfoStore.clearRouteInfos()
-            routeInfoEffect.clearMarkers()
-        }
-    }
-)
-
-// 경로 폴리라인이 지워지면 로컬 경로정보도 함께 정리
-watch(
-    () => routeDrawStore.drawnPositions.value,
-    (positions) => {
-        if (!positions) {
-            routeInfoStore.clearLocalRouteInfos()
-            routeInfoEffect.clearMarkers()
-        }
-    }
-)
-
 // ─── 고도 시각화 ────────────────────────────────────────────────
 const elevation = useElevationLayerStore()
 const elevationEffect = useElevationLayerSideeffect({
@@ -389,6 +280,31 @@ const explore = useExploreSearchSideeffect()
 
 const simulation = useSimulationStore()
 const simulationEffect = useSimulationSideeffect({ viewer })
+
+// ─── 구간 정보 + 경로 선택·수정 흐름 ───────────────────────────────
+const {
+    sectionInfo,
+    sectionDistances,
+    sectionTotalDistance,
+    sectionTotalTime,
+    showStepBackConfirm,
+    slideOverTitle,
+    slideOverDescription,
+    handleStepBack,
+    confirmStepBack,
+    stopSimulationForRouteChange,
+    handleRouteSelect,
+    handleRouteEdit
+} = useRouteSelectionFlow({
+    routeDrawStore,
+    routeList,
+    slideOver,
+    activeNav,
+    simulation,
+    simulationEffect,
+    routeInfoStore,
+    routeInfoEffect
+})
 
 const weatherRecommend = useWeatherRecommendStore()
 const weatherRecommendEffect = useWeatherRecommendSideeffect()
