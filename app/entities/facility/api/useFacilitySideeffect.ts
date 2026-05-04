@@ -1,20 +1,18 @@
 import type { ShallowRef } from 'vue'
-import type { Entity, LabelGraphics, PointGraphics } from 'cesium'
+import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import type { CesiumDrawHandler, CesiumRuntime } from '#shared/types/cesium'
+import type { CesiumDrawHandler } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
-import {
-    createClampedPoint,
-    createClampedLabel,
-    createClampedPolyline
-} from '~/entities/route/lib/useGroundClamping'
+import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { usePoiOverlay } from '~/shared/lib/map/usePoiOverlay'
+import type { PoiDto } from '~/shared/lib/map/usePoiOverlay'
 
 /** 시설물 유형별 Cesium Entity 색상 (신호 횡단보도 / 무신호 횡단보도 구분) */
 const CROSSWALK_SIGNAL_COLOR = '#4CAF50'
@@ -47,11 +45,38 @@ interface UseFacilitySideeffectOptions {
 export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => {
     const { viewer, facilities, activeTypes, isLoading, isSearching, onPoiClick } = options
     const camera = useCameraStore()
+    const facilityStore = useFacilityStore()
 
-    /** 유형별 추가된 Entity 참조 보관 (제거 시 사용) */
+    /** 유형별 추가된 Entity 참조 보관 (횡단보도 polyline 전용) */
     const entityMap = new Map<FacilityType, Entity[]>()
-    /** Entity → Facility 역참조 맵 (클릭 시 POI 데이터 추출에 사용) */
+    /** Entity → Facility 역참조 맵 (횡단보도 클릭 시 POI 데이터 추출에 사용) */
     const entityToFacilityMap = new Map<Entity, Facility>()
+
+    /** 유형별 POI ID 목록 (제거 시 사용) */
+    const poiIdMap = new Map<FacilityType, string[]>()
+    /** POI ID → Facility 역참조 맵 */
+    const poiToFacilityMap = new Map<string, Facility>()
+
+    /** POI(음수대/물품보관함/화장실) HTML Overlay */
+    const poiOverlay = usePoiOverlay(viewer, {
+        onClick: (dto) => {
+            const facility = poiToFacilityMap.get(dto.id)
+            if (!facility) return
+
+            if (onPoiClick) {
+                const poi = facilityToPoiDraft(facility)
+                if (poi) {
+                    onPoiClick(poi)
+                    return
+                }
+            }
+            facilityStore.selectedFacility.value = facility
+        },
+        colorResolver: (dto) => {
+            const facility = poiToFacilityMap.get(dto.id)
+            return facility ? getLayerColor(facility.type) : '#2196F3'
+        }
+    })
 
     /** 중복 요청 방지 플래그 */
     let fetchInFlight = false
@@ -83,7 +108,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         }
     }
 
-    const addCrosswalkEntity = (v: CesiumViewer, _C: CesiumRuntime, facility: Facility) => {
+    const addCrosswalkEntity = (v: CesiumViewer, facility: Facility) => {
         if (facility.polyline && facility.polyline.length >= 2) {
             const color = facility.hasSignal ? CROSSWALK_SIGNAL_COLOR : CROSSWALK_NO_SIGNAL_COLOR
             const positions = facility.polyline.map(
@@ -104,26 +129,18 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         return null
     }
 
-    const addPointEntity = (v: CesiumViewer, C: CesiumRuntime, facility: Facility) => {
-        const color = getLayerColor(facility.type)
-        const point = createClampedPoint(C, {
-            color: toCesiumColor(C, color)
-        }) as ConstructorParameters<typeof PointGraphics>[0]
-        const label = createClampedLabel(C, {
-            text: facility.name
-        }) as ConstructorParameters<typeof LabelGraphics>[0]
-
-        return v.entities.add({
-            name: facility.name,
-            position: C.Cartesian3.fromDegrees(facility.lng, facility.lat),
-            point,
-            label
-        })
-    }
+    /** Facility → PoiDto 변환 */
+    const toPoiDto = (facility: Facility): PoiDto => ({
+        id: facility.id,
+        lon: facility.lng,
+        lat: facility.lat,
+        name: facility.name,
+        descript: facility.description ?? ''
+    })
 
     /**
-     * 특정 유형의 시설물 엔티티를 지도에 추가한다.
-     * 기존에 표시 중인 같은 유형의 엔티티는 먼저 제거한다.
+     * 특정 유형의 시설물을 지도에 추가한다.
+     * 횡단보도는 Entity(polyline), 나머지는 HTML Overlay(POI 핀)로 렌더링한다.
      *
      * @param type - 표시할 시설물 유형
      */
@@ -131,54 +148,68 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         const v = viewer.value
         if (!v) return
 
-        const C = getCesiumRuntime()
         removeLayer(type)
 
         const items = facilities.value.filter((f) => f.type === type)
-        const entities: Entity[] = []
 
-        for (const facility of items) {
-            const entity =
-                facility.type === 'crosswalk'
-                    ? addCrosswalkEntity(v, C, facility)
-                    : addPointEntity(v, C, facility)
-
-            if (entity) {
-                entities.push(entity)
-                entityToFacilityMap.set(entity, facility)
+        if (type === 'crosswalk') {
+            const entities: Entity[] = []
+            for (const facility of items) {
+                const entity = addCrosswalkEntity(v, facility)
+                if (entity) {
+                    entities.push(entity)
+                    entityToFacilityMap.set(entity, facility)
+                }
             }
+            entityMap.set(type, entities)
+        } else {
+            const ids: string[] = []
+            for (const facility of items) {
+                const dto = toPoiDto(facility)
+                poiToFacilityMap.set(dto.id, facility)
+                poiOverlay.showPoi(dto)
+                ids.push(dto.id)
+            }
+            poiIdMap.set(type, ids)
         }
-
-        entityMap.set(type, entities)
     }
 
     /**
-     * 특정 유형의 시설물 엔티티를 지도에서 모두 제거한다.
+     * 특정 유형의 시설물을 지도에서 모두 제거한다.
      *
      * @param type - 제거할 시설물 유형
      */
     const removeLayer = (type: FacilityType) => {
         const v = viewer.value
 
-        if (!v) return
-
+        // 횡단보도: Entity 제거
         const entities = entityMap.get(type)
-
-        if (entities) {
+        if (entities && v) {
             for (const entity of entities) {
                 v.entities.remove(entity)
                 entityToFacilityMap.delete(entity)
             }
-
             entityMap.delete(type)
+        }
+
+        // POI Overlay 제거
+        const ids = poiIdMap.get(type)
+        if (ids) {
+            for (const id of ids) {
+                poiOverlay.unshowPoi({ id })
+                poiToFacilityMap.delete(id)
+            }
+            poiIdMap.delete(type)
         }
     }
 
-    /** 모든 유형의 시설물 엔티티를 지도에서 일괄 제거한다. */
+    /** 모든 유형의 시설물을 지도에서 일괄 제거한다. */
     const removeAllLayers = () => {
-        for (const type of entityMap.keys()) {
+        for (const type of ALL_FACILITY_TYPES) {
             removeLayer(type)
         }
+        poiOverlay.clear()
+        poiToFacilityMap.clear()
     }
 
     /**
@@ -201,9 +232,8 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
         }
     }
 
-    /** Cesium 화면 클릭 → 시설물 엔티티 감지 → 팝업 표시 또는 POI 연결 */
+    /** Cesium 화면 클릭 → 횡단보도 엔티티 감지 → 팝업 표시 또는 POI 연결 */
     let clickHandler: CesiumDrawHandler | null = null
-    const facilityStore = useFacilityStore()
 
     watch(
         viewer,
@@ -259,7 +289,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
         for (const type of ALL_FACILITY_TYPES) {
             const shouldShow = current.has(type)
-            const isShown = entityMap.has(type)
+            const isShown = entityMap.has(type) || poiIdMap.has(type)
 
             if (shouldShow && !isShown) {
                 showLayer(type)
