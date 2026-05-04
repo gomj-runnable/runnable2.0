@@ -133,7 +133,12 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
 
             // 동이 선택되면 해당 동만 렌더링
             if (district && dong) {
-                await renderDong(district, dong)
+                store.isLoading.value = true
+                try {
+                    await renderDong(district, dong)
+                } finally {
+                    store.isLoading.value = false
+                }
                 return
             }
 
@@ -142,7 +147,12 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
                 removeAll()
                 const gu = store.districts.value.find((d) => d.name === district)
                 if (gu) {
-                    await Promise.all(gu.dongs.map((d) => renderDong(district, d.name)))
+                    store.isLoading.value = true
+                    try {
+                        await Promise.all(gu.dongs.map((d) => renderDong(district, d.name)))
+                    } finally {
+                        store.isLoading.value = false
+                    }
                 }
             }
         }
