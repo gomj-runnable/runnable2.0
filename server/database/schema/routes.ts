@@ -15,6 +15,7 @@ export const routes = pgTable(
         lowHeight: numeric('low_height', { precision: 10, scale: 2 }),
         distance: numeric('distance', { precision: 12, scale: 2 }),
         isPublic: boolean('is_public').notNull().default(true),
+        sourceRouteId: text('source_route_id'),
         sgg: text('sgg'), // text+JSON: 비정규화 필터용, 조인 테이블 없이 단순 조회
         emd: text('emd'),
         createdAt: timestamp('created_at').notNull().defaultNow(),
