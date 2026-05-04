@@ -67,6 +67,12 @@ const hasSearchableActive = computed(() =>
                 :icon="layer.icon"
                 size="sm"
                 class="font-bold rounded-full"
+                :loading="
+                    isLoading &&
+                    (layer.type === 'sidewalk'
+                        ? sidewalk.isActive.value
+                        : activeTypes.has(layer.type))
+                "
                 :variant="
                     (
                         layer.type === 'sidewalk'
