@@ -178,22 +178,19 @@ const POI_ICON: Record<string, string> = {
         <UModal v-model:open="showSplitGuide" title="구간 나누기">
             <template #body>
                 <div class="flex flex-col gap-3 text-sm text-[var(--ui-text-muted)]">
-                    <p class="font-medium text-[var(--ui-text-highlighted)]">
-                        구간을 나누는 방법
-                    </p>
+                    <p class="font-medium text-[var(--ui-text-highlighted)]">구간을 나누는 방법</p>
                     <ol class="list-decimal list-inside flex flex-col gap-2">
                         <li>
                             <strong>분할 지점 선택</strong> — 지도 위에 표시된
-                            <span class="text-[var(--ui-primary)]">작은 점</span>을
-                            클릭하여 구간을 나눌 위치를 선택합니다.
+                            <span class="text-[var(--ui-primary)]">작은 점</span>을 클릭하여 구간을
+                            나눌 위치를 선택합니다.
                         </li>
                         <li>
-                            <strong>위치 조정</strong> — 점을 드래그하면 경로 포인트의
-                            위치를 조정할 수 있습니다.
+                            <strong>위치 조정</strong> — 점을 드래그하면 경로 포인트의 위치를 조정할
+                            수 있습니다.
                         </li>
                         <li>
-                            <strong>저장</strong> — 상단 저장 버튼을 눌러 변경사항을
-                            적용합니다.
+                            <strong>저장</strong> — 상단 저장 버튼을 눌러 변경사항을 적용합니다.
                         </li>
                     </ol>
                     <p class="text-xs text-[var(--ui-text-dimmed)]">

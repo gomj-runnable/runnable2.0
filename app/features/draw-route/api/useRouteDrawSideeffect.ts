@@ -140,7 +140,8 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             if (!r || pointIndex <= r.start || pointIndex >= r.end) {
                 options.notify({
                     title: '구간 나누기 불가',
-                    message: '구간의 시작/끝 포인트에서는 나눌 수 없습니다. 중간 포인트를 선택하세요.',
+                    message:
+                        '구간의 시작/끝 포인트에서는 나눌 수 없습니다. 중간 포인트를 선택하세요.',
                     tone: NotificationToneEnum.WARNING
                 })
                 return
@@ -161,19 +162,15 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         }, Cesium.ScreenSpaceEventType.LEFT_DOWN)
 
         // MOUSE_MOVE → 드래그 중 위치 갱신 (시각적)
-        splitHandler!.setInputAction(
-            (movement: { endPosition?: unknown }) => {
-                if (!dragEntity || dragPointIndex === null) return
+        splitHandler!.setInputAction((movement: { endPosition?: unknown }) => {
+            if (!dragEntity || dragPointIndex === null) return
 
-                const cartesian =
-                    viewer.scene.pickPosition?.(movement.endPosition) ??
-                    viewer.camera.pickEllipsoid?.(movement.endPosition, Cesium.Ellipsoid.WGS84)
-                if (!cartesian) return
-
-                ;(dragEntity as any).position = cartesian
-            },
-            Cesium.ScreenSpaceEventType.MOUSE_MOVE
-        )
+            const cartesian =
+                viewer.scene.pickPosition?.(movement.endPosition) ??
+                viewer.camera.pickEllipsoid?.(movement.endPosition, Cesium.Ellipsoid.WGS84)
+            if (!cartesian) return
+            ;(dragEntity as any).position = cartesian
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
 
         // LEFT_UP → 드래그 종료, 좌표 반영
         splitHandler!.setInputAction(() => {

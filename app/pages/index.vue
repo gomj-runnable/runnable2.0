@@ -279,7 +279,6 @@ const confirmStepBack = () => {
     sectionInfo.close()
 }
 
-
 /** 선택 경로가 바뀌면 기존 시뮬레이션을 즉시 정지한다. */
 const stopSimulationForRouteChange = () => {
     if (!simulation.playbackState.value.isStopped) {
@@ -755,9 +754,7 @@ watch(activeNav, (next) => {
                                 name="i-lucide-chevron-right"
                                 class="text-[var(--ui-text-dimmed)] size-3"
                             />
-                            <span
-                                class="text-sm font-medium text-[var(--ui-text-highlighted)]"
-                            >
+                            <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">
                                 구간정보
                             </span>
                         </div>
@@ -831,9 +828,7 @@ watch(activeNav, (next) => {
                                 name="i-lucide-chevron-right"
                                 class="text-[var(--ui-text-dimmed)] size-3"
                             />
-                            <span
-                                class="text-sm font-medium text-[var(--ui-text-highlighted)]"
-                            >
+                            <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">
                                 구간정보
                             </span>
                         </div>
