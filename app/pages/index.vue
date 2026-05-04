@@ -21,43 +21,12 @@ import WeatherOverlay from '~/features/weather-overlay/ui/WeatherOverlay.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
 import ExplorePanel from '~/features/explore/ui/ExplorePanel.vue'
-import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
-import {
-    findNearestSection,
-    validatePoiDistance,
-    generatePoiComment
-} from '~/entities/route/lib/usePoiSnapping'
-import { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
-import { useWeatherSideeffect } from '~/features/weather-overlay/api/useWeatherSideeffect'
-import { useWeatherSourceStrategy } from '~/entities/weather/model/useWeatherSourceStrategy'
-import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
-import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
-import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
-import { useAuthStore } from '~/entities/user/model/useAuthStore'
-import { useAuthSideeffect } from '~/entities/user/api/useAuthSideeffect'
-import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
 import { FILTER_ALL } from '~/features/explore/model/useExploreFilterStore'
-import { useCameraStore } from '~/shared/model/useCameraStore'
-import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
-import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
-import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
-import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
-import SecondPanel from '~/widgets/right-panel/ui/SecondPanel.vue'
-import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
-import { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
-import { useElevationLayerSideeffect } from '~/features/elevation-layer/api/useElevationLayerSideeffect'
-import { useGradientStore } from '~/entities/gradient/model/useGradientStore'
-import { useGradientSideeffect } from '~/entities/gradient/api/useGradientSideeffect'
 import { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSideeffect'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
-import { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
-import { useSimulationSideeffect } from '~/features/simulation/api/useSimulationSideeffect'
-import { useWeatherRecommendStore } from '~/entities/weather/model/useWeatherRecommendStore'
-import { useWeatherRecommendSideeffect } from '~/features/weather-overlay/api/useWeatherRecommendSideeffect'
-import { useMapInit } from '~/shared/lib/map/useMapInit'
 import { useExploreRouteActions } from '~/features/explore/model/useExploreRouteActions'
 import RouteInfoInputForm from '~/entities/route/ui/RouteInfoInputForm.vue'
 import RouteInfoMarkerPopup from '~/entities/route/ui/RouteInfoMarkerPopup.vue'
@@ -65,10 +34,13 @@ import FacilityMarkerPopup from '~/entities/facility/ui/FacilityMarkerPopup.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
-import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useMobileDetect } from '~/shared/lib/useMobileDetect'
 import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
 import { useFabGroups } from '~/widgets/map-shell/model/useFabGroups'
+import { useMapFeatureInit } from '~/widgets/map-shell/model/useMapFeatureInit'
+import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
+import SecondPanel from '~/widgets/right-panel/ui/SecondPanel.vue'
+import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
 definePageMeta({ ssr: false })
@@ -81,18 +53,6 @@ useHead({
 
 const notification = useNotificationStore()
 
-const toast = useToast()
-
-const { init } = useMapInit({
-    onBuildingCorrected: () => {
-        toast.add({
-            title: '위치 보정',
-            description: '건물 위를 선택하여 인근 지면으로 위치가 보정되었습니다.',
-            icon: 'i-lucide-info',
-            color: 'info'
-        })
-    }
-})
 /** Cesium 뷰어 인스턴스. `onMounted` 이후 `window.viewer`로 할당된다. */
 const viewer = shallowRef<CesiumViewer | null>(null)
 
@@ -122,6 +82,47 @@ const {
 
 const routeDrawStore = useRouteDrawStore()
 
+// ─── 지도 기능 초기화 (인증·날씨·편의시설·카메라·경계·고도·경사·탐색·시뮬레이션) ──
+
+const {
+    authStore,
+    authEffect,
+    weather,
+    weatherSources,
+    facility,
+    sidewalk,
+    facilityEffect,
+    camera,
+    boundary,
+    boundaryEffect,
+    elevation,
+    elevationEffect,
+    gradient,
+    gradientEffect,
+    explore,
+    simulation,
+    simulationEffect,
+    weatherRecommend,
+    weatherRecommendEffect
+} = useMapFeatureInit({
+    viewer,
+    drawing,
+    routeDrawStore,
+    notification,
+    hideRoutePolylines,
+    showRoutePolylines
+})
+
+// ─── SlideOver 네비게이션 ────────────────────────────────────────
+
+const slideOver = useSlideOverNav(activeNav)
+const authContentRef = ref<InstanceType<typeof AuthSlideOverContent> | null>(null)
+
+/** SlideOver에서 로그인 탭 진입 시 폼 초기화 */
+watch(slideOver.current, (nav) => {
+    if (nav === NavKey.AUTH) authContentRef.value?.reset()
+})
+
 // ─── 키보드 단축키 ──────────────────────────────────────────────
 
 defineShortcuts({
@@ -140,108 +141,6 @@ defineShortcuts({
         },
         usingInput: true
     }
-})
-
-// ─── 인증 ────────────────────────────────────────────────────────
-
-const authStore = useAuthStore()
-const authEffect = useAuthSideeffect()
-
-// ─── SlideOver 네비게이션 ────────────────────────────────────────
-
-const slideOver = useSlideOverNav(activeNav)
-const authContentRef = ref<InstanceType<typeof AuthSlideOverContent> | null>(null)
-
-/** SlideOver에서 로그인 탭 진입 시 폼 초기화 */
-watch(slideOver.current, (nav) => {
-    if (nav === NavKey.AUTH) authContentRef.value?.reset()
-})
-
-// ─── 날씨·편의시설 ───────────────────────────────────────────────
-
-const weather = useWeatherStore()
-const weatherSources = useWeatherSourceStrategy()
-const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
-
-const facility = useFacilityStore()
-const sidewalk = useSidewalkStore()
-const facilityEffect = useFacilitySideeffect({
-    viewer,
-    ...facility,
-    onPoiClick: (poi) => {
-        // 드로잉 상태가 아니면 무시
-        if (!drawing.sectionDraft) return
-
-        const ranges = routeDrawStore.sectionPointRanges.value
-        const positions = routeDrawStore.drawnPositions.value
-        if (!positions?.length || !ranges.length) return
-
-        // 구간별 좌표 추출
-        const sectionGeometries = ranges.map((range) => ({
-            geom: {
-                coordinates: positions.slice(range.start, range.end + 1)
-            }
-        }))
-
-        const result = findNearestSection(poi.geom, sectionGeometries)
-        if (!result) return
-
-        const status = validatePoiDistance(result.distanceMeters)
-
-        if (status === 'blocked') {
-            notification.notify({
-                title: '연결 불가',
-                message: `선택한 시설물이 경로에서 ${Math.round(result.distanceMeters)}m 떨어져 있어 연결할 수 없습니다. (최대 500m)`,
-                tone: NotificationToneEnum.ERROR
-            })
-            return
-        }
-
-        if (status === 'warning') {
-            notification.notify({
-                title: '거리 경고',
-                message: `선택한 시설물이 경로에서 ${Math.round(result.distanceMeters)}m 떨어져 있습니다.`,
-                tone: NotificationToneEnum.WARNING
-            })
-        }
-
-        const enrichedPoi = {
-            ...poi,
-            description: generatePoiComment(poi.name, result.distanceMeters)
-        }
-
-        drawing.addPoiToSection(result.sectionIndex, enrichedPoi)
-    }
-})
-useSidewalkSideeffect({ viewer })
-
-// ─── 카메라 정보 ─────────────────────────────────────────────────
-
-const camera = useCameraStore()
-const cameraEffect = useCameraSideeffect({ viewer, ...camera })
-
-// ─── 행정경계 ────────────────────────────────────────────────────
-
-const boundary = useBoundaryStore()
-const boundaryEffect = useBoundarySideeffect({ viewer })
-
-// ─── 고도 시각화 ────────────────────────────────────────────────
-const elevation = useElevationLayerStore()
-const elevationEffect = useElevationLayerSideeffect({
-    viewer,
-    isElevationVisible: elevation.isElevationVisible
-})
-
-// ─── 경사도 시각화 ───────────────────────────────────────────────
-const gradient = useGradientStore()
-const gradientEffect = useGradientSideeffect({
-    viewer,
-    isGradientVisible: gradient.isGradientVisible,
-    drawnPositions: routeDrawStore.drawnPositions,
-    setSegments: gradient.setSegments,
-    setDifficulty: gradient.setDifficulty,
-    hideRoutePolylines,
-    showRoutePolylines
 })
 
 // ─── 추천 경로 토글 ──────────────────────────────────────────────
@@ -274,12 +173,6 @@ const handleRouteInfoSubmit = async (payload: { name: string; description: strin
     }
 }
 
-// ─── 탐색 (overlayContext보다 앞에 선언 필요) ───────────────────
-const explore = useExploreSearchSideeffect()
-
-const simulation = useSimulationStore()
-const simulationEffect = useSimulationSideeffect({ viewer })
-
 // ─── 구간 정보 + 경로 선택·수정 흐름 ───────────────────────────────
 const {
     sectionInfo,
@@ -304,9 +197,6 @@ const {
     routeInfoStore,
     routeInfoEffect
 })
-
-const weatherRecommend = useWeatherRecommendStore()
-const weatherRecommendEffect = useWeatherRecommendSideeffect()
 
 // ─── 시뮬레이션 Drawer ──────────────────────────────────────────
 const isSimDrawerOpen = ref(false)
@@ -366,23 +256,6 @@ const { fabGroups, fabNearbyVisible } = useFabGroups({
     showRouteInfoChip
 })
 
-// ─── 마운트: 지도 초기화 → 날씨·세션 병렬 로드 ──────────────────
-
-onMounted(async () => {
-    await init()
-    viewer.value = window.viewer
-    await Promise.all([
-        districtEffect.init(),
-        initWeather(),
-        authEffect.fetchSession(),
-        cameraEffect.init(),
-        boundaryEffect.init(),
-        elevationEffect.init(),
-        gradientEffect.init(),
-        weatherRecommendEffect.fetchRecommendedRoutes()
-    ])
-})
-
 // ─── 탐색 ────────────────────────────────────────────────────────
 
 const {
@@ -400,6 +273,10 @@ const {
     routeList,
     stopSimulationForRouteChange,
     notification
+})
+
+onMounted(async () => {
+    await districtEffect.init()
 })
 
 /** 인증 성공 시 SlideOver를 닫는다. */
