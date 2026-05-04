@@ -5,78 +5,79 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineNuxtConfig({
-  ssr: false,
+    ssr: false,
 
-  modules: ['@nuxt/eslint', '@nuxt/ui'],
+    modules: ['@nuxt/eslint', '@nuxt/ui'],
 
-  components: false,
+    components: false,
 
-  imports: {
-    dirs: []
-  },
-
-  app: {
-    head: {
-      viewport: 'width=device-width, initial-scale=1, maximum-scale=1'
-    }
-  },
-
-  devtools: {
-    enabled: false
-  },
-
-  css: ['~/assets/css/base/main.css'],
-
-  compatibilityDate: '2025-01-15',
-
-  runtimeConfig: {
-    weatherKor: process.env.WEATHER_KOR ?? '',
-    openData: process.env.OPEN_DATA ?? '',
-    airKoreaKey: process.env.AIR_KOREA_KEY || process.env.OPEN_DATA || '',
-    routeMode: process.env.ROUTE_MODE ?? 'NONE',
-    tmapApi: process.env.TMAP_API ?? '',
-    public: {
-      routeMode: process.env.ROUTE_MODE ?? 'NONE',
+    imports: {
+        dirs: []
     },
-  },
 
-  vite: {
-    plugins: [tailwindcss()],
-    optimizeDeps: {
-      include: [
-        '@nuxt/ui > prosemirror-state',
-        '@nuxt/ui > prosemirror-transform',
-        '@nuxt/ui > prosemirror-model',
-        '@nuxt/ui > prosemirror-view',
-        '@nuxt/ui > prosemirror-gapcursor'
-      ]
-    }
-  },
-
-  eslint: {
-    config: {
-      stylistic: false
-    }
-  },
-
-  routeRules: {
-    '/': { ssr: false }
-  },
-
-  nitro: {
-    routeRules: {
-      '/**': {
-        headers: {
-          'X-Frame-Options': 'DENY',
-          'X-Content-Type-Options': 'nosniff',
-          'Referrer-Policy': 'strict-origin-when-cross-origin',
-          'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)',
+    app: {
+        head: {
+            viewport: 'width=device-width, initial-scale=1, maximum-scale=1'
         }
-      }
     },
-    publicAssets: [
-      { dir: resolve(__dirname, 'lib'), baseURL: '/lib' },
-      { dir: resolve(__dirname, 'static'), baseURL: '/static' }
-    ]
-  }
+
+    devtools: {
+        enabled: false
+    },
+
+    css: ['~/assets/css/base/main.css'],
+
+    compatibilityDate: '2025-01-15',
+
+    runtimeConfig: {
+        weatherKor: process.env.WEATHER_KOR ?? '',
+        openData: process.env.OPEN_DATA ?? '',
+        airKoreaKey: process.env.AIR_KOREA_KEY || process.env.OPEN_DATA || '',
+        routeMode: process.env.ROUTE_MODE ?? 'NONE',
+        tmapApi: process.env.TMAP_API ?? '',
+        public: {
+            routeMode: process.env.ROUTE_MODE ?? 'NONE'
+        }
+    },
+
+    vite: {
+        plugins: [tailwindcss()],
+        optimizeDeps: {
+            include: [
+                '@nuxt/ui > prosemirror-state',
+                '@nuxt/ui > prosemirror-transform',
+                '@nuxt/ui > prosemirror-model',
+                '@nuxt/ui > prosemirror-view',
+                '@nuxt/ui > prosemirror-gapcursor'
+            ]
+        }
+    },
+
+    eslint: {
+        config: {
+            stylistic: false
+        }
+    },
+
+    routeRules: {
+        '/': { ssr: false }
+    },
+
+    nitro: {
+        serverAssets: [{ baseName: 'facilities', dir: './server/data/facilities' }],
+        routeRules: {
+            '/**': {
+                headers: {
+                    'X-Frame-Options': 'DENY',
+                    'X-Content-Type-Options': 'nosniff',
+                    'Referrer-Policy': 'strict-origin-when-cross-origin',
+                    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)'
+                }
+            }
+        },
+        publicAssets: [
+            { dir: resolve(__dirname, 'lib'), baseURL: '/lib' },
+            { dir: resolve(__dirname, 'static'), baseURL: '/static' }
+        ]
+    }
 })
