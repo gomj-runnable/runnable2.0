@@ -44,11 +44,14 @@ function toggleExpand(routeId: string) {
             <li v-for="route in routes" :key="route.routeId">
                 <UCard
                     variant="subtle"
-                    class="cursor-pointer"
+                    class="cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--ui-primary)]"
                     :class="{
                         'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId
                     }"
+                    tabindex="0"
+                    role="button"
                     @click="$emit('select', route.routeId)"
+                    @keydown.enter="$emit('select', route.routeId)"
                 >
                     <template #header>
                         <div class="flex items-center gap-2">
