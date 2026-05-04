@@ -1,6 +1,6 @@
-import type { Facility, FacilityType } from '#shared/types/facility'
+import type { FacilityType } from '#shared/types/facility'
 import type { IFacilityRepository } from './facility.repository'
-import { seoulFacilities } from '../data/facilities'
+import { getAllFacilities } from '../data/facilities'
 import { haversineDistance } from '../utils/haversine'
 
 export const facilityRepository: IFacilityRepository = {
@@ -8,7 +8,8 @@ export const facilityRepository: IFacilityRepository = {
         const latDelta = radius / 111_320
         const lngDelta = radius / (111_320 * Math.cos((lat * Math.PI) / 180))
 
-        return seoulFacilities.filter((f) => {
+        const facilities = await getAllFacilities()
+        return facilities.filter((f) => {
             if (!types.includes(f.type as FacilityType)) return false
             if (Math.abs(f.lat - lat) > latDelta || Math.abs(f.lng - lng) > lngDelta) return false
             return haversineDistance(lat, lng, f.lat, f.lng) <= radius
@@ -16,6 +17,6 @@ export const facilityRepository: IFacilityRepository = {
     },
 
     async findAll() {
-        return seoulFacilities
+        return getAllFacilities()
     }
 }
