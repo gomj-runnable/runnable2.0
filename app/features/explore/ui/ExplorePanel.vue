@@ -21,6 +21,17 @@ defineEmits<{
     /** 추천 모드 토글 */
     recommend: []
 }>()
+
+/** 펼쳐진 카드의 routeId Set */
+const expandedIds = ref<Set<string>>(new Set())
+
+function toggleExpand(routeId: string) {
+    if (expandedIds.value.has(routeId)) {
+        expandedIds.value.delete(routeId)
+    } else {
+        expandedIds.value.add(routeId)
+    }
+}
 </script>
 
 <template>
@@ -52,8 +63,6 @@ defineEmits<{
                 <li v-for="route in routes" :key="route.routeId">
                     <UCard
                         variant="subtle"
-                        :title="route.title"
-                        :description="route.description"
                         class="cursor-pointer"
                         :class="{
                             'ring-2 ring-[var(--ui-primary)]': selectedRouteId === route.routeId
@@ -61,44 +70,65 @@ defineEmits<{
                         @click="$emit('select', route.routeId)"
                     >
                         <template #header>
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
+                            <div class="flex items-center gap-2">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <p
+                                            class="font-semibold text-[var(--ui-text-highlighted)] truncate"
+                                        >
+                                            {{ route.title }}
+                                        </p>
+                                        <span
+                                            v-if="route.authorName"
+                                            class="shrink-0 text-xs font-medium text-[var(--ui-text-muted)] whitespace-nowrap"
+                                        >
+                                            {{ route.authorName }}
+                                        </span>
+                                    </div>
                                     <p
-                                        class="text-lg font-semibold text-[var(--ui-text-highlighted)]"
+                                        class="text-sm mt-0.5 line-clamp-1"
+                                        :class="
+                                            route.description
+                                                ? 'text-[var(--ui-text-muted)]'
+                                                : 'text-[var(--ui-text-dimmed)] italic'
+                                        "
                                     >
-                                        {{ route.title }}
-                                    </p>
-                                    <p
-                                        v-if="route.description"
-                                        class="mt-1 text-sm text-[var(--ui-text-muted)]"
-                                    >
-                                        {{ route.description }}
+                                        {{ route.description || '설명이 없습니다.' }}
                                     </p>
                                 </div>
-                                <span
-                                    v-if="route.authorName"
-                                    class="shrink-0 text-xs font-medium text-[var(--ui-text-muted)] whitespace-nowrap"
-                                >
-                                    {{ route.authorName }}
-                                </span>
+                                <UButton
+                                    :icon="
+                                        expandedIds.has(route.routeId)
+                                            ? 'i-lucide-chevron-up'
+                                            : 'i-lucide-chevron-down'
+                                    "
+                                    variant="ghost"
+                                    color="neutral"
+                                    size="sm"
+                                    square
+                                    aria-label="상세 정보 토글"
+                                    @click.stop="toggleExpand(route.routeId)"
+                                />
                             </div>
                         </template>
 
-                        <UScrollArea
-                            orientation="vertical"
-                            :items="getRouteInfoItems(route)"
-                            :virtualize="{ lanes: 2, gap: 8 }"
-                            :ui="{ root: 'max-h-28' }"
-                        >
-                            <template #default="{ item }">
-                                <div class="flex justify-between text-sm py-0.5">
-                                    <dt class="text-[var(--ui-text-dimmed)]">{{ item.key }}</dt>
-                                    <dd class="font-medium m-0">{{ item.value }}</dd>
-                                </div>
-                            </template>
-                        </UScrollArea>
+                        <template v-if="expandedIds.has(route.routeId)" #default>
+                            <UScrollArea
+                                orientation="vertical"
+                                :items="getRouteInfoItems(route)"
+                                :virtualize="{ lanes: 2, gap: 8 }"
+                                :ui="{ root: 'max-h-28' }"
+                            >
+                                <template #default="{ item }">
+                                    <div class="flex justify-between text-sm py-0.5">
+                                        <dt class="text-[var(--ui-text-dimmed)]">{{ item.key }}</dt>
+                                        <dd class="font-medium m-0">{{ item.value }}</dd>
+                                    </div>
+                                </template>
+                            </UScrollArea>
+                        </template>
 
-                        <template #footer>
+                        <template v-if="expandedIds.has(route.routeId)" #footer>
                             <UButton
                                 icon="i-lucide-folder-input"
                                 variant="outline"
