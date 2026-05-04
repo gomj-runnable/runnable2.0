@@ -16,11 +16,11 @@ const weatherItems = [
     { label: '눈', color: 'rgba(150, 210, 250, 0.6)' }
 ]
 
-const pm10Items = [
-    { label: '좋음 (≤30)', color: 'rgba(100, 200, 100, 0.5)' },
-    { label: '보통 (≤80)', color: 'rgba(250, 220, 50, 0.5)' },
-    { label: '나쁨 (≤150)', color: 'rgba(255, 150, 50, 0.5)' },
-    { label: '매우나쁨 (>150)', color: 'rgba(220, 60, 60, 0.5)' }
+const dustItems = [
+    { label: '좋음', color: 'rgba(100, 200, 100, 0.5)', pm10: '≤30', pm25: '≤15' },
+    { label: '보통', color: 'rgba(250, 220, 50, 0.5)', pm10: '≤80', pm25: '≤35' },
+    { label: '나쁨', color: 'rgba(255, 150, 50, 0.5)', pm10: '≤150', pm25: '≤75' },
+    { label: '매우나쁨', color: 'rgba(220, 60, 60, 0.5)', pm10: '>150', pm25: '>75' }
 ]
 </script>
 
@@ -28,9 +28,9 @@ const pm10Items = [
     <div
         class="bg-(--ui-bg-elevated)/85 border border-(--ui-border) rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-lg min-w-[140px]"
     >
-        <!-- 날씨 레이어 -->
+        <!-- 예보 레이어 -->
         <template v-if="activeLayer?.isWeather">
-            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">날씨</p>
+            <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">예보</p>
             <div class="flex flex-col gap-1">
                 <div
                     v-for="item in weatherItems"
@@ -89,19 +89,28 @@ const pm10Items = [
         <!-- 미세먼지 레이어 -->
         <template v-else-if="activeLayer?.isPm10">
             <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">
-                미세먼지 PM10
+                미세먼지
             </p>
             <div class="flex flex-col gap-1">
+                <!-- 기준치 헤더 -->
+                <div class="flex items-center gap-1 text-[10px] text-meta mb-0.5">
+                    <span class="w-3 shrink-0" />
+                    <span class="w-[52px] shrink-0" />
+                    <span class="w-[38px] text-center">PM10</span>
+                    <span class="w-[38px] text-center">PM2.5</span>
+                </div>
                 <div
-                    v-for="item in pm10Items"
+                    v-for="item in dustItems"
                     :key="item.label"
-                    class="flex items-center gap-1.5 text-xs text-text-muted"
+                    class="flex items-center gap-1 text-xs text-text-muted"
                 >
                     <span
                         class="w-3 h-3 rounded-lg border border-(--ui-border) shrink-0"
                         :style="{ background: item.color }"
                     />
-                    {{ item.label }}
+                    <span class="w-[52px] shrink-0">{{ item.label }}</span>
+                    <span class="w-[38px] text-center text-[10px] text-meta">{{ item.pm10 }}</span>
+                    <span class="w-[38px] text-center text-[10px] text-meta">{{ item.pm25 }}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-xs text-text-muted">
                     <span
@@ -109,6 +118,9 @@ const pm10Items = [
                     />
                     데이터 없음
                 </div>
+                <p class="text-[10px] text-meta mt-1 leading-tight">
+                    둘 중 하나라도 상위 단계이면 해당 등급 적용
+                </p>
             </div>
         </template>
     </div>

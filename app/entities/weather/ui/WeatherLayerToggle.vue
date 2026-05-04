@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
-import { useWeatherSourceStrategy, WEATHER_SOURCES } from '../model/useWeatherSourceStrategy'
 
 const props = defineProps<{
     /** 현재 활성화된 날씨 레이어 타입 */
@@ -13,7 +12,7 @@ const emit = defineEmits<{
 }>()
 
 const layers: { value: WeatherLayerEnum; label: string; icon: string }[] = [
-    { value: WeatherLayerEnum.WEATHER, label: '날씨', icon: 'i-lucide-cloud-sun' },
+    { value: WeatherLayerEnum.WEATHER, label: '예보', icon: 'i-lucide-cloud-sun' },
     { value: WeatherLayerEnum.TEMPERATURE, label: '온도', icon: 'i-lucide-thermometer' },
     { value: WeatherLayerEnum.PM10, label: '미세먼지', icon: 'i-lucide-wind' }
 ]
@@ -21,8 +20,6 @@ const layers: { value: WeatherLayerEnum; label: string; icon: string }[] = [
 const handleClick = (layer: WeatherLayerEnum) => {
     emit('update:modelValue', props.modelValue?.equals(layer) ? null : layer)
 }
-
-const { toggleSource, isSourceActive } = useWeatherSourceStrategy()
 </script>
 
 <template>
@@ -37,18 +34,6 @@ const { toggleSource, isSourceActive } = useWeatherSourceStrategy()
             :variant="(modelValue?.equals(layer.value) ?? false) ? 'solid' : 'outline'"
             :color="(modelValue?.equals(layer.value) ?? false) ? 'primary' : 'neutral'"
             @click="handleClick(layer.value)"
-        />
-        <span class="w-px h-5 bg-[var(--ui-border-accented)] mx-0.5" />
-        <UButton
-            v-for="src in WEATHER_SOURCES"
-            :key="src.key"
-            :label="src.label"
-            :icon="src.icon"
-            size="sm"
-            class="font-bold rounded-full"
-            :variant="isSourceActive(src.key) ? 'solid' : 'outline'"
-            :color="isSourceActive(src.key) ? 'info' : 'neutral'"
-            @click="toggleSource(src.key)"
         />
     </div>
 </template>

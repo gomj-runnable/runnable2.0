@@ -15,6 +15,8 @@ const makeSlot = (
     temperature,
     pm10: null,
     pm10Grade: null,
+    pm25: null,
+    pm25Grade: null,
     source
 })
 

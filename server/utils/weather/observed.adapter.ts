@@ -199,6 +199,8 @@ export class ObservedWeatherAdapter implements IObservedWeatherAdapter {
                 temperature,
                 pm10,
                 pm10Grade: pm10 === null ? null : mapPm10Grade(pm10),
+                pm25: null,
+                pm25Grade: null,
                 source: 'observed'
             })
         }

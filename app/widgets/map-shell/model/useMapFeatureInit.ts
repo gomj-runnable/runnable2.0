@@ -72,6 +72,9 @@ export function useMapFeatureInit({
     const weatherSources = useWeatherSourceStrategy()
     const { init: initWeather } = useWeatherSideeffect({ viewer, ...weather })
 
+    // 레이어 변경 시 소스 자동 동기화
+    watch(weather.activeLayer, (layer) => weatherSources.syncSourceFromLayer(layer))
+
     // ─── 편의시설 ────────────────────────────────────────────────────
     const facility = useFacilityStore()
     const sidewalk = useSidewalkStore()

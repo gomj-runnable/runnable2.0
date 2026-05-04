@@ -107,3 +107,80 @@ describe('Pm10GradeEnum 인스턴스 속성', () => {
         expect(unique.size).toBe(4)
     })
 })
+
+// ─── fromPm25Value() ─────────────────────────────────────────────────────
+
+describe('Pm10GradeEnum.fromPm25Value()', () => {
+    it('0µg/m³ → GOOD', () => {
+        expect(Pm10GradeEnum.fromPm25Value(0)).toBe(Pm10GradeEnum.GOOD)
+    })
+
+    it('15µg/m³(경계값) → GOOD', () => {
+        expect(Pm10GradeEnum.fromPm25Value(15)).toBe(Pm10GradeEnum.GOOD)
+    })
+
+    it('16µg/m³(경계값+1) → MODERATE', () => {
+        expect(Pm10GradeEnum.fromPm25Value(16)).toBe(Pm10GradeEnum.MODERATE)
+    })
+
+    it('35µg/m³(경계값) → MODERATE', () => {
+        expect(Pm10GradeEnum.fromPm25Value(35)).toBe(Pm10GradeEnum.MODERATE)
+    })
+
+    it('36µg/m³(경계값+1) → BAD', () => {
+        expect(Pm10GradeEnum.fromPm25Value(36)).toBe(Pm10GradeEnum.BAD)
+    })
+
+    it('75µg/m³(경계값) → BAD', () => {
+        expect(Pm10GradeEnum.fromPm25Value(75)).toBe(Pm10GradeEnum.BAD)
+    })
+
+    it('76µg/m³(경계값+1) → VERY_BAD', () => {
+        expect(Pm10GradeEnum.fromPm25Value(76)).toBe(Pm10GradeEnum.VERY_BAD)
+    })
+
+    it('999µg/m³(매우 높음) → VERY_BAD', () => {
+        expect(Pm10GradeEnum.fromPm25Value(999)).toBe(Pm10GradeEnum.VERY_BAD)
+    })
+})
+
+// ─── composite() ─────────────────────────────────────────────────────────
+
+describe('Pm10GradeEnum.composite()', () => {
+    it('둘 다 null이면 null을 반환한다', () => {
+        expect(Pm10GradeEnum.composite(null, null)).toBeNull()
+    })
+
+    it('PM10만 있으면 PM10 등급을 반환한다', () => {
+        const result = Pm10GradeEnum.composite(Pm10GradeEnum.MODERATE, null)
+        expect(result).toBe(Pm10GradeEnum.MODERATE)
+    })
+
+    it('PM2.5만 있으면 PM2.5 등급을 반환한다', () => {
+        expect(Pm10GradeEnum.composite(null, Pm10GradeEnum.BAD)).toBe(Pm10GradeEnum.BAD)
+    })
+
+    it('PM10이 더 나쁘면 PM10 등급을 반환한다', () => {
+        expect(Pm10GradeEnum.composite(Pm10GradeEnum.VERY_BAD, Pm10GradeEnum.GOOD)).toBe(
+            Pm10GradeEnum.VERY_BAD
+        )
+    })
+
+    it('PM2.5가 더 나쁘면 PM2.5 등급을 반환한다', () => {
+        expect(Pm10GradeEnum.composite(Pm10GradeEnum.GOOD, Pm10GradeEnum.BAD)).toBe(
+            Pm10GradeEnum.BAD
+        )
+    })
+
+    it('등급이 동일하면 해당 등급을 반환한다', () => {
+        expect(Pm10GradeEnum.composite(Pm10GradeEnum.MODERATE, Pm10GradeEnum.MODERATE)).toBe(
+            Pm10GradeEnum.MODERATE
+        )
+    })
+
+    it('GOOD + VERY_BAD → VERY_BAD (합집합 규칙)', () => {
+        expect(Pm10GradeEnum.composite(Pm10GradeEnum.GOOD, Pm10GradeEnum.VERY_BAD)).toBe(
+            Pm10GradeEnum.VERY_BAD
+        )
+    })
+})

@@ -1,21 +1,17 @@
 import type { WeatherSourceKey, HourlyWeather } from '#shared/types/weather'
+import type { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { filterSlotsBySource, filterAvailableDatesBySource } from '../lib/useWeatherFilter'
 
-export interface SourceToggleItem {
-    key: WeatherSourceKey
-    label: string
-    icon: string
+/** 레이어 → 소스 매핑: 각 레이어가 암묵적으로 사용하는 데이터 소스 */
+const LAYER_SOURCE_MAP: Record<string, WeatherSourceKey> = {
+    weather: 'forecast',
+    temperature: 'observed',
+    pm10: 'airquality'
 }
-
-export const WEATHER_SOURCES: SourceToggleItem[] = [
-    { key: 'observed', label: '관측', icon: 'i-lucide-eye' },
-    { key: 'forecast', label: '예보', icon: 'i-lucide-cloud-sun' },
-    { key: 'airquality', label: '대기질', icon: 'i-lucide-wind' }
-]
 
 /**
  * 데이터 소스 필터 전략을 관리하는 store composable.
- * null = 전체 소스 표시, 값 = 해당 소스만 필터 (기존 레이어 토글과 동일 패턴).
+ * 레이어 선택 시 소스가 자동으로 연결된다.
  */
 export const useWeatherSourceStrategy = () => {
     /** 현재 필터링 중인 소스. null이면 전체 표시. */
@@ -30,14 +26,9 @@ export const useWeatherSourceStrategy = () => {
         () => ({})
     )
 
-    /** 소스 토글: 활성 → null(전체), 비활성 → 선택(단일) */
-    const toggleSource = (source: WeatherSourceKey) => {
-        activeSourceFilter.value = activeSourceFilter.value === source ? null : source
-    }
-
-    /** 소스가 활성 상태인지 확인한다. */
-    const isSourceActive = (source: WeatherSourceKey): boolean => {
-        return activeSourceFilter.value === source
+    /** 레이어 변경 시 소스를 자동 동기화한다. */
+    const syncSourceFromLayer = (layer: WeatherLayerEnum | null) => {
+        activeSourceFilter.value = layer ? (LAYER_SOURCE_MAP[layer.key] ?? null) : null
     }
 
     /** 활성 소스 기반 필터된 가용 날짜 */
@@ -53,8 +44,7 @@ export const useWeatherSourceStrategy = () => {
     return {
         activeSourceFilter,
         sourceAvailability,
-        toggleSource,
-        isSourceActive,
+        syncSourceFromLayer,
         filteredAvailableDates,
         filterSlots
     }

@@ -49,15 +49,18 @@ export const tempToColor = (tempAvg: number): string => {
 export class WeatherLayerEnum extends EnumBase {
     static readonly WEATHER = new WeatherLayerEnum(
         'weather',
-        '날씨',
+        '예보',
         (w) => WeatherConditionEnum.from(w.condition).color
     )
     static readonly TEMPERATURE = new WeatherLayerEnum('temperature', '온도', (w) =>
         tempToColor(w.temperature)
     )
-    static readonly PM10 = new WeatherLayerEnum('pm10', '미세먼지', (w) =>
-        w.pm10Grade ? Pm10GradeEnum.from(w.pm10Grade).color : NO_DATA_COLOR
-    )
+    static readonly PM10 = new WeatherLayerEnum('pm10', '미세먼지', (w) => {
+        const pm10G = w.pm10Grade ? Pm10GradeEnum.from(w.pm10Grade) : null
+        const pm25G = w.pm25Grade ? Pm10GradeEnum.from(w.pm25Grade) : null
+        const composite = Pm10GradeEnum.composite(pm10G, pm25G)
+        return composite ? composite.color : NO_DATA_COLOR
+    })
 
     private constructor(
         key: string,

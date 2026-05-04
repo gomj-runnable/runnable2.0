@@ -244,7 +244,6 @@ const { fabGroups, fabNearbyVisible } = useFabGroups({
     elevation,
     boundary,
     weather,
-    weatherSources,
     gradient,
     overlayContext,
     elevationChart,

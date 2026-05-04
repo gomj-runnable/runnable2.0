@@ -134,6 +134,9 @@ export const parseSlotDateTime = (slot: Pick<HourlyWeather, 'date' | 'time'>): D
 export const mapPm10Grade = (pm10: number): Pm10Grade =>
     Pm10GradeEnum.fromValue(pm10).key as Pm10Grade
 
+export const mapPm25Grade = (pm25: number): Pm10Grade =>
+    Pm10GradeEnum.fromPm25Value(pm25).key as Pm10Grade
+
 export const mapConditionByCloudAndRain = (
     temperature: number,
     rainfall: number | null,
