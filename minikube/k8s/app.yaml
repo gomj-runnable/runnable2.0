@@ -32,6 +32,17 @@ spec:
           env:
             - name: DATABASE_URL
               value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+            # Nuxt runtimeConfig 런타임 오버라이드 (NUXT_ 접두사 필요)
+            - name: NUXT_PUBLIC_ROUTE_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: runnable-config
+                  key: ROUTE_MODE
+            - name: NUXT_TMAP_API
+              valueFrom:
+                secretKeyRef:
+                  name: runnable-secret
+                  key: TMAP_API
           resources:
             requests:
               cpu: 200m
