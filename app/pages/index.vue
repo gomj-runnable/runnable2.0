@@ -586,6 +586,7 @@ watch(activeNav, (next) => {
                     :active-types="facility.activeTypes.value"
                     :is-loading="facility.isLoading.value"
                     :is-searching="facility.isSearching.value"
+                    :disabled="!viewer"
                     :show-simulation="showSimulationChip"
                     :simulation-active="isSimDrawerOpen"
                     :show-route-info="showRouteInfoChip"

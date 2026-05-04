@@ -16,6 +16,8 @@ const props = defineProps<{
     isLoading: boolean
     /** 현재 위치 기반 POI 검색 진행 중 여부 */
     isSearching: boolean
+    /** 뷰어 미준비 시 칩 비활성화 */
+    disabled?: boolean
     /** 시뮬레이션 칩 표시 여부 */
     showSimulation?: boolean
     /** 시뮬레이션 Drawer 열림 여부 */
@@ -67,6 +69,7 @@ const hasSearchableActive = computed(() =>
                 :icon="layer.icon"
                 size="sm"
                 class="font-bold rounded-full"
+                :disabled="disabled"
                 :loading="
                     isLoading &&
                     (layer.type === 'sidewalk'
