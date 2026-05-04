@@ -12,7 +12,6 @@ import {
     mergeSectionPointRanges,
     removeSectionDraftAttr,
     splitSectionAtPoint,
-    splitSectionPointRange,
     syncSectionAttrs,
     updateSectionDraftAttr
 } from '~/entities/route/lib/useRouteDrawDraft'
@@ -78,7 +77,8 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
     const splitTargetIndex = ref<number | null>(null)
     const splitPointGroup = createEntityGroup(options.viewer)
     const splitPointMap = new Map<CesiumEntity, number>()
-    let splitHandler: InstanceType<typeof import('cesium').ScreenSpaceEventHandler> | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let splitHandler: any = null
 
     /** 지정 구간의 모든 포인트를 시각화하고 클릭/드래그 핸들러를 설정한다. */
     const enterSplitMode = (sectionIndex: number) => {
@@ -108,7 +108,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
                     pixelSize: isEndpoint ? 6 : 8,
                     outlineColor: Cesium.Color.WHITE,
                     outlineWidth: 1
-                })
+                }) as any
             }) as CesiumEntity
 
             splitPointMap.set(entity, i)
