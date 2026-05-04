@@ -286,6 +286,33 @@ export const splitSectionPointRange = (
     return nextRanges
 }
 
+/**
+ * 구간 범위 배열에서 특정 인덱스의 구간을 지정한 포인트에서 둘로 분할한다.
+ * 사용자가 지도에서 포인트를 클릭하여 분할 위치를 직접 선택할 때 호출한다.
+ *
+ * @param ranges - 현재 구간 범위 배열
+ * @param sectionIndex - 분할할 구간의 인덱스
+ * @param pointIndex - 분할 기준 포인트의 전체 인덱스
+ * @returns 해당 구간이 지정 포인트에서 분할된 새 범위 배열 (불변 업데이트)
+ */
+export const splitSectionAtPoint = (
+    ranges: SectionPointRange[],
+    sectionIndex: number,
+    pointIndex: number
+): SectionPointRange[] => {
+    const range = ranges[sectionIndex]
+    if (!range || pointIndex <= range.start || pointIndex >= range.end) return ranges
+
+    const nextRanges = [...ranges]
+    nextRanges.splice(
+        sectionIndex,
+        1,
+        { start: range.start, end: pointIndex },
+        { start: pointIndex, end: range.end }
+    )
+    return nextRanges
+}
+
 export const mergeSectionPointRanges = (ranges: SectionPointRange[], index: number) => {
     if (index <= 0 || index >= ranges.length) {
         return ranges

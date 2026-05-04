@@ -15,7 +15,24 @@ defineProps<{
     activeSectionIndex?: number | null
 }>()
 
-defineEmits<{
+/** 구간 나누기 안내 모달 */
+const showSplitGuide = ref(false)
+const pendingSplitIndex = ref<number | null>(null)
+
+const openSplitGuide = (index: number) => {
+    pendingSplitIndex.value = index
+    showSplitGuide.value = true
+}
+
+const confirmSplit = () => {
+    if (pendingSplitIndex.value !== null) {
+        emit('addSection', { index: pendingSplitIndex.value })
+    }
+    showSplitGuide.value = false
+    pendingSplitIndex.value = null
+}
+
+const emit = defineEmits<{
     /** 경로 초기화 버튼 클릭 시 발생 */
     reset: []
     /** 경로 저장 버튼 클릭 시 발생 */
@@ -152,9 +169,54 @@ const POI_ICON: Record<string, string> = {
                     size="xs"
                     label="구간 나누기"
                     class="self-center mt-1"
-                    @click.stop="$emit('addSection', { index })"
+                    @click.stop="openSplitGuide(index)"
                 />
             </div>
         </div>
+
+        <!-- 구간 나누기 안내 모달 -->
+        <UModal v-model:open="showSplitGuide" title="구간 나누기">
+            <template #body>
+                <div class="flex flex-col gap-3 text-sm text-[var(--ui-text-muted)]">
+                    <p class="font-medium text-[var(--ui-text-highlighted)]">
+                        구간을 나누는 방법
+                    </p>
+                    <ol class="list-decimal list-inside flex flex-col gap-2">
+                        <li>
+                            <strong>분할 지점 선택</strong> — 지도 위에 표시된
+                            <span class="text-[var(--ui-primary)]">작은 점</span>을
+                            클릭하여 구간을 나눌 위치를 선택합니다.
+                        </li>
+                        <li>
+                            <strong>위치 조정</strong> — 점을 드래그하면 경로 포인트의
+                            위치를 조정할 수 있습니다.
+                        </li>
+                        <li>
+                            <strong>저장</strong> — 상단 저장 버튼을 눌러 변경사항을
+                            적용합니다.
+                        </li>
+                    </ol>
+                    <p class="text-xs text-[var(--ui-text-dimmed)]">
+                        포인트가 2개 미만인 구간은 나눌 수 없습니다.
+                    </p>
+                </div>
+            </template>
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <UButton
+                        variant="outline"
+                        color="neutral"
+                        label="취소"
+                        @click="showSplitGuide = false"
+                    />
+                    <UButton
+                        variant="solid"
+                        color="primary"
+                        label="구간 나누기 시작"
+                        @click="confirmSplit"
+                    />
+                </div>
+            </template>
+        </UModal>
     </div>
 </template>
