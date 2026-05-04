@@ -1,5 +1,4 @@
 import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
-import { WEATHER_SOURCES } from '~/entities/weather/model/useWeatherSourceStrategy'
 import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import type { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
@@ -8,7 +7,6 @@ import type { useSidewalkStore } from '~/entities/facility/model/useSidewalkStor
 import type { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
 import type { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import type { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
-import type { useWeatherSourceStrategy } from '~/entities/weather/model/useWeatherSourceStrategy'
 import type { useGradientStore } from '~/entities/gradient/model/useGradientStore'
 import type { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 
@@ -18,7 +16,6 @@ interface FabGroupsOptions {
     elevation: ReturnType<typeof useElevationLayerStore>
     boundary: ReturnType<typeof useBoundaryStore>
     weather: ReturnType<typeof useWeatherStore>
-    weatherSources: ReturnType<typeof useWeatherSourceStrategy>
     gradient: ReturnType<typeof useGradientStore>
     overlayContext: ComputedRef<MapOverlayContextEnum>
     elevationChart: {
@@ -48,7 +45,6 @@ export const useFabGroups = (options: FabGroupsOptions) => {
         elevation,
         boundary,
         weather,
-        weatherSources,
         gradient,
         overlayContext,
         elevationChart,
@@ -132,7 +128,7 @@ export const useFabGroups = (options: FabGroupsOptions) => {
             items: [
                 {
                     key: 'weather-layer',
-                    label: '날씨',
+                    label: '예보',
                     icon: 'i-lucide-cloud-sun',
                     active: weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER) ?? false,
                     onClick: () => {
@@ -172,14 +168,7 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                         if (next && elevation.isElevationVisible.value)
                             elevation.isElevationVisible.value = false
                     }
-                },
-                ...WEATHER_SOURCES.map((src) => ({
-                    key: `source-${src.key}`,
-                    label: src.label,
-                    icon: src.icon,
-                    active: weatherSources.isSourceActive(src.key),
-                    onClick: () => weatherSources.toggleSource(src.key)
-                }))
+                }
             ]
         },
         {

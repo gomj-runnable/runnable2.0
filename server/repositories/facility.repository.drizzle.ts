@@ -18,7 +18,9 @@ function toFacility(row: typeof facilities.$inferSelect): Facility {
         lng: Number(row.lng),
         lat: Number(row.lat),
         hours: row.hours ?? undefined,
-        tel: row.tel ?? undefined
+        tel: row.tel ?? undefined,
+        ...(row.hasSignal !== null && { hasSignal: row.hasSignal }),
+        ...(row.polyline && { polyline: row.polyline })
     }
 }
 

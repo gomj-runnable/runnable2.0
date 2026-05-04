@@ -1,7 +1,7 @@
 // model
 export * from './model/useWeatherStore'
 export * from './model/useWeatherRecommendStore'
-export * from './model/useWeatherSourceStrategy'
+export { useWeatherSourceStrategy } from './model/useWeatherSourceStrategy'
 
 // lib
 export * from './lib/useWeatherDataTransform'

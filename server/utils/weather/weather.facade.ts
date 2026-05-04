@@ -18,6 +18,7 @@ import {
     formatDate,
     parseYmd,
     mapPm10Grade,
+    mapPm25Grade,
     fromKstParts
 } from './common'
 
@@ -99,26 +100,32 @@ class WeatherFacade {
             forecastSlots
         })
 
-        // PM10 보충 (airquality data → merged slots)
+        // PM10/PM2.5 보충 (airquality data → merged slots)
         const dongs: DongWeather[] = SEOUL_GU_DATA.map((gu) => {
             const guAirSlots = airQualityByGu.get(gu.code) ?? []
             const hourly = mergedSlots.map((slot) => {
-                if (slot.pm10 !== null) return { ...slot }
-
                 const matched = guAirSlots.find((aq) => {
                     const [datePart, timePart] = aq.dataTime.split(' ')
                     return datePart === slot.date && timePart === slot.time
                 })
 
-                if (matched?.pm10 !== null && matched?.pm10 !== undefined) {
-                    return {
-                        ...slot,
-                        pm10: matched.pm10,
-                        pm10Grade: mapPm10Grade(matched.pm10)
-                    }
+                const enriched = { ...slot }
+
+                if (
+                    enriched.pm10 === null &&
+                    matched?.pm10 !== null &&
+                    matched?.pm10 !== undefined
+                ) {
+                    enriched.pm10 = matched.pm10
+                    enriched.pm10Grade = mapPm10Grade(matched.pm10)
                 }
 
-                return { ...slot }
+                if (matched?.pm25 !== null && matched?.pm25 !== undefined) {
+                    enriched.pm25 = matched.pm25
+                    enriched.pm25Grade = mapPm25Grade(matched.pm25)
+                }
+
+                return enriched
             })
 
             return {

@@ -13,6 +13,8 @@ export interface HourlyWeather {
     temperature: number // °C
     pm10: number | null // µg/m³
     pm10Grade: Pm10Grade | null
+    pm25: number | null // µg/m³
+    pm25Grade: Pm10Grade | null
     source: WeatherSlotSource
 }
 

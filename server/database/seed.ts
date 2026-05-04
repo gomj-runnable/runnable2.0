@@ -76,7 +76,13 @@ async function seed() {
         const { resolve } = await import('node:path')
 
         const dataDir = resolve(import.meta.dirname, '../data/facilities')
-        const files = ['hospitals.json', 'toilets.json', 'fountains.json', 'lockers.json']
+        const files = [
+            'hospitals.json',
+            'toilets.json',
+            'fountains.json',
+            'lockers.json',
+            'crosswalks.json'
+        ]
 
         let totalInserted = 0
         for (const file of files) {
@@ -100,6 +106,8 @@ async function seed() {
                                 lat: number
                                 hours?: string
                                 tel?: string
+                                hasSignal?: boolean
+                                polyline?: [number, number][]
                             }) => ({
                                 id: f.id,
                                 type: f.type,
@@ -108,7 +116,9 @@ async function seed() {
                                 lng: f.lng.toString(),
                                 lat: f.lat.toString(),
                                 hours: f.hours ?? null,
-                                tel: f.tel ?? null
+                                tel: f.tel ?? null,
+                                hasSignal: f.hasSignal ?? null,
+                                polyline: f.polyline ?? null
                             })
                         )
                     )
@@ -121,7 +131,9 @@ async function seed() {
                             lng: sql`excluded.lng`,
                             lat: sql`excluded.lat`,
                             hours: sql`excluded.hours`,
-                            tel: sql`excluded.tel`
+                            tel: sql`excluded.tel`,
+                            hasSignal: sql`excluded.has_signal`,
+                            polyline: sql`excluded.polyline`
                         }
                     })
             }

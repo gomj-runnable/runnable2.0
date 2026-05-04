@@ -151,8 +151,8 @@ describe('WeatherLayerEnum 인스턴스 속성', () => {
         expect(WeatherLayerEnum.WEATHER.isPm10).toBe(false)
     })
 
-    it('WEATHER.label이 "날씨"다', () => {
-        expect(WeatherLayerEnum.WEATHER.label).toBe('날씨')
+    it('WEATHER.label이 "예보"다', () => {
+        expect(WeatherLayerEnum.WEATHER.label).toBe('예보')
     })
 
     it('TEMPERATURE.label이 "온도"다', () => {

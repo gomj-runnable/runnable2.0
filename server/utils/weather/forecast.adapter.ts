@@ -157,6 +157,8 @@ export class ForecastAdapter implements IForecastAdapter {
                 temperature,
                 pm10: null,
                 pm10Grade: null,
+                pm25: null,
+                pm25Grade: null,
                 source: 'forecast'
             })
         }

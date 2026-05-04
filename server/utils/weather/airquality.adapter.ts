@@ -1,6 +1,6 @@
 import type { AirKoreaRltmItem } from '#shared/types/weather'
 import { AirKoreaOriginalResponse } from '#shared/types/weather'
-import { parseNumber, mapPm10Grade } from './common'
+import { parseNumber, mapPm10Grade, mapPm25Grade } from './common'
 import type { IAirQualityAdapter } from './common'
 import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 
@@ -15,6 +15,8 @@ export interface AirQualitySlot {
     dataTime: string // "2026-04-10 14:00"
     pm10: number | null
     pm10Grade: ReturnType<typeof mapPm10Grade> | null
+    pm25: number | null
+    pm25Grade: ReturnType<typeof mapPm25Grade> | null
 }
 
 // ─── 동시 요청 제한 ───────────────────────────────────────────
@@ -49,6 +51,7 @@ const parseAirKoreaItems = (items: AirKoreaRltmItem[]): AirQualitySlot[] => {
 
     for (const item of items) {
         const pm10 = parseNumber(item.pm10Value === '-' ? null : item.pm10Value)
+        const pm25 = parseNumber(item.pm25Value === '-' ? null : item.pm25Value)
         const guCode = guNameToCode.get(item.stationName) ?? ''
 
         slots.push({
@@ -56,7 +59,9 @@ const parseAirKoreaItems = (items: AirKoreaRltmItem[]): AirQualitySlot[] => {
             guCode,
             dataTime: item.dataTime,
             pm10,
-            pm10Grade: pm10 !== null ? mapPm10Grade(pm10) : null
+            pm10Grade: pm10 !== null ? mapPm10Grade(pm10) : null,
+            pm25,
+            pm25Grade: pm25 !== null ? mapPm25Grade(pm25) : null
         })
     }
 
