@@ -72,7 +72,6 @@ import FacilityMarkerPopup from '~/entities/facility/ui/FacilityMarkerPopup.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
-import BottomDrawer from '~/shared/ui/BottomDrawer.vue'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useMobileDetect } from '~/shared/lib/useMobileDetect'
 import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
@@ -247,6 +246,39 @@ const sectionTotalDistance = computed(() => calculateTotalDistance(sectionInfo.s
 const sectionTotalTime = computed(() =>
     formatTime(calculateTotalTime(sectionInfo.sections.value, sectionInfo.userPaces.value))
 )
+
+// ─── Step 네비게이션 (경로목록 → 구간정보) ─────────────────────────
+const showStepBackConfirm = ref(false)
+
+/** SlideOver 제목: 구간정보가 열려있으면 덮어쓴다 */
+const slideOverTitle = computed(() => {
+    if (
+        sectionInfo.isOpen.value &&
+        (slideOver.current.value === NavKey.LIST || slideOver.current.value === NavKey.EXPLORE)
+    ) {
+        return sectionInfo.panelTitle.value
+    }
+    return slideOver.meta.value.title
+})
+const slideOverDescription = computed(() => {
+    if (
+        sectionInfo.isOpen.value &&
+        (slideOver.current.value === NavKey.LIST || slideOver.current.value === NavKey.EXPLORE)
+    ) {
+        return '구간별 페이스·짐 무게·전략을 설정합니다'
+    }
+    return slideOver.meta.value.description
+})
+
+/** 구간정보 → 경로목록으로 돌아가기 (항상 경고) */
+const handleStepBack = () => {
+    showStepBackConfirm.value = true
+}
+const confirmStepBack = () => {
+    showStepBackConfirm.value = false
+    sectionInfo.close()
+}
+
 
 /** 선택 경로가 바뀌면 기존 시뮬레이션을 즉시 정지한다. */
 const stopSimulationForRouteChange = () => {
@@ -513,29 +545,12 @@ watch(activeNav, (next) => {
 
 <template>
     <div class="index-page">
-        <MapShell :show-second-panel="sectionInfo.isOpen.value">
+        <MapShell>
             <template #sidebar>
                 <MapSidebar
                     :active-nav="slideOver.lastActive.value"
                     :is-logged-in="authStore.isLoggedIn.value"
                     @select="slideOver.select"
-                />
-            </template>
-
-            <template #secondPanel>
-                <SecondPanel
-                    :panel-title="sectionInfo.panelTitle.value"
-                    :sections="sectionInfo.sections.value"
-                    :user-paces="sectionInfo.userPaces.value"
-                    :total-distance="sectionTotalDistance"
-                    :total-time="sectionTotalTime"
-                    :is-edit-mode="sectionInfo.isEditMode.value"
-                    :read-only="sectionInfo.readOnly.value"
-                    @update:edit-mode="sectionInfo.isEditMode.value = $event"
-                    @update:pace="sectionInfo.updatePace"
-                    @update:weight="sectionInfo.updateWeight"
-                    @update:strategy="sectionInfo.updateStrategy"
-                    @close="sectionInfo.close"
                 />
             </template>
 
@@ -710,8 +725,8 @@ watch(activeNav, (next) => {
         <!-- 탭 콘텐츠: SlideOver (모바일·데스크톱 공통) -->
         <USlideover
             v-model:open="slideOver.isOpen.value"
-            :title="slideOver.meta.value.title"
-            :description="slideOver.meta.value.description"
+            :title="slideOverTitle"
+            :description="slideOverDescription"
             side="left"
             :overlay="false"
             :modal="false"
@@ -724,20 +739,59 @@ watch(activeNav, (next) => {
             <template #body>
                 <!-- 목록 -->
                 <div v-if="slideOver.current.value === NavKey.LIST" class="flex flex-col gap-1">
-                    <UInput
-                        v-model="routeList.searchQuery"
-                        type="search"
-                        placeholder="경로 이름으로 검색"
-                        icon="i-lucide-search"
-                    />
-                    <RouteListPanel
-                        :routes="routeList.filteredRoutes"
-                        :selected-route-id="routeList.selectedRouteId"
-                        :current-user-id="authStore.user.value?.id"
-                        @select="handleRouteSelect"
-                        @download="routeList.download"
-                        @edit="handleRouteEdit"
-                    />
+                    <!-- 구간정보 step -->
+                    <template v-if="sectionInfo.isOpen.value">
+                        <div class="flex items-center gap-1.5 mb-2">
+                            <UButton
+                                icon="i-lucide-chevron-left"
+                                variant="ghost"
+                                color="neutral"
+                                size="xs"
+                                label="경로목록"
+                                @click="handleStepBack"
+                            />
+                            <UIcon
+                                name="i-lucide-chevron-right"
+                                class="text-[var(--ui-text-dimmed)] size-3"
+                            />
+                            <span
+                                class="text-sm font-medium text-[var(--ui-text-highlighted)]"
+                            >
+                                구간정보
+                            </span>
+                        </div>
+                        <SecondPanel
+                            :panel-title="sectionInfo.panelTitle.value"
+                            :sections="sectionInfo.sections.value"
+                            :user-paces="sectionInfo.userPaces.value"
+                            :total-distance="sectionTotalDistance"
+                            :total-time="sectionTotalTime"
+                            :is-edit-mode="sectionInfo.isEditMode.value"
+                            :read-only="sectionInfo.readOnly.value"
+                            @update:edit-mode="sectionInfo.isEditMode.value = $event"
+                            @update:pace="sectionInfo.updatePace"
+                            @update:weight="sectionInfo.updateWeight"
+                            @update:strategy="sectionInfo.updateStrategy"
+                            @close="handleStepBack"
+                        />
+                    </template>
+                    <!-- 기본 경로목록 -->
+                    <template v-else>
+                        <UInput
+                            v-model="routeList.searchQuery"
+                            type="search"
+                            placeholder="경로 이름으로 검색"
+                            icon="i-lucide-search"
+                        />
+                        <RouteListPanel
+                            :routes="routeList.filteredRoutes"
+                            :selected-route-id="routeList.selectedRouteId"
+                            :current-user-id="authStore.user.value?.id"
+                            @select="handleRouteSelect"
+                            @download="routeList.download"
+                            @edit="handleRouteEdit"
+                        />
+                    </template>
                 </div>
 
                 <!-- 그리기 -->
@@ -761,55 +815,94 @@ watch(activeNav, (next) => {
                     v-else-if="slideOver.current.value === NavKey.EXPLORE"
                     class="flex flex-col gap-1"
                 >
-                    <UInput
-                        v-model="explore.searchQuery.value"
-                        type="search"
-                        placeholder="경로 이름으로 검색"
-                        icon="i-lucide-search"
-                        @keyup.enter="explore.search(explore.searchQuery.value)"
-                    />
-                    <div class="flex items-center gap-1">
-                        <USelect
-                            :model-value="explore.filter.selectedSigungu.value"
-                            :items="sigunguOptions"
-                            placeholder="시군구"
-                            class="flex-1 min-w-0"
-                            @update:model-value="explore.filter.setSigungu($event)"
-                        />
-                        <USelect
-                            :model-value="explore.filter.selectedDong.value"
-                            :items="dongOptions"
-                            placeholder="읍면동"
-                            class="flex-1 min-w-0"
-                            :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
-                            @update:model-value="explore.filter.selectedDong.value = $event"
-                        />
-                        <UButton
-                            variant="outline"
-                            color="neutral"
-                            size="sm"
-                            icon="i-lucide-rotate-ccw"
-                            label="초기화"
-                            @click="explore.filter.resetFilters"
-                        />
-                    </div>
-                    <ExplorePanel
-                        :routes="explore.filteredResults.value"
-                        :selected-route-id="explore.selectedRouteId.value"
-                        :is-loading="explore.isSearching.value"
-                        :recommend-active="showRecommend"
-                        @select="handleExploreSelect"
-                        @import="handleExploreImport"
-                        @recommend="showRecommend = !showRecommend"
-                    >
-                        <template #recommend>
-                            <WeatherRecommendPanel
-                                :routes="weatherRecommend.recommendedRoutes.value"
-                                :is-loading="weatherRecommend.isLoading.value"
-                                @select="handleRouteSelect"
+                    <!-- 구간정보 step -->
+                    <template v-if="sectionInfo.isOpen.value">
+                        <div class="flex items-center gap-1.5 mb-2">
+                            <UButton
+                                icon="i-lucide-chevron-left"
+                                variant="ghost"
+                                color="neutral"
+                                size="xs"
+                                label="경로탐색"
+                                @click="handleStepBack"
                             />
-                        </template>
-                    </ExplorePanel>
+                            <UIcon
+                                name="i-lucide-chevron-right"
+                                class="text-[var(--ui-text-dimmed)] size-3"
+                            />
+                            <span
+                                class="text-sm font-medium text-[var(--ui-text-highlighted)]"
+                            >
+                                구간정보
+                            </span>
+                        </div>
+                        <SecondPanel
+                            :panel-title="sectionInfo.panelTitle.value"
+                            :sections="sectionInfo.sections.value"
+                            :user-paces="sectionInfo.userPaces.value"
+                            :total-distance="sectionTotalDistance"
+                            :total-time="sectionTotalTime"
+                            :is-edit-mode="sectionInfo.isEditMode.value"
+                            :read-only="sectionInfo.readOnly.value"
+                            @update:edit-mode="sectionInfo.isEditMode.value = $event"
+                            @update:pace="sectionInfo.updatePace"
+                            @update:weight="sectionInfo.updateWeight"
+                            @update:strategy="sectionInfo.updateStrategy"
+                            @close="handleStepBack"
+                        />
+                    </template>
+                    <!-- 기본 탐색 목록 -->
+                    <template v-else>
+                        <UInput
+                            v-model="explore.searchQuery.value"
+                            type="search"
+                            placeholder="경로 이름으로 검색"
+                            icon="i-lucide-search"
+                            @keyup.enter="explore.search(explore.searchQuery.value)"
+                        />
+                        <div class="flex items-center gap-1">
+                            <USelect
+                                :model-value="explore.filter.selectedSigungu.value"
+                                :items="sigunguOptions"
+                                placeholder="시군구"
+                                class="flex-1 min-w-0"
+                                @update:model-value="explore.filter.setSigungu($event)"
+                            />
+                            <USelect
+                                :model-value="explore.filter.selectedDong.value"
+                                :items="dongOptions"
+                                placeholder="읍면동"
+                                class="flex-1 min-w-0"
+                                :disabled="explore.filter.selectedSigungu.value === FILTER_ALL"
+                                @update:model-value="explore.filter.selectedDong.value = $event"
+                            />
+                            <UButton
+                                variant="outline"
+                                color="neutral"
+                                size="sm"
+                                icon="i-lucide-rotate-ccw"
+                                label="초기화"
+                                @click="explore.filter.resetFilters"
+                            />
+                        </div>
+                        <ExplorePanel
+                            :routes="explore.filteredResults.value"
+                            :selected-route-id="explore.selectedRouteId.value"
+                            :is-loading="explore.isSearching.value"
+                            :recommend-active="showRecommend"
+                            @select="handleExploreSelect"
+                            @import="handleExploreImport"
+                            @recommend="showRecommend = !showRecommend"
+                        >
+                            <template #recommend>
+                                <WeatherRecommendPanel
+                                    :routes="weatherRecommend.recommendedRoutes.value"
+                                    :is-loading="weatherRecommend.isLoading.value"
+                                    @select="handleRouteSelect"
+                                />
+                            </template>
+                        </ExplorePanel>
+                    </template>
                 </div>
 
                 <!-- 로그인 / 내 계정 -->
@@ -821,6 +914,31 @@ watch(activeNav, (next) => {
                 />
             </template>
         </USlideover>
+
+        <!-- 구간정보 → 경로목록 뒤로가기 확인 모달 -->
+        <UModal v-model:open="showStepBackConfirm" title="구간정보 닫기">
+            <template #body>
+                <p class="text-sm text-[var(--ui-text-muted)]">
+                    구간정보를 닫으면 현재 설정한 내용이 사라집니다. 돌아가시겠습니까?
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <UButton
+                        variant="outline"
+                        color="neutral"
+                        label="취소"
+                        @click="showStepBackConfirm = false"
+                    />
+                    <UButton
+                        variant="solid"
+                        color="error"
+                        label="돌아가기"
+                        @click="confirmStepBack"
+                    />
+                </div>
+            </template>
+        </UModal>
 
         <!-- 모바일: SlideOver 닫혔을 때 다시 열기 탭 -->
         <div
@@ -850,28 +968,6 @@ watch(activeNav, (next) => {
                 @click="facilityEffect.searchNearby()"
             />
         </div>
-
-        <!-- 모바일 전용: SecondPanel을 BottomDrawer로 표시 -->
-        <BottomDrawer
-            v-if="isMobile && sectionInfo.isOpen.value"
-            :open="sectionInfo.isOpen.value"
-            @update:open="!$event && sectionInfo.close()"
-        >
-            <SecondPanel
-                :panel-title="sectionInfo.panelTitle.value"
-                :sections="sectionInfo.sections.value"
-                :user-paces="sectionInfo.userPaces.value"
-                :total-distance="sectionTotalDistance"
-                :total-time="sectionTotalTime"
-                :is-edit-mode="sectionInfo.isEditMode.value"
-                :read-only="sectionInfo.readOnly.value"
-                @update:edit-mode="sectionInfo.isEditMode.value = $event"
-                @update:pace="sectionInfo.updatePace"
-                @update:weight="sectionInfo.updateWeight"
-                @update:strategy="sectionInfo.updateStrategy"
-                @close="sectionInfo.close"
-            />
-        </BottomDrawer>
 
         <SimulationDrawer
             v-model:open="isSimDrawerOpen"

@@ -57,10 +57,14 @@ function toggleExpand(routeId: string) {
                                     {{ route.title }}
                                 </p>
                                 <p
-                                    v-if="route.description"
-                                    class="text-sm text-[var(--ui-text-muted)] mt-0.5 line-clamp-1"
+                                    class="text-sm mt-0.5 line-clamp-1"
+                                    :class="
+                                        route.description
+                                            ? 'text-[var(--ui-text-muted)]'
+                                            : 'text-[var(--ui-text-dimmed)] italic'
+                                    "
                                 >
-                                    {{ route.description }}
+                                    {{ route.description || '설명이 없습니다.' }}
                                 </p>
                             </div>
                             <UButton
