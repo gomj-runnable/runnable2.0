@@ -237,7 +237,7 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
     watch(
         viewer,
-        (v) => {
+        async (v) => {
             clickHandler?.destroy()
             clickHandler = null
 
@@ -274,6 +274,14 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             }, C.ScreenSpaceEventType.LEFT_CLICK)
 
             clickHandler = handler
+
+            // viewer 초기화 전에 활성화된 레이어가 있으면 데이터를 가져와 렌더링한다
+            if (activeTypes.value.size > 0) {
+                await fetchFacilities()
+                for (const type of activeTypes.value) {
+                    showLayer(type)
+                }
+            }
         },
         { immediate: true }
     )
