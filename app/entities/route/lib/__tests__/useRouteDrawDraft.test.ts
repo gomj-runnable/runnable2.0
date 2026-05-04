@@ -7,6 +7,7 @@ import {
     removeSectionDraftAttr,
     mergeSectionPointRanges,
     splitSectionPointRange,
+    splitSectionAtPoint,
     syncSectionAttrs,
     type SectionPointRange
 } from '~/entities/route/lib/useRouteDrawDraft'
@@ -290,6 +291,54 @@ describe('splitSectionPointRange', () => {
     it('범위 밖 인덱스는 원본을 반환한다', () => {
         const ranges: SectionPointRange[] = [{ start: 0, end: 4 }]
         const result = splitSectionPointRange(ranges, 5)
+
+        expect(result).toEqual(ranges)
+    })
+})
+
+// ─── splitSectionAtPoint ────────────────────────────────────────────────
+describe('splitSectionAtPoint', () => {
+    it('지정한 포인트에서 구간을 둘로 분할한다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 6 }]
+        const result = splitSectionAtPoint(ranges, 0, 3)
+
+        expect(result).toHaveLength(2)
+        expect(result[0]).toEqual({ start: 0, end: 3 })
+        expect(result[1]).toEqual({ start: 3, end: 6 })
+    })
+
+    it('구간의 시작 포인트에서는 분할하지 않는다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 6 }]
+        const result = splitSectionAtPoint(ranges, 0, 0)
+
+        expect(result).toEqual(ranges)
+    })
+
+    it('구간의 끝 포인트에서는 분할하지 않는다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 6 }]
+        const result = splitSectionAtPoint(ranges, 0, 6)
+
+        expect(result).toEqual(ranges)
+    })
+
+    it('여러 구간 중 특정 구간만 지정 포인트에서 분할한다', () => {
+        const ranges: SectionPointRange[] = [
+            { start: 0, end: 3 },
+            { start: 3, end: 8 },
+            { start: 8, end: 10 }
+        ]
+        const result = splitSectionAtPoint(ranges, 1, 5)
+
+        expect(result).toHaveLength(4)
+        expect(result[0]).toEqual({ start: 0, end: 3 })
+        expect(result[1]).toEqual({ start: 3, end: 5 })
+        expect(result[2]).toEqual({ start: 5, end: 8 })
+        expect(result[3]).toEqual({ start: 8, end: 10 })
+    })
+
+    it('범위 밖 포인트 인덱스는 원본을 반환한다', () => {
+        const ranges: SectionPointRange[] = [{ start: 0, end: 6 }]
+        const result = splitSectionAtPoint(ranges, 0, 10)
 
         expect(result).toEqual(ranges)
     })

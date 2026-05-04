@@ -11,17 +11,20 @@ import {
     createInitialSectionPointRanges,
     mergeSectionPointRanges,
     removeSectionDraftAttr,
+    splitSectionAtPoint,
     splitSectionPointRange,
     syncSectionAttrs,
     updateSectionDraftAttr
 } from '~/entities/route/lib/useRouteDrawDraft'
 import {
     addRoutePointEntity,
+    cartesianToRouteDrawPosition,
     getSectionColor,
     normalizeDrawPositions,
-    toCesiumColor
+    toCesiumColor,
+    toCartesianPosition
 } from '~/entities/route/lib/useRouteDrawUtils'
-import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
+import { createClampedPoint, createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import type { NotificationOptions } from '~/entities/notification/model/useNotificationStore'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
@@ -69,6 +72,172 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     /** 현재 지도에 그려진 구간 경계 포인트 엔티티 목록 */
     const sectionPoints = createEntityGroup(options.viewer)
+
+    // ─── Split Mode (구간 포인트 선택/드래그) ───────────────────────
+    const splitMode = ref(false)
+    const splitTargetIndex = ref<number | null>(null)
+    const splitPointGroup = createEntityGroup(options.viewer)
+    const splitPointMap = new Map<CesiumEntity, number>()
+    let splitHandler: InstanceType<typeof import('cesium').ScreenSpaceEventHandler> | null = null
+
+    /** 지정 구간의 모든 포인트를 시각화하고 클릭/드래그 핸들러를 설정한다. */
+    const enterSplitMode = (sectionIndex: number) => {
+        const positions = options.drawnPositions.value
+        const range = options.sectionPointRanges.value[sectionIndex]
+        if (!positions || !range || !options.viewer.value) return
+
+        exitSplitMode()
+
+        splitMode.value = true
+        splitTargetIndex.value = sectionIndex
+
+        const Cesium = getCesiumRuntime()
+        const entities: CesiumEntity[] = []
+
+        for (let i = range.start; i <= range.end; i++) {
+            const pos = positions[i]
+            if (!pos) continue
+
+            const isEndpoint = i === range.start || i === range.end
+            const entity = options.viewer.value.entities.add({
+                position: toCartesianPosition(Cesium, pos),
+                point: createClampedPoint(Cesium, {
+                    color: isEndpoint
+                        ? toCesiumColor(Cesium, '#888888', 0.5)
+                        : toCesiumColor(Cesium, '#00BFFF', 0.9),
+                    pixelSize: isEndpoint ? 6 : 8,
+                    outlineColor: Cesium.Color.WHITE,
+                    outlineWidth: 1
+                })
+            }) as CesiumEntity
+
+            splitPointMap.set(entity, i)
+            entities.push(entity)
+        }
+
+        splitPointGroup.set(entities)
+
+        // 클릭/드래그 이벤트 핸들러
+        const viewer = options.viewer.value as any
+        splitHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+
+        let dragEntity: CesiumEntity | null = null
+        let dragPointIndex: number | null = null
+
+        const pickSplitEntity = (pos: unknown): CesiumEntity | null => {
+            const picked = viewer.scene.pick(pos)
+            const entity = picked?.id as CesiumEntity | undefined
+            return entity && splitPointMap.has(entity) ? entity : null
+        }
+
+        // LEFT_CLICK → 클릭한 포인트에서 구간 분할
+        splitHandler!.setInputAction((movement: { position?: unknown }) => {
+            const entity = pickSplitEntity(movement.position)
+            if (!entity) return
+
+            const pointIndex = splitPointMap.get(entity)!
+            const r = options.sectionPointRanges.value[sectionIndex]
+            if (!r || pointIndex <= r.start || pointIndex >= r.end) {
+                options.notify({
+                    title: '구간 나누기 불가',
+                    message: '구간의 시작/끝 포인트에서는 나눌 수 없습니다. 중간 포인트를 선택하세요.',
+                    tone: NotificationToneEnum.WARNING
+                })
+                return
+            }
+            handleSplitAtPoint(sectionIndex, pointIndex)
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+
+        // LEFT_DOWN → 드래그 시작
+        splitHandler!.setInputAction((movement: { position?: unknown }) => {
+            const entity = pickSplitEntity(movement.position)
+            if (!entity) return
+
+            dragEntity = entity
+            dragPointIndex = splitPointMap.get(entity)!
+            if (viewer.scene.screenSpaceCameraController) {
+                viewer.scene.screenSpaceCameraController.enableRotate = false
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_DOWN)
+
+        // MOUSE_MOVE → 드래그 중 위치 갱신 (시각적)
+        splitHandler!.setInputAction(
+            (movement: { endPosition?: unknown }) => {
+                if (!dragEntity || dragPointIndex === null) return
+
+                const cartesian =
+                    viewer.scene.pickPosition?.(movement.endPosition) ??
+                    viewer.camera.pickEllipsoid?.(movement.endPosition, Cesium.Ellipsoid.WGS84)
+                if (!cartesian) return
+
+                ;(dragEntity as any).position = cartesian
+            },
+            Cesium.ScreenSpaceEventType.MOUSE_MOVE
+        )
+
+        // LEFT_UP → 드래그 종료, 좌표 반영
+        splitHandler!.setInputAction(() => {
+            if (!dragEntity || dragPointIndex === null || !options.drawnPositions.value) {
+                dragEntity = null
+                dragPointIndex = null
+                return
+            }
+
+            const pos = (dragEntity as any).position
+            const cartesian = typeof pos?.getValue === 'function' ? pos.getValue(0) : pos
+            if (cartesian) {
+                const newPos = cartesianToRouteDrawPosition(Cesium, cartesian)
+                const updated = [...options.drawnPositions.value]
+                updated[dragPointIndex] = newPos
+                options.drawnPositions.value = updated
+            }
+
+            if (viewer.scene.screenSpaceCameraController) {
+                viewer.scene.screenSpaceCameraController.enableRotate = true
+            }
+            dragEntity = null
+            dragPointIndex = null
+
+            redrawSectionGraphics()
+            enterSplitMode(sectionIndex)
+        }, Cesium.ScreenSpaceEventType.LEFT_UP)
+    }
+
+    /** split mode를 종료하고 포인트 엔티티·핸들러를 정리한다. */
+    const exitSplitMode = () => {
+        splitMode.value = false
+        splitTargetIndex.value = null
+        splitPointGroup.clear()
+        splitPointMap.clear()
+        if (splitHandler) {
+            splitHandler.destroy()
+            splitHandler = null
+        }
+        const viewer = options.viewer.value as any
+        if (viewer?.scene?.screenSpaceCameraController) {
+            viewer.scene.screenSpaceCameraController.enableRotate = true
+        }
+    }
+
+    /** 지정 포인트에서 구간을 분할한다. */
+    const handleSplitAtPoint = (sectionIndex: number, pointIndex: number) => {
+        if (!options.sectionDraft.value) return
+
+        const nextRanges = splitSectionAtPoint(
+            options.sectionPointRanges.value,
+            sectionIndex,
+            pointIndex
+        )
+
+        options.sectionPointRanges.value = nextRanges
+        options.sectionDraft.value = {
+            ...options.sectionDraft.value,
+            attrs: syncSectionAttrs(options.sectionDraft.value.attrs ?? [], nextRanges)
+        }
+
+        exitSplitMode()
+        redrawSectionGraphics()
+    }
 
     /**
      * 단일 구간의 폴리라인을 지도에 그린다.
@@ -327,14 +496,14 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
     }
 
     /**
-     * 특정 구간을 중간 지점에서 둘로 분할하여 새 구간을 삽입한다.
-     * 구간 범위와 속성 배열을 함께 갱신한 뒤 지도 그래픽을 다시 그린다.
+     * 특정 구간의 포인트를 시각화하여 사용자가 분할 지점을 직접 선택하도록 한다.
+     * 포인트가 충분하지 않으면 경고를 표시한다.
      */
     const handleAddSection = ({ index }: { index: number }) => {
         if (!options.sectionDraft.value) return
 
-        const nextRanges = splitSectionPointRange(options.sectionPointRanges.value, index)
-        if (nextRanges.length === options.sectionPointRanges.value.length) {
+        const range = options.sectionPointRanges.value[index]
+        if (!range || range.end - range.start < 2) {
             options.notify({
                 title: '구간 나누기 불가',
                 message: '포인트가 충분하지 않아 구간을 나눌 수 없습니다.',
@@ -343,12 +512,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             return
         }
 
-        options.sectionPointRanges.value = nextRanges
-        options.sectionDraft.value = {
-            ...options.sectionDraft.value,
-            attrs: syncSectionAttrs(options.sectionDraft.value.attrs ?? [], nextRanges)
-        }
-        redrawSectionGraphics()
+        enterSplitMode(index)
     }
 
     if (options.closingMode) {
@@ -358,6 +522,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
     }
 
     onBeforeUnmount(() => {
+        exitSplitMode()
         sectionPolylines.clear()
         sectionPoints.clear()
     })
@@ -366,11 +531,13 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         cancelDrawing,
         finishDrawing,
         isDrawingActive: readonly(isDrawingActive),
+        splitMode: readonly(splitMode),
         handleDrawReset,
         handleDrawSave,
         handleUpdateSectionAttr,
         handleRemoveSection,
         handleAddSection,
+        exitSplitMode,
         redrawSectionGraphics,
         hideSectionPolylines: () => sectionPolylines.hide(),
         showSectionPolylines: () => sectionPolylines.show()

@@ -34,6 +34,8 @@ export interface CesiumRuntime {
     ScreenSpaceEventHandler: new (element?: unknown) => CesiumDrawHandler
     ScreenSpaceEventType: {
         LEFT_CLICK: unknown
+        LEFT_DOWN: unknown
+        LEFT_UP: unknown
         MOUSE_MOVE: unknown
         RIGHT_CLICK: unknown
     }
