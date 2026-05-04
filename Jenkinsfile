@@ -158,24 +158,22 @@ pipeline {
             }
         }
 
-        // ── 7. 포트포워드 + 헬스체크 (workspace 무관) ──
+        // ── 7. 헬스체크 + Funnel ──
+        // port-forward는 LaunchAgent(com.runnable.portforward)가 상시 관리
         stage('Expose') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
-                    echo "==> 포트포워드 시작 (PID 파일 기반, 빌드 종료 후에도 지속)"
-                    bash minikube/scripts/portforward.sh start
-
-                    echo "==> 헬스체크"
-                    for i in 1 2 3 4 5; do
+                    echo "==> 헬스체크 (LaunchAgent port-forward 재연결 대기)"
+                    for i in $(seq 1 10); do
                         HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${LOCAL_PORT}" --max-time 5 2>/dev/null || echo "000")
                         if [ "$HTTP_CODE" = "200" ]; then
                             echo "    OK (HTTP 200)"
                             break
                         fi
-                        echo "    시도 ${i}/5 — HTTP ${HTTP_CODE}"
-                        sleep 2
+                        echo "    시도 ${i}/10 — HTTP ${HTTP_CODE}"
+                        sleep 3
                     done
 
                     if [ "$HTTP_CODE" != "200" ]; then
@@ -201,14 +199,7 @@ pipeline {
     post {
         success { echo "Pipeline SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }
         failure { echo "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }
-        always {
-            sh '''#!/bin/bash
-                # 빌드 성공/실패 무관하게 Pod가 Running이면 포트포워드 보장
-                if kubectl -n runnable get pods 2>/dev/null | grep -q Running; then
-                    bash minikube/scripts/portforward.sh start || true
-                fi
-            '''
-        }
+        // port-forward는 LaunchAgent가 상시 관리하므로 별도 조치 불필요
         cleanup { cleanWs() }
     }
 }
