@@ -71,10 +71,9 @@ const hasSearchableActive = computed(() =>
                 class="font-bold rounded-full"
                 :disabled="disabled"
                 :loading="
-                    isLoading &&
-                    (layer.type === 'sidewalk'
-                        ? sidewalk.isActive.value
-                        : activeTypes.has(layer.type))
+                    layer.type === 'sidewalk'
+                        ? sidewalk.isLoading.value
+                        : isLoading && activeTypes.has(layer.type)
                 "
                 :variant="
                     (
@@ -114,6 +113,7 @@ const hasSearchableActive = computed(() =>
                 icon="i-lucide-mountain"
                 size="sm"
                 class="font-bold rounded-full"
+                :disabled="disabled"
                 :variant="elevation.isElevationVisible.value ? 'solid' : 'outline'"
                 :color="elevation.isElevationVisible.value ? 'primary' : 'neutral'"
                 @click="elevation.toggleElevation"
@@ -123,6 +123,7 @@ const hasSearchableActive = computed(() =>
                 icon="i-lucide-map"
                 size="sm"
                 class="font-bold rounded-full"
+                :disabled="disabled"
                 :variant="boundary.isGuActive.value ? 'solid' : 'outline'"
                 :color="boundary.isGuActive.value ? 'primary' : 'neutral'"
                 @click="boundary.toggleGu"
@@ -132,6 +133,7 @@ const hasSearchableActive = computed(() =>
                 icon="i-lucide-map-pin"
                 size="sm"
                 class="font-bold rounded-full"
+                :disabled="disabled"
                 :variant="boundary.isDongActive.value ? 'solid' : 'outline'"
                 :color="boundary.isDongActive.value ? 'primary' : 'neutral'"
                 @click="boundary.toggleDong"
