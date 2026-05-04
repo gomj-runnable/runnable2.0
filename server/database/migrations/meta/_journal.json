@@ -15,6 +15,13 @@
       "when": 1776523094285,
       "tag": "0001_next_ken_ellis",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777859406589,
+      "tag": "0002_dazzling_gertrude_yorkes",
+      "breakpoints": true
     }
   ]
 }

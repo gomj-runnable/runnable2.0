@@ -31,6 +31,7 @@ const toSavedRoute = (row: typeof routes.$inferSelect, authorName?: string): Sav
     lowHeight: row.lowHeight ? Number(row.lowHeight) : undefined,
     distance: row.distance ? Number(row.distance) : undefined,
     isPublic: row.isPublic,
+    sourceRouteId: row.sourceRouteId ?? undefined,
     sgg: safeParseJson<string[] | undefined>(row.sgg, undefined, 'sgg'),
     emd: safeParseJson<string[] | undefined>(row.emd, undefined, 'emd'),
     createdAt: row.createdAt.toISOString(),
@@ -72,6 +73,7 @@ class DrizzleRouteRepository implements IRouteRepository {
                 lowHeight: input.lowHeight?.toString() ?? null,
                 distance: input.distance?.toString() ?? null,
                 isPublic: input.isPublic ?? true,
+                sourceRouteId: input.sourceRouteId ?? null,
                 sgg: input.sgg ? JSON.stringify(input.sgg) : null,
                 emd: input.emd ? JSON.stringify(input.emd) : null
             })
@@ -189,6 +191,19 @@ class DrizzleRouteRepository implements IRouteRepository {
             .where(eq(routeSections.routeId, routeId))
 
         return rows.map(toSavedSection)
+    }
+
+    async deleteSectionsByRouteId(routeId: string): Promise<void> {
+        await getDb().delete(routeSections).where(eq(routeSections.routeId, routeId))
+    }
+
+    async hasRouteFromSource(userId: string, sourceRouteId: string): Promise<boolean> {
+        const rows = await getDb()
+            .select({ routeId: routes.routeId })
+            .from(routes)
+            .where(and(eq(routes.userId, userId), eq(routes.sourceRouteId, sourceRouteId)))
+            .limit(1)
+        return rows.length > 0
     }
 }
 
