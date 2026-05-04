@@ -275,12 +275,21 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
             clickHandler = handler
 
-            // viewer 초기화 전에 활성화된 레이어가 있으면 데이터를 가져와 렌더링한다
+            // viewer 초기화 전에 활성화된 레이어가 있으면
+            // camera 좌표가 준비된 후 데이터를 가져와 렌더링한다
             if (activeTypes.value.size > 0) {
-                await fetchFacilities()
-                for (const type of activeTypes.value) {
-                    showLayer(type)
-                }
+                const unwatchCamera = watch(
+                    [camera.centerLat, camera.centerLng],
+                    async ([lat, lng]) => {
+                        if (lat === null || lng === null) return
+                        unwatchCamera()
+                        await fetchFacilities()
+                        for (const type of activeTypes.value) {
+                            showLayer(type)
+                        }
+                    },
+                    { immediate: true }
+                )
             }
         },
         { immediate: true }
@@ -291,7 +300,9 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
      * Set 비교 대신 entityMap 존재 여부로 판단하여 안정성 확보.
      */
     const activeTypesKey = computed(() => [...activeTypes.value].sort().join(','))
-    watch(activeTypesKey, async () => {
+
+    /** activeTypes가 변경되었을 때 레이어를 동기화한다 */
+    const syncLayers = async () => {
         const current = activeTypes.value
         await fetchFacilities()
 
@@ -305,6 +316,23 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                 removeLayer(type)
             }
         }
+    }
+
+    watch(activeTypesKey, async () => {
+        // camera 좌표가 없으면(초기 로드 중) 좌표 준비 후 동기화
+        if (camera.centerLat.value === null || camera.centerLng.value === null) {
+            const unwatchCamera = watch(
+                [camera.centerLat, camera.centerLng],
+                async ([lat, lng]) => {
+                    if (lat === null || lng === null) return
+                    unwatchCamera()
+                    await syncLayers()
+                },
+                { immediate: true }
+            )
+            return
+        }
+        await syncLayers()
     })
 
     /**
