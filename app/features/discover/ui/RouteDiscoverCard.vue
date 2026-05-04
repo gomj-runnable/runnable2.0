@@ -24,9 +24,12 @@ function getRouteInfoItems(route: RouteDiscoverCard) {
 <template>
     <UCard
         variant="subtle"
-        class="cursor-pointer"
+        class="cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--ui-primary)]"
         :class="{ 'ring-2 ring-[var(--ui-primary)]': selected }"
+        tabindex="0"
+        role="button"
         @click="$emit('select', route.routeId)"
+        @keydown.enter="$emit('select', route.routeId)"
     >
         <template #header>
             <div class="flex items-start justify-between gap-2">
