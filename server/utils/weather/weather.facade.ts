@@ -11,15 +11,13 @@ import { AirQualityService } from './airquality.service'
 import { mergeWeatherSlots } from './merge.service'
 import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
 import {
-    addDays,
     toDateOnly,
-    truncateToKstHour,
-    withKstHour,
     formatDate,
     parseYmd,
     mapPm10Grade,
     mapPm25Grade,
-    fromKstParts
+    createWeatherTimeRange,
+    type WeatherTimeRange
 } from './common'
 
 export interface WeatherFacadeOptions {
@@ -31,19 +29,6 @@ export interface WeatherFacadeOptions {
 
 const ALL_SOURCES: WeatherSourceKey[] = ['observed', 'forecast', 'airquality']
 
-// Parse "YYYY-MM" to { start: Date, end: Date } for the month range
-const parseMonthRange = (month: string): { start: Date; end: Date } | null => {
-    if (!/^\d{4}-\d{2}$/.test(month)) return null
-    const [yearRaw = '', monthRaw = ''] = month.split('-')
-    const year = Number(yearRaw)
-    const mon = Number(monthRaw)
-    if (!year || !mon || mon < 1 || mon > 12) return null
-    const start = fromKstParts(year, mon, 1, 0, 0)
-    // Last day: go to next month day 1, subtract 1 day
-    const end = withKstHour(addDays(fromKstParts(year, mon + 1, 1, 0, 0), -1), 23)
-    return { start, end }
-}
-
 class WeatherFacade {
     private readonly observedService = new ObservedService()
     private readonly forecastService = new ForecastService()
@@ -54,37 +39,69 @@ class WeatherFacade {
         month: string,
         options: WeatherFacadeOptions = {}
     ): Promise<SeoulMonthlyWeather> {
-        const range = parseMonthRange(month)
-        if (!range) throw new Error(`Invalid month format: ${month}. Expected YYYY-MM.`)
+        const timeRange = createWeatherTimeRange(month)
+        if (!timeRange) throw new Error(`Invalid month format: ${month}. Expected YYYY-MM.`)
 
+        const sources = options.sources ?? ALL_SOURCES
+        const { airKoreaKey } = options
+
+        const { observedSlots, forecastSlots, airQualityByGu, sourceErrors } =
+            await this._fetchAllSources(timeRange, options)
+
+        const mergedSlots = mergeWeatherSlots({
+            rangeStart: timeRange.rangeStart,
+            rangeEnd: timeRange.rangeEnd,
+            observedSlots,
+            forecastSlots
+        })
+
+        const dongs = this._enrichWithAirQuality(mergedSlots, airQualityByGu)
+
+        return {
+            baseDate: formatDate(timeRange.rangeStart),
+            rangeStart: formatDate(timeRange.rangeStart),
+            rangeEnd: formatDate(timeRange.rangeEnd),
+            dongs,
+            ...(sourceErrors.length > 0 && { sourceErrors }),
+            activeSources: sources.filter((s) => s !== 'airquality' || airKoreaKey?.trim())
+        }
+    }
+
+    /** 3개 소스에서 데이터를 병렬로 fetch하고 sourceErrors를 수집 */
+    private async _fetchAllSources(
+        timeRange: WeatherTimeRange,
+        options: WeatherFacadeOptions
+    ): Promise<{
+        observedSlots: import('#shared/types/weather').HourlyWeather[]
+        forecastSlots: import('#shared/types/weather').HourlyWeather[]
+        airQualityByGu: Map<string, import('./airquality.adapter').AirQualitySlot[]>
+        sourceErrors: WeatherSourceError[]
+    }> {
         const { authKey, openDataKey, airKoreaKey } = options
         const sources = options.sources ?? ALL_SOURCES
-        const now = truncateToKstHour(new Date())
-
         const sourceErrors: WeatherSourceError[] = []
 
-        // Observed
+        // Observed — 과거 ~ now 범위
         let observedSlots: import('#shared/types/weather').HourlyWeather[] = []
         if (sources.includes('observed') && authKey?.trim()) {
-            const observedEnd = range.end.getTime() > now.getTime() ? now : range.end
-            const result = await this.observedService.fetch(authKey, range.start, observedEnd)
+            const result = await this.observedService.fetch(authKey, timeRange.rangeStart, timeRange.observedEnd)
             observedSlots = result.slots
             if (result.error) sourceErrors.push(result.error)
         }
 
-        // Forecast
+        // Forecast — now 기준 최근 3일 이내
         let forecastSlots: import('#shared/types/weather').HourlyWeather[] = []
         if (sources.includes('forecast') && openDataKey?.trim()) {
             const result = await this.forecastService.fetch(
                 openDataKey,
-                formatDate(range.start),
-                now
+                timeRange.forecastRequestDate,
+                timeRange.now
             )
             forecastSlots = result.slots
             if (result.error) sourceErrors.push(result.error)
         }
 
-        // Airquality
+        // Airquality — 실시간
         let airQualityByGu = new Map<string, import('./airquality.adapter').AirQualitySlot[]>()
         if (sources.includes('airquality') && airKoreaKey?.trim()) {
             const result = await this.airQualityService.fetch(airKoreaKey)
@@ -92,16 +109,15 @@ class WeatherFacade {
             if (result.error) sourceErrors.push(result.error)
         }
 
-        // Merge observed + forecast
-        const mergedSlots = mergeWeatherSlots({
-            rangeStart: range.start,
-            rangeEnd: range.end,
-            observedSlots,
-            forecastSlots
-        })
+        return { observedSlots, forecastSlots, airQualityByGu, sourceErrors }
+    }
 
-        // PM10/PM2.5 보충 (airquality data → merged slots)
-        const dongs: DongWeather[] = SEOUL_GU_DATA.map((gu) => {
+    /** PM10/PM2.5 보충 후 동별 데이터 구조화 */
+    private _enrichWithAirQuality(
+        mergedSlots: import('#shared/types/weather').HourlyWeather[],
+        airQualityByGu: Map<string, import('./airquality.adapter').AirQualitySlot[]>
+    ): DongWeather[] {
+        return SEOUL_GU_DATA.map((gu) => {
             const guAirSlots = airQualityByGu.get(gu.code) ?? []
             const hourly = mergedSlots.map((slot) => {
                 const matched = guAirSlots.find((aq) => {
@@ -136,15 +152,6 @@ class WeatherFacade {
                 hourly
             }
         })
-
-        return {
-            baseDate: formatDate(range.start),
-            rangeStart: formatDate(range.start),
-            rangeEnd: formatDate(range.end),
-            dongs,
-            ...(sourceErrors.length > 0 && { sourceErrors }),
-            activeSources: sources.filter((s) => s !== 'airquality' || airKoreaKey?.trim())
-        }
     }
 
     /** 하위호환: 날짜 기준 조회 (해당 날짜의 월 전체를 조회) */

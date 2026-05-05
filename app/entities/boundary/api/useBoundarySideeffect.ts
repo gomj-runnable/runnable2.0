@@ -7,9 +7,97 @@ import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
 
 interface UseBoundarySideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
+}
+
+interface BoundaryLayerOptions {
+    viewer: ShallowRef<CesiumViewer | null>
+    geojson: { features?: GeoFeature[] } | null
+    entities: Entity[]
+    nameKey: string
+    fillColor?: string
+    lineColor: string
+    lineAlpha: number
+    lineWidth: number
+    labelColor?: string
+    labelAlpha?: number
+    fontSize: string
+    labelOutlineWidth: number
+    showPolygon: boolean
+}
+
+const calcCentroid = (coords: number[][]): [number, number] => {
+    const [lng, lat] = centroid(polygon([coords])).geometry.coordinates
+    return [lng!, lat!]
+}
+
+const renderBoundaryLayer = (opts: BoundaryLayerOptions) => {
+    const v = opts.viewer.value
+    const C = getCesiumRuntime()
+    if (!v || !C || !opts.geojson) return
+
+    const lineCol = C.Color.fromCssColorString(opts.lineColor).withAlpha(opts.lineAlpha)
+    const fillCol = opts.fillColor
+        ? C.Color.fromCssColorString(opts.fillColor).withAlpha(0.08)
+        : null
+    const labelCol =
+        opts.labelColor && opts.labelAlpha !== undefined
+            ? C.Color.fromCssColorString(opts.labelColor).withAlpha(opts.labelAlpha)
+            : lineCol
+
+    for (const feature of opts.geojson.features ?? []) {
+        const geo = feature.geometry
+        if (!geo) continue
+        const name = String(feature.properties?.[opts.nameKey] ?? '')
+
+        const addRing = (ring: number[][], showLabel: boolean) => {
+            const flat = ring.flatMap(([lng, lat]) => [lng!, lat!])
+            const def: Record<string, unknown> = {
+                polyline: {
+                    positions: C.Cartesian3.fromDegreesArray(flat),
+                    width: opts.lineWidth,
+                    material: lineCol as unknown as undefined,
+                    clampToGround: true
+                }
+            }
+            if (opts.showPolygon && fillCol) {
+                def.polygon = {
+                    hierarchy: C.Cartesian3.fromDegreesArray(flat),
+                    material: fillCol as unknown as undefined,
+                    outline: false
+                }
+            }
+            if (showLabel) {
+                const [cLng, cLat] = calcCentroid(ring)
+                def.position = C.Cartesian3.fromDegrees(cLng!, cLat!)
+                def.label = {
+                    text: name,
+                    font: `${opts.fontSize} sans-serif`,
+                    fillColor: labelCol,
+                    outlineColor: C.Color.BLACK,
+                    outlineWidth: opts.labelOutlineWidth,
+                    style: C.LabelStyle.FILL_AND_OUTLINE,
+                    verticalOrigin: C.VerticalOrigin.CENTER,
+                    horizontalOrigin: C.HorizontalOrigin.CENTER,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY
+                }
+            }
+            opts.entities.push(v.entities.add(def as Parameters<typeof v.entities.add>[0]))
+        }
+
+        if (geo.type === 'Polygon') {
+            const rings = geo.coordinates as number[][][]
+            if (rings[0]) addRing(rings[0], true)
+        } else if (geo.type === 'MultiPolygon') {
+            const polys = geo.coordinates as number[][][][]
+            polys.forEach((poly, idx) => {
+                if (poly[0]) addRing(poly[0], idx === 0)
+            })
+        }
+    }
 }
 
 /**
@@ -27,70 +115,20 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
     /** 행정동 Entity 목록 */
     const dongEntities: Entity[] = []
 
-    const calcCentroid = (coords: number[][]): [number, number] => {
-        const [lng, lat] = centroid(polygon([coords])).geometry.coordinates
-        return [lng!, lat!]
-    }
-
-    /** 시군구 엔티티를 추가한다. */
-    const showGu = () => {
-        const v = viewer.value
-        const C = getCesiumRuntime()
-        if (!v || !C || !guGeojson.value) return
-
-        const geojson = guGeojson.value as { features?: GeoFeature[] }
-        const fillColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.08)
-        const lineColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.4)
-
-        for (const feature of geojson.features ?? []) {
-            const geo = feature.geometry
-            if (!geo) continue
-            const name = String(feature.properties?.SIG_KOR_NM ?? '')
-
-            const addRing = (ring: number[][], showLabel: boolean) => {
-                const flat = ring.flatMap(([lng, lat]) => [lng!, lat!])
-                const def: Record<string, unknown> = {
-                    polygon: {
-                        hierarchy: C.Cartesian3.fromDegreesArray(flat),
-                        material: fillColor as unknown as undefined,
-                        outline: false
-                    },
-                    polyline: {
-                        positions: C.Cartesian3.fromDegreesArray(flat),
-                        width: 2,
-                        material: lineColor as unknown as undefined,
-                        clampToGround: true
-                    }
-                }
-                if (showLabel) {
-                    const [cLng, cLat] = calcCentroid(ring)
-                    def.position = C.Cartesian3.fromDegrees(cLng!, cLat!)
-                    def.label = {
-                        text: name,
-                        font: '13px sans-serif',
-                        fillColor: lineColor,
-                        outlineColor: C.Color.BLACK,
-                        outlineWidth: 2,
-                        style: C.LabelStyle.FILL_AND_OUTLINE,
-                        verticalOrigin: C.VerticalOrigin.CENTER,
-                        horizontalOrigin: C.HorizontalOrigin.CENTER,
-                        disableDepthTestDistance: Number.POSITIVE_INFINITY
-                    }
-                }
-                guEntities.push(v.entities.add(def as Parameters<typeof v.entities.add>[0]))
-            }
-
-            if (geo.type === 'Polygon') {
-                const rings = geo.coordinates as number[][][]
-                if (rings[0]) addRing(rings[0], true)
-            } else if (geo.type === 'MultiPolygon') {
-                const polys = geo.coordinates as number[][][][]
-                polys.forEach((poly, idx) => {
-                    if (poly[0]) addRing(poly[0], idx === 0)
-                })
-            }
-        }
-    }
+    const showGu = () =>
+        renderBoundaryLayer({
+            viewer,
+            geojson: guGeojson.value as { features?: GeoFeature[] } | null,
+            entities: guEntities,
+            nameKey: 'SIG_KOR_NM',
+            fillColor: '#2196F3',
+            lineColor: '#2196F3',
+            lineAlpha: 0.4,
+            lineWidth: 2,
+            fontSize: '13px',
+            labelOutlineWidth: 2,
+            showPolygon: true
+        })
 
     const hideGu = () => {
         const v = viewer.value
@@ -99,60 +137,21 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
         guEntities.length = 0
     }
 
-    /** 행정동 엔티티를 추가한다. 시군구 위에 렌더링된다. */
-    const showDong = () => {
-        const v = viewer.value
-        const C = getCesiumRuntime()
-        if (!v || !C || !dongGeojson.value) return
-
-        const geojson = dongGeojson.value as { features?: GeoFeature[] }
-        const lineColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.25)
-        const labelColor = C.Color.fromCssColorString('#2196F3').withAlpha(0.5)
-
-        for (const feature of geojson.features ?? []) {
-            const geo = feature.geometry
-            if (!geo) continue
-            const name = String(feature.properties?.name ?? '')
-
-            const addRing = (ring: number[][], showLabel: boolean) => {
-                const flat = ring.flatMap(([lng, lat]) => [lng!, lat!])
-                const def: Record<string, unknown> = {
-                    polyline: {
-                        positions: C.Cartesian3.fromDegreesArray(flat),
-                        width: 1,
-                        material: lineColor as unknown as undefined,
-                        clampToGround: true
-                    }
-                }
-                if (showLabel) {
-                    const [cLng, cLat] = calcCentroid(ring)
-                    def.position = C.Cartesian3.fromDegrees(cLng!, cLat!)
-                    def.label = {
-                        text: name,
-                        font: '11px sans-serif',
-                        fillColor: labelColor,
-                        outlineColor: C.Color.BLACK,
-                        outlineWidth: 1,
-                        style: C.LabelStyle.FILL_AND_OUTLINE,
-                        verticalOrigin: C.VerticalOrigin.CENTER,
-                        horizontalOrigin: C.HorizontalOrigin.CENTER,
-                        disableDepthTestDistance: Number.POSITIVE_INFINITY
-                    }
-                }
-                dongEntities.push(v.entities.add(def as Parameters<typeof v.entities.add>[0]))
-            }
-
-            if (geo.type === 'Polygon') {
-                const rings = geo.coordinates as number[][][]
-                if (rings[0]) addRing(rings[0], true)
-            } else if (geo.type === 'MultiPolygon') {
-                const polys = geo.coordinates as number[][][][]
-                polys.forEach((poly, idx) => {
-                    if (poly[0]) addRing(poly[0], idx === 0)
-                })
-            }
-        }
-    }
+    const showDong = () =>
+        renderBoundaryLayer({
+            viewer,
+            geojson: dongGeojson.value as { features?: GeoFeature[] } | null,
+            entities: dongEntities,
+            nameKey: 'name',
+            lineColor: '#2196F3',
+            lineAlpha: 0.25,
+            lineWidth: 1,
+            labelColor: '#2196F3',
+            labelAlpha: 0.5,
+            fontSize: '11px',
+            labelOutlineWidth: 1,
+            showPolygon: false
+        })
 
     const hideDong = () => {
         const v = viewer.value
@@ -161,31 +160,22 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
         dongEntities.length = 0
     }
 
+    const guLayer = createToggleLayerSideeffect({
+        source: isGuActive,
+        apply: showGu,
+        remove: hideGu
+    })
+
+    const dongLayer = createToggleLayerSideeffect({
+        source: isDongActive,
+        apply: showDong,
+        remove: hideDong
+    })
+
     const init = async () => {
         await Promise.all([ensureGuBoundaryLoaded(), ensureDongBoundaryLoaded()])
-
-        const stopGuWatch = watch(
-            isGuActive,
-            (active) => {
-                if (active) showGu()
-                else hideGu()
-            },
-            { immediate: true }
-        )
-
-        const stopDongWatch = watch(
-            isDongActive,
-            (active) => {
-                if (active) showDong()
-                else hideDong()
-            },
-            { immediate: true }
-        )
-
-        onBeforeUnmount(() => {
-            stopGuWatch()
-            stopDongWatch()
-        })
+        guLayer.init()
+        dongLayer.init()
     }
 
     return { init }

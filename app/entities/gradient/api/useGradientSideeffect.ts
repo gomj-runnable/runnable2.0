@@ -8,6 +8,7 @@ import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { useGradientAction } from '~/entities/gradient/lib/useGradientAction'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
 import { distance, point } from '@turf/turf'
 
 interface GradientSideeffectOptions {
@@ -82,24 +83,16 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
         setDifficulty(null)
     }
 
-    const init = () => {
-        const stopWatch = watch(
-            [isGradientVisible, drawnPositions] as const,
-            ([visible, positions]) => {
-                if (visible && positions && positions.length >= 2) {
-                    drawGradientPolylines(positions)
-                } else {
-                    clearGradientPolylines()
-                }
-            },
-            { immediate: true }
-        )
-
-        onBeforeUnmount(() => {
-            stopWatch()
-            gradientPolylines.clear()
-        })
-    }
+    const { init } = createToggleLayerSideeffect<
+        [boolean, GeoJsonPosition[] | null]
+    >({
+        source: [isGradientVisible, drawnPositions] as const,
+        condition: ([visible, positions]) =>
+            visible && positions != null && positions.length >= 2,
+        apply: () => drawGradientPolylines(drawnPositions.value!),
+        remove: clearGradientPolylines,
+        cleanup: () => gradientPolylines.clear()
+    })
 
     return { init }
 }
