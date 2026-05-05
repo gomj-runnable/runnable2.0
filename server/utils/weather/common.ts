@@ -155,6 +155,47 @@ export const mapConditionByCloudAndRain = (
     return 'cloudy'
 }
 
+// ─── WeatherTimeRange DTO ────────────────────────────────────────────────
+
+/** 월 단위 날씨 조회에 필요한 시간 범위 DTO */
+export interface WeatherTimeRange {
+    /** 전체 조회 범위 시작 (월 1일 00:00 KST) */
+    rangeStart: Date
+    /** 전체 조회 범위 끝 (월 말일 23:00 KST) */
+    rangeEnd: Date
+    /** 현재 시각 (시 단위 절삭) */
+    now: Date
+    /** 관측 데이터 조회 끝 — min(rangeEnd, now) */
+    observedEnd: Date
+    /** 예보 요청 날짜 문자열 — formatDate(now) */
+    forecastRequestDate: string
+}
+
+/** "YYYY-MM" → WeatherTimeRange. 유효하지 않으면 null */
+export const createWeatherTimeRange = (
+    month: string,
+    now?: Date
+): WeatherTimeRange | null => {
+    if (!/^\d{4}-\d{2}$/.test(month)) return null
+    const [yearRaw = '', monthRaw = ''] = month.split('-')
+    const year = Number(yearRaw)
+    const mon = Number(monthRaw)
+    if (!year || !mon || mon < 1 || mon > 12) return null
+
+    const rangeStart = fromKstParts(year, mon, 1, 0, 0)
+    const rangeEnd = withKstHour(addDays(fromKstParts(year, mon + 1, 1, 0, 0), -1), 23)
+    const truncatedNow = truncateToKstHour(now ?? new Date())
+    const observedEnd = rangeEnd.getTime() > truncatedNow.getTime() ? truncatedNow : rangeEnd
+
+    return {
+        rangeStart,
+        rangeEnd,
+        now: truncatedNow,
+        observedEnd,
+        forecastRequestDate: formatDate(truncatedNow)
+    }
+}
+
 export const mapConditionByPrecipitation = (
     temperature: number,
     precipitation: number | null,

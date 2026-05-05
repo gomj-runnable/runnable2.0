@@ -1,6 +1,7 @@
 import type { ShallowRef, Ref } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
 
 interface ElevationLayerOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -142,23 +143,11 @@ export const useElevationLayerSideeffect = (options: ElevationLayerOptions) => {
         originalMaterial = null
     }
 
-    const init = () => {
-        const stopWatch = watch(
-            isElevationVisible,
-            (visible) => {
-                if (visible) {
-                    applyElevationMaterial()
-                } else {
-                    removeElevationMaterial()
-                }
-            },
-            { immediate: true }
-        )
-
-        onBeforeUnmount(() => {
-            stopWatch()
-        })
-    }
+    const { init } = createToggleLayerSideeffect({
+        source: isElevationVisible,
+        apply: applyElevationMaterial,
+        remove: removeElevationMaterial
+    })
 
     return { init }
 }
