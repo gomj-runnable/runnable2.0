@@ -85,25 +85,12 @@ const routeDrawStore = useRouteDrawStore()
 // ─── 지도 기능 초기화 (인증·날씨·편의시설·카메라·경계·고도·경사·탐색·시뮬레이션) ──
 
 const {
-    authStore,
-    authEffect,
-    weather,
-    weatherSources,
-    facility,
-    sidewalk,
-    facilityEffect,
+    auth,
+    weather: weatherFacade,
+    mapLayers,
     camera,
-    boundary,
-    boundaryEffect,
-    elevation,
-    elevationEffect,
-    gradient,
-    gradientEffect,
     explore,
-    simulation,
-    simulationEffect,
-    weatherRecommend,
-    weatherRecommendEffect
+    simulation: simulationFacade
 } = useMapFeatureInit({
     viewer,
     drawing,
@@ -112,6 +99,26 @@ const {
     hideRoutePolylines,
     showRoutePolylines
 })
+
+const { authStore, authEffect } = auth
+const {
+    store: weather,
+    sources: weatherSources,
+    recommend: weatherRecommend,
+    recommendEffect: weatherRecommendEffect
+} = weatherFacade
+const {
+    facility,
+    sidewalk,
+    facilityEffect,
+    boundary,
+    boundaryEffect,
+    elevation,
+    elevationEffect,
+    gradient,
+    gradientEffect
+} = mapLayers
+const { store: simulation, effect: simulationEffect } = simulationFacade
 
 // ─── SlideOver 네비게이션 ────────────────────────────────────────
 
@@ -192,8 +199,7 @@ const {
     routeList,
     slideOver,
     activeNav,
-    simulation,
-    simulationEffect,
+    simulation: simulationFacade,
     routeInfoStore,
     routeInfoEffect
 })
@@ -239,12 +245,8 @@ const handleDrawingStartWithHelp = () => {
 
 // ─── FAB 그룹 (모바일 전용 플로팅 메뉴) ─────────────────────────
 const { fabGroups, fabNearbyVisible } = useFabGroups({
-    facility,
-    sidewalk,
-    elevation,
-    boundary,
-    weather,
-    gradient,
+    mapLayers,
+    weather: weatherFacade,
     overlayContext,
     elevationChart,
     activeNav,

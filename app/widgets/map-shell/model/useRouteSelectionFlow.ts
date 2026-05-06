@@ -21,8 +21,10 @@ interface UseRouteSelectionFlowOptions {
     }
     slideOver: { current: Ref<any>; meta: Ref<{ title: string; description: string }> }
     activeNav: Ref<string>
-    simulation: ReturnType<typeof useSimulationStore>
-    simulationEffect: { stopPlayback: () => void }
+    simulation: {
+        store: ReturnType<typeof useSimulationStore>
+        effect: { stopPlayback: () => void }
+    }
     routeInfoStore: ReturnType<typeof useRouteInfoStore>
     routeInfoEffect: ReturnType<typeof useRouteInfoSideeffect>
 }
@@ -39,7 +41,6 @@ export function useRouteSelectionFlow({
     slideOver,
     activeNav,
     simulation,
-    simulationEffect,
     routeInfoStore,
     routeInfoEffect
 }: UseRouteSelectionFlowOptions) {
@@ -98,8 +99,8 @@ export function useRouteSelectionFlow({
 
     /** 선택 경로가 바뀌면 기존 시뮬레이션을 즉시 정지한다. */
     const stopSimulationForRouteChange = () => {
-        if (!simulation.playbackState.value.isStopped) {
-            simulationEffect.stopPlayback()
+        if (!simulation.store.playbackState.value.isStopped) {
+            simulation.effect.stopPlayback()
         }
     }
 
