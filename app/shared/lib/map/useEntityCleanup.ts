@@ -9,6 +9,15 @@ import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
 export const createEntityGroup = (viewer: ShallowRef<CesiumViewer | null>) => {
     const entities = shallowRef<CesiumEntity[]>([])
 
+    /** 엔티티 옵션을 받아 viewer에 추가하고 그룹에 등록한다. 추가된 엔티티를 반환한다. */
+    const add = (options: Record<string, unknown>): CesiumEntity | null => {
+        const v = viewer.value
+        if (!v) return null
+        const entity = v.entities.add(options)
+        entities.value = [...entities.value, entity]
+        return entity
+    }
+
     /** 엔티티 배열을 지도에서 일괄 제거하고 내부 목록을 초기화한다. */
     const clear = () => {
         if (!viewer.value) return
@@ -35,5 +44,5 @@ export const createEntityGroup = (viewer: ShallowRef<CesiumViewer | null>) => {
         })
     }
 
-    return { entities, clear, set, hide, show }
+    return { entities, add, clear, set, hide, show }
 }

@@ -1,33 +1,17 @@
-import { createError, defineEventHandler, getQuery } from 'h3'
-import type { WeatherSourceKey } from '#shared/types/weather'
+import { defineEventHandler, getQuery } from 'h3'
 import { weatherFacade } from '../../../utils/weather/weather.facade'
-
-const VALID_SOURCES: WeatherSourceKey[] = ['observed', 'forecast', 'airquality']
-
-const parseSources = (raw?: string): WeatherSourceKey[] => {
-    if (!raw) return [...VALID_SOURCES]
-    return raw
-        .split(',')
-        .map((s) => s.trim() as WeatherSourceKey)
-        .filter((s) => VALID_SOURCES.includes(s))
-}
+import { parseSources, resolveWeatherKeys } from '../../../utils/weather/event'
+import { badRequest } from '../../../utils/error'
 
 export default defineEventHandler(async (event) => {
     const month = event.context.params?.month
     if (!month || !/^\d{4}-\d{2}$/.test(month)) {
-        throw createError({
-            statusCode: 400,
-            message: 'month path param must be YYYY-MM'
-        })
+        throw badRequest('month path param must be YYYY-MM')
     }
 
-    const config = useRuntimeConfig(event)
-    const authKey = String(config.weatherKor ?? '').trim()
-    const openDataKey = String(config.openData ?? '').trim()
-    const airKoreaKey = String(config.airKoreaKey ?? '').trim()
-
+    const keys = resolveWeatherKeys(event)
     const query = getQuery(event)
     const sources = parseSources(query.sources as string | undefined)
 
-    return weatherFacade.requestByMonth(month, { authKey, openDataKey, airKoreaKey, sources })
+    return weatherFacade.requestByMonth(month, { ...keys, sources })
 })

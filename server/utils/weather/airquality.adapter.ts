@@ -68,6 +68,10 @@ const parseAirKoreaItems = (items: AirKoreaRltmItem[]): AirQualitySlot[] => {
     return slots
 }
 
+/**
+ * AirQuality 데이터는 시간당 1회 갱신되는 실시간 측정값이며 모든 요청에 동일한 결과를 반환하므로
+ * 1시간 인메모리 캐시를 둔다. observed/forecast adapter는 요청 시각·기간이 매번 다르므로 캐시하지 않는다.
+ */
 export class AirQualityAdapter implements IAirQualityAdapter {
     private cachedResult: Map<string, AirQualitySlot[]> | null = null
     private cacheTimestamp = 0
@@ -80,16 +84,17 @@ export class AirQualityAdapter implements IAirQualityAdapter {
         serviceKey: string,
         stationName: string
     ): Promise<AirKoreaRltmItem[]> {
-        const url = new URL(AIRKOREA_BASE_URL)
-        url.searchParams.set('serviceKey', serviceKey)
-        url.searchParams.set('stationName', stationName)
-        url.searchParams.set('dataTerm', 'DAILY')
-        url.searchParams.set('returnType', 'json')
-        url.searchParams.set('numOfRows', '24')
-        url.searchParams.set('pageNo', '1')
-        url.searchParams.set('ver', '1.3')
+        const params = new URLSearchParams()
+        params.set('stationName', stationName)
+        params.set('dataTerm', 'DAILY')
+        params.set('returnType', 'json')
+        params.set('numOfRows', '24')
+        params.set('pageNo', '1')
+        params.set('ver', '1.3')
 
-        const response = await fetch(url.toString())
+        const url = `${AIRKOREA_BASE_URL}?serviceKey=${serviceKey}&${params.toString()}`
+
+        const response = await fetch(url)
         if (!response.ok) {
             throw new Error(`AirKorea request failed for ${stationName} (${response.status})`)
         }

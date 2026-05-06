@@ -3,6 +3,7 @@ import type { SavedRouteInfo, RouteInfoDraftInput } from '#shared/types/routeInf
 import type { CesiumViewer, CesiumEntity } from '~/shared/lib/useWindow'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import type { CesiumDrawHandler } from '#shared/types/cesium'
 
 export interface RouteInfoClickedPosition {
@@ -17,7 +18,7 @@ export interface RouteInfoClickedPosition {
  */
 export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
     const store = useRouteInfoStore()
-    let entityGroup: ReturnType<typeof createEntityGroup> | null = null
+    const entityGroup = createEntityGroup(viewer)
     const entityToRouteInfoMap = new Map<CesiumEntity, SavedRouteInfo | RouteInfoDraftInput>()
 
     /** 지도 클릭으로 선택된 경로정보 위치 */
@@ -174,8 +175,6 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
         const C = getCesiumRuntime()
         clearMarkers()
-        entityGroup = createEntityGroup(v)
-        entityToRouteInfoMap.clear()
 
         const allItems: (SavedRouteInfo | RouteInfoDraftInput)[] = [
             ...store.routeInfos.value,
@@ -217,15 +216,12 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
                 }
             })
 
-            entityToRouteInfoMap.set(entity, item)
+            if (entity) entityToRouteInfoMap.set(entity, item)
         }
     }
 
     const clearMarkers = () => {
-        if (entityGroup) {
-            entityGroup.removeAll()
-            entityGroup = null
-        }
+        entityGroup.clear()
         entityToRouteInfoMap.clear()
     }
 
@@ -244,24 +240,5 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
         clearMarkers,
         clickedPosition,
         cancelAdding
-    }
-}
-
-/** Cesium entity 그룹을 생성하여 일괄 관리한다 */
-function createEntityGroup(viewer: CesiumViewer) {
-    const entities: CesiumEntity[] = []
-
-    return {
-        add(options: Record<string, unknown>) {
-            const entity = viewer.entities.add(options)
-            entities.push(entity)
-            return entity
-        },
-        removeAll() {
-            for (const entity of entities) {
-                viewer.entities.remove(entity)
-            }
-            entities.length = 0
-        }
     }
 }

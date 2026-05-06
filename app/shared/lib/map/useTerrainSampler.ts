@@ -1,8 +1,7 @@
 import type { ShallowRef } from 'vue'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import type { RouteElevationSectionInput } from '~/entities/route/lib/useRouteElevationProfile'
-import { densifyPositions } from '~/entities/route/lib/usePositionDensify'
+import { densifyPositions } from '~/shared/lib/map/densifyPositions'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 
 /**
@@ -61,12 +60,12 @@ export const useTerrainSampler = (viewer: ShallowRef<CesiumViewer | null>) => {
      * 구간 입력 배열의 각 좌표를 보간+샘플링하여 반환한다.
      * 고도 프로필 생성 전 전처리 파이프라인으로 사용한다.
      *
-     * @param sections - 보간+샘플링할 구간 입력 배열
+     * @param sections - `positions` 필드를 가진 구간 입력 배열
      * @returns positions가 보간+샘플링된 구간 입력 배열
      */
-    const densifyAndSampleSections = async (
-        sections: RouteElevationSectionInput[]
-    ): Promise<RouteElevationSectionInput[]> =>
+    const densifyAndSampleSections = async <T extends { positions: GeoJsonPosition[] }>(
+        sections: T[]
+    ): Promise<T[]> =>
         Promise.all(
             sections.map(async (s) => ({
                 ...s,

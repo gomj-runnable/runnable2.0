@@ -39,7 +39,7 @@ import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
 import { useFabGroups } from '~/widgets/map-shell/model/useFabGroups'
 import { useMapFeatureInit } from '~/widgets/map-shell/model/useMapFeatureInit'
 import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
-import SecondPanel from '~/widgets/right-panel/ui/SecondPanel.vue'
+import SectionInfoSlideContent from '~/widgets/right-panel/ui/SectionInfoSlideContent.vue'
 import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
 
 /** 브라우저 전용 페이지 — Cesium 뷰어가 window 객체에 의존하므로 SSR을 비활성화한다. */
@@ -489,39 +489,22 @@ const handleLogout = async () => {
                 <!-- 목록 -->
                 <div v-if="slideOver.current.value === NavKey.LIST" class="flex flex-col gap-1">
                     <!-- 구간정보 step -->
-                    <template v-if="sectionInfo.isOpen.value">
-                        <div class="flex items-center gap-1.5 mb-2">
-                            <UButton
-                                icon="i-lucide-chevron-left"
-                                variant="ghost"
-                                color="neutral"
-                                size="xs"
-                                label="경로목록"
-                                @click="handleStepBack"
-                            />
-                            <UIcon
-                                name="i-lucide-chevron-right"
-                                class="text-[var(--ui-text-dimmed)] size-3"
-                            />
-                            <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">
-                                구간정보
-                            </span>
-                        </div>
-                        <SecondPanel
-                            :panel-title="sectionInfo.panelTitle.value"
-                            :sections="sectionInfo.sections.value"
-                            :user-paces="sectionInfo.userPaces.value"
-                            :total-distance="sectionTotalDistance"
-                            :total-time="sectionTotalTime"
-                            :is-edit-mode="sectionInfo.isEditMode.value"
-                            :read-only="sectionInfo.readOnly.value"
-                            @update:edit-mode="sectionInfo.isEditMode.value = $event"
-                            @update:pace="sectionInfo.updatePace"
-                            @update:weight="sectionInfo.updateWeight"
-                            @update:strategy="sectionInfo.updateStrategy"
-                            @close="handleStepBack"
-                        />
-                    </template>
+                    <SectionInfoSlideContent
+                        v-if="sectionInfo.isOpen.value"
+                        back-label="경로목록"
+                        :panel-title="sectionInfo.panelTitle.value"
+                        :sections="sectionInfo.sections.value"
+                        :user-paces="sectionInfo.userPaces.value"
+                        :total-distance="sectionTotalDistance"
+                        :total-time="sectionTotalTime"
+                        :is-edit-mode="sectionInfo.isEditMode.value"
+                        :read-only="sectionInfo.readOnly.value"
+                        @update:edit-mode="sectionInfo.isEditMode.value = $event"
+                        @update:pace="sectionInfo.updatePace"
+                        @update:weight="sectionInfo.updateWeight"
+                        @update:strategy="sectionInfo.updateStrategy"
+                        @back="handleStepBack"
+                    />
                     <!-- 기본 경로목록 -->
                     <template v-else>
                         <UInput
@@ -563,39 +546,22 @@ const handleLogout = async () => {
                     class="flex flex-col gap-1"
                 >
                     <!-- 구간정보 step -->
-                    <template v-if="sectionInfo.isOpen.value">
-                        <div class="flex items-center gap-1.5 mb-2">
-                            <UButton
-                                icon="i-lucide-chevron-left"
-                                variant="ghost"
-                                color="neutral"
-                                size="xs"
-                                label="경로탐색"
-                                @click="handleStepBack"
-                            />
-                            <UIcon
-                                name="i-lucide-chevron-right"
-                                class="text-[var(--ui-text-dimmed)] size-3"
-                            />
-                            <span class="text-sm font-medium text-[var(--ui-text-highlighted)]">
-                                구간정보
-                            </span>
-                        </div>
-                        <SecondPanel
-                            :panel-title="sectionInfo.panelTitle.value"
-                            :sections="sectionInfo.sections.value"
-                            :user-paces="sectionInfo.userPaces.value"
-                            :total-distance="sectionTotalDistance"
-                            :total-time="sectionTotalTime"
-                            :is-edit-mode="sectionInfo.isEditMode.value"
-                            :read-only="sectionInfo.readOnly.value"
-                            @update:edit-mode="sectionInfo.isEditMode.value = $event"
-                            @update:pace="sectionInfo.updatePace"
-                            @update:weight="sectionInfo.updateWeight"
-                            @update:strategy="sectionInfo.updateStrategy"
-                            @close="handleStepBack"
-                        />
-                    </template>
+                    <SectionInfoSlideContent
+                        v-if="sectionInfo.isOpen.value"
+                        back-label="경로탐색"
+                        :panel-title="sectionInfo.panelTitle.value"
+                        :sections="sectionInfo.sections.value"
+                        :user-paces="sectionInfo.userPaces.value"
+                        :total-distance="sectionTotalDistance"
+                        :total-time="sectionTotalTime"
+                        :is-edit-mode="sectionInfo.isEditMode.value"
+                        :read-only="sectionInfo.readOnly.value"
+                        @update:edit-mode="sectionInfo.isEditMode.value = $event"
+                        @update:pace="sectionInfo.updatePace"
+                        @update:weight="sectionInfo.updateWeight"
+                        @update:strategy="sectionInfo.updateStrategy"
+                        @back="handleStepBack"
+                    />
                     <!-- 기본 탐색 목록 -->
                     <template v-else>
                         <UInput

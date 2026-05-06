@@ -49,17 +49,18 @@ const fetchVilageFcst = async (
     nx: number,
     ny: number
 ): Promise<VilageFcstOriginalItem[]> => {
-    const url = new URL('https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst')
-    url.searchParams.set('serviceKey', serviceKey)
-    url.searchParams.set('pageNo', '1')
-    url.searchParams.set('numOfRows', '1000')
-    url.searchParams.set('dataType', 'JSON')
-    url.searchParams.set('base_date', baseDate)
-    url.searchParams.set('base_time', baseTime)
-    url.searchParams.set('nx', String(nx))
-    url.searchParams.set('ny', String(ny))
+    const params = new URLSearchParams()
+    params.set('pageNo', '1')
+    params.set('numOfRows', '1000')
+    params.set('dataType', 'JSON')
+    params.set('base_date', baseDate)
+    params.set('base_time', baseTime)
+    params.set('nx', String(nx))
+    params.set('ny', String(ny))
 
-    const response = await fetch(url.toString())
+    const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&${params.toString()}`
+
+    const response = await fetch(url)
     if (!response.ok) {
         throw new Error(`KMA forecast request failed (${response.status})`)
     }

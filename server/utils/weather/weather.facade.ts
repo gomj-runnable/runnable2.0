@@ -81,37 +81,41 @@ class WeatherFacade {
         const sources = options.sources ?? ALL_SOURCES
         const sourceErrors: WeatherSourceError[] = []
 
-        // Observed — 과거 ~ now 범위
-        let observedSlots: import('#shared/types/weather').HourlyWeather[] = []
-        if (sources.includes('observed') && authKey?.trim()) {
-            const result = await this.observedService.fetch(
-                authKey,
-                timeRange.rangeStart,
-                timeRange.observedEnd
-            )
-            observedSlots = result.slots
-            if (result.error) sourceErrors.push(result.error)
-        }
+        const observedTask =
+            sources.includes('observed') && authKey?.trim()
+                ? this.observedService.fetch(authKey, timeRange.rangeStart, timeRange.observedEnd)
+                : Promise.resolve(null)
 
-        // Forecast — now 기준 최근 3일 이내
-        let forecastSlots: import('#shared/types/weather').HourlyWeather[] = []
-        if (sources.includes('forecast') && openDataKey?.trim()) {
-            const result = await this.forecastService.fetch(
-                openDataKey,
-                timeRange.forecastRequestDate,
-                timeRange.now
-            )
-            forecastSlots = result.slots
-            if (result.error) sourceErrors.push(result.error)
-        }
+        const forecastTask =
+            sources.includes('forecast') && openDataKey?.trim()
+                ? this.forecastService.fetch(
+                      openDataKey,
+                      timeRange.forecastRequestDate,
+                      timeRange.now
+                  )
+                : Promise.resolve(null)
 
-        // Airquality — 실시간
-        let airQualityByGu = new Map<string, import('./airquality.adapter').AirQualitySlot[]>()
-        if (sources.includes('airquality') && airKoreaKey?.trim()) {
-            const result = await this.airQualityService.fetch(airKoreaKey)
-            airQualityByGu = result.dataByGu
-            if (result.error) sourceErrors.push(result.error)
-        }
+        const airTask =
+            sources.includes('airquality') && airKoreaKey?.trim()
+                ? this.airQualityService.fetch(airKoreaKey)
+                : Promise.resolve(null)
+
+        const [observedResult, forecastResult, airResult] = await Promise.all([
+            observedTask,
+            forecastTask,
+            airTask
+        ])
+
+        const observedSlots = observedResult?.slots ?? []
+        if (observedResult?.error) sourceErrors.push(observedResult.error)
+
+        const forecastSlots = forecastResult?.slots ?? []
+        if (forecastResult?.error) sourceErrors.push(forecastResult.error)
+
+        const airQualityByGu =
+            airResult?.dataByGu ??
+            new Map<string, import('./airquality.adapter').AirQualitySlot[]>()
+        if (airResult?.error) sourceErrors.push(airResult.error)
 
         return { observedSlots, forecastSlots, airQualityByGu, sourceErrors }
     }

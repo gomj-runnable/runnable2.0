@@ -214,7 +214,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         const month = `${selectedMonth.value.slice(0, 4)}-${selectedMonth.value.slice(4)}`
         const data = await _fetchAvailability(month)
         if (data) {
-            sourceAvailability.value = data as unknown as Record<string, string[]>
+            sourceAvailability.value = data.sourceAvailability
         }
     }
 
@@ -341,5 +341,8 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         fetchMonthlyWeather()
         fetchAvailability()
     })
+
+    onBeforeUnmount(() => clearWeatherLayer())
+
     return { init, clearWeatherLayer, fetchAvailability }
 }

@@ -1,5 +1,7 @@
 import { getQuery } from 'h3'
 import { weatherFacade } from '../../utils/weather/weather.facade'
+import { resolveWeatherKeys } from '../../utils/weather/event'
+import { formatDate, formatHour } from '../../utils/weather/common'
 import { routeRepository } from '../../repositories'
 import type { WeatherMetrics, RecommendedRoute } from '#shared/types/weather-recommend'
 
@@ -11,19 +13,14 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const limit = Math.min(Number(query.limit ?? 5), 20)
 
-    const config = useRuntimeConfig(event)
-    const authKey = String(config.weatherKor ?? '').trim()
-    const openDataKey = String(config.openData ?? '').trim()
-    const airKoreaKey = String(config.airKoreaKey ?? '').trim()
+    const keys = resolveWeatherKeys(event)
 
     // 날씨 데이터와 공개 경로를 병렬로 조회한다
     const [monthlyWeather, routes] = await Promise.all([
-        weatherFacade
-            .requestByDate(undefined, { authKey, openDataKey, airKoreaKey })
-            .catch((err) => {
-                console.error('[recommend] weather fetch failed', err)
-                return null
-            }),
+        weatherFacade.requestByDate(undefined, keys).catch((err) => {
+            console.error('[recommend] weather fetch failed', err)
+            return null
+        }),
         routeRepository.searchPublicRoutes().catch((err) => {
             console.error('[recommend] route fetch failed', err)
             return []
@@ -68,10 +65,8 @@ const resolveCurrentWeather = (
     if (!monthlyWeather) return fallback
 
     const now = new Date()
-    const kstOffset = 9 * 60 * 60 * 1000
-    const kst = new Date(now.getTime() + kstOffset)
-    const todayStr = kst.toISOString().slice(0, 10)
-    const hourStr = `${String(kst.getUTCHours()).padStart(2, '0')}:00`
+    const todayStr = formatDate(now)
+    const hourStr = formatHour(now)
 
     const slots: Array<{ temperature: number; precipitation: number }> = []
 

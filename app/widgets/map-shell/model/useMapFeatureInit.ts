@@ -1,20 +1,32 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useMapInit } from '~/shared/lib/map/useMapInit'
+import {
+    isBuildingPick,
+    findNearestGroundPosition
+} from '~/features/camera/lib/useBuildingDetection'
 import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
 import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
 import { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
 import { useSimulationSideeffect } from '~/features/simulation/api/useSimulationSideeffect'
+import type { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
+import type { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
+import type { useRouteMapFacade } from './useRouteMapFacade'
 import { useAuthFacade } from './useAuthFacade'
 import { useWeatherFacade } from './useWeatherFacade'
 import { useMapLayersFacade } from './useMapLayersFacade'
 
+type RouteDrawStore = ReturnType<typeof useRouteDrawStore>
+type NotificationStore = ReturnType<typeof useNotificationStore>
+type RouteMapFacadeReturn = ReturnType<typeof useRouteMapFacade>
+type DrawingFacade = RouteMapFacadeReturn['drawing']
+
 interface UseMapFeatureInitOptions {
     viewer: ShallowRef<CesiumViewer | null>
-    drawing: any
-    routeDrawStore: any
-    notification: any
+    drawing: DrawingFacade
+    routeDrawStore: RouteDrawStore
+    notification: NotificationStore
     hideRoutePolylines: () => void
     showRoutePolylines: () => void
     /** districtEffect.init() 등 외부 init을 onMounted에 추가 */
@@ -40,7 +52,8 @@ export function useMapFeatureInit({
                 icon: 'i-lucide-info',
                 color: 'info'
             })
-        }
+        },
+        buildingPickHelpers: { isBuildingPick, findNearestGroundPosition }
     })
 
     // ─── 하위 퍼사드 조합 ────────────────────────────────────────────

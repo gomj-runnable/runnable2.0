@@ -1,5 +1,5 @@
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
-import { useNotificationStore } from '~/entities/notification'
+import { useNotificationStore } from '../model/useNotificationStore'
 
 interface ExceptionHandlerOptions {
     /** 에러 알림에 표시할 제목 (기본: '오류') */
