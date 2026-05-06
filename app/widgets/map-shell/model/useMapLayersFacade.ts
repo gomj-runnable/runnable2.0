@@ -1,5 +1,6 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
+import type { PoiDraftInput } from '#shared/types/facility'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
@@ -16,12 +17,20 @@ import {
     validatePoiDistance,
     generatePoiComment
 } from '~/entities/route/lib/usePoiSnapping'
+import type { SectionPointRange } from '~/entities/route/lib/useRouteDrawDraft'
+import type { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
+import type { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
+import type { useRouteMapFacade } from './useRouteMapFacade'
+
+type RouteDrawStore = ReturnType<typeof useRouteDrawStore>
+type NotificationStore = ReturnType<typeof useNotificationStore>
+type DrawingFacade = ReturnType<typeof useRouteMapFacade>['drawing']
 
 interface UseMapLayersFacadeOptions {
     viewer: ShallowRef<CesiumViewer | null>
-    drawing: any
-    routeDrawStore: any
-    notification: any
+    drawing: DrawingFacade
+    routeDrawStore: RouteDrawStore
+    notification: NotificationStore
     hideRoutePolylines: () => void
     showRoutePolylines: () => void
 }
@@ -40,14 +49,14 @@ export function useMapLayersFacade({
     const facilityEffect = useFacilitySideeffect({
         viewer,
         ...facility,
-        onPoiClick: (poi: any) => {
+        onPoiClick: (poi: PoiDraftInput) => {
             if (!drawing.sectionDraft) return
 
             const ranges = routeDrawStore.sectionPointRanges.value
             const positions = routeDrawStore.drawnPositions.value
             if (!positions?.length || !ranges.length) return
 
-            const sectionGeometries = ranges.map((range: any) => ({
+            const sectionGeometries = ranges.map((range: SectionPointRange) => ({
                 geom: {
                     coordinates: positions.slice(range.start, range.end + 1)
                 }

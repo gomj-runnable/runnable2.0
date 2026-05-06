@@ -1,5 +1,4 @@
 export * from './useFormatUtils'
 export * from './useAsyncDecorator'
-export * from './useExceptionHandler'
 export * from './usePlaybackStateMachine'
 export * from './useWindow'

@@ -12,6 +12,7 @@ import { randomBytes } from 'crypto'
 import { auth } from '#server/utils/auth'
 import { memoryUsers, memorySessions } from '#server/utils/memoryStore'
 import { isMemoryMode } from '#server/utils/config'
+import { badRequest, conflict, forbidden, internalError, unauthorized } from '#server/utils/error'
 
 /**
  * better-auth는 url을 임의로 조작하는데, 이를 위한 url 개방
@@ -43,7 +44,7 @@ async function handleMemoryAuth(event: H3Event) {
         const body = await readBody(event)
         const csrfToken = body?.csrfToken || getHeader(event, 'x-csrf-token')
         if (!csrfToken || !memoryCsrfTokens.has(csrfToken)) {
-            throw createError({ statusCode: 403, message: 'Invalid CSRF token' })
+            throw forbidden('Invalid CSRF token')
         }
         memoryCsrfTokens.delete(csrfToken)
 
@@ -52,11 +53,11 @@ async function handleMemoryAuth(event: H3Event) {
         const name = body?.name?.trim() || 'User'
 
         if (!email || !password) {
-            throw createError({ statusCode: 400, message: '이메일과 비밀번호를 입력해주세요.' })
+            throw badRequest('이메일과 비밀번호를 입력해주세요.')
         }
 
         if (memoryUsers.has(email)) {
-            throw createError({ statusCode: 409, message: '이미 가입된 이메일입니다.' })
+            throw conflict('이미 가입된 이메일입니다.')
         }
 
         const id = `user-${Date.now()}`
@@ -84,7 +85,7 @@ async function handleMemoryAuth(event: H3Event) {
         const body = await readBody(event)
         const csrfToken = body?.csrfToken || getHeader(event, 'x-csrf-token')
         if (!csrfToken || !memoryCsrfTokens.has(csrfToken)) {
-            throw createError({ statusCode: 403, message: 'Invalid CSRF token' })
+            throw forbidden('Invalid CSRF token')
         }
         memoryCsrfTokens.delete(csrfToken)
 
@@ -92,15 +93,12 @@ async function handleMemoryAuth(event: H3Event) {
         const password = body?.password
 
         if (!email || !password) {
-            throw createError({ statusCode: 400, message: '이메일과 비밀번호를 입력해주세요.' })
+            throw badRequest('이메일과 비밀번호를 입력해주세요.')
         }
 
         const user = memoryUsers.get(email)
         if (!user || user.password !== password) {
-            throw createError({
-                statusCode: 401,
-                message: '이메일 또는 비밀번호가 올바르지 않습니다.'
-            })
+            throw unauthorized('이메일 또는 비밀번호가 올바르지 않습니다.')
         }
         const sessionToken = randomBytes(32).toString('hex')
         memorySessions.set(sessionToken, user.id)
@@ -165,9 +163,8 @@ export default defineEventHandler(async (event) => {
         }
         // better-auth 내부 에러 로깅 + 전파
         console.error('[auth] better-auth handler error:', error)
-        throw createError({
-            statusCode: 500,
-            message: error instanceof Error ? error.message : '인증 처리 중 오류가 발생했습니다.'
-        })
+        throw internalError(
+            error instanceof Error ? error.message : '인증 처리 중 오류가 발생했습니다.'
+        )
     }
 })

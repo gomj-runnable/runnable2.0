@@ -1,14 +1,17 @@
 /**
  * Java enum 스타일의 TypeScript enum class 베이스.
  * static readonly 인스턴스와 key/label 속성을 제공한다.
+ *
+ * 제네릭 K로 key 리터럴 타입을 좁힐 수 있다. 기본값은 `string`(하위 호환).
+ * 예: `class WeatherConditionEnum extends EnumBase<WeatherCondition>`
  */
-export abstract class EnumBase {
+export abstract class EnumBase<K extends string = string> {
     protected constructor(
-        public readonly key: string,
+        public readonly key: K,
         public readonly label: string
     ) {}
 
-    toString(): string {
+    toString(): K {
         return this.key
     }
 

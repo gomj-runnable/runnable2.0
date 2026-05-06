@@ -125,57 +125,39 @@ export const useFabGroups = (options: FabGroupsOptions) => {
             key: 'weather',
             label: '날씨',
             icon: 'i-lucide-cloud-sun',
-            items: [
-                {
-                    key: 'weather-layer',
-                    label: '예보',
-                    icon: 'i-lucide-cloud-sun',
-                    active:
-                        weather.store.activeLayer.value?.equals(WeatherLayerEnum.WEATHER) ?? false,
-                    onClick: () => {
-                        const next = weather.store.activeLayer.value?.equals(
-                            WeatherLayerEnum.WEATHER
-                        )
-                            ? null
-                            : WeatherLayerEnum.WEATHER
-                        weather.store.activeLayer.value = next
-                        if (next && elevation.isElevationVisible.value)
-                            elevation.isElevationVisible.value = false
+            items: (
+                [
+                    {
+                        key: 'weather-layer',
+                        label: '예보',
+                        icon: 'i-lucide-cloud-sun',
+                        layer: WeatherLayerEnum.WEATHER
+                    },
+                    {
+                        key: 'temperature',
+                        label: '온도',
+                        icon: 'i-lucide-thermometer',
+                        layer: WeatherLayerEnum.TEMPERATURE
+                    },
+                    {
+                        key: 'pm10',
+                        label: '미세먼지',
+                        icon: 'i-lucide-wind',
+                        layer: WeatherLayerEnum.PM10
                     }
-                },
-                {
-                    key: 'temperature',
-                    label: '온도',
-                    icon: 'i-lucide-thermometer',
-                    active:
-                        weather.store.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ??
-                        false,
-                    onClick: () => {
-                        const next = weather.store.activeLayer.value?.equals(
-                            WeatherLayerEnum.TEMPERATURE
-                        )
-                            ? null
-                            : WeatherLayerEnum.TEMPERATURE
-                        weather.store.activeLayer.value = next
-                        if (next && elevation.isElevationVisible.value)
-                            elevation.isElevationVisible.value = false
-                    }
-                },
-                {
-                    key: 'pm10',
-                    label: '미세먼지',
-                    icon: 'i-lucide-wind',
-                    active: weather.store.activeLayer.value?.equals(WeatherLayerEnum.PM10) ?? false,
-                    onClick: () => {
-                        const next = weather.store.activeLayer.value?.equals(WeatherLayerEnum.PM10)
-                            ? null
-                            : WeatherLayerEnum.PM10
-                        weather.store.activeLayer.value = next
-                        if (next && elevation.isElevationVisible.value)
-                            elevation.isElevationVisible.value = false
-                    }
+                ] as const
+            ).map(({ key, label, icon, layer }) => ({
+                key,
+                label,
+                icon,
+                active: weather.store.activeLayer.value?.equals(layer) ?? false,
+                onClick: () => {
+                    const next = weather.store.activeLayer.value?.equals(layer) ? null : layer
+                    weather.store.activeLayer.value = next
+                    if (next && elevation.isElevationVisible.value)
+                        elevation.isElevationVisible.value = false
                 }
-            ]
+            }))
         },
         {
             key: 'route-tools',

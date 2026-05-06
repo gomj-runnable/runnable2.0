@@ -26,7 +26,7 @@ const dustItems = [
 
 <template>
     <div
-        class="bg-(--ui-bg-elevated)/85 border border-(--ui-border) rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-lg min-w-[140px]"
+        class="bg-(--ui-bg-elevated)/85 border border-(--ui-border) rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-lg min-w-[140px] max-md:scale-90 max-md:origin-bottom-left max-md:max-w-[160px]"
     >
         <!-- 예보 레이어 -->
         <template v-if="activeLayer?.isWeather">

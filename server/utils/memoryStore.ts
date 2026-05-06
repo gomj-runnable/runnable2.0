@@ -1,5 +1,7 @@
+import type { SavedRouteInfo } from '../repositories/routeInfo.repository'
+
 /** MEMORY 모드 전용 인메모리 경로정보 저장소. GET/POST 핸들러가 공유한다. */
-export const memoryRouteInfos: Record<string, unknown>[] = []
+export const memoryRouteInfos: SavedRouteInfo[] = []
 
 /** MEMORY 모드 전용 인메모리 사용자 저장소. auth 핸들러와 session 유틸이 공유한다. */
 export const memoryUsers = new Map<

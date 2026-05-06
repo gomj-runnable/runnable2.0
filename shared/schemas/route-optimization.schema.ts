@@ -6,12 +6,11 @@ import {
     type RouteOptimizeResponse
 } from '#shared/types/route-optimization'
 import type { GeoJsonPosition } from '#shared/types/geojson'
+import { geoJsonPositionSchema } from './geojson.schema'
 
 const modeKeys = Object.keys(ROUTE_OPTIMIZATION_MODES) as [string, ...string[]]
 
 export const routeOptimizationModeSchema = z.enum(modeKeys)
-
-const geoJsonPositionSchema = z.tuple([z.number(), z.number(), z.number()])
 
 export const routeOptimizeRequestSchema = z.object({
     positions: z.array(geoJsonPositionSchema).min(2),

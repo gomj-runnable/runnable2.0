@@ -3,9 +3,7 @@ import type { IRouteInfoRepository, NewRouteInfo, SavedRouteInfo } from './route
 
 class InMemoryRouteInfoRepository implements IRouteInfoRepository {
     async findByRouteId(routeId: string): Promise<SavedRouteInfo[]> {
-        return (memoryRouteInfos as unknown as SavedRouteInfo[]).filter(
-            (item) => item.routeId === routeId
-        )
+        return memoryRouteInfos.filter((item) => item.routeId === routeId)
     }
 
     async create(routeInfo: NewRouteInfo): Promise<SavedRouteInfo> {
@@ -21,7 +19,7 @@ class InMemoryRouteInfoRepository implements IRouteInfoRepository {
             authorName: routeInfo.authorName,
             createdAt: new Date().toISOString()
         }
-        ;(memoryRouteInfos as unknown as SavedRouteInfo[]).push(saved)
+        memoryRouteInfos.push(saved)
         return saved
     }
 }

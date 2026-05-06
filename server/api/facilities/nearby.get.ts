@@ -1,5 +1,6 @@
-import { defineEventHandler, getQuery, createError } from 'h3'
+import { defineEventHandler, getQuery } from 'h3'
 import { facilityRepository } from '../../repositories'
+import { badRequest } from '../../utils/error'
 import type { FacilityType } from '#shared/types/facility'
 
 /** 검색 반경 기본값 (미터) */
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
     const typesParam = (query.types as string) ?? ''
 
     if (isNaN(lat) || isNaN(lng)) {
-        throw createError({ statusCode: 400, message: 'lat, lng 파라미터가 필요합니다' })
+        throw badRequest('lat, lng 파라미터가 필요합니다')
     }
 
     const requestedTypes = typesParam

@@ -37,8 +37,15 @@ const emit = defineEmits<{
 
 const inputDate = useTemplateRef('inputDate')
 
-/** 날씨 레이어 변경: 레이어 선택 시 고도 레이어를 끈다 */
+/** 날씨 레이어 변경: 레이어 선택 시 고도 레이어를 끄고, 현재 날짜·시간으로 초기화 */
 const handleLayerChange = (layer: WeatherLayerEnum | null) => {
+    if (layer !== null && props.activeLayer === null) {
+        const now = new Date()
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        const hourStr = `${String(now.getHours()).padStart(2, '0')}:00`
+        emit('update:selectedDate', dateStr)
+        emit('update:selectedHour', hourStr)
+    }
     emit('update:activeLayer', layer)
     if (layer !== null && props.isElevationActive) {
         emit('update:elevationActive', false)
@@ -146,7 +153,7 @@ const handleTimeChange = (value: any) => {
         </div>
         <div
             v-if="activeLayer"
-            class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-1.5 max-md:left-1.5"
+            class="absolute bottom-4 left-4 pointer-events-auto max-md:bottom-14 max-md:left-1.5"
         >
             <WeatherLegend :active-layer="activeLayer" />
         </div>

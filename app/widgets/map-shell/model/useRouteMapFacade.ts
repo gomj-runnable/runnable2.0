@@ -1,6 +1,6 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import { RouteDraftAssembler, createSectionSchema } from '#shared/schemas/route.schema'
+import { buildRouteSavePayload } from '~/entities/route/lib/useRouteSaveBuilder'
 import {
     createRouteElevationProfile,
     buildDraftSectionInputs,
@@ -10,12 +10,9 @@ import { useTerrainSampler } from '~/shared/lib/map/useTerrainSampler'
 import { createRouteGpx, toGpxFileName } from '~/entities/route/lib/useRouteGpx'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import {
-    createDefaultSectionAttr,
     createHeightAwareRouteGeom,
     createInitialSectionDraft,
-    createInitialSectionPointRanges,
-    createWaypointBasedSectionRanges,
-    createSectionDraftsFromRanges
+    createWaypointBasedSectionRanges
 } from '~/entities/route/lib/useRouteDrawDraft'
 import useRouteDrawSideeffect from '~/features/draw-route/api/useRouteDrawSideeffect'
 import { useRouteClosingSideeffect } from '~/features/draw-route/api/useRouteClosingSideeffect'
@@ -247,85 +244,16 @@ export const useRouteMapFacade = (
         await startDrawing()
     }
 
-    const buildSavePayload = () => {
-        if (!store.sectionDraft.value) {
-            throw new Error('먼저 구간을 그려주세요.')
-        }
-
-        if (!store.drawnPositions.value?.length) {
-            throw new Error('경로 포인트가 없습니다.')
-        }
-
-        const originalPositions = store.drawnPositions.value
-        const closingMode = store.closingMode.value
-        const sectionPayload = createSectionSchema.parse(store.sectionDraft.value)
-
-        let positions = originalPositions
-        let ranges = store.sectionPointRanges.value
-        let attrs = sectionPayload.attrs ?? []
-
-        // 도착지 연결: 마지막점 → 첫점을 1개 구간으로 추가
-        if (closingMode?.isLoopClose && originalPositions.length >= 2) {
-            positions = [...originalPositions, originalPositions[0]!]
-            ranges = [
-                ...ranges,
-                { start: originalPositions.length - 1, end: originalPositions.length }
-            ]
-            attrs = [...attrs, createDefaultSectionAttr(attrs.length)]
-        }
-
-        // 왕복 코스: 역순 경로를 원래 구간 수만큼 미러링하여 추가
-        if (closingMode?.isRoundTrip && originalPositions.length >= 2) {
-            const returnPositions = [...originalPositions].reverse()
-            positions = [...originalPositions, ...returnPositions]
-
-            const originalLength = originalPositions.length
-            const reversedRanges = [...ranges].reverse()
-            let cursor = originalLength
-            const returnRanges = reversedRanges.map((r) => {
-                const size = r.end - r.start + 1
-                const range = { start: cursor, end: cursor + size - 1 }
-                cursor = range.end
-                return range
-            })
-            ranges = [...ranges, ...returnRanges]
-            attrs = [
-                ...attrs,
-                ...returnRanges.map((_, i) => createDefaultSectionAttr(attrs.length + i))
-            ]
-        }
-
-        const routeGeom = createHeightAwareRouteGeom(
-            store.drawMetrics.value ?? undefined,
-            positions
-        )
-        const assembler = new RouteDraftAssembler()
-            .withPositions(positions)
-            .withDrawMetrics({
-                ...(store.drawMetrics.value ?? {}),
-                geoJson: routeGeom,
-                closingMode
-            })
-            .withSectionAttrs(attrs)
-            .withClosingMode(closingMode)
-
-        const { route: routeDraftPayload } = assembler.build(store.routeForm.value)
-        const sectionPayloads = createSectionDraftsFromRanges(
-            attrs,
-            ranges,
-            positions,
-            undefined,
-            routeGeom
-        ).map((section, index) => ({
-            ...section,
-            pois: store.sectionPois.value[index] ?? []
-        }))
-
-        return {
-            routeDraftPayload,
-            sectionPayloads
-        }
-    }
+    const buildSavePayload = () =>
+        buildRouteSavePayload({
+            sectionDraft: store.sectionDraft.value,
+            drawnPositions: store.drawnPositions.value,
+            closingMode: store.closingMode.value,
+            sectionPointRanges: store.sectionPointRanges.value,
+            drawMetrics: store.drawMetrics.value,
+            routeForm: store.routeForm.value,
+            sectionPois: store.sectionPois.value
+        })
 
     /**
      * 저장 모달에서 "저장" 버튼 클릭 시 경로를 확정 저장한다.

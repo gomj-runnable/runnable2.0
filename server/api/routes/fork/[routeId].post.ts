@@ -1,6 +1,7 @@
 import { routeRepository } from '../../../repositories'
 import { requireRouteIdParam } from '../../../utils/params'
 import { requireSession } from '../../../utils/session'
+import { conflict, notFound } from '../../../utils/error'
 
 export default defineEventHandler(async (event) => {
     const routeId = requireRouteIdParam(event)
@@ -8,17 +9,17 @@ export default defineEventHandler(async (event) => {
 
     // 원본 경로 조회
     const source = await routeRepository.getRoute(routeId)
-    if (!source) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
+    if (!source) throw notFound('경로를 찾을 수 없습니다.')
 
     // 본인 경로인지 확인
     if (source.userId === user.userId) {
-        throw createError({ statusCode: 409, message: '본인이 만든 경로입니다.' })
+        throw conflict('본인이 만든 경로입니다.')
     }
 
     // 이미 가져온 경로인지 확인
     const alreadyForked = await routeRepository.hasRouteFromSource(user.userId, routeId)
     if (alreadyForked) {
-        throw createError({ statusCode: 409, message: '이미 추가된 경로입니다.' })
+        throw conflict('이미 추가된 경로입니다.')
     }
 
     // 경로 복사

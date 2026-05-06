@@ -3,11 +3,23 @@ import type { CommonResponse } from '#shared/types/common'
 import type { CesiumDrawHandler, CesiumRuntime, CesiumViewerRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { DrawActionData, DrawActionResult, CesiumViewer } from '~/shared/lib/useWindow'
-import {
-    isBuildingPick,
-    findNearestGroundPosition
-} from '~/features/camera/lib/useBuildingDetection'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+
+/**
+ * 클릭 위치가 건물(3DTileset) 위인지 판별하고, 그렇다면 인근 비건물 지면 좌표를 찾는 헬퍼 인터페이스.
+ * shared 레이어가 features/camera에 직접 의존하지 않도록 DI로 주입한다.
+ */
+export interface BuildingPickHelpers {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    isBuildingPick: (pickResult: any) => boolean
+    findNearestGroundPosition: (
+        viewer: any,
+        CesiumLib: any,
+        windowPosition: any,
+        searchRadius?: number
+    ) => { snappedPosition: any; corrected: boolean }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+}
 
 type ViewerEntityHandle = Parameters<CesiumViewer['entities']['remove']>[0]
 
@@ -23,6 +35,8 @@ interface CesiumDrawState {
 
 interface MapInitOptions {
     onBuildingCorrected?: () => void
+    /** 건물 위 클릭을 지면으로 보정하는 헬퍼. 미주입 시 보정을 건너뛴다. */
+    buildingPickHelpers?: BuildingPickHelpers
 }
 
 /**
@@ -177,16 +191,19 @@ export const useMapInit = (options?: MapInitOptions) => {
             return null
         }
 
-        // 건물(3DTileset) 감지
-        const pickResult = scene.pick(windowPosition)
-        if (isBuildingPick(pickResult)) {
-            const { snappedPosition, corrected } = findNearestGroundPosition(
-                rawViewer,
-                CesiumLib,
-                windowPosition
-            )
-            lastPickWasCorrected = corrected
-            if (snappedPosition) return snappedPosition as Cartesian3
+        // 건물(3DTileset) 감지 — buildingPickHelpers가 주입되었을 때만 동작
+        const helpers = options?.buildingPickHelpers
+        if (helpers) {
+            const pickResult = scene.pick(windowPosition)
+            if (helpers.isBuildingPick(pickResult)) {
+                const { snappedPosition, corrected } = helpers.findNearestGroundPosition(
+                    rawViewer,
+                    CesiumLib,
+                    windowPosition
+                )
+                lastPickWasCorrected = corrected
+                if (snappedPosition) return snappedPosition as Cartesian3
+            }
         }
 
         lastPickWasCorrected = false

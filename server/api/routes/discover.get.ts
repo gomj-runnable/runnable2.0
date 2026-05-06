@@ -1,5 +1,6 @@
 import { routeRepository } from '../../repositories'
 import { routeDiscoverFilterSchema } from '#shared/schemas/discover.schema'
+import { badRequest } from '../../utils/error'
 import type { RouteDiscoverCard } from '#shared/types/discover'
 
 export default defineEventHandler(async (event) => {
@@ -8,7 +9,7 @@ export default defineEventHandler(async (event) => {
     // 쿼리 파라미터 검증
     const parsed = routeDiscoverFilterSchema.safeParse(query)
     if (!parsed.success) {
-        throw createError({ statusCode: 400, message: '잘못된 요청 파라미터입니다.' })
+        throw badRequest('잘못된 요청 파라미터입니다.')
     }
 
     const { district, sortBy = 'recent', limit = 20 } = parsed.data

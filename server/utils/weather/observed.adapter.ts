@@ -32,7 +32,9 @@ const parseTyp01Table = (rawText: string): Array<Record<string, string>> => {
         .filter((line) => !line.startsWith('#------------------------------------------------'))
         .map((line) => line.replace(/^#+\s*/, ''))
 
-    const headerIndex = normalized.findIndex((line) => /\bTM\b/.test(line) && /\bSTN\b/.test(line))
+    const headerIndex = normalized.findIndex(
+        (line) => (/\bTM\b/.test(line) || /\bYYMMDDHHMI\b/.test(line)) && /\bSTN\b/.test(line)
+    )
     if (headerIndex < 0) {
         return []
     }
@@ -42,9 +44,9 @@ const parseTyp01Table = (rawText: string): Array<Record<string, string>> => {
         return []
     }
 
-    const delimiter = headerLine.includes(',') ? ',' : /\s+/
+    const headerDelimiter = headerLine.includes(',') ? ',' : /\s+/
     const headers = headerLine
-        .split(delimiter)
+        .split(headerDelimiter)
         .map((token) => token.trim())
         .filter(Boolean)
 
@@ -60,8 +62,10 @@ const parseTyp01Table = (rawText: string): Array<Record<string, string>> => {
             continue
         }
 
+        // 데이터 행의 delimiter는 헤더와 다를 수 있음 (헤더=공백, 데이터=콤마)
+        const rowDelimiter = line.includes(',') ? ',' : headerDelimiter
         const values = line
-            .split(delimiter)
+            .split(rowDelimiter)
             .map((token) => token.trim())
             .filter(Boolean)
 
@@ -73,6 +77,10 @@ const parseTyp01Table = (rawText: string): Array<Record<string, string>> => {
         headers.forEach((header, index) => {
             row[header] = values[index] ?? ''
         })
+        // apihub 신규 포맷 호환: YYMMDDHHMI → TM 별칭
+        if (row.YYMMDDHHMI && !row.TM) {
+            row.TM = row.YYMMDDHHMI
+        }
         rows.push(row)
     }
 
@@ -116,7 +124,7 @@ const fetchHourlyObsMap = async (
 
     for (const row of original.rows) {
         const tm = row.TM
-        const value = parseNumber(row[obs])
+        const value = parseNumber(row[obs] ?? row.VAL)
 
         if (!tm || value === null || tm.length < 10) {
             continue
