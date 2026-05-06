@@ -84,7 +84,11 @@ class WeatherFacade {
         // Observed — 과거 ~ now 범위
         let observedSlots: import('#shared/types/weather').HourlyWeather[] = []
         if (sources.includes('observed') && authKey?.trim()) {
-            const result = await this.observedService.fetch(authKey, timeRange.rangeStart, timeRange.observedEnd)
+            const result = await this.observedService.fetch(
+                authKey,
+                timeRange.rangeStart,
+                timeRange.observedEnd
+            )
             observedSlots = result.slots
             if (result.error) sourceErrors.push(result.error)
         }

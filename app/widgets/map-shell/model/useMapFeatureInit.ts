@@ -47,8 +47,24 @@ export function useMapFeatureInit({
     const { authStore, authEffect } = useAuthFacade()
     const { weather, weatherSources, initWeather, weatherRecommend, weatherRecommendEffect } =
         useWeatherFacade({ viewer })
-    const { facility, sidewalk, facilityEffect, boundary, boundaryEffect, elevation, elevationEffect, gradient, gradientEffect } =
-        useMapLayersFacade({ viewer, drawing, routeDrawStore, notification, hideRoutePolylines, showRoutePolylines })
+    const {
+        facility,
+        sidewalk,
+        facilityEffect,
+        boundary,
+        boundaryEffect,
+        elevation,
+        elevationEffect,
+        gradient,
+        gradientEffect
+    } = useMapLayersFacade({
+        viewer,
+        drawing,
+        routeDrawStore,
+        notification,
+        hideRoutePolylines,
+        showRoutePolylines
+    })
 
     // ─── 카메라 정보 ─────────────────────────────────────────────────
     const camera = useCameraStore()
@@ -78,24 +94,27 @@ export function useMapFeatureInit({
     })
 
     return {
-        authStore,
-        authEffect,
-        weather,
-        weatherSources,
-        facility,
-        sidewalk,
-        facilityEffect,
+        auth: { authStore, authEffect },
+        weather: {
+            store: weather,
+            sources: weatherSources,
+            recommend: weatherRecommend,
+            recommendEffect: weatherRecommendEffect,
+            initWeather
+        },
+        mapLayers: {
+            facility,
+            sidewalk,
+            facilityEffect,
+            boundary,
+            boundaryEffect,
+            elevation,
+            elevationEffect,
+            gradient,
+            gradientEffect
+        },
         camera,
-        boundary,
-        boundaryEffect,
-        elevation,
-        elevationEffect,
-        gradient,
-        gradientEffect,
         explore,
-        simulation,
-        simulationEffect,
-        weatherRecommend,
-        weatherRecommendEffect
+        simulation: { store: simulation, effect: simulationEffect }
     }
 }

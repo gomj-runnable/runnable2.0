@@ -83,12 +83,9 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
         setDifficulty(null)
     }
 
-    const { init } = createToggleLayerSideeffect<
-        [boolean, GeoJsonPosition[] | null]
-    >({
+    const { init } = createToggleLayerSideeffect<[boolean, GeoJsonPosition[] | null]>({
         source: [isGradientVisible, drawnPositions] as const,
-        condition: ([visible, positions]) =>
-            visible && positions != null && positions.length >= 2,
+        condition: ([visible, positions]) => visible && positions != null && positions.length >= 2,
         apply: () => drawGradientPolylines(drawnPositions.value!),
         remove: clearGradientPolylines,
         cleanup: () => gradientPolylines.clear()

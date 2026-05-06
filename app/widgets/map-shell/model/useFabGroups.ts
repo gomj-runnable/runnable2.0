@@ -11,12 +11,14 @@ import type { useGradientStore } from '~/entities/gradient/model/useGradientStor
 import type { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 
 interface FabGroupsOptions {
-    facility: ReturnType<typeof useFacilityStore>
-    sidewalk: ReturnType<typeof useSidewalkStore>
-    elevation: ReturnType<typeof useElevationLayerStore>
-    boundary: ReturnType<typeof useBoundaryStore>
-    weather: ReturnType<typeof useWeatherStore>
-    gradient: ReturnType<typeof useGradientStore>
+    mapLayers: {
+        facility: ReturnType<typeof useFacilityStore>
+        sidewalk: ReturnType<typeof useSidewalkStore>
+        elevation: ReturnType<typeof useElevationLayerStore>
+        boundary: ReturnType<typeof useBoundaryStore>
+        gradient: ReturnType<typeof useGradientStore>
+    }
+    weather: { store: ReturnType<typeof useWeatherStore> }
     overlayContext: ComputedRef<MapOverlayContextEnum>
     elevationChart: {
         title: string
@@ -40,12 +42,8 @@ interface FabGroupsOptions {
  */
 export const useFabGroups = (options: FabGroupsOptions) => {
     const {
-        facility,
-        sidewalk,
-        elevation,
-        boundary,
+        mapLayers,
         weather,
-        gradient,
         overlayContext,
         elevationChart,
         activeNav,
@@ -55,6 +53,8 @@ export const useFabGroups = (options: FabGroupsOptions) => {
         showSimulationChip,
         showRouteInfoChip
     } = options
+
+    const { facility, sidewalk, elevation, boundary, gradient } = mapLayers
 
     /** 모바일: 현재 위치 검색 버튼 노출 조건 */
     const fabNearbyVisible = computed(() =>
@@ -102,7 +102,7 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     onClick: () => {
                         const next = !elevation.isElevationVisible.value
                         elevation.isElevationVisible.value = next
-                        if (next) weather.activeLayer.value = null
+                        if (next) weather.store.activeLayer.value = null
                     }
                 },
                 {
@@ -130,12 +130,15 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     key: 'weather-layer',
                     label: '예보',
                     icon: 'i-lucide-cloud-sun',
-                    active: weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER) ?? false,
+                    active:
+                        weather.store.activeLayer.value?.equals(WeatherLayerEnum.WEATHER) ?? false,
                     onClick: () => {
-                        const next = weather.activeLayer.value?.equals(WeatherLayerEnum.WEATHER)
+                        const next = weather.store.activeLayer.value?.equals(
+                            WeatherLayerEnum.WEATHER
+                        )
                             ? null
                             : WeatherLayerEnum.WEATHER
-                        weather.activeLayer.value = next
+                        weather.store.activeLayer.value = next
                         if (next && elevation.isElevationVisible.value)
                             elevation.isElevationVisible.value = false
                     }
@@ -145,12 +148,15 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     label: '온도',
                     icon: 'i-lucide-thermometer',
                     active:
-                        weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ?? false,
+                        weather.store.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE) ??
+                        false,
                     onClick: () => {
-                        const next = weather.activeLayer.value?.equals(WeatherLayerEnum.TEMPERATURE)
+                        const next = weather.store.activeLayer.value?.equals(
+                            WeatherLayerEnum.TEMPERATURE
+                        )
                             ? null
                             : WeatherLayerEnum.TEMPERATURE
-                        weather.activeLayer.value = next
+                        weather.store.activeLayer.value = next
                         if (next && elevation.isElevationVisible.value)
                             elevation.isElevationVisible.value = false
                     }
@@ -159,12 +165,12 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     key: 'pm10',
                     label: '미세먼지',
                     icon: 'i-lucide-wind',
-                    active: weather.activeLayer.value?.equals(WeatherLayerEnum.PM10) ?? false,
+                    active: weather.store.activeLayer.value?.equals(WeatherLayerEnum.PM10) ?? false,
                     onClick: () => {
-                        const next = weather.activeLayer.value?.equals(WeatherLayerEnum.PM10)
+                        const next = weather.store.activeLayer.value?.equals(WeatherLayerEnum.PM10)
                             ? null
                             : WeatherLayerEnum.PM10
-                        weather.activeLayer.value = next
+                        weather.store.activeLayer.value = next
                         if (next && elevation.isElevationVisible.value)
                             elevation.isElevationVisible.value = false
                     }

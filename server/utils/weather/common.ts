@@ -172,10 +172,7 @@ export interface WeatherTimeRange {
 }
 
 /** "YYYY-MM" → WeatherTimeRange. 유효하지 않으면 null */
-export const createWeatherTimeRange = (
-    month: string,
-    now?: Date
-): WeatherTimeRange | null => {
+export const createWeatherTimeRange = (month: string, now?: Date): WeatherTimeRange | null => {
     if (!/^\d{4}-\d{2}$/.test(month)) return null
     const [yearRaw = '', monthRaw = ''] = month.split('-')
     const year = Number(yearRaw)
