@@ -102,7 +102,7 @@ async function handleMemoryAuth(event: H3Event) {
                 : null
             if (user) {
                 return {
-                    user: { id: user.id, name: user.name, email: user.email },
+                    user: { id: user.id, name: user.name, email: user.email, role: user.role },
                     session: { id: `session-${user.id}`, userId: user.id, token }
                 }
             }
@@ -111,7 +111,12 @@ async function handleMemoryAuth(event: H3Event) {
         if (autoUser) {
             const newToken = issueSession(event, autoUser.id)
             return {
-                user: { id: autoUser.id, name: autoUser.name, email: autoUser.email },
+                user: {
+                    id: autoUser.id,
+                    name: autoUser.name,
+                    email: autoUser.email,
+                    role: autoUser.role
+                },
                 session: {
                     id: `session-${autoUser.id}`,
                     userId: autoUser.id,

@@ -15,7 +15,8 @@ export default defineConfig({
         include: [
             'app/**/__tests__/**/*.test.ts',
             'server/**/__tests__/**/*.test.ts',
-            'shared/**/__tests__/**/*.test.ts'
+            'shared/**/__tests__/**/*.test.ts',
+            'layers/**/__tests__/**/*.test.ts'
         ]
     }
 })

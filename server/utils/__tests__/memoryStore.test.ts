@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 async function freshModule() {
     vi.resetModules()
     vi.stubEnv('ADMIN_SEED_PASSWORD', 'admin1234')
+    vi.stubEnv('DEVELOPER_SEED_PASSWORD', 'developer1234')
     return import('../memoryStore')
 }
 

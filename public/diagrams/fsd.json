@@ -1,0 +1,406 @@
+{
+  "kind": "fsd",
+  "nodes": [
+    {
+      "id": "widgets/facility-overlay",
+      "label": "widgets/facility-overlay",
+      "group": "widgets"
+    },
+    {
+      "id": "widgets/map-shell",
+      "label": "widgets/map-shell",
+      "group": "widgets"
+    },
+    {
+      "id": "widgets/right-panel",
+      "label": "widgets/right-panel",
+      "group": "widgets"
+    },
+    {
+      "id": "features/camera",
+      "label": "features/camera",
+      "group": "features"
+    },
+    {
+      "id": "features/discover",
+      "label": "features/discover",
+      "group": "features"
+    },
+    {
+      "id": "features/draw-route",
+      "label": "features/draw-route",
+      "group": "features"
+    },
+    {
+      "id": "features/elevation-layer",
+      "label": "features/elevation-layer",
+      "group": "features"
+    },
+    {
+      "id": "features/explore",
+      "label": "features/explore",
+      "group": "features"
+    },
+    {
+      "id": "features/route-info",
+      "label": "features/route-info",
+      "group": "features"
+    },
+    {
+      "id": "features/simulation",
+      "label": "features/simulation",
+      "group": "features"
+    },
+    {
+      "id": "features/weather-overlay",
+      "label": "features/weather-overlay",
+      "group": "features"
+    },
+    {
+      "id": "entities/boundary",
+      "label": "entities/boundary",
+      "group": "entities"
+    },
+    {
+      "id": "entities/facility",
+      "label": "entities/facility",
+      "group": "entities"
+    },
+    {
+      "id": "entities/gradient",
+      "label": "entities/gradient",
+      "group": "entities"
+    },
+    {
+      "id": "entities/notification",
+      "label": "entities/notification",
+      "group": "entities"
+    },
+    {
+      "id": "entities/route",
+      "label": "entities/route",
+      "group": "entities"
+    },
+    {
+      "id": "entities/user",
+      "label": "entities/user",
+      "group": "entities"
+    },
+    {
+      "id": "entities/weather",
+      "label": "entities/weather",
+      "group": "entities"
+    },
+    {
+      "id": "shared/lib",
+      "label": "shared/lib",
+      "group": "shared"
+    },
+    {
+      "id": "shared/model",
+      "label": "shared/model",
+      "group": "shared"
+    },
+    {
+      "id": "shared/ui",
+      "label": "shared/ui",
+      "group": "shared"
+    }
+  ],
+  "edges": [
+    {
+      "id": "widgets/right-panel->entities/route",
+      "source": "widgets/right-panel",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->shared/lib",
+      "source": "widgets/map-shell",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/weather",
+      "source": "widgets/map-shell",
+      "target": "entities/weather",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/weather-overlay",
+      "source": "widgets/map-shell",
+      "target": "features/weather-overlay",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/user",
+      "source": "widgets/map-shell",
+      "target": "entities/user",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/route",
+      "source": "widgets/map-shell",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/simulation",
+      "source": "widgets/map-shell",
+      "target": "features/simulation",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/route-info",
+      "source": "widgets/map-shell",
+      "target": "features/route-info",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/draw-route",
+      "source": "widgets/map-shell",
+      "target": "features/draw-route",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/notification",
+      "source": "widgets/map-shell",
+      "target": "entities/notification",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/facility",
+      "source": "widgets/map-shell",
+      "target": "entities/facility",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/boundary",
+      "source": "widgets/map-shell",
+      "target": "entities/boundary",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/elevation-layer",
+      "source": "widgets/map-shell",
+      "target": "features/elevation-layer",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->entities/gradient",
+      "source": "widgets/map-shell",
+      "target": "entities/gradient",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/camera",
+      "source": "widgets/map-shell",
+      "target": "features/camera",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->shared/model",
+      "source": "widgets/map-shell",
+      "target": "shared/model",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/map-shell->features/explore",
+      "source": "widgets/map-shell",
+      "target": "features/explore",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/facility-overlay->entities/facility",
+      "source": "widgets/facility-overlay",
+      "target": "entities/facility",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/facility-overlay->entities/boundary",
+      "source": "widgets/facility-overlay",
+      "target": "entities/boundary",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/facility-overlay->features/elevation-layer",
+      "source": "widgets/facility-overlay",
+      "target": "features/elevation-layer",
+      "kind": "imports"
+    },
+    {
+      "id": "widgets/facility-overlay->entities/route",
+      "source": "widgets/facility-overlay",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "features/weather-overlay->entities/weather",
+      "source": "features/weather-overlay",
+      "target": "entities/weather",
+      "kind": "imports"
+    },
+    {
+      "id": "features/weather-overlay->shared/lib",
+      "source": "features/weather-overlay",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/weather-overlay->entities/route",
+      "source": "features/weather-overlay",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "features/weather-overlay->entities/boundary",
+      "source": "features/weather-overlay",
+      "target": "entities/boundary",
+      "kind": "imports"
+    },
+    {
+      "id": "features/weather-overlay->entities/notification",
+      "source": "features/weather-overlay",
+      "target": "entities/notification",
+      "kind": "imports"
+    },
+    {
+      "id": "features/simulation->shared/ui",
+      "source": "features/simulation",
+      "target": "shared/ui",
+      "kind": "imports"
+    },
+    {
+      "id": "features/simulation->shared/lib",
+      "source": "features/simulation",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/simulation->entities/route",
+      "source": "features/simulation",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "features/route-info->shared/lib",
+      "source": "features/route-info",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/route-info->entities/route",
+      "source": "features/route-info",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "features/explore->shared/lib",
+      "source": "features/explore",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/explore->entities/boundary",
+      "source": "features/explore",
+      "target": "entities/boundary",
+      "kind": "imports"
+    },
+    {
+      "id": "features/elevation-layer->shared/lib",
+      "source": "features/elevation-layer",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/draw-route->shared/lib",
+      "source": "features/draw-route",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/draw-route->entities/route",
+      "source": "features/draw-route",
+      "target": "entities/route",
+      "kind": "imports"
+    },
+    {
+      "id": "features/draw-route->entities/gradient",
+      "source": "features/draw-route",
+      "target": "entities/gradient",
+      "kind": "imports"
+    },
+    {
+      "id": "features/draw-route->shared/ui",
+      "source": "features/draw-route",
+      "target": "shared/ui",
+      "kind": "imports"
+    },
+    {
+      "id": "features/draw-route->entities/notification",
+      "source": "features/draw-route",
+      "target": "entities/notification",
+      "kind": "imports"
+    },
+    {
+      "id": "features/discover->shared/lib",
+      "source": "features/discover",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/camera->shared/model",
+      "source": "features/camera",
+      "target": "shared/model",
+      "kind": "imports"
+    },
+    {
+      "id": "features/camera->shared/lib",
+      "source": "features/camera",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "features/camera->entities/boundary",
+      "source": "features/camera",
+      "target": "entities/boundary",
+      "kind": "imports"
+    },
+    {
+      "id": "entities/route->shared/lib",
+      "source": "entities/route",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "entities/gradient->shared/lib",
+      "source": "entities/gradient",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "entities/facility->shared/lib",
+      "source": "entities/facility",
+      "target": "shared/lib",
+      "kind": "imports"
+    },
+    {
+      "id": "entities/facility->shared/model",
+      "source": "entities/facility",
+      "target": "shared/model",
+      "kind": "imports"
+    },
+    {
+      "id": "entities/boundary->shared/lib",
+      "source": "entities/boundary",
+      "target": "shared/lib",
+      "kind": "imports"
+    }
+  ],
+  "meta": {
+    "generatedAt": "2026-05-07T09:43:00.354Z",
+    "sourceCommit": "448aa80406232f3994362603f0197bf95aeded07",
+    "nodeCount": 21,
+    "edgeCount": 48
+  }
+}

@@ -1,4 +1,5 @@
 import type { SavedRouteInfo } from '../repositories/routeInfo.repository'
+import { ROLES } from '../../shared/constants/roles'
 
 /** MEMORY 모드 전용 인메모리 경로정보 저장소. GET/POST 핸들러가 공유한다. */
 export const memoryRouteInfos: SavedRouteInfo[] = []
@@ -6,7 +7,7 @@ export const memoryRouteInfos: SavedRouteInfo[] = []
 /** MEMORY 모드 전용 인메모리 사용자 저장소. auth 핸들러와 session 유틸이 공유한다. */
 export const memoryUsers = new Map<
     string,
-    { id: string; name: string; email: string; password: string }
+    { id: string; name: string; email: string; password: string; role?: number }
 >()
 
 /** MEMORY 모드 전용 세션 토큰 → userId 매핑. auth 핸들러와 session 유틸이 공유한다. */
@@ -34,4 +35,19 @@ memoryUsers.set(MEMORY_AUTO_LOGIN_EMAIL, {
     name: 'Root',
     email: MEMORY_AUTO_LOGIN_EMAIL,
     password: 'root1234'
+})
+
+// TODO. 다이어그램 스튜디오 dev 백도어 — prod에서도 살아 있다 (seed.ts와 동일 정책).
+//       정식 권한 체계 정립 시 이 엔트리와 ROLES.DEVELOPER 자체 제거 검토.
+const developerPassword = process.env.DEVELOPER_SEED_PASSWORD
+if (!developerPassword) {
+    console.error('DEVELOPER_SEED_PASSWORD env var is required.')
+    process.exit(1)
+}
+memoryUsers.set('developer@runnable.com', {
+    id: 'developer-user',
+    name: 'developer',
+    email: 'developer@runnable.com',
+    password: developerPassword,
+    role: ROLES.DEVELOPER
 })
