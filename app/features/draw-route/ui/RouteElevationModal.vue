@@ -137,7 +137,8 @@ const chartGeometry = computed(() => {
                                 :x2="tick.x"
                                 y1="24"
                                 :y2="chartGeometry.baselineY"
-                                class="elevation-grid-line"
+                                stroke="rgb(255 255 255 / 0.08)"
+                                stroke-width="1"
                             />
                         </g>
 
@@ -147,25 +148,59 @@ const chartGeometry = computed(() => {
                             v-for="section in chartGeometry.sectionSegments"
                             :key="`${section.label}-${section.startIndex}`"
                             :d="section.path"
-                            class="elevation-line"
+                            fill="none"
+                            stroke="#f1c25b"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
                             :style="{ stroke: section.color }"
                         />
 
                         <g
                             v-if="chartGeometry.highestPoint"
                             :transform="`translate(${chartGeometry.highestPoint.x}, ${chartGeometry.highestPoint.y})`"
-                            class="elevation-marker elevation-marker--highest"
                         >
-                            <rect x="-8" y="-8" width="16" height="16" rx="8" />
-                            <path d="M -3 0 L -0.5 3 L 4 -3" />
+                            <rect
+                                x="-8"
+                                y="-8"
+                                width="16"
+                                height="16"
+                                rx="8"
+                                fill="#fff2b8"
+                                stroke="#f7c948"
+                                stroke-width="2"
+                            />
+                            <path
+                                d="M -3 0 L -0.5 3 L 4 -3"
+                                fill="none"
+                                stroke="#09111a"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.2"
+                            />
                         </g>
                         <g
                             v-if="chartGeometry.lowestPoint"
                             :transform="`translate(${chartGeometry.lowestPoint.x}, ${chartGeometry.lowestPoint.y})`"
-                            class="elevation-marker elevation-marker--lowest"
                         >
-                            <rect x="-8" y="-8" width="16" height="16" rx="8" />
-                            <path d="M -3 0 L -0.5 3 L 4 -3" />
+                            <rect
+                                x="-8"
+                                y="-8"
+                                width="16"
+                                height="16"
+                                rx="8"
+                                fill="#cfe9ff"
+                                stroke="#57b9ff"
+                                stroke-width="2"
+                            />
+                            <path
+                                d="M -3 0 L -0.5 3 L 4 -3"
+                                fill="none"
+                                stroke="#09111a"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.2"
+                            />
                         </g>
 
                         <g v-if="chartGeometry.highestPoint">
@@ -173,7 +208,9 @@ const chartGeometry = computed(() => {
                                 :x="chartGeometry.highestPoint.x"
                                 :y="chartGeometry.highestPoint.y - 12"
                                 text-anchor="middle"
-                                class="elevation-marker-label elevation-marker-label--highest"
+                                font-size="12"
+                                font-weight="700"
+                                fill="#fff2b8"
                             >
                                 최고 {{ formatElevation(profile.maxElevation) }}
                             </text>
@@ -184,7 +221,9 @@ const chartGeometry = computed(() => {
                                 :x="chartGeometry.lowestPoint.x"
                                 :y="chartGeometry.lowestPoint.y + 22"
                                 text-anchor="middle"
-                                class="elevation-marker-label elevation-marker-label--lowest"
+                                font-size="12"
+                                font-weight="700"
+                                fill="#cfe9ff"
                             >
                                 최저 {{ formatElevation(profile.minElevation) }}
                             </text>
@@ -195,7 +234,9 @@ const chartGeometry = computed(() => {
                                 :x="tick.x"
                                 :y="CHART_HEIGHT - 8"
                                 text-anchor="middle"
-                                class="elevation-tick-label"
+                                font-size="12"
+                                font-weight="600"
+                                fill="rgb(255 255 255 / 0.58)"
                             >
                                 {{ formatTickLabel(tick.value) }}
                             </text>
@@ -213,50 +254,3 @@ const chartGeometry = computed(() => {
         </template>
     </UModal>
 </template>
-
-<style scoped>
-.elevation-grid-line {
-    stroke: rgb(255 255 255 / 0.08);
-    stroke-width: 1;
-}
-.elevation-line {
-    fill: none;
-    stroke: #f1c25b;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-.elevation-marker rect {
-    stroke-width: 2;
-}
-.elevation-marker path {
-    fill: none;
-    stroke: #09111a;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2.2;
-}
-.elevation-marker--highest rect {
-    fill: #fff2b8;
-    stroke: #f7c948;
-}
-.elevation-marker--lowest rect {
-    fill: #cfe9ff;
-    stroke: #57b9ff;
-}
-.elevation-marker-label {
-    font-size: 12px;
-    font-weight: 700;
-}
-.elevation-marker-label--highest {
-    fill: #fff2b8;
-}
-.elevation-marker-label--lowest {
-    fill: #cfe9ff;
-}
-.elevation-tick-label {
-    fill: rgb(255 255 255 / 0.58);
-    font-size: 12px;
-    font-weight: 600;
-}
-</style>

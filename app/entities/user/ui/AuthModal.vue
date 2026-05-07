@@ -88,13 +88,13 @@ const toggleMode = () => {
         @update:open="$emit('update:open', $event)"
     >
         <template #body>
-            <div class="auth-modal__fields">
-                <label v-if="mode === 'signup'" class="auth-modal__field map-form-field">
+            <div class="fields-root flex flex-col gap-3">
+                <label v-if="mode === 'signup'" class="map-form-field">
                     <span class="map-form-label">이름</span>
                     <UInput v-model="name" placeholder="사용자 이름" autocomplete="name" />
                 </label>
 
-                <label class="auth-modal__field map-form-field">
+                <label class="map-form-field">
                     <span class="map-form-label">이메일</span>
                     <UInput
                         v-model="email"
@@ -104,7 +104,7 @@ const toggleMode = () => {
                     />
                 </label>
 
-                <label class="auth-modal__field map-form-field">
+                <label class="map-form-field">
                     <span class="map-form-label">비밀번호</span>
                     <UInput
                         v-model="password"
@@ -114,7 +114,10 @@ const toggleMode = () => {
                     />
                 </label>
 
-                <div v-if="errorMessage" class="auth-modal__error">
+                <div
+                    v-if="errorMessage"
+                    class="flex items-start gap-[0.375rem] text-xs text-(--ui-error) px-3 py-[0.625rem] rounded-2xl bg-[color-mix(in_srgb,var(--ui-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--ui-error)_22%,transparent)]"
+                >
                     <UIcon name="i-lucide-alert-circle" />
                     {{ errorMessage }}
                 </div>
@@ -122,14 +125,18 @@ const toggleMode = () => {
         </template>
 
         <template #footer="{ close }">
-            <button type="button" class="auth-modal__toggle" @click="toggleMode">
+            <button
+                type="button"
+                class="bg-transparent border-none text-(--ui-text-muted) text-xs cursor-pointer transition-colors duration-150 hover:text-(--ui-text-highlighted)"
+                @click="toggleMode"
+            >
                 {{
                     mode === 'login'
                         ? '계정이 없으신가요? 회원가입'
                         : '이미 계정이 있으신가요? 로그인'
                 }}
             </button>
-            <div class="auth-modal__actions">
+            <div class="flex justify-end gap-[0.625rem] mt-4">
                 <UButton variant="outline" color="neutral" label="취소" @click="close" />
                 <UButton
                     variant="solid"
@@ -143,4 +150,16 @@ const toggleMode = () => {
     </UModal>
 </template>
 
-<style scoped src="./AuthModal.css"></style>
+<style scoped>
+.fields-root {
+    --map-form-label-color: var(--ui-text-muted);
+    --map-form-bg: var(--ui-bg-elevated);
+    --map-form-color: var(--ui-text-highlighted);
+    --map-form-font-size: 0.875rem;
+    --map-form-line-height: 1.5;
+    --map-form-padding: 0.75rem;
+    --map-form-placeholder: var(--ui-text-dimmed);
+    --map-form-focus-border: var(--ui-border-accented);
+    --map-form-focus-bg: var(--ui-bg-elevated);
+}
+</style>
