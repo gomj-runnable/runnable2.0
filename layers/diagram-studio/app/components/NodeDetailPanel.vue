@@ -18,8 +18,9 @@ const isOpen = computed(() => !!props.node)
         :open="isOpen"
         side="right"
         :ui="{
-            overlay: 'ds-detail__overlay',
-            content: 'ds-detail__content'
+            overlay: 'hidden max-sm:block max-sm:bg-black/50',
+            content:
+                'absolute top-0 right-0 h-full w-[260px] shadow-none rounded-none overflow-y-auto max-sm:fixed max-sm:w-full max-sm:max-w-full max-sm:h-dvh'
         }"
         aria-label="노드 상세 패널"
         @update:open="
@@ -29,10 +30,15 @@ const isOpen = computed(() => !!props.node)
         "
     >
         <template #content>
-            <div v-if="node" class="ds-detail">
+            <div v-if="node" class="flex flex-col h-full">
                 <!-- Header -->
-                <div class="ds-detail__header">
-                    <span class="ds-detail__title">{{ node.label }}</span>
+                <div
+                    class="flex items-center justify-between px-4 py-3 border-b border-default sticky top-0 bg-elevated z-10"
+                >
+                    <span
+                        class="text-sm font-semibold font-mono overflow-hidden text-ellipsis whitespace-nowrap"
+                        >{{ node.label }}</span
+                    >
                     <UButton
                         icon="i-lucide-x"
                         color="neutral"
@@ -44,7 +50,10 @@ const isOpen = computed(() => !!props.node)
                 </div>
 
                 <!-- Node kind / group badges -->
-                <div v-if="node.kind || node.group" class="ds-detail__badges">
+                <div
+                    v-if="node.kind || node.group"
+                    class="flex gap-1.5 px-4 py-2 flex-wrap border-b border-default"
+                >
                     <UBadge
                         v-if="node.group"
                         :label="node.group"
@@ -62,19 +71,35 @@ const isOpen = computed(() => !!props.node)
                 </div>
 
                 <!-- Meta data list -->
-                <dl class="ds-detail__meta">
-                    <div v-if="node.group" class="ds-detail__row">
-                        <dt class="ds-detail__dt">그룹</dt>
-                        <dd class="ds-detail__dd">{{ node.group }}</dd>
+                <dl class="px-4 py-3 flex flex-col gap-2 m-0">
+                    <div v-if="node.group" class="flex flex-col gap-px">
+                        <dt
+                            class="font-mono text-[0.5625rem] uppercase tracking-[0.05em] text-muted font-semibold"
+                        >
+                            그룹
+                        </dt>
+                        <dd class="font-mono text-[0.8125rem] m-0 break-all">{{ node.group }}</dd>
                     </div>
-                    <div v-if="node.kind" class="ds-detail__row">
-                        <dt class="ds-detail__dt">종류</dt>
-                        <dd class="ds-detail__dd">{{ node.kind }}</dd>
+                    <div v-if="node.kind" class="flex flex-col gap-px">
+                        <dt
+                            class="font-mono text-[0.5625rem] uppercase tracking-[0.05em] text-muted font-semibold"
+                        >
+                            종류
+                        </dt>
+                        <dd class="font-mono text-[0.8125rem] m-0 break-all">{{ node.kind }}</dd>
                     </div>
                     <template v-if="node.data">
-                        <div v-for="(val, key) in node.data" :key="key" class="ds-detail__row">
-                            <dt class="ds-detail__dt">{{ key }}</dt>
-                            <dd class="ds-detail__dd">
+                        <div
+                            v-for="(val, key) in node.data"
+                            :key="key"
+                            class="flex flex-col gap-px"
+                        >
+                            <dt
+                                class="font-mono text-[0.5625rem] uppercase tracking-[0.05em] text-muted font-semibold"
+                            >
+                                {{ key }}
+                            </dt>
+                            <dd class="font-mono text-[0.8125rem] m-0 break-all">
                                 {{ typeof val === 'object' ? JSON.stringify(val) : val }}
                             </dd>
                         </div>
@@ -84,93 +109,3 @@ const isOpen = computed(() => !!props.node)
         </template>
     </USlideover>
 </template>
-
-<style scoped>
-/* Overlay: no backdrop needed — panel sits inside the canvas area */
-:deep(.ds-detail__overlay) {
-    display: none;
-}
-
-:deep(.ds-detail__content) {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 260px;
-    height: 100%;
-    background: var(--ds-bg-elevated);
-    border-left: 1px solid var(--ds-border);
-    box-shadow: none;
-    border-radius: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ds-border) transparent;
-}
-
-/* Panel inner layout */
-.ds-detail {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.ds-detail__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--ds-border);
-    position: sticky;
-    top: 0;
-    background: var(--ds-bg-elevated);
-    z-index: 1;
-}
-
-.ds-detail__title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--ds-text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-family: var(--ds-font-mono);
-}
-
-.ds-detail__badges {
-    display: flex;
-    gap: 0.375rem;
-    padding: 0.5rem 1rem;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--ds-border-subtle);
-}
-
-.ds-detail__meta {
-    padding: 0.75rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin: 0;
-}
-
-.ds-detail__row {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.ds-detail__dt {
-    font-family: var(--ds-font-mono);
-    font-size: 0.5625rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--ds-text-muted);
-    font-weight: 600;
-}
-
-.ds-detail__dd {
-    font-family: var(--ds-font-mono);
-    font-size: 0.8125rem;
-    color: var(--ds-text);
-    margin: 0;
-    word-break: break-all;
-}
-</style>

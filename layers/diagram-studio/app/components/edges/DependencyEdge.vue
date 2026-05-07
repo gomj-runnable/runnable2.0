@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@vue-flow/core'
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from '@vue-flow/core'
 import { computed } from '#imports'
 
 const props = defineProps<{
@@ -16,18 +16,18 @@ const props = defineProps<{
 
 const DASH_MAP: Record<string, string> = {
     imports: '0',
-    calls: '5,3',
-    extends: '8,4',
-    uses: '0',
+    calls: '6,3',
+    extends: '10,4',
+    uses: '4,2',
     navigates: '0'
 }
 
 const STROKE_MAP: Record<string, string> = {
-    imports: '#64748b',
-    calls: '#818cf8',
-    extends: '#f472b6',
-    uses: '#94a3b8',
-    navigates: '#34d399'
+    imports: 'var(--ui-color-neutral-500)',
+    calls: 'var(--ui-color-primary-400)',
+    extends: 'var(--ui-color-warning-400)',
+    uses: 'var(--ui-color-neutral-400)',
+    navigates: 'var(--ui-color-success-400)'
 }
 
 const STROKE_WIDTH_MAP: Record<string, number> = {
@@ -42,16 +42,33 @@ const kind = computed(() => props.data?.kind ?? 'imports')
 const strokeDasharray = computed(() => DASH_MAP[kind.value] ?? '0')
 const stroke = computed(() => STROKE_MAP[kind.value] ?? '#64748b')
 const strokeWidth = computed(() => STROKE_WIDTH_MAP[kind.value] ?? 1.5)
+const markerId = computed(() => `arrow-${props.id}`)
 
-const [path, labelX, labelY] = getBezierPath({
+const [path, labelX, labelY] = getSmoothStepPath({
     sourceX: props.sourceX,
     sourceY: props.sourceY,
     targetX: props.targetX,
-    targetY: props.targetY
+    targetY: props.targetY,
+    borderRadius: 8
 })
 </script>
 
 <template>
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+        <defs>
+            <marker
+                :id="markerId"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="3"
+                orient="auto"
+                markerUnits="strokeWidth"
+            >
+                <path d="M0,0 L0,6 L9,3 z" :fill="stroke" />
+            </marker>
+        </defs>
+    </svg>
     <BaseEdge
         :id="id"
         :path="path"
@@ -60,28 +77,17 @@ const [path, labelX, labelY] = getBezierPath({
             strokeWidth,
             strokeDasharray
         }"
-        aria-label="`의존성 엣지: ${data?.kind ?? 'imports'}`"
+        :marker-end="`url(#${markerId})`"
+        :aria-label="`의존성 엣지: ${data?.kind ?? 'imports'}`"
     />
     <EdgeLabelRenderer v-if="label">
         <div
             :style="{
                 transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`
             }"
-            class="dependency-edge__label nodrag nopan"
+            class="absolute text-[0.625rem] text-neutral-400 bg-neutral-950 px-1.5 py-px rounded border border-neutral-700 pointer-events-none whitespace-nowrap nodrag nopan"
         >
             {{ label }}
         </div>
     </EdgeLabelRenderer>
 </template>
-
-<style scoped>
-.dependency-edge__label {
-    position: absolute;
-    font-size: 0.625rem;
-    color: var(--ds-text-muted, #888);
-    background: var(--ds-bg, #0f0f0f);
-    padding: 1px 4px;
-    border-radius: 3px;
-    pointer-events: none;
-}
-</style>

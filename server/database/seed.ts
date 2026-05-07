@@ -78,6 +78,40 @@ async function seed() {
         })
         console.log('✅ 관리자 계정 설정 완료 (ID: ' + ADMIN_ID + ')')
 
+        // ADMIN 계정 생성 (ROLES.ADMIN, email 기반 — 운영자 대시보드 등 향후 admin 페이지 진입용)
+        const ADMIN_ROLE_ID = 'admin_role_master_01'
+        const adminRoleData = {
+            email: 'admin@runnable.com',
+            password: adminPassword,
+            name: 'admin'
+        }
+        const hashedAdminRolePassword = await hashPassword(adminRoleData.password)
+
+        await db.transaction(async (tx) => {
+            await tx
+                .insert(users)
+                .values({
+                    id: ADMIN_ROLE_ID,
+                    name: adminRoleData.name,
+                    email: adminRoleData.email,
+                    role: ROLES.ADMIN,
+                    emailVerified: true
+                })
+                .onConflictDoNothing({ target: users.id })
+
+            await tx
+                .insert(userAccounts)
+                .values({
+                    id: `acc_${ADMIN_ROLE_ID}`,
+                    userId: ADMIN_ROLE_ID,
+                    accountId: adminRoleData.email,
+                    providerId: 'credential',
+                    password: hashedAdminRolePassword
+                })
+                .onConflictDoNothing({ target: userAccounts.id })
+        })
+        console.log('✅ admin 계정 설정 완료 (ID: ' + ADMIN_ROLE_ID + ')')
+
         // developer 계정 생성 (ROLES.DEVELOPER, email 기반 — username 플러그인 미사용)
         const DEV_ID = 'developer_master_01'
         const devData = {

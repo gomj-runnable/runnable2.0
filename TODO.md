@@ -4,23 +4,17 @@
 
 ## A. 결정이 필요한 사항
 
-### A-1. 로그인 ID 형식 — 어떻게 가시겠어요?
-- 사용자 명시: `id: developer` / `password: developer1234`
-- 현재 구현: better-auth가 email-only라 **email = `developer@runnable.com`** 로 저장됨
-- 옵션:
-  - **(A) 그대로 유지** — 로그인 시 `developer@runnable.com` 입력 (간단, 추가 작업 없음)
-  - (B) better-auth `username` 플러그인 도입 — 의존성/스키마 마이그레이션 발생
-  - (C) email 컬럼에 'developer' 문자열 저장 — better-auth 검증 우회 필요(권장 안 함)
+### A-1. 로그인 ID 형식 — ✅ resolved (2026-05-07)
+- 결정: **A안 — 그대로 유지**. better-auth email-only 인증 그대로.
+- 로그인 시 풀 email 입력 (`developer@runnable.com` / `admin@runnable.com`).
+- 추가 의존성/마이그레이션 없음.
 
-→ 답해주시면 바로 반영합니다.
+### A-2. 시드 패스워드 평문 하드코딩 — ✅ resolved (2026-05-07)
+- 처리: 이미 적용된 상태였음. `.env.example` 에 `ADMIN_SEED_PASSWORD` + `DEVELOPER_SEED_PASSWORD` 정의, `seed.ts` / `memoryStore.ts` 모두 `process.env.*_SEED_PASSWORD` 로 읽음. 평문 하드코딩 0.
 
-### A-2. 시드 패스워드 평문 하드코딩
-- `server/database/seed.ts`, `server/utils/memoryStore.ts`에 `developer1234` 평문.
-- dev 환경 한정이지만 환경변수(`DEVELOPER_SEED_PASSWORD`)로 분리할까요?
-
-### A-3. role 정수 컨벤션
-- 현재 `99 = developer` 임의 지정. 향후 admin 등 추가 시 충돌 위험.
-- `shared/constants/roles.ts` 같은 단일 진실 공급원을 만들지 결정 필요.
+### A-3. role 정수 컨벤션 — ✅ resolved
+- `shared/constants/roles.ts` 단일 진실 공급원 도입됨 (`USER=1`, `DEVELOPER=99`).
+- 향후 admin 권한은 동일 파일에서 확장.
 
 ---
 
@@ -62,8 +56,7 @@
 
 ## E. 다음 단계 제안
 
-1. **A-1 답변 → 즉시 반영**
-2. dev 서버 띄워 §B 체크리스트 점검
-3. 결과 공유 → 발견된 결함 fix 또는 commit & PR
+1. dev 서버 띄워 §B 체크리스트 점검
+2. 결과 공유 → 발견된 결함 fix 또는 commit & PR
 
-> 수정이 필요한 항목을 알려주시면 그 부분만 작업합니다.
+> A 섹션 결정사항(A-1/A-2/A-3) 모두 resolved. 추가 개선 항목은 `docs/ISSUE-REPORT-DIAGRAM-STUDIO.md` 참조.

@@ -6,6 +6,7 @@
  */
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { useAuthSideeffect } from '~/entities/user/api/useAuthSideeffect'
+import { hasAdminAccess } from '../../../../shared/constants/roles'
 
 const emit = defineEmits<{
     success: []
@@ -62,6 +63,13 @@ const handleLogout = async () => {
     emit('logout')
 }
 
+const showAdminLink = computed(() => hasAdminAccess(authStore.user.value?.role))
+
+const goToAdmin = () => {
+    navigateTo('/admin')
+    emit('success')
+}
+
 defineExpose({ reset })
 </script>
 
@@ -80,6 +88,15 @@ defineExpose({ reset })
                     <p class="text-sm text-(--ui-text-muted)">{{ authStore.user.value?.email }}</p>
                 </div>
             </div>
+            <UButton
+                v-if="showAdminLink"
+                variant="outline"
+                color="primary"
+                icon="i-lucide-shield"
+                label="관리자 페이지"
+                block
+                @click="goToAdmin"
+            />
             <UButton
                 variant="outline"
                 color="error"

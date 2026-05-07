@@ -1,14 +1,18 @@
 import { onMounted, onUnmounted } from '#imports'
-import type { TabKind } from '../components/DiagramTabs.vue'
+import type { TabKind } from '../../runtime/types'
+import { TAB_KEYS } from './useDiagramTabs'
 
 interface ShortcutHandlers {
     onTabSelect: (tab: TabKind) => void
     onSearchFocus: () => void
+    onHelpToggle?: () => void
 }
 
-const TAB_KEYS: TabKind[] = ['user-journey', 'fsd', 'composables', 'classes']
-
-export function useKeyboardShortcuts({ onTabSelect, onSearchFocus }: ShortcutHandlers) {
+export function useKeyboardShortcuts({
+    onTabSelect,
+    onSearchFocus,
+    onHelpToggle
+}: ShortcutHandlers) {
     function handle(e: KeyboardEvent) {
         const target = e.target as HTMLElement
         const isEditable =
@@ -21,7 +25,16 @@ export function useKeyboardShortcuts({ onTabSelect, onSearchFocus }: ShortcutHan
             return
         }
 
-        const idx = parseInt(e.key) - 1
+        if (e.key === '?') {
+            e.preventDefault()
+            onHelpToggle?.()
+            return
+        }
+
+        // 숫자 키(1~9)에 한해 탭 전환 처리. Escape/Tab 등 비숫자 키는 NaN으로 무시된다.
+        if (!/^[1-9]$/.test(e.key)) return
+
+        const idx = parseInt(e.key, 10) - 1
         const tab = TAB_KEYS[idx]
         if (tab !== undefined) {
             onTabSelect(tab)

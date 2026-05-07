@@ -13,7 +13,7 @@ import { MiniMap } from '@vue-flow/minimap'
 import { computed, ref, watch, nextTick } from '#imports'
 import { useDiagramData } from '../composables/useDiagramData'
 import { applyLayout } from '../composables/useDagreLayout'
-import type { DiagramNode } from '../../runtime/types'
+import type { DiagramNode, DiagramEdge } from '../../runtime/types'
 import ModuleNode from './nodes/ModuleNode.vue'
 import JourneyNode from './nodes/JourneyNode.vue'
 import ClassNode from './nodes/ClassNode.vue'
@@ -22,7 +22,10 @@ import DependencyEdge from './edges/DependencyEdge.vue'
 
 const props = defineProps<{
     src: string
-    nodeKindMap?: Record<string, any>
+    nodeKindMap?: NodeTypesObject
+    selectedGroups?: string[]
+    searchQuery?: string
+    kind?: string
 }>()
 
 const emit = defineEmits<{
@@ -51,22 +54,77 @@ const nodeTypes = computed(
 )
 
 const edgeTypes: EdgeTypesObject = {
-    dependency: DependencyEdge as any
+    dependency: DependencyEdge as unknown as EdgeTypesObject[string]
 }
 
 const isEmpty = computed(() => !pending.value && !error.value && data.value?.nodes?.length === 0)
 
+const codegenError = computed(() => data.value?.meta?.error ?? null)
+
+const manifestHint = computed(() => {
+    const k = props.kind ?? data.value?.kind ?? ''
+    if (!k) return 'layers/diagram-studio/manifests/'
+    return `layers/diagram-studio/manifests/${k}/`
+})
+
+const lastBuildAt = computed(() => {
+    const ts = data.value?.meta?.generatedAt
+    if (!ts) return null
+    return new Date(ts).toLocaleString('ko-KR')
+})
+
+function matchesQuery(n: DiagramNode, q: string): boolean {
+    if (!q) return false
+    return (n.label || n.id).toLowerCase().includes(q) || n.id.toLowerCase().includes(q)
+}
+
+function filterDiagram(
+    rawNodes: DiagramNode[],
+    rawEdges: DiagramEdge[]
+): { nodes: DiagramNode[]; edges: DiagramEdge[]; matchedIds: string[] } {
+    const groups = props.selectedGroups ?? []
+    const q = (props.searchQuery ?? '').trim().toLowerCase()
+
+    // 그룹 필터는 가시성 제어. 검색어는 강조만 (노드는 모두 표시).
+    let visibleNodes = rawNodes
+    if (groups.length > 0) {
+        visibleNodes = visibleNodes.filter((n) => !!n.group && groups.includes(n.group))
+    }
+    const matchedIds = q ? visibleNodes.filter((n) => matchesQuery(n, q)).map((n) => n.id) : []
+    const visibleIds = new Set(visibleNodes.map((n) => n.id))
+    const filteredEdges = rawEdges.filter(
+        (e) => visibleIds.has(e.source) && visibleIds.has(e.target)
+    )
+    return { nodes: visibleNodes, edges: filteredEdges, matchedIds }
+}
+
 watch(
-    () => data.value,
-    async (diagram) => {
-        if (!diagram) return
-        const layout = applyLayout(diagram.nodes, diagram.edges)
-        nodes.value = layout.nodes
+    [() => data.value, () => props.selectedGroups, () => props.searchQuery] as const,
+    async ([diagram]) => {
+        if (!diagram) {
+            nodes.value = []
+            edges.value = []
+            return
+        }
+        const filtered = filterDiagram(diagram.nodes, diagram.edges)
+        const layout = applyLayout(filtered.nodes, filtered.edges, {
+            diagramKind: props.kind ?? diagram.kind
+        })
+        const matchedSet = new Set(filtered.matchedIds)
+        nodes.value = layout.nodes.map((n) => ({
+            ...n,
+            class: matchedSet.has(n.id) ? 'node-highlight' : undefined,
+            data: { ...(n.data ?? {}), highlighted: matchedSet.has(n.id) }
+        }))
         edges.value = layout.edges
         await nextTick()
-        fitView({ padding: 0.1 })
+        if (filtered.matchedIds.length > 0) {
+            fitView({ nodes: filtered.matchedIds, padding: 0.25 })
+        } else {
+            fitView({ padding: 0.15 })
+        }
     },
-    { immediate: true }
+    { immediate: true, deep: true }
 )
 
 function onNodeClick({ node }: NodeMouseEvent) {
@@ -82,13 +140,56 @@ function onNodeClick({ node }: NodeMouseEvent) {
 </script>
 
 <template>
-    <div class="diagram-canvas" aria-label="다이어그램 캔버스">
-        <div v-if="pending" class="diagram-canvas__state">로딩 중...</div>
-        <div v-else-if="error" class="diagram-canvas__state diagram-canvas__state--error">
-            다이어그램을 불러오지 못했습니다.
+    <div class="w-full h-full relative" aria-label="다이어그램 캔버스">
+        <div v-if="pending" class="flex items-center justify-center h-full text-sm text-muted">
+            로딩 중...
         </div>
-        <div v-else-if="isEmpty" class="diagram-canvas__state">
-            아직 생성된 다이어그램이 없습니다. <code>pnpm gen:diagrams</code>를 실행하세요.
+        <div v-else-if="error" class="flex items-center justify-center h-full">
+            <UAlert
+                color="error"
+                variant="subtle"
+                icon="i-lucide-triangle-alert"
+                title="다이어그램을 불러오지 못했습니다."
+                class="max-w-[420px]"
+            />
+        </div>
+        <div v-else-if="isEmpty" class="flex items-center justify-center h-full">
+            <UAlert
+                :color="codegenError ? 'warning' : 'info'"
+                variant="subtle"
+                :icon="codegenError ? 'i-lucide-triangle-alert' : 'i-lucide-info'"
+                :title="
+                    codegenError
+                        ? '다이어그램 생성 중 오류가 발생했습니다.'
+                        : '아직 생성된 다이어그램이 없습니다.'
+                "
+                class="max-w-[420px]"
+            >
+                <template #description>
+                    <div class="flex flex-col gap-1.5">
+                        <p v-if="codegenError" class="m-0 text-xs">
+                            <code
+                                class="font-mono text-[0.6875rem] text-default bg-warning/10 px-2 py-1 rounded inline-block break-all"
+                                >{{ codegenError }}</code
+                            >
+                        </p>
+                        <p class="m-0 text-xs text-muted">
+                            <UKbd value="pnpm gen:diagrams" size="sm" />
+                            를 실행하세요.
+                        </p>
+                        <p class="m-0 text-xs text-muted">
+                            manifest 경로:
+                            <code
+                                class="font-mono text-[0.6875rem] text-primary bg-primary/10 px-1.5 py-0.5 rounded"
+                                >{{ manifestHint }}</code
+                            >
+                        </p>
+                        <p v-if="lastBuildAt" class="m-0 text-xs text-muted">
+                            마지막 빌드: <span>{{ lastBuildAt }}</span>
+                        </p>
+                    </div>
+                </template>
+            </UAlert>
         </div>
         <VueFlow
             v-else
@@ -96,46 +197,17 @@ function onNodeClick({ node }: NodeMouseEvent) {
             v-model:edges="edges"
             :node-types="nodeTypes"
             :edge-types="edgeTypes"
-            class="diagram-canvas__flow"
+            class="w-full h-full"
             @node-click="onNodeClick"
         >
             <Background />
             <Controls />
-            <MiniMap />
+            <MiniMap
+                node-color="var(--ui-color-neutral-500)"
+                mask-color="rgba(0,0,0,0.6)"
+                pannable
+                zoomable
+            />
         </VueFlow>
     </div>
 </template>
-
-<style scoped>
-.diagram-canvas {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.diagram-canvas__flow {
-    width: 100%;
-    height: 100%;
-}
-
-.diagram-canvas__state {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    font-size: 0.875rem;
-    color: var(--ds-text-muted, #888);
-}
-
-.diagram-canvas__state--error {
-    color: #f87171;
-}
-
-.diagram-canvas__state code {
-    font-family: monospace;
-    background: var(--ds-bg-elevated, #1a1a1a);
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-left: 4px;
-}
-</style>

@@ -2,17 +2,19 @@ import { createAuthClient } from 'better-auth/vue'
 import type { AuthUser } from '../model/useAuthStore'
 import { useAuthStore } from '../model/useAuthStore'
 
-/** better-auth 응답의 user 객체를 AuthUser로 변환한다. */
+/** better-auth 응답의 user 객체를 AuthUser로 변환한다. role 필드는 schema 확장으로 추가된 정수. */
 const toAuthUser = (user: {
     id: string
     name: string
     email: string
     image?: string | null
+    role?: number | null
 }): AuthUser => ({
     id: user.id,
     name: user.name,
     email: user.email,
-    image: user.image
+    image: user.image,
+    role: user.role
 })
 
 /** better-auth 클라이언트 싱글톤. 최초 호출 시 생성되고 이후 재사용된다. */
