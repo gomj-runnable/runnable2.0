@@ -37,8 +37,8 @@ defineEmits<{
         @update:open="$emit('update:open', $event)"
     >
         <template #body>
-            <div class="route-save-modal__fields">
-                <label class="route-save-modal__field map-form-field">
+            <div class="fields-root flex flex-col gap-3">
+                <label class="map-form-field">
                     <span class="map-form-label">제목</span>
                     <UInput
                         :model-value="title"
@@ -47,7 +47,7 @@ defineEmits<{
                     />
                 </label>
 
-                <label class="route-save-modal__field map-form-field">
+                <label class="map-form-field">
                     <span class="map-form-label">설명</span>
                     <textarea
                         :value="description"
@@ -63,14 +63,14 @@ defineEmits<{
                     />
                 </label>
 
-                <label class="route-save-modal__field map-form-field">
+                <label class="map-form-field">
                     <span class="map-form-label">거리</span>
                     <UInput :model-value="formatDistance(distance)" placeholder="0.00" disabled />
                 </label>
 
-                <div v-if="districts?.length" class="route-save-modal__field map-form-field">
+                <div v-if="districts?.length" class="map-form-field">
                     <span class="map-form-label">행정구역</span>
-                    <div class="route-save-modal__districts">
+                    <div class="text-sm text-(--ui-text-muted) leading-[1.5]">
                         {{ districts.join(', ') }}
                     </div>
                 </div>
@@ -89,4 +89,19 @@ defineEmits<{
     </UModal>
 </template>
 
-<style scoped src="./RouteSaveModal.css"></style>
+<style scoped>
+.fields-root {
+    --map-form-label-color: var(--ui-text-muted);
+    --map-form-bg: var(--ui-bg-elevated);
+    --map-form-color: var(--ui-text-highlighted);
+    --map-form-font-size: 0.875rem;
+    --map-form-line-height: 1.5;
+    --map-form-padding: 0.75rem;
+    --map-form-resize: vertical;
+    --map-form-placeholder: var(--ui-text-dimmed);
+    --map-form-focus-border: var(--ui-border-accented);
+    --map-form-focus-bg: var(--ui-bg-elevated);
+    --map-form-disabled-color: var(--ui-text-dimmed);
+    --map-form-disabled-bg: var(--ui-bg-accented);
+}
+</style>
