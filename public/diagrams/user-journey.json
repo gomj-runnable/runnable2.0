@@ -1,0 +1,73 @@
+{
+  "kind": "user-journey",
+  "nodes": [
+    {
+      "id": "enter",
+      "label": "앱 진입",
+      "kind": "step"
+    },
+    {
+      "id": "auth",
+      "label": "로그인",
+      "kind": "step"
+    },
+    {
+      "id": "map",
+      "label": "지도 진입",
+      "kind": "step"
+    },
+    {
+      "id": "draw",
+      "label": "경로 그리기",
+      "kind": "step"
+    },
+    {
+      "id": "save",
+      "label": "경로 저장",
+      "kind": "step"
+    },
+    {
+      "id": "share",
+      "label": "경로 공유",
+      "kind": "step"
+    }
+  ],
+  "edges": [
+    {
+      "id": "enter->auth",
+      "source": "enter",
+      "target": "auth",
+      "kind": "navigates"
+    },
+    {
+      "id": "auth->map",
+      "source": "auth",
+      "target": "map",
+      "kind": "navigates"
+    },
+    {
+      "id": "map->draw",
+      "source": "map",
+      "target": "draw",
+      "kind": "navigates"
+    },
+    {
+      "id": "draw->save",
+      "source": "draw",
+      "target": "save",
+      "kind": "navigates"
+    },
+    {
+      "id": "save->share",
+      "source": "save",
+      "target": "share",
+      "kind": "navigates"
+    }
+  ],
+  "meta": {
+    "generatedAt": "2026-05-07T09:43:00.317Z",
+    "sourceCommit": "448aa80406232f3994362603f0197bf95aeded07",
+    "nodeCount": 6,
+    "edgeCount": 5
+  }
+}

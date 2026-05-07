@@ -5,6 +5,8 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineNuxtConfig({
+    extends: ['./layers/diagram-studio'],
+
     ssr: false,
 
     modules: ['@nuxt/eslint', '@nuxt/ui'],

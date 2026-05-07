@@ -11,12 +11,21 @@ async function seed() {
     const { facilities } = await import('./schema/facilities')
     const { hashPassword } = await import('better-auth/crypto')
     const { sql } = await import('drizzle-orm')
+    const { ROLES } = await import('../../shared/constants/roles')
 
     console.log('🌱 Seed 작업 시작...')
 
     const adminPassword = process.env.ADMIN_SEED_PASSWORD
     if (!adminPassword) {
         console.error('ADMIN_SEED_PASSWORD env var is required.')
+        process.exit(1)
+    }
+
+    // TODO. 다이어그램 스튜디오 dev 백도어 — prod에서도 developer 계정으로 접근 가능.
+    //       정식 권한 체계 정립 시 이 시드와 ROLES.DEVELOPER 자체를 제거 검토.
+    const developerPassword = process.env.DEVELOPER_SEED_PASSWORD
+    if (!developerPassword) {
+        console.error('DEVELOPER_SEED_PASSWORD env var is required.')
         process.exit(1)
     }
 
@@ -68,6 +77,40 @@ async function seed() {
                 })
         })
         console.log('✅ 관리자 계정 설정 완료 (ID: ' + ADMIN_ID + ')')
+
+        // developer 계정 생성 (ROLES.DEVELOPER, email 기반 — username 플러그인 미사용)
+        const DEV_ID = 'developer_master_01'
+        const devData = {
+            email: 'developer@runnable.com',
+            password: developerPassword,
+            name: 'developer'
+        }
+        const hashedDevPassword = await hashPassword(devData.password)
+
+        await db.transaction(async (tx) => {
+            await tx
+                .insert(users)
+                .values({
+                    id: DEV_ID,
+                    name: devData.name,
+                    email: devData.email,
+                    role: ROLES.DEVELOPER,
+                    emailVerified: true
+                })
+                .onConflictDoNothing({ target: users.id })
+
+            await tx
+                .insert(userAccounts)
+                .values({
+                    id: `acc_${DEV_ID}`,
+                    userId: DEV_ID,
+                    accountId: devData.email,
+                    providerId: 'credential',
+                    password: hashedDevPassword
+                })
+                .onConflictDoNothing({ target: userAccounts.id })
+        })
+        console.log('✅ developer 계정 설정 완료 (ID: ' + DEV_ID + ')')
 
         // 2. 시설물 데���터 적재
         await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)

@@ -1,0 +1,14 @@
+steps:
+  - id: start
+    label: 시작
+    next:
+      - browse
+
+  - id: browse
+    label: 경로 탐색
+    next:
+      - detail
+
+  - id: detail
+    label: 경로 상세
+    next: []
