@@ -6,6 +6,7 @@ import { analyzeFsd } from './analyzers/fsd-graph'
 import { analyzeComposables } from './analyzers/composable-graph'
 import { analyzeClasses } from './analyzers/class-diagram'
 import { analyzeUserJourney } from './analyzers/user-journey'
+import type { DiagramJSON, TabKind } from '../runtime/types'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '../../../')
@@ -22,35 +23,85 @@ function getCommit(): string {
     }
 }
 
-async function runAnalyzers(manifestPath: string): Promise<void> {
+function emptySkeleton(kind: TabKind, error: string): DiagramJSON {
+    return {
+        kind,
+        nodes: [],
+        edges: [],
+        meta: {
+            generatedAt: new Date().toISOString(),
+            sourceCommit: '',
+            nodeCount: 0,
+            edgeCount: 0,
+            error
+        }
+    }
+}
+
+interface AnalyzerEntry {
+    kind: TabKind
+    file: string
+    run: () => Promise<DiagramJSON>
+}
+
+function getAnalyzers(manifestPath: string): AnalyzerEntry[] {
+    return [
+        { kind: 'fsd', file: 'fsd.json', run: () => analyzeFsd(root) },
+        { kind: 'composables', file: 'composables.json', run: () => analyzeComposables(root) },
+        { kind: 'classes', file: 'classes.json', run: () => analyzeClasses(root) },
+        {
+            kind: 'user-journey',
+            file: 'user-journey.json',
+            run: () => analyzeUserJourney(manifestPath)
+        }
+    ]
+}
+
+async function safeRun(entry: AnalyzerEntry, strict: boolean): Promise<DiagramJSON> {
+    try {
+        return await entry.run()
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        console.error(`[diagram-studio] kind=${entry.kind} generation failed: ${message}`)
+        if (strict) throw err
+        return emptySkeleton(entry.kind, message)
+    }
+}
+
+export interface GenerateOptions {
+    strict?: boolean
+    quiet?: boolean
+}
+
+export async function generate(
+    manifestPath: string = resolve(root, 'app/manifests/diagram-studio/user-journey.yaml'),
+    options: GenerateOptions = {}
+): Promise<void> {
     const start = Date.now()
+    const strict = options.strict ?? process.env.DIAGRAM_STUDIO_STRICT === '1'
+    const quiet = options.quiet ?? false
+
     mkdirSync(outDir, { recursive: true })
-
     const commit = getCommit()
+    const analyzers = getAnalyzers(manifestPath)
 
-    const results = await Promise.all([
-        analyzeFsd(root),
-        analyzeComposables(root),
-        analyzeClasses(root),
-        analyzeUserJourney(manifestPath)
-    ])
-
-    const files = ['fsd.json', 'composables.json', 'classes.json', 'user-journey.json']
-    const labels = ['fsd', 'composables', 'classes', 'user-journey']
-
-    for (let i = 0; i < results.length; i++) {
-        const diagram = results[i]
+    const results: DiagramJSON[] = []
+    for (const entry of analyzers) {
+        const diagram = await safeRun(entry, strict)
         diagram.meta.sourceCommit = commit
         diagram.meta.nodeCount = diagram.nodes.length
         diagram.meta.edgeCount = diagram.edges.length
-        writeFileSync(resolve(outDir, files[i]), JSON.stringify(diagram, null, 2))
+        writeFileSync(resolve(outDir, entry.file), JSON.stringify(diagram, null, 2))
+        results.push(diagram)
     }
 
-    const elapsed = Date.now() - start
-    const summary = results
-        .map((r, i) => `${labels[i]}: ${r.nodes.length}/${r.edges.length}`)
-        .join(', ')
-    console.log(`[diagram-studio] regenerated in ${elapsed}ms — ${summary}`)
+    if (!quiet) {
+        const elapsed = Date.now() - start
+        const summary = analyzers
+            .map((a, i) => `${a.kind}: ${results[i]!.nodes.length}/${results[i]!.edges.length}`)
+            .join(', ')
+        console.log(`[diagram-studio] regenerated in ${elapsed}ms — ${summary}`)
+    }
 }
 
 function walkAndWatch(
@@ -99,7 +150,7 @@ function watchFile(
 
 async function startWatchMode(manifestPath: string): Promise<void> {
     console.log('[diagram-studio] watch mode starting...')
-    await runAnalyzers(manifestPath)
+    await generate(manifestPath)
 
     const watchers = new Set<ReturnType<typeof fsWatch>>()
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -111,7 +162,7 @@ async function startWatchMode(manifestPath: string): Promise<void> {
             if (running) return
             running = true
             try {
-                await runAnalyzers(manifestPath)
+                await generate(manifestPath)
             } catch (err) {
                 console.error('[diagram-studio] error during regeneration:', err)
             } finally {
@@ -156,33 +207,22 @@ async function main() {
     if (watchMode) {
         await startWatchMode(manifestPath)
     } else {
-        mkdirSync(outDir, { recursive: true })
-
-        const commit = getCommit()
-
-        const results = await Promise.all([
-            analyzeFsd(root),
-            analyzeComposables(root),
-            analyzeClasses(root),
-            analyzeUserJourney(manifestPath)
-        ])
-
-        const files = ['fsd.json', 'composables.json', 'classes.json', 'user-journey.json']
-
-        for (let i = 0; i < results.length; i++) {
-            const diagram = results[i]
-            diagram.meta.sourceCommit = commit
-            diagram.meta.nodeCount = diagram.nodes.length
-            diagram.meta.edgeCount = diagram.edges.length
-            writeFileSync(resolve(outDir, files[i]), JSON.stringify(diagram, null, 2))
-            console.log(
-                `wrote ${files[i]} (${diagram.nodes.length} nodes, ${diagram.edges.length} edges)`
-            )
-        }
+        await generate(manifestPath)
     }
 }
 
-main().catch((err) => {
-    console.error(err)
-    process.exit(1)
-})
+const isDirectInvocation = (() => {
+    if (!process.argv[1]) return false
+    try {
+        return fileURLToPath(import.meta.url) === resolve(process.argv[1])
+    } catch {
+        return false
+    }
+})()
+
+if (isDirectInvocation) {
+    main().catch((err) => {
+        console.error(err)
+        process.exit(1)
+    })
+}

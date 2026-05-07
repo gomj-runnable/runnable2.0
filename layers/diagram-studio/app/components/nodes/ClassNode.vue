@@ -11,13 +11,19 @@ const props = defineProps<{
     }
 }>()
 
-const KIND_COLORS: Record<string, string> = {
-    types: 'class-node--types',
-    schemas: 'class-node--schemas',
-    services: 'class-node--services'
+const KIND_ACCENT: Record<string, { border: string; label: string }> = {
+    types: { border: 'border-l-blue-700', label: 'text-blue-300' },
+    schemas: { border: 'border-l-green-700', label: 'text-green-300' },
+    services: { border: 'border-l-amber-600', label: 'text-amber-300' }
 }
 
-const kindClass = computed(() => KIND_COLORS[props.data.kind ?? ''] ?? 'class-node--types')
+const accent = computed(
+    () =>
+        KIND_ACCENT[props.data.kind ?? ''] ?? {
+            border: 'border-l-neutral-600',
+            label: 'text-neutral-400'
+        }
+)
 
 const memberCount = computed(() => {
     const meta = props.data.meta
@@ -30,72 +36,23 @@ const memberCount = computed(() => {
 </script>
 
 <template>
-    <div :class="['class-node', kindClass]" :aria-label="`클래스 노드: ${data.label}`">
+    <div
+        class="border border-neutral-700 border-l-[3px] rounded bg-neutral-950 min-w-[140px] overflow-hidden"
+        :class="accent.border"
+        :aria-label="`클래스 노드: ${data.label}`"
+    >
         <Handle type="target" :position="Position.Left" />
-        <div class="class-node__header">
-            <span class="class-node__kind">{{ data.kind ?? 'type' }}</span>
-            <span class="class-node__label">{{ data.label }}</span>
-            <span v-if="memberCount != null" class="class-node__members"
+        <div class="px-2.5 pt-1.5 pb-1.5 pl-2 flex flex-col gap-px">
+            <span
+                class="text-[0.625rem] uppercase tracking-[0.05em] font-semibold"
+                :class="accent.label"
+                >{{ data.kind ?? 'type' }}</span
+            >
+            <span class="text-[0.8125rem] font-semibold text-neutral-100">{{ data.label }}</span>
+            <span v-if="memberCount != null" class="text-[0.625rem] text-neutral-500 mt-px"
                 >{{ memberCount }}개 멤버</span
             >
         </div>
         <Handle type="source" :position="Position.Right" />
     </div>
 </template>
-
-<style scoped>
-.class-node {
-    border: 1px solid var(--ds-border, #2a2a2a);
-    border-radius: 4px;
-    background: var(--ds-bg-elevated, #1a1a1a);
-    min-width: 140px;
-    overflow: hidden;
-}
-
-.class-node__header {
-    padding: 5px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.class-node__kind {
-    font-size: 0.625rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-}
-
-.class-node__label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--ds-text, #e5e5e5);
-}
-
-.class-node__members {
-    font-size: 0.625rem;
-    color: var(--ds-text-muted, #888);
-    margin-top: 1px;
-}
-
-.class-node--types {
-    border-color: #1d4ed8;
-}
-.class-node--types .class-node__kind {
-    color: #93c5fd;
-}
-
-.class-node--schemas {
-    border-color: #15803d;
-}
-.class-node--schemas .class-node__kind {
-    color: #86efac;
-}
-
-.class-node--services {
-    border-color: #b45309;
-}
-.class-node--services .class-node__kind {
-    color: #fcd34d;
-}
-</style>

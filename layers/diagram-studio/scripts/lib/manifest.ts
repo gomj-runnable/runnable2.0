@@ -1,17 +1,19 @@
 import { readFileSync } from 'node:fs'
 import yaml from 'js-yaml'
+import {
+    userJourneyManifestSchema,
+    formatZodError,
+    type UserJourneyManifest
+} from '../../manifests/__schemas/manifest'
 
-interface ManifestStep {
-    id: string
-    label: string
-    next: string[]
-}
-
-interface UserJourneyManifest {
-    steps: ManifestStep[]
-}
+export type { UserJourneyManifest } from '../../manifests/__schemas/manifest'
 
 export function loadUserJourneyManifest(filePath: string): UserJourneyManifest {
     const raw = readFileSync(filePath, 'utf-8')
-    return yaml.load(raw) as UserJourneyManifest
+    const parsed = yaml.load(raw)
+    const result = userJourneyManifestSchema.safeParse(parsed)
+    if (!result.success) {
+        throw new Error(formatZodError(result.error, filePath))
+    }
+    return result.data
 }

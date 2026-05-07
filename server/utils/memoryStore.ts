@@ -37,6 +37,15 @@ memoryUsers.set(MEMORY_AUTO_LOGIN_EMAIL, {
     password: 'root1234'
 })
 
+// admin 시드 계정 (ROLES.ADMIN). MEMORY 모드 dev 환경에서 운영자 권한을 검증하기 위함.
+memoryUsers.set('admin@runnable.com', {
+    id: 'admin-role-user',
+    name: 'admin',
+    email: 'admin@runnable.com',
+    password: devPassword,
+    role: ROLES.ADMIN
+})
+
 // TODO. 다이어그램 스튜디오 dev 백도어 — prod에서도 살아 있다 (seed.ts와 동일 정책).
 //       정식 권한 체계 정립 시 이 엔트리와 ROLES.DEVELOPER 자체 제거 검토.
 const developerPassword = process.env.DEVELOPER_SEED_PASSWORD

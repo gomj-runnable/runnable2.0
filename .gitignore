@@ -39,3 +39,5 @@ public/uploads/
 # Oh My ClaudeCode
 .omc/
 
+# TODO
+*.TODO.md

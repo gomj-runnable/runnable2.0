@@ -8,6 +8,8 @@ export interface AuthUser {
     email: string
     /** 프로필 이미지 URL. 없으면 `null`. */
     image?: string | null
+    /** 역할 코드 (`shared/constants/roles.ts` ROLES 값 — USER=1 / ADMIN=50 / DEVELOPER=99) */
+    role?: number | null
 }
 
 /**

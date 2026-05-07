@@ -11,92 +11,37 @@ const props = defineProps<{
     }
 }>()
 
-const KIND_COLORS: Record<string, string> = {
-    facade: 'callable-node--amber',
-    store: 'callable-node--emerald',
-    sideeffect: 'callable-node--rose',
-    action: 'callable-node--sky'
+const KIND_ACCENT: Record<string, { border: string; label: string }> = {
+    facade: { border: 'border-l-amber-600', label: 'text-amber-400' },
+    store: { border: 'border-l-emerald-600', label: 'text-emerald-400' },
+    sideeffect: { border: 'border-l-rose-600', label: 'text-rose-400' },
+    action: { border: 'border-l-sky-600', label: 'text-sky-400' }
 }
 
-const kindClass = computed(() => KIND_COLORS[props.data.kind ?? ''] ?? 'callable-node--slate')
+const accent = computed(
+    () =>
+        KIND_ACCENT[props.data.kind ?? ''] ?? {
+            border: 'border-l-slate-500',
+            label: 'text-slate-400'
+        }
+)
 </script>
 
 <template>
-    <div :class="['callable-node', kindClass]" :aria-label="`callable 노드: ${data.label}`">
+    <div
+        class="px-3 pt-1.5 pb-1.5 pl-2.5 border border-neutral-700 border-l-[3px] rounded-md bg-neutral-950 min-w-[130px]"
+        :class="accent.border"
+        :aria-label="`callable 노드: ${data.label}`"
+    >
         <Handle type="target" :position="Position.Left" />
-        <div class="callable-node__inner">
-            <span class="callable-node__kind">{{ data.kind ?? 'composable' }}</span>
-            <span class="callable-node__label">{{ data.label }}</span>
+        <div class="flex flex-col gap-px">
+            <span
+                class="text-[0.625rem] uppercase tracking-[0.05em] font-semibold"
+                :class="accent.label"
+                >{{ data.kind ?? 'composable' }}</span
+            >
+            <span class="text-xs font-medium text-neutral-100">{{ data.label }}</span>
         </div>
         <Handle type="source" :position="Position.Right" />
     </div>
 </template>
-
-<style scoped>
-.callable-node {
-    padding: 5px 12px;
-    border: 1px solid var(--ds-border, #2a2a2a);
-    border-radius: 6px;
-    background: var(--ds-bg-elevated, #1a1a1a);
-    min-width: 130px;
-}
-
-.callable-node__inner {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.callable-node__kind {
-    font-size: 0.625rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-}
-
-.callable-node__label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--ds-text, #e5e5e5);
-}
-
-.callable-node--amber {
-    border-color: #d97706;
-    background: #1c1200;
-}
-.callable-node--amber .callable-node__kind {
-    color: #fbbf24;
-}
-
-.callable-node--emerald {
-    border-color: #059669;
-    background: #001a0e;
-}
-.callable-node--emerald .callable-node__kind {
-    color: #34d399;
-}
-
-.callable-node--rose {
-    border-color: #e11d48;
-    background: #1a0008;
-}
-.callable-node--rose .callable-node__kind {
-    color: #fb7185;
-}
-
-.callable-node--sky {
-    border-color: #0284c7;
-    background: #00111a;
-}
-.callable-node--sky .callable-node__kind {
-    color: #38bdf8;
-}
-
-.callable-node--slate {
-    border-color: #475569;
-    background: #1a1a1a;
-}
-.callable-node--slate .callable-node__kind {
-    color: #94a3b8;
-}
-</style>
