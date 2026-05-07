@@ -71,6 +71,17 @@ export const useSlideOverNav = (activeNav: Ref<string>) => {
         }
     )
 
+    // ─── activeNav → current 역방향 동기화 ─────────────────────
+    // confirmSave 등 외부 코드가 activeNav를 직접 바꾼 경우에도 SlideOver 패널이 따라 바뀌도록 한다.
+    watch(activeNav, (nav) => {
+        if (
+            nav !== current.value &&
+            (nav === NavKey.LIST || nav === NavKey.DRAW || nav === NavKey.EXPLORE)
+        ) {
+            current.value = nav
+        }
+    })
+
     /** 마지막으로 선택된 네비게이션 (닫혀도 active 표시용) */
     const lastActive = computed(() => current.value ?? _lastNav.value)
     const _lastNav = ref<NavKeyValue>(NavKey.LIST)
