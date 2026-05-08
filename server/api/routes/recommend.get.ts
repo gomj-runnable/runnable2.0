@@ -2,7 +2,7 @@ import { getQuery } from 'h3'
 import { weatherFacade } from '../../utils/weather/weather.facade'
 import { resolveWeatherKeys } from '../../utils/weather/event'
 import { formatDate, formatHour } from '../../utils/weather/common'
-import { routeRepository } from '../../repositories'
+import { routeService } from '../../services/route.service'
 import type { WeatherMetrics, RecommendedRoute } from '#shared/types/weather-recommend'
 
 /**
@@ -15,22 +15,19 @@ export default defineEventHandler(async (event) => {
 
     const keys = resolveWeatherKeys(event)
 
-    // 날씨 데이터와 공개 경로를 병렬로 조회한다
     const [monthlyWeather, routes] = await Promise.all([
         weatherFacade.requestByDate(undefined, keys).catch((err) => {
             console.error('[recommend] weather fetch failed', err)
             return null
         }),
-        routeRepository.searchPublicRoutes().catch((err) => {
+        routeService.searchPublicRoutes().catch((err) => {
             console.error('[recommend] route fetch failed', err)
             return []
         })
     ])
 
-    // 현재 시각 기준 날씨 슬롯에서 서울 전체 평균 조건을 추출한다
     const currentWeather = resolveCurrentWeather(monthlyWeather)
 
-    // 각 경로에 적합도 점수를 계산하고 상위 N개를 반환한다
     const scored: RecommendedRoute[] = routes.map((route) => {
         const { score, tags } = calculateSuitability(currentWeather, {
             distance: route.distance,
@@ -52,7 +49,6 @@ export default defineEventHandler(async (event) => {
     return scored.slice(0, limit)
 })
 
-/** 월별 날씨 데이터에서 현재 시각에 가장 가까운 슬롯의 서울 평균 기상 조건을 추출한다 */
 const resolveCurrentWeather = (
     monthlyWeather: Awaited<ReturnType<typeof weatherFacade.requestByDate>> | null
 ): WeatherMetrics => {
@@ -73,7 +69,6 @@ const resolveCurrentWeather = (
     for (const dong of monthlyWeather.dongs) {
         const slot = dong.hourly.find((h) => h.date === todayStr && h.time === hourStr)
         if (slot) {
-            // HourlyWeather에 강수량 수치가 없으므로 condition으로 강수 여부를 판단한다
             const precipitation = slot.condition === 'rainy' || slot.condition === 'snowy' ? 2 : 0
             slots.push({ temperature: slot.temperature, precipitation })
         }
@@ -90,7 +85,6 @@ const resolveCurrentWeather = (
     }
 }
 
-/** 날씨·경로 속성으로 적합도를 계산한다 (서버 사이드 순수 함수) */
 const calculateSuitability = (
     weather: WeatherMetrics,
     route: { distance?: number; highHeight?: number; lowHeight?: number }

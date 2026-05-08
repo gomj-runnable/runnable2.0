@@ -1,25 +1,31 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
+import { PGlite } from '@electric-sql/pglite'
+import type { drizzle } from 'drizzle-orm/pglite'
+import { initPgliteDb, resetDb } from '../../database/client'
 import type { IRouteRepository } from '../route.repository'
+import { DrizzleRouteRepository } from '../route.repository.drizzle'
 import type { RouteDraftInput } from '#shared/types/route'
+import { users } from '../../database/schema'
+import type * as schema from '../../database/schema'
 
-// 각 테스트마다 독립된 인스턴스를 사용하기 위해 모듈을 직접 import하지 않고
-// 싱글턴 대신 클래스를 인스턴스화한다. 소스가 클래스를 export하지 않으므로
-// routeRepository 싱글턴을 import해 각 테스트 전에 초기화한다.
-// InMemoryRouteRepository는 private 클래스이므로 테스트는 IRouteRepository 계약만 사용한다.
+// Each test gets a fresh in-memory PGlite instance — no shared state between tests.
 
-// 주의: routeRepository는 모듈 싱글턴이므로 테스트 간 상태 공유를 피하기 위해
-// 각 테스트에서 고유한 ID prefix를 사용하거나, 삭제로 정리한다.
-// 더 깔끔하게 격리하려면 vitest의 vi.resetModules()를 사용할 수 있으나
-// 현재는 각 describe block에서 생성한 경로를 직접 정리하는 방식으로 격리한다.
+type PgliteDb = ReturnType<typeof drizzle<typeof schema>>
 
-// routeRepository 싱글턴을 각 it에서 독립적으로 사용하기 위해
-// 실제로는 매 테스트마다 새 인스턴스가 필요하다.
-// vitest는 모듈 캐시를 공유하므로 vi.resetModules + dynamic import로 해결한다.
+async function createFreshRepository(): Promise<{ repo: IRouteRepository; db: PgliteDb }> {
+    resetDb()
+    const pglite = new PGlite()
+    const db = (await initPgliteDb(pglite)) as PgliteDb
+    return { repo: new DrizzleRouteRepository(db), db }
+}
 
-async function createFreshRepository(): Promise<IRouteRepository> {
-    vi.resetModules()
-    const mod = await import('../route.repository.memory')
-    return mod.routeRepository
+async function insertTestUser(db: PgliteDb, id: string): Promise<void> {
+    await db.insert(users).values({
+        id,
+        name: id,
+        email: `${id}@test.com`,
+        emailVerified: false
+    })
 }
 
 const sampleInput = (overrides: Partial<RouteDraftInput> = {}): RouteDraftInput => ({
@@ -29,10 +35,15 @@ const sampleInput = (overrides: Partial<RouteDraftInput> = {}): RouteDraftInput 
     ...overrides
 })
 
-describe('InMemoryRouteRepository', () => {
+describe('DrizzleRouteRepository (PGlite in-memory)', () => {
+    afterEach(() => {
+        resetDb()
+    })
+
     describe('createRoute / getRoute', () => {
         it('경로를 생성하고 ID로 조회할 수 있다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
             const created = await repo.createRoute(sampleInput(), 'user-1')
 
             expect(created.routeId).toBeTruthy()
@@ -46,7 +57,7 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('존재하지 않는 ID로 조회하면 null을 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo } = await createFreshRepository()
             const result = await repo.getRoute('non-existent-id')
             expect(result).toBeNull()
         })
@@ -54,7 +65,9 @@ describe('InMemoryRouteRepository', () => {
 
     describe('listRoutes', () => {
         it('생성된 모든 경로를 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            await insertTestUser(db, 'user-2')
             await repo.createRoute(sampleInput({ title: '경로 A' }), 'user-1')
             await repo.createRoute(sampleInput({ title: '경로 B' }), 'user-2')
 
@@ -63,7 +76,7 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('경로가 없으면 빈 배열을 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo } = await createFreshRepository()
             const all = await repo.listRoutes()
             expect(all).toHaveLength(0)
         })
@@ -71,7 +84,9 @@ describe('InMemoryRouteRepository', () => {
 
     describe('listRoutesByUser', () => {
         it('특정 userId의 경로만 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            await insertTestUser(db, 'user-2')
             await repo.createRoute(sampleInput({ title: '유저1 경로' }), 'user-1')
             await repo.createRoute(sampleInput({ title: '유저2 경로' }), 'user-2')
 
@@ -81,7 +96,7 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('해당 userId 경로가 없으면 빈 배열을 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo } = await createFreshRepository()
             const result = await repo.listRoutesByUser('no-such-user')
             expect(result).toHaveLength(0)
         })
@@ -89,7 +104,8 @@ describe('InMemoryRouteRepository', () => {
 
     describe('updateRoute', () => {
         it('기존 경로를 업데이트하고 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
             const created = await repo.createRoute(sampleInput(), 'user-1')
 
             const updated = await repo.updateRoute(created.routeId, { title: '수정된 경로' })
@@ -97,19 +113,19 @@ describe('InMemoryRouteRepository', () => {
             expect(updated!.title).toBe('수정된 경로')
             expect(updated!.routeId).toBe(created.routeId)
 
-            // getRoute로 재조회해도 업데이트가 반영돼 있어야 한다
             const refetched = await repo.getRoute(created.routeId)
             expect(refetched!.title).toBe('수정된 경로')
         })
 
         it('존재하지 않는 ID 업데이트는 null을 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo } = await createFreshRepository()
             const result = await repo.updateRoute('non-existent-id', { title: '없음' })
             expect(result).toBeNull()
         })
 
         it('일부 필드만 업데이트해도 나머지 필드는 유지된다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
             const created = await repo.createRoute(
                 sampleInput({ title: '원본', description: '설명 유지' }),
                 'user-1'
@@ -121,7 +137,8 @@ describe('InMemoryRouteRepository', () => {
 
     describe('deleteRoute', () => {
         it('경로를 삭제하면 true를 반환하고 이후 조회 시 null이다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
             const created = await repo.createRoute(sampleInput(), 'user-1')
 
             const deleted = await repo.deleteRoute(created.routeId)
@@ -132,7 +149,7 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('존재하지 않는 ID 삭제는 false를 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo } = await createFreshRepository()
             const result = await repo.deleteRoute('non-existent-id')
             expect(result).toBe(false)
         })
@@ -140,7 +157,9 @@ describe('InMemoryRouteRepository', () => {
 
     describe('searchPublicRoutes', () => {
         it('isPublic=true 경로만 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            await insertTestUser(db, 'user-2')
             await repo.createRoute(sampleInput({ title: '공개', isPublic: true }), 'user-1')
             await repo.createRoute(sampleInput({ title: '비공개', isPublic: false }), 'user-2')
 
@@ -150,7 +169,9 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('query가 있으면 title 또는 description에서 검색한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            await insertTestUser(db, 'user-2')
             await repo.createRoute(sampleInput({ title: '한강 달리기', isPublic: true }), 'user-1')
             await repo.createRoute(sampleInput({ title: '남산 코스', isPublic: true }), 'user-2')
 
@@ -160,7 +181,9 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('query가 없으면 모든 공개 경로를 반환한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            await insertTestUser(db, 'user-2')
             await repo.createRoute(sampleInput({ title: 'A', isPublic: true }), 'user-1')
             await repo.createRoute(sampleInput({ title: 'B', isPublic: true }), 'user-2')
 
@@ -171,7 +194,8 @@ describe('InMemoryRouteRepository', () => {
 
     describe('createSection / getSectionsByRouteId', () => {
         it('구간을 생성하고 routeId로 조회할 수 있다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
             const route = await repo.createRoute(sampleInput(), 'user-1')
 
             const section = await repo.createSection(route.routeId, {})
@@ -184,7 +208,9 @@ describe('InMemoryRouteRepository', () => {
         })
 
         it('다른 routeId의 구간은 조회되지 않는다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            await insertTestUser(db, 'user-2')
             const route1 = await repo.createRoute(sampleInput(), 'user-1')
             const route2 = await repo.createRoute(sampleInput(), 'user-2')
 
@@ -196,13 +222,13 @@ describe('InMemoryRouteRepository', () => {
 
     describe('createSections', () => {
         it('여러 구간을 한번에 생성한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
             const route = await repo.createRoute(sampleInput(), 'user-1')
 
             const sections = await repo.createSections(route.routeId, [{}, {}, {}])
             expect(sections).toHaveLength(3)
             expect(sections.every((s) => s.routeId === route.routeId)).toBe(true)
-            // 각 sectionId가 고유해야 한다
             const ids = sections.map((s) => s.sectionId)
             expect(new Set(ids).size).toBe(3)
         })
@@ -210,29 +236,24 @@ describe('InMemoryRouteRepository', () => {
 
     describe('전체 CRUD 사이클', () => {
         it('생성 → 조회 → 업데이트 → 삭제 흐름이 정상 동작한다', async () => {
-            const repo = await createFreshRepository()
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-A')
 
-            // 생성
             const created = await repo.createRoute(sampleInput({ title: '원본 제목' }), 'user-A')
             expect(created.routeId).toBeTruthy()
 
-            // 조회
             const found = await repo.getRoute(created.routeId)
             expect(found!.title).toBe('원본 제목')
 
-            // 목록
             const all = await repo.listRoutes()
             expect(all.some((r) => r.routeId === created.routeId)).toBe(true)
 
-            // 업데이트
             const updated = await repo.updateRoute(created.routeId, { title: '수정된 제목' })
             expect(updated!.title).toBe('수정된 제목')
 
-            // 삭제
             const deleted = await repo.deleteRoute(created.routeId)
             expect(deleted).toBe(true)
 
-            // 삭제 후 조회
             const afterDelete = await repo.getRoute(created.routeId)
             expect(afterDelete).toBeNull()
         })

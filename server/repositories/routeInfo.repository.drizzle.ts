@@ -1,12 +1,9 @@
 import { eq } from 'drizzle-orm'
 import type { IRouteInfoRepository, NewRouteInfo, SavedRouteInfo } from './routeInfo.repository'
-import { db as _db } from '../utils/db'
+import type { getDb } from '../database/client'
 import { routeInfos } from '../database/schema/routeInfos'
 
-function getDb() {
-    if (!_db) throw new Error('DrizzleRouteInfoRepository requires a database connection')
-    return _db
-}
+type Db = Awaited<ReturnType<typeof getDb>>
 
 const toSavedRouteInfo = (row: typeof routeInfos.$inferSelect): SavedRouteInfo => ({
     routeInfoId: row.routeInfoId,
@@ -21,19 +18,20 @@ const toSavedRouteInfo = (row: typeof routeInfos.$inferSelect): SavedRouteInfo =
     createdAt: row.createdAt.toISOString()
 })
 
-class DrizzleRouteInfoRepository implements IRouteInfoRepository {
+export class DrizzleRouteInfoRepository implements IRouteInfoRepository {
+    constructor(private readonly db: Db) {}
+
     async findByRouteId(routeId: string): Promise<SavedRouteInfo[]> {
-        const rows = await getDb()
+        const rows = await this.db
             .select()
             .from(routeInfos)
             .where(eq(routeInfos.routeId, routeId))
             .orderBy(routeInfos.createdAt)
-
         return rows.map(toSavedRouteInfo)
     }
 
     async create(routeInfo: NewRouteInfo): Promise<SavedRouteInfo> {
-        const [row] = await getDb()
+        const [row] = await this.db
             .insert(routeInfos)
             .values({
                 routeInfoId: routeInfo.routeInfoId,
@@ -52,5 +50,3 @@ class DrizzleRouteInfoRepository implements IRouteInfoRepository {
         return toSavedRouteInfo(row)
     }
 }
-
-export const routeInfoRepository: IRouteInfoRepository = new DrizzleRouteInfoRepository()
