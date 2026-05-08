@@ -33,7 +33,7 @@
 - [ ] DiagramLegend의 그룹 필터 토글이 노드를 실제로 숨기는지 (특히 classes 탭 124노드 노이즈)
 - [ ] 디자인 인상 — "Terminal Graph" 미학(JetBrains Mono + 격자 오버레이 + #00d4a8/#ff6b35)이 의도와 맞는지
 
-> ⚠️ **MEMORY 모드는 검증 불가.** root@runnable.com 자동 로그인이 항상 동작해 비로그인 상태가 사실상 존재하지 않습니다. 권한 가드 검증은 production DB 모드에서만 가능합니다.
+> ⚠️ **MEMORY 모드는 검증 불가.** admin@runnable.com 자동 로그인이 항상 동작해 비로그인 상태가 사실상 존재하지 않습니다. 권한 가드 검증은 production DB 모드에서만 가능합니다.
 
 ---
 

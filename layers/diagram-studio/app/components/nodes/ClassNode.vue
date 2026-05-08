@@ -7,6 +7,7 @@ const props = defineProps<{
         label: string
         group?: string
         kind?: string
+        rankdir?: string
         meta?: Record<string, unknown>
     }
 }>()
@@ -24,6 +25,8 @@ const accent = computed(
             label: 'text-neutral-400'
         }
 )
+const targetPos = computed(() => props.data.rankdir === 'TB' ? Position.Top : Position.Left)
+const sourcePos = computed(() => props.data.rankdir === 'TB' ? Position.Bottom : Position.Right)
 
 const memberCount = computed(() => {
     const meta = props.data.meta
@@ -41,7 +44,7 @@ const memberCount = computed(() => {
         :class="accent.border"
         :aria-label="`클래스 노드: ${data.label}`"
     >
-        <Handle type="target" :position="Position.Left" />
+        <Handle type="target" :position="targetPos" />
         <div class="px-2.5 pt-1.5 pb-1.5 pl-2 flex flex-col gap-px">
             <span
                 class="text-[0.625rem] uppercase tracking-[0.05em] font-semibold"
@@ -53,6 +56,6 @@ const memberCount = computed(() => {
                 >{{ memberCount }}개 멤버</span
             >
         </div>
-        <Handle type="source" :position="Position.Right" />
+        <Handle type="source" :position="sourcePos" />
     </div>
 </template>

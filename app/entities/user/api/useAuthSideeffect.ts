@@ -39,22 +39,26 @@ export const useAuthSideeffect = () => {
 
     /**
      * 현재 세션을 서버에서 조회하여 `store.user`를 갱신한다.
-     * 세션이 없거나 오류 시 `store.user`를 `null`로 초기화한다.
+     * 세션이 없으면 `store.user`를 `null`로 초기화한다.
+     * 오류 시에는 기존 값을 유지한다 (1차 로그인 데이터 보호).
      */
     const fetchSession = async () => {
         try {
             const { data } = await getClient().getSession()
             if (data?.user) {
                 store.user.value = toAuthUser(data.user)
+            } else {
+                store.user.value = null
             }
         } catch {
-            store.user.value = null
+            // 네트워크 오류 등 예외 시 기존 store 값을 유지한다
         }
     }
 
     /**
      * 이메일·비밀번호로 로그인한다.
-     * 성공 시 `store.user`를 갱신하고 인증 모달을 닫는다. 실패 시 예외를 던진다.
+     * signIn 응답에 role 이 누락될 수 있으므로 fetchSession 으로 role 을 보강한다.
+     * 성공 시 인증 모달을 닫는다. 실패 시 예외를 던진다.
      *
      * @param email - 사용자 이메일
      * @param password - 사용자 비밀번호
@@ -65,12 +69,14 @@ export const useAuthSideeffect = () => {
         if (data?.user) {
             store.user.value = toAuthUser(data.user)
         }
+        await fetchSession()
         store.closeAuthModal()
     }
 
     /**
      * 이름·이메일·비밀번호로 회원가입한다.
-     * 성공 시 `store.user`를 갱신하고 인증 모달을 닫는다. 실패 시 예외를 던진다.
+     * signUp 후 better-auth 가 자동 로그인 세션을 발급하므로 fetchSession 으로 role 을 보강한다.
+     * 성공 시 인증 모달을 닫는다. 실패 시 예외를 던진다.
      *
      * @param name - 사용자 이름
      * @param email - 사용자 이메일
@@ -82,6 +88,7 @@ export const useAuthSideeffect = () => {
         if (data?.user) {
             store.user.value = toAuthUser(data.user)
         }
+        await fetchSession()
         store.closeAuthModal()
     }
 

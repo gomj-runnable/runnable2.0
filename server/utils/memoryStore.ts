@@ -29,13 +29,7 @@ memoryUsers.set('dev@localhost', {
 })
 
 /** MEMORY 모드 자동 로그인 계정. /get-session 호출 시 쿠키가 없으면 이 계정으로 세션을 발급한다. */
-export const MEMORY_AUTO_LOGIN_EMAIL = 'root@runnable.com'
-memoryUsers.set(MEMORY_AUTO_LOGIN_EMAIL, {
-    id: 'root-user',
-    name: 'Root',
-    email: MEMORY_AUTO_LOGIN_EMAIL,
-    password: 'root1234'
-})
+export const MEMORY_AUTO_LOGIN_EMAIL = 'admin@runnable.com'
 
 // admin 시드 계정 (ROLES.ADMIN). MEMORY 모드 dev 환경에서 운영자 권한을 검증하기 위함.
 memoryUsers.set('admin@runnable.com', {
