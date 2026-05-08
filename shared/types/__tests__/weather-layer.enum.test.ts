@@ -69,6 +69,8 @@ const makeWeather = (overrides: Partial<HourlyWeather> = {}): HourlyWeather => (
     temperature: 20,
     pm10: 45,
     pm10Grade: 'moderate',
+    pm25: null,
+    pm25Grade: null,
     source: 'forecast',
     ...overrides
 })
