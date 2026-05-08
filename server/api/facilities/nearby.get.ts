@@ -1,9 +1,8 @@
 import { defineEventHandler, getQuery } from 'h3'
-import { facilityRepository } from '../../repositories'
+import { facilityService } from '../../services/facility.service'
 import { badRequest } from '../../utils/error'
 import type { FacilityType } from '#shared/types/facility'
 
-/** 검색 반경 기본값 (미터) */
 const DEFAULT_RADIUS_M = 1000
 
 export default defineEventHandler(async (event) => {
@@ -21,5 +20,5 @@ export default defineEventHandler(async (event) => {
         ? (typesParam.split(',').filter(Boolean) as FacilityType[])
         : (['crosswalk', 'fountain', 'hospital', 'toilet'] as FacilityType[])
 
-    return facilityRepository.findNearby(lat, lng, radius, requestedTypes)
+    return facilityService.findNearby(lat, lng, radius, requestedTypes)
 })

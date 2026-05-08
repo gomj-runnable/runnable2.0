@@ -25,7 +25,7 @@
 ```
 server/
 ├── api/                    # API 핸들러 (파일 기반 라우팅)
-│   ├── auth/               # 인증 (better-auth / memory)
+│   ├── auth/               # 인증 (better-auth)
 │   ├── boundary/           # 행정경계 GeoJSON
 │   ├── district/           # 시군구 조회
 │   ├── facilities/         # 시설물 CRUD
@@ -40,21 +40,23 @@ server/
 │
 ├── repositories/           # 데이터 접근 계층
 │   ├── route.repository.ts         # 인터페이스 (IRouteRepository)
-│   ├── route.repository.drizzle.ts # Drizzle 구현체
-│   ├── route.repository.memory.ts  # 인메모리 구현체
-│   ├── factory.ts                  # 제네릭 팩토리 (환경별 구현체 선택)
-│   └── index.ts                    # 싱글턴 export
+│   ├── route.repository.drizzle.ts # Drizzle 구현체 (PGlite·Postgres 공용)
+│   └── index.ts                    # lazy 싱글턴 export
+
+├── services/               # 도메인 서비스 Facade
+│   ├── route.service.ts            # 경로 도메인 로직 (district lookup, fork dedupe)
+│   ├── facility.service.ts         # 시설물 조회
+│   └── routeInfo.service.ts        # 경로 피드백
 │
 ├── middleware/
 │   └── rate-limit.ts       # IP별 속도 제한 (경로별 차등)
 │
 └── utils/
     ├── auth.ts             # better-auth 설정
-    ├── auth.service.ts     # IAuthService + Memory/BetterAuth DI
-    ├── db.ts               # Drizzle ORM 초기화
+    ├── auth.service.ts     # better-auth 위 도메인 wrapper
     ├── error.ts            # 에러 헬퍼 (badRequest, notFound 등) + withExceptionHandler
     ├── session.ts          # requireSession / getSessionUser
-    ├── config.ts           # USE_DATABASE_MODE 플래그
+    ├── config.ts           # USE_DATABASE_MODE (PGLITE|POSTGRES) 플래그
     ├── district/           # 행정구역 경계 데이터 + 역지오코딩
     ├── routing/            # 경로 최적화
     │   ├── registry.ts     # 라우팅 서비스 레지스트리 (Strategy + Registry 패턴)
@@ -77,13 +79,13 @@ server/
 
 | 패턴 | 적용 위치 |
 |------|-----------|
-| Repository | `server/repositories/` — 인터페이스 + Memory/Drizzle 구현체 |
-| Factory | `server/repositories/factory.ts` — 환경별 구현체 선택 |
+| Repository | `server/repositories/` — 인터페이스 + Drizzle 구현체 (PGlite·Postgres 공용) |
+| Facade (DB) | `server/database/client.ts` — `getDb()` 단일 진입점 (PGLITE/POSTGRES 분기) |
+| Facade (Service) | `server/services/*.service.ts` — Repository 위 도메인 응집 계층 |
 | Template Method | `server/utils/routing/common.ts` — AbstractRoutingService (검증→API→파싱→보간) |
 | Strategy | `server/utils/routing/` — TMap/OSRM 교체 가능 (AbstractRoutingService 상속) |
 | Registry | `server/utils/routing/registry.ts` — 전략 등록·조회 |
 | Adapter | `server/utils/weather/` — 외부 API 응답 정규화 |
-| DI | `server/utils/auth.service.ts` — Memory/BetterAuth 주입 |
 | Decorator | `server/utils/error.ts` — withExceptionHandler 래퍼 |
 
 ---
@@ -106,7 +108,9 @@ server/
 
 `USE_DATABASE_MODE` 환경 변수로 제어:
 
-| 모드 | Repository | Auth | 용도 |
-|------|-----------|------|------|
-| `MEMORY` | InMemory (Map) | MemoryAuthService | 개발/프로토타입 |
-| `POSTGRES` | Drizzle (PostgreSQL) | BetterAuthService | 프로덕션 |
+| 모드 | DB 클라이언트 | 용도 |
+|------|---------------|------|
+| `PGLITE` | PGlite (`@electric-sql/pglite`) — 파일 기반 임베디드 Postgres (`.data/pglite/`) | 개발 (기본값) |
+| `POSTGRES` | `pg.Pool` + `drizzle-orm/node-postgres` | 프로덕션 |
+
+PGLITE 모드는 부팅 시 마이그레이션 자동 적용 + users 비어있으면 seed 자동 실행. PostGIS 의존 라인은 sanitizer 가 스킵하고 facility 의 거리 쿼리는 lat/lng + JS haversine 으로 폴백한다.

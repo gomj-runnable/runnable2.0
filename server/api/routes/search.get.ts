@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { routeRepository } from '../../repositories'
+import { routeService } from '../../services/route.service'
 import { badRequest } from '../../utils/error'
 
 const searchQuerySchema = z.object({
@@ -14,5 +14,5 @@ export default defineEventHandler(async (event) => {
         throw badRequest('잘못된 요청 파라미터입니다.')
     }
 
-    return routeRepository.searchPublicRoutes(parsed.data.q)
+    return routeService.searchPublicRoutes(parsed.data.q)
 })

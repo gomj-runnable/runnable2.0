@@ -1,10 +1,9 @@
 import { nanoid } from 'nanoid'
 import { createRouteInfoSchema } from '#shared/schemas/routeInfo.schema'
-import { routeInfoRepository } from '../../../../repositories'
+import { routeInfoService } from '../../../../services/routeInfo.service'
 import { requireSession } from '../../../../utils/session'
 import { badRequest, withExceptionHandler } from '../../../../utils/error'
 
-/** POST /api/routes/:routeId/feedbacks — 경로정보 추가 (로그인 필수) */
 export default defineEventHandler(
     withExceptionHandler(async (event) => {
         const routeId = getRouterParam(event, 'routeId')
@@ -17,7 +16,7 @@ export default defineEventHandler(
         const body = await readBody(event)
         const input = createRouteInfoSchema.parse(body)
 
-        return routeInfoRepository.create({
+        return routeInfoService.create({
             routeInfoId: nanoid(),
             routeId,
             userId: user.userId,

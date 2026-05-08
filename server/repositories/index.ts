@@ -1,25 +1,42 @@
+import { getDb } from '../database/client'
 import type { IRouteRepository } from './route.repository'
-import { routeRepository as memoryRepository } from './route.repository.memory'
-import { routeRepository as drizzleRepository } from './route.repository.drizzle'
 import type { IRouteInfoRepository } from './routeInfo.repository'
-import { routeInfoRepository as memoryRouteInfoRepository } from './routeInfo.repository.memory'
-import { routeInfoRepository as drizzleRouteInfoRepository } from './routeInfo.repository.drizzle'
 import type { IFacilityRepository } from './facility.repository'
-import { facilityRepository as memoryFacilityRepository } from './facility.repository.memory'
-import { facilityRepository as drizzleFacilityRepository } from './facility.repository.drizzle'
-import { createRepository } from './factory'
+import { DrizzleRouteRepository } from './route.repository.drizzle'
+import { DrizzleRouteInfoRepository } from './routeInfo.repository.drizzle'
+import { DrizzleFacilityRepository } from './facility.repository.drizzle'
 
-export const routeRepository: IRouteRepository = createRepository(
-    memoryRepository,
-    drizzleRepository
-)
+let _routeRepo: IRouteRepository | null = null
+let _routeInfoRepo: IRouteInfoRepository | null = null
+let _facilityRepo: IFacilityRepository | null = null
 
-export const routeInfoRepository: IRouteInfoRepository = createRepository(
-    memoryRouteInfoRepository,
-    drizzleRouteInfoRepository
-)
+async function getRouteRepository(): Promise<IRouteRepository> {
+    if (!_routeRepo) _routeRepo = new DrizzleRouteRepository(await getDb())
+    return _routeRepo
+}
 
-export const facilityRepository: IFacilityRepository = createRepository(
-    memoryFacilityRepository,
-    drizzleFacilityRepository
-)
+async function getRouteInfoRepository(): Promise<IRouteInfoRepository> {
+    if (!_routeInfoRepo) _routeInfoRepo = new DrizzleRouteInfoRepository(await getDb())
+    return _routeInfoRepo
+}
+
+async function getFacilityRepository(): Promise<IFacilityRepository> {
+    if (!_facilityRepo) _facilityRepo = new DrizzleFacilityRepository(await getDb())
+    return _facilityRepo
+}
+
+function lazyRepo<T extends object>(getRepo: () => Promise<T>): T {
+    return new Proxy({} as T, {
+        get(_target, prop) {
+            return (...args: unknown[]) =>
+                getRepo().then((repo) => {
+                    const fn = Reflect.get(repo as object, prop) as (...a: unknown[]) => unknown
+                    return fn.apply(repo, args)
+                })
+        }
+    })
+}
+
+export const routeRepository: IRouteRepository = lazyRepo(getRouteRepository)
+export const routeInfoRepository: IRouteInfoRepository = lazyRepo(getRouteInfoRepository)
+export const facilityRepository: IFacilityRepository = lazyRepo(getFacilityRepository)

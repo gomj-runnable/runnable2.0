@@ -1,14 +1,14 @@
-import { routeRepository, routeInfoRepository } from '../../../repositories'
+import { routeService } from '../../../services/route.service'
+import { routeInfoService } from '../../../services/routeInfo.service'
 import { badRequest, notFound, forbidden } from '../../../utils/error'
 
-/** GET /api/routes/share/:routeId — 공개 경로 + 경로정보 조회 (인증 불필요) */
 export default defineEventHandler(async (event) => {
     const routeId = getRouterParam(event, 'routeId')
     if (!routeId) {
         throw badRequest('경로 ID가 필요합니다.')
     }
 
-    const route = await routeRepository.getRoute(routeId)
+    const route = await routeService.getRouteById(routeId)
     if (!route) {
         throw notFound('경로를 찾을 수 없습니다.')
     }
@@ -16,8 +16,8 @@ export default defineEventHandler(async (event) => {
         throw forbidden('비공개 경로입니다.')
     }
 
-    const sections = await routeRepository.getSectionsByRouteId(routeId)
-    const routeInfoItems = await routeInfoRepository.findByRouteId(routeId)
+    const sections = await routeService.getSectionsByRouteId(routeId)
+    const routeInfoItems = await routeInfoService.findByRouteId(routeId)
 
     return { route, sections, routeInfos: routeInfoItems }
 })
