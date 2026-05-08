@@ -1,3 +1,5 @@
+import pRetry from 'p-retry'
+
 interface ErrorBoundaryOptions<T> {
     /** 로그 식별 라벨 (e.g., 'WeatherSideeffect') */
     label: string
@@ -20,30 +22,27 @@ export function withErrorBoundary<TArgs extends unknown[], TReturn>(
     const { label, fallback, retry = 0, retryDelay = 200 } = options
 
     return async (...args: TArgs): Promise<TReturn> => {
-        let lastError: unknown
-
-        for (let attempt = 0; attempt <= retry; attempt++) {
-            try {
-                return await fn(...args)
-            } catch (error) {
-                lastError = error
-                if (attempt < retry) {
+        try {
+            return await pRetry(() => fn(...args), {
+                retries: retry,
+                factor: 2,
+                minTimeout: retryDelay,
+                onFailedAttempt(error) {
                     console.warn(
-                        `[${label}] attempt ${attempt + 1}/${retry + 1} failed, retrying...`
+                        `[${label}] attempt ${error.attemptNumber}/${retry + 1} failed, retrying...`
                     )
-                    await new Promise((resolve) => setTimeout(resolve, retryDelay * 2 ** attempt))
                 }
+            })
+        } catch (err) {
+            console.error(`[${label}] failed`, err)
+
+            if (fallback !== undefined) {
+                return typeof fallback === 'object' && fallback !== null
+                    ? structuredClone(fallback)
+                    : fallback
             }
+
+            throw err
         }
-
-        console.error(`[${label}] failed`, lastError)
-
-        if (fallback !== undefined) {
-            return typeof fallback === 'object' && fallback !== null
-                ? structuredClone(fallback)
-                : fallback
-        }
-
-        throw lastError
     }
 }

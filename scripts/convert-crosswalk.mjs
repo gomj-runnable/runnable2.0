@@ -6,6 +6,7 @@
  * 출력: server/data/facilities/crosswalks.json (WGS84)
  */
 import { readFileSync, writeFileSync } from 'node:fs'
+import Papa from 'papaparse'
 import proj4 from 'proj4'
 
 // EPSG:5186 (Korea 2000 / Central Belt 2010) 정의
@@ -35,30 +36,11 @@ const parseOrdinates = (xgeo) => {
     return coords.length >= 2 ? coords : null
 }
 
-/** CSV 라인 파서 (따옴표 내 콤마 처리) */
-const parseCsvLine = (line) => {
-    const fields = []
-    let current = ''
-    let inQuotes = false
-    for (let i = 0; i < line.length; i++) {
-        const ch = line[i]
-        if (ch === '"') {
-            inQuotes = !inQuotes
-        } else if (ch === ',' && !inQuotes) {
-            fields.push(current)
-            current = ''
-        } else {
-            current += ch
-        }
-    }
-    fields.push(current)
-    return fields
-}
-
 // ─── 메인 ─────────────────────────────────────────────────────
 const csv = readFileSync('public/crosswalk/A057_L.csv', 'latin1')
-const lines = csv.split('\n').filter((l) => l.trim())
-const headers = parseCsvLine(lines[0])
+const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true })
+const rows = parsed.data
+const headers = rows[0]
 
 const colIdx = (name) => headers.indexOf(name)
 const iMGRNU = colIdx('MGRNU')
@@ -70,13 +52,13 @@ const iSNLP = colIdx('SNLP_QUA')
 const iBSNLP = colIdx('BSNLP_QUA')
 const iSTAT = colIdx('STAT_CDE')
 
-console.log(`총 ${lines.length - 1}건 처리 시작...`)
+console.log(`총 ${rows.length - 1}건 처리 시작...`)
 
 const facilities = []
 let skipped = 0
 
-for (let i = 1; i < lines.length; i++) {
-    const fields = parseCsvLine(lines[i])
+for (let i = 1; i < rows.length; i++) {
+    const fields = rows[i]
     if (fields.length < 20) continue
 
     // 001 = 사용중 상태만
