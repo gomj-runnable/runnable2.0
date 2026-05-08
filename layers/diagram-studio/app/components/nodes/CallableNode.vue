@@ -7,6 +7,7 @@ const props = defineProps<{
         label: string
         group?: string
         kind?: string
+        rankdir?: string
         meta?: Record<string, unknown>
     }
 }>()
@@ -25,6 +26,8 @@ const accent = computed(
             label: 'text-slate-400'
         }
 )
+const targetPos = computed(() => props.data.rankdir === 'TB' ? Position.Top : Position.Left)
+const sourcePos = computed(() => props.data.rankdir === 'TB' ? Position.Bottom : Position.Right)
 </script>
 
 <template>
@@ -33,7 +36,7 @@ const accent = computed(
         :class="accent.border"
         :aria-label="`callable 노드: ${data.label}`"
     >
-        <Handle type="target" :position="Position.Left" />
+        <Handle type="target" :position="targetPos" />
         <div class="flex flex-col gap-px">
             <span
                 class="text-[0.625rem] uppercase tracking-[0.05em] font-semibold"
@@ -42,6 +45,6 @@ const accent = computed(
             >
             <span class="text-xs font-medium text-neutral-100">{{ data.label }}</span>
         </div>
-        <Handle type="source" :position="Position.Right" />
+        <Handle type="source" :position="sourcePos" />
     </div>
 </template>

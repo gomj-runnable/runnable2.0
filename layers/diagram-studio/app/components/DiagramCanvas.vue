@@ -111,15 +111,25 @@ watch(
             diagramKind: props.kind ?? diagram.kind
         })
         const matchedSet = new Set(filtered.matchedIds)
-        nodes.value = layout.nodes.map((n) => ({
-            ...n,
-            class: matchedSet.has(n.id) ? 'node-highlight' : undefined,
-            data: { ...(n.data ?? {}), highlighted: matchedSet.has(n.id) }
-        }))
+        // 클러스터 모드에서는 layout 노드 id 가 `${originalId}__${clusterKey}` 로 prefix 된다.
+        // 검색/하이라이트/fitView 는 모두 originalId 로 매칭하고, 매칭된 모든 복제 인스턴스를 함께 강조한다.
+        const matchedLayoutIds: string[] = []
+        nodes.value = layout.nodes.map((n) => {
+            const originalId =
+                ((n.data as Record<string, unknown> | undefined)?.originalId as string | undefined) ??
+                n.id
+            const isMatched = matchedSet.has(originalId)
+            if (isMatched) matchedLayoutIds.push(n.id)
+            return {
+                ...n,
+                class: isMatched ? 'node-highlight' : undefined,
+                data: { ...(n.data ?? {}), highlighted: isMatched }
+            }
+        })
         edges.value = layout.edges
         await nextTick()
-        if (filtered.matchedIds.length > 0) {
-            fitView({ nodes: filtered.matchedIds, padding: 0.25 })
+        if (matchedLayoutIds.length > 0) {
+            fitView({ nodes: matchedLayoutIds, padding: 0.25 })
         } else {
             fitView({ padding: 0.15 })
         }
@@ -128,9 +138,13 @@ watch(
 )
 
 function onNodeClick({ node }: NodeMouseEvent) {
+    // 클러스터 복제 노드는 id 가 prefix 되어 있으므로 NodeDetailPanel 등 외부에는 originalId 를 노출한다.
+    const originalId =
+        ((node.data as Record<string, unknown> | undefined)?.originalId as string | undefined) ??
+        node.id
     const raw: DiagramNode = {
-        id: node.id,
-        label: node.data?.label ?? node.id,
+        id: originalId,
+        label: node.data?.label ?? originalId,
         group: node.data?.group,
         kind: node.data?.kind,
         data: node.data?.meta

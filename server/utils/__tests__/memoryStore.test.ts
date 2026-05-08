@@ -12,17 +12,17 @@ describe('memoryStore - 시드 사용자', () => {
         vi.unstubAllEnvs()
     })
 
-    it('MEMORY_AUTO_LOGIN_EMAIL 상수는 root@runnable.com 이다', async () => {
+    it('MEMORY_AUTO_LOGIN_EMAIL 상수는 admin@runnable.com 이다', async () => {
         const mod = await freshModule()
-        expect(mod.MEMORY_AUTO_LOGIN_EMAIL).toBe('root@runnable.com')
+        expect(mod.MEMORY_AUTO_LOGIN_EMAIL).toBe('admin@runnable.com')
     })
 
-    it('자동 로그인용 root 계정이 시드되어 있다 (root1234)', async () => {
+    it('자동 로그인 계정은 admin@runnable.com 이며 ADMIN role 을 갖는다', async () => {
         const mod = await freshModule()
-        const user = mod.memoryUsers.get('root@runnable.com')
+        const user = mod.memoryUsers.get('admin@runnable.com')
         expect(user).toBeDefined()
-        expect(user?.id).toBe('root-user')
-        expect(user?.password).toBe('root1234')
+        expect(user?.id).toBe('admin-role-user')
+        expect(user?.password).toBe('admin1234')
     })
 
     it('dev 시드 계정은 ADMIN_SEED_PASSWORD 환경변수 값을 사용한다', async () => {

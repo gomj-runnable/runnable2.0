@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from '@vue-flow/core'
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, Position } from '@vue-flow/core'
 import { computed } from '#imports'
 
 const props = defineProps<{
@@ -8,8 +8,8 @@ const props = defineProps<{
     sourceY: number
     targetX: number
     targetY: number
-    sourcePosition?: string
-    targetPosition?: string
+    sourcePosition?: Position
+    targetPosition?: Position
     label?: string
     data?: { kind?: 'imports' | 'calls' | 'extends' | 'uses' | 'navigates' }
 }>()
@@ -23,32 +23,34 @@ const DASH_MAP: Record<string, string> = {
 }
 
 const STROKE_MAP: Record<string, string> = {
-    imports: 'var(--ui-color-neutral-500)',
-    calls: 'var(--ui-color-primary-400)',
-    extends: 'var(--ui-color-warning-400)',
-    uses: 'var(--ui-color-neutral-400)',
-    navigates: 'var(--ui-color-success-400)'
+    imports: 'var(--ui-color-neutral-300)',
+    calls: 'var(--ui-color-primary-300)',
+    extends: 'var(--ui-color-warning-300)',
+    uses: 'var(--ui-color-neutral-200)',
+    navigates: 'var(--ui-color-success-300)'
 }
 
 const STROKE_WIDTH_MAP: Record<string, number> = {
-    imports: 1.5,
-    calls: 1.5,
-    extends: 2,
-    uses: 1,
-    navigates: 2
+    imports: 2,
+    calls: 2,
+    extends: 2.5,
+    uses: 1.5,
+    navigates: 2.5
 }
 
 const kind = computed(() => props.data?.kind ?? 'imports')
 const strokeDasharray = computed(() => DASH_MAP[kind.value] ?? '0')
 const stroke = computed(() => STROKE_MAP[kind.value] ?? '#64748b')
-const strokeWidth = computed(() => STROKE_WIDTH_MAP[kind.value] ?? 1.5)
+const strokeWidth = computed(() => STROKE_WIDTH_MAP[kind.value] ?? 2)
 const markerId = computed(() => `arrow-${props.id}`)
 
 const [path, labelX, labelY] = getSmoothStepPath({
     sourceX: props.sourceX,
     sourceY: props.sourceY,
+    sourcePosition: props.sourcePosition,
     targetX: props.targetX,
     targetY: props.targetY,
+    targetPosition: props.targetPosition,
     borderRadius: 8
 })
 </script>
@@ -58,14 +60,14 @@ const [path, labelX, labelY] = getSmoothStepPath({
         <defs>
             <marker
                 :id="markerId"
-                markerWidth="10"
-                markerHeight="10"
-                refX="8"
-                refY="3"
+                markerWidth="12"
+                markerHeight="12"
+                refX="10"
+                refY="3.5"
                 orient="auto"
                 markerUnits="strokeWidth"
             >
-                <path d="M0,0 L0,6 L9,3 z" :fill="stroke" />
+                <path d="M0,0 L0,7 L11,3.5 z" :fill="stroke" />
             </marker>
         </defs>
     </svg>
