@@ -1,5 +1,5 @@
 import { defineEventHandler, getQuery } from 'h3'
-import { facilityService } from '../../services/facility.service'
+import { getFacilityRepository } from '../../repositories'
 import { badRequest } from '../../utils/error'
 import type { FacilityType } from '#shared/types/facility'
 
@@ -20,5 +20,5 @@ export default defineEventHandler(async (event) => {
         ? (typesParam.split(',').filter(Boolean) as FacilityType[])
         : (['crosswalk', 'fountain', 'hospital', 'toilet'] as FacilityType[])
 
-    return facilityService.findNearby(lat, lng, radius, requestedTypes)
+    return (await getFacilityRepository()).findNearby(lat, lng, radius, requestedTypes)
 })
