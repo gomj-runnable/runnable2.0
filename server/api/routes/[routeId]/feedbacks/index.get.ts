@@ -1,4 +1,4 @@
-import { routeInfoService } from '../../../../services/routeInfo.service'
+import { getRouteInfoRepository } from '../../../../repositories'
 import { badRequest } from '../../../../utils/error'
 
 export default defineEventHandler(async (event) => {
@@ -7,5 +7,5 @@ export default defineEventHandler(async (event) => {
         throw badRequest('경로 ID가 필요합니다.')
     }
 
-    return routeInfoService.findByRouteId(routeId)
+    return (await getRouteInfoRepository()).findByRouteId(routeId)
 })

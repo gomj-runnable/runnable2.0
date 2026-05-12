@@ -1,5 +1,5 @@
 import { routeService } from '../../../services/route.service'
-import { routeInfoService } from '../../../services/routeInfo.service'
+import { getRouteInfoRepository } from '../../../repositories'
 import { badRequest, notFound, forbidden } from '../../../utils/error'
 
 export default defineEventHandler(async (event) => {
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const sections = await routeService.getSectionsByRouteId(routeId)
-    const routeInfoItems = await routeInfoService.findByRouteId(routeId)
+    const routeInfoItems = await (await getRouteInfoRepository()).findByRouteId(routeId)
 
     return { route, sections, routeInfos: routeInfoItems }
 })

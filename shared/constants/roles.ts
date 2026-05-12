@@ -5,8 +5,9 @@
  * 위계: USER(1) ≤ ADMIN(50) ≤ DEVELOPER(99).
  * 위 비교(`role >= ROLES.ADMIN`)로 상위 권한이 하위 페이지에 자동 접근하도록 설계.
  *
- * TODO. DEVELOPER 권한은 다이어그램 스튜디오 dev 백도어 용도로 prod에도 살아 있다.
- *       정식 admin/role 체계 정립 시 재검토 필요.
+ * NOTE. DEVELOPER 권한은 다이어그램 스튜디오 dev 백도어 용도. seed 단계에서 prod 환경에는 시드되지
+ *       않도록 차단되어 있다 (`server/database/seed.ts` 의 NODE_ENV 가드 참고).
+ * TODO. 정식 admin/role 체계 정립 시 ROLES.DEVELOPER 자체 제거 검토.
  */
 export const ROLES = {
     USER: 1,
