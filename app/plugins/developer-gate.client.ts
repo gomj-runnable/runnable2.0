@@ -1,5 +1,5 @@
 import { createAuthClient } from 'better-auth/vue'
-import { defineDeveloperGate, defineAdminGate } from '../../layers/diagram-studio/runtime/auth-gate'
+import { defineDeveloperGate, defineAdminGate } from '~/shared/lib/auth-gate'
 import { hasAdminAccess, hasDeveloperAccess } from '../../shared/constants/roles'
 
 export default defineNuxtPlugin(() => {
