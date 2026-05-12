@@ -1,6 +1,6 @@
 import { defineEventHandler, getQuery } from 'h3'
-import { weatherFacade } from '../../../utils/weather/weather.facade'
-import { parseSources, resolveWeatherKeys } from '../../../utils/weather/event'
+import { weatherService } from '../../../services/weather/weather.service'
+import { parseSources, resolveWeatherKeys } from '../../../services/weather/event'
 import { badRequest } from '../../../utils/error'
 
 export default defineEventHandler(async (event) => {
@@ -13,5 +13,5 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const sources = parseSources(query.sources as string | undefined)
 
-    return weatherFacade.requestByMonth(month, { ...keys, sources })
+    return weatherService.requestByMonth(month, { ...keys, sources })
 })
