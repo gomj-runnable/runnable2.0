@@ -9,7 +9,7 @@ import { ObservedService } from './observed.service'
 import { ForecastService } from './forecast.service'
 import { AirQualityService } from './airquality.service'
 import { mergeWeatherSlots } from './merge.service'
-import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
+import { SEOUL_GU_DATA } from '../../utils/district/seoul-gu-data'
 import {
     toDateOnly,
     formatDate,
@@ -212,4 +212,4 @@ class WeatherFacade {
     }
 }
 
-export const weatherFacade = new WeatherFacade()
+export const weatherService = new WeatherFacade()

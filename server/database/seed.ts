@@ -17,58 +17,23 @@ async function seed() {
         process.exit(1)
     }
 
-    const developerPassword = process.env.DEVELOPER_SEED_PASSWORD
-    if (!developerPassword) {
-        console.error('DEVELOPER_SEED_PASSWORD env var is required.')
+    // developer 시드는 dev 백도어이므로 prod 에서 시드/검증 모두 스킵.
+    const isProduction = process.env.NODE_ENV === 'production'
+    const developerPassword = isProduction ? null : process.env.DEVELOPER_SEED_PASSWORD
+    if (!isProduction && !developerPassword) {
+        console.error('DEVELOPER_SEED_PASSWORD env var is required (non-production).')
         process.exit(1)
     }
 
     const db = await getDb()
 
     try {
-        // 1. 관리자 계정 (최고관리자)
-        const ADMIN_ID = 'admin_master_01'
-        const adminData = {
-            email: 'admin@runnable.local',
-            password: adminPassword,
-            name: '최고관리자'
-        }
-        const hashedPassword = await hashPassword(adminData.password)
-
-        await db.transaction(async (tx) => {
-            await tx
-                .insert(users)
-                .values({
-                    id: ADMIN_ID,
-                    name: adminData.name,
-                    email: adminData.email,
-                    role: 10,
-                    emailVerified: true
-                })
-                .onConflictDoUpdate({
-                    target: users.id,
-                    set: { email: adminData.email, name: adminData.name, role: 10 }
-                })
-
-            await tx
-                .insert(userAccounts)
-                .values({
-                    id: `acc_${ADMIN_ID}`,
-                    userId: ADMIN_ID,
-                    accountId: adminData.email,
-                    providerId: 'credential',
-                    password: hashedPassword
-                })
-                .onConflictDoUpdate({ target: userAccounts.id, set: { password: hashedPassword } })
-        })
-        console.log('✅ 관리자 계정 설정 완료 (ID: ' + ADMIN_ID + ')')
-
-        // 2. admin 계정 (ROLES.ADMIN)
+        // 1. 최고관리자 계정 (ROLES.ADMIN)
         const ADMIN_ROLE_ID = 'admin_role_master_01'
         const adminRoleData = {
             email: 'admin@runnable.com',
             password: adminPassword,
-            name: 'admin'
+            name: '최고관리자'
         }
         const hashedAdminRolePassword = await hashPassword(adminRoleData.password)
 
@@ -82,7 +47,14 @@ async function seed() {
                     role: ROLES.ADMIN,
                     emailVerified: true
                 })
-                .onConflictDoNothing({ target: users.id })
+                .onConflictDoUpdate({
+                    target: users.id,
+                    set: {
+                        email: adminRoleData.email,
+                        name: adminRoleData.name,
+                        role: ROLES.ADMIN
+                    }
+                })
 
             await tx
                 .insert(userAccounts)
@@ -93,46 +65,63 @@ async function seed() {
                     providerId: 'credential',
                     password: hashedAdminRolePassword
                 })
-                .onConflictDoNothing({ target: userAccounts.id })
+                .onConflictDoUpdate({
+                    target: userAccounts.id,
+                    set: { password: hashedAdminRolePassword }
+                })
         })
-        console.log('✅ admin 계정 설정 완료 (ID: ' + ADMIN_ROLE_ID + ')')
+        console.log('✅ 최고관리자 계정 설정 완료 (ID: ' + ADMIN_ROLE_ID + ')')
 
-        // 3. developer 계정 (ROLES.DEVELOPER)
-        // TODO. 다이어그램 스튜디오 dev 백도어 — 정식 권한 체계 정립 시 이 시드와 ROLES.DEVELOPER 제거 검토.
-        const DEV_ID = 'developer_master_01'
-        const devData = {
-            email: 'developer@runnable.com',
-            password: developerPassword,
-            name: 'developer'
+        // 2. developer 계정 (ROLES.DEVELOPER) — dev 백도어, prod 에서는 시드하지 않음.
+        // TODO. 정식 권한 체계 정립 시 이 시드와 ROLES.DEVELOPER 자체를 제거 검토.
+        if (!isProduction && developerPassword) {
+            const DEV_ID = 'developer_master_01'
+            const devData = {
+                email: 'developer@runnable.com',
+                password: developerPassword,
+                name: 'developer'
+            }
+            const hashedDevPassword = await hashPassword(devData.password)
+
+            await db.transaction(async (tx) => {
+                await tx
+                    .insert(users)
+                    .values({
+                        id: DEV_ID,
+                        name: devData.name,
+                        email: devData.email,
+                        role: ROLES.DEVELOPER,
+                        emailVerified: true
+                    })
+                    .onConflictDoUpdate({
+                        target: users.id,
+                        set: {
+                            email: devData.email,
+                            name: devData.name,
+                            role: ROLES.DEVELOPER
+                        }
+                    })
+
+                await tx
+                    .insert(userAccounts)
+                    .values({
+                        id: `acc_${DEV_ID}`,
+                        userId: DEV_ID,
+                        accountId: devData.email,
+                        providerId: 'credential',
+                        password: hashedDevPassword
+                    })
+                    .onConflictDoUpdate({
+                        target: userAccounts.id,
+                        set: { password: hashedDevPassword }
+                    })
+            })
+            console.log('✅ developer 계정 설정 완료 (ID: ' + DEV_ID + ')')
+        } else {
+            console.log('ℹ️  production 모드: developer 시드 스킵')
         }
-        const hashedDevPassword = await hashPassword(devData.password)
 
-        await db.transaction(async (tx) => {
-            await tx
-                .insert(users)
-                .values({
-                    id: DEV_ID,
-                    name: devData.name,
-                    email: devData.email,
-                    role: ROLES.DEVELOPER,
-                    emailVerified: true
-                })
-                .onConflictDoNothing({ target: users.id })
-
-            await tx
-                .insert(userAccounts)
-                .values({
-                    id: `acc_${DEV_ID}`,
-                    userId: DEV_ID,
-                    accountId: devData.email,
-                    providerId: 'credential',
-                    password: hashedDevPassword
-                })
-                .onConflictDoNothing({ target: userAccounts.id })
-        })
-        console.log('✅ developer 계정 설정 완료 (ID: ' + DEV_ID + ')')
-
-        // 4. 시설물 데이터 적재 (POSTGRES 전용 — PGlite는 PostGIS 미지원)
+        // 3. 시설물 데이터 적재 (POSTGRES 전용 — PGlite는 PostGIS 미지원)
         if (dbMode === 'POSTGRES') {
             await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)
 

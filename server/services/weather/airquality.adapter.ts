@@ -2,7 +2,7 @@ import type { AirKoreaRltmItem } from '#shared/types/weather'
 import { AirKoreaOriginalResponse } from '#shared/types/weather'
 import { parseNumber, mapPm10Grade, mapPm25Grade } from './common'
 import type { IAirQualityAdapter } from './common'
-import { SEOUL_GU_DATA } from '../district/seoul-gu-data'
+import { SEOUL_GU_DATA } from '../../utils/district/seoul-gu-data'
 
 const AIRKOREA_BASE_URL =
     'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty'
