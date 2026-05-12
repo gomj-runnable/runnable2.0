@@ -6,6 +6,7 @@ import { analyzeFsd } from './analyzers/fsd-graph'
 import { analyzeComposables } from './analyzers/composable-graph'
 import { analyzeClasses } from './analyzers/class-diagram'
 import { analyzeUserJourney } from './analyzers/user-journey'
+import { convertFsd, convertUserJourney, convertComposables, convertClasses } from './gen-mermaid'
 import type { DiagramJSON, TabKind } from '../runtime/types'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -93,6 +94,25 @@ export async function generate(
         diagram.meta.edgeCount = diagram.edges.length
         writeFileSync(resolve(outDir, entry.file), JSON.stringify(diagram, null, 2))
         results.push(diagram)
+    }
+
+    const mmdDir = resolve(root, 'docs/diagrams')
+    mkdirSync(mmdDir, { recursive: true })
+    const mmdConverters: Array<{ name: string; convert: () => string }> = [
+        { name: 'fsd', convert: convertFsd },
+        { name: 'user-journey', convert: convertUserJourney },
+        { name: 'composables', convert: convertComposables },
+        { name: 'classes', convert: convertClasses },
+    ]
+    const banner = '<!-- AUTO-GENERATED — do not edit by hand. Run: pnpm gen:diagrams -->'
+    for (const { name, convert } of mmdConverters) {
+        try {
+            const mmd = convert()
+            writeFileSync(resolve(mmdDir, `${name}.mmd`), mmd, 'utf-8')
+            writeFileSync(resolve(mmdDir, `${name}.md`), `${banner}\n\`\`\`mermaid\n${mmd}\`\`\`\n`, 'utf-8')
+        } catch (err) {
+            if (!quiet) console.error(`[diagram-studio] mermaid export failed for ${name}:`, err)
+        }
     }
 
     if (!quiet) {

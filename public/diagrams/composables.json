@@ -90,14 +90,6 @@
       }
     },
     {
-      "id": "useMobileDetect",
-      "label": "useMobileDetect",
-      "kind": "lib",
-      "data": {
-        "file": "app/shared/lib/useMobileDetect.ts"
-      }
-    },
-    {
       "id": "useTerrainSampler",
       "label": "useTerrainSampler",
       "kind": "lib",
@@ -877,9 +869,9 @@
     }
   ],
   "meta": {
-    "generatedAt": "2026-05-08T00:24:10.513Z",
-    "sourceCommit": "8b56802e8932f706baeb3b531e91bb40057daf07",
-    "nodeCount": 58,
+    "generatedAt": "2026-05-11T15:30:05.700Z",
+    "sourceCommit": "b34d59081a15511c37127aa68b610c0f15c84b75",
+    "nodeCount": 57,
     "edgeCount": 68
   }
 }
