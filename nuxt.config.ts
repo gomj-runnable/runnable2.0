@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         weatherKor: process.env.WEATHER_KOR ?? '',
         openData: process.env.OPEN_DATA ?? '',
-        airKoreaKey: process.env.AIR_KOREA_KEY || process.env.OPEN_DATA || '',
+        airKoreaKey: process.env.AIR_KOREA_KEY ?? '',
         routeMode: process.env.ROUTE_MODE ?? 'NONE',
         tmapApi: process.env.TMAP_API ?? '',
         public: {
@@ -73,7 +73,18 @@ export default defineNuxtConfig({
                     'X-Frame-Options': 'DENY',
                     'X-Content-Type-Options': 'nosniff',
                     'Referrer-Policy': 'strict-origin-when-cross-origin',
-                    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)'
+                    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)',
+                    'Content-Security-Policy': [
+                        "default-src 'self'",
+                        "img-src 'self' data: blob: https:",
+                        "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com",
+                        "style-src 'self' 'unsafe-inline'",
+                        "script-src 'self' 'wasm-unsafe-eval' blob:",
+                        "worker-src 'self' blob:",
+                        "font-src 'self' data:",
+                        "frame-ancestors 'none'"
+                    ].join('; '),
+                    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
                 }
             }
         },
