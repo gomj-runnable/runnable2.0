@@ -36,16 +36,28 @@ async function bootstrapPglite(pglite: PGlite): Promise<void> {
     // process.cwd() (= 프로젝트 루트) 기준으로 마이그레이션 디렉터리를 찾는다.
     const migrationsDir = resolve(process.cwd(), 'server/database/migrations')
 
+    // 파일 기반 영속(.data/pglite)에서 동일 마이그레이션을 재실행하지 않도록 적용 이력을 추적한다.
+    await pglite.exec(`
+        CREATE TABLE IF NOT EXISTS __pglite_migrations (
+            file text PRIMARY KEY,
+            applied_at timestamp DEFAULT now()
+        )
+    `)
+    const appliedRes = await pglite.query<{ file: string }>('SELECT file FROM __pglite_migrations')
+    const applied = new Set(appliedRes.rows.map((r) => r.file))
+
     const files = readdirSync(migrationsDir)
         .filter((f) => f.endsWith('.sql'))
         .sort()
 
     for (const file of files) {
+        if (applied.has(file)) continue
         const sql = readFileSync(resolve(migrationsDir, file), 'utf-8')
         const statements = sanitizeForPglite(sql)
         for (const stmt of statements) {
             await pglite.exec(stmt)
         }
+        await pglite.query('INSERT INTO __pglite_migrations (file) VALUES ($1)', [file])
     }
 }
 
