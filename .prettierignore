@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.nuxt/
+.output/
+.data/
+.husky/_/
+pnpm-lock.yaml
+*.min.js
+*.min.css
+public/lib/
+lib/cesium/
+.claude/
