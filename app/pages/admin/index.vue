@@ -1,12 +1,4 @@
 <script setup lang="ts">
-/**
- * /admin 진입 허브.
- * - DEVELOPER(>=99): 자동으로 `/admin/diagrams` 로 리다이렉트.
- * - ADMIN(50): 사용 가능한 도구가 아직 없으므로 placeholder 안내.
- *
- * `app/middleware/admin-only.global.ts` 가 role >= ADMIN(50) 통과만 허용하므로
- * 이 페이지에 도달한 사용자는 항상 admin 또는 developer 권한 보유자다.
- */
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { hasDeveloperAccess } from '../../../shared/constants/roles'
 
@@ -22,25 +14,56 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen flex items-center justify-center p-6">
-        <div class="max-w-md text-center space-y-3">
-            <UIcon
-                name="i-lucide-shield"
-                class="w-12 h-12 mx-auto text-(--ui-text-muted)"
-                aria-hidden="true"
-            />
-            <h1 class="text-xl font-semibold">관리자 페이지</h1>
-            <p class="text-sm text-(--ui-text-muted)">
-                현재 사용 가능한 관리자 도구가 준비되지 않았습니다.<br />
-                개발자 권한 계정으로는 Diagram Studio 진입이 가능합니다.
-            </p>
-            <UButton
-                to="/"
-                variant="outline"
-                color="neutral"
-                icon="i-lucide-arrow-left"
-                label="메인으로 돌아가기"
-            />
+    <div class="container mx-auto p-6">
+        <header class="mb-6">
+            <h1 class="text-2xl font-semibold">관리자 대시보드</h1>
+            <p class="text-sm text-(--ui-text-muted) mt-1">관리자/개발자용 운영 도구입니다.</p>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Diagram Studio (DEVELOPER 전용) -->
+            <UCard :ui="{ root: 'hover:ring-2 hover:ring-primary-500 transition' }">
+                <template #header>
+                    <div class="flex items-center gap-2">
+                        <UIcon name="i-lucide-network" class="w-5 h-5" />
+                        <h2 class="font-medium">Diagram Studio</h2>
+                    </div>
+                </template>
+                <p class="text-sm text-(--ui-text-muted)">
+                    프로젝트 구조 시각화 도구 (DEVELOPER 권한 필요).
+                </p>
+                <template #footer>
+                    <UButton
+                        to="/admin/diagrams"
+                        variant="solid"
+                        :disabled="!hasDeveloperAccess(authStore.user.value?.role)"
+                        block
+                    >
+                        이동
+                    </UButton>
+                </template>
+            </UCard>
+
+            <!-- Placeholder cards (준비 중) -->
+            <UCard class="opacity-60 cursor-not-allowed">
+                <template #header>
+                    <div class="flex items-center gap-2">
+                        <UIcon name="i-lucide-database" class="w-5 h-5" />
+                        <h2 class="font-medium">시드 관리</h2>
+                    </div>
+                </template>
+                <p class="text-sm text-(--ui-text-muted)">준비 중</p>
+            </UCard>
+
+            <UCard class="opacity-60 cursor-not-allowed">
+                <template #header>
+                    <div class="flex items-center gap-2">
+                        <UIcon name="i-lucide-users" class="w-5 h-5" />
+                        <h2 class="font-medium">세션 관리</h2>
+                    </div>
+                </template>
+                <p class="text-sm text-(--ui-text-muted)">준비 중</p>
+            </UCard>
         </div>
     </div>
 </template>

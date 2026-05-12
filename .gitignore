@@ -37,6 +37,8 @@ logs
 
 # Static uploads & MCP
 public/uploads/
+# GIS 데이터 (~397MB), 변환기(scripts/convert-crosswalk.mjs) 입력용
+public/crosswalk/
 .mcp.json
 
 # Oh My ClaudeCode

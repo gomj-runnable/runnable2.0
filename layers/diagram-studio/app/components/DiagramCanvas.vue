@@ -116,13 +116,16 @@ watch(
         const matchedLayoutIds: string[] = []
         nodes.value = layout.nodes.map((n) => {
             const originalId =
-                ((n.data as Record<string, unknown> | undefined)?.originalId as string | undefined) ??
-                n.id
+                ((n.data as Record<string, unknown> | undefined)?.originalId as
+                    | string
+                    | undefined) ?? n.id
             const isMatched = matchedSet.has(originalId)
             if (isMatched) matchedLayoutIds.push(n.id)
             return {
                 ...n,
-                class: isMatched ? 'node-highlight' : undefined,
+                class: isMatched
+                    ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-neutral-950 rounded-lg'
+                    : undefined,
                 data: { ...(n.data ?? {}), highlighted: isMatched }
             }
         })
