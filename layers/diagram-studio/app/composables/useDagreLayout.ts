@@ -33,8 +33,8 @@ function getGraphConfig(diagramKind: string | undefined): GraphConfig {
             return {
                 rankdir: 'TB',
                 nodesep: 72,
-                ranksep: 160,
-                edgesep: 32,
+                ranksep: 192,
+                edgesep: 38,
                 marginx: 40,
                 marginy: 40
             }
@@ -42,8 +42,8 @@ function getGraphConfig(diagramKind: string | undefined): GraphConfig {
             return {
                 rankdir: 'LR',
                 nodesep: 72,
-                ranksep: 200,
-                edgesep: 32,
+                ranksep: 240,
+                edgesep: 38,
                 marginx: 30,
                 marginy: 30
             }
@@ -51,8 +51,8 @@ function getGraphConfig(diagramKind: string | undefined): GraphConfig {
             return {
                 rankdir: 'LR',
                 nodesep: 64,
-                ranksep: 220,
-                edgesep: 32,
+                ranksep: 264,
+                edgesep: 38,
                 marginx: 36,
                 marginy: 36
             }
@@ -61,8 +61,8 @@ function getGraphConfig(diagramKind: string | undefined): GraphConfig {
             return {
                 rankdir: 'LR',
                 nodesep: 72,
-                ranksep: 220,
-                edgesep: 32,
+                ranksep: 264,
+                edgesep: 38,
                 marginx: 36,
                 marginy: 36
             }
