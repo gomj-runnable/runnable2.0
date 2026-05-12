@@ -229,12 +229,3 @@ function closeMobileSidebar() {
         </UDashboardPanel>
     </UDashboardGroup>
 </template>
-
-<style>
-/* VueFlow node wrapper highlight — Tailwind ring utilities don't reach VueFlow internals */
-.vue-flow__node.node-highlight {
-    outline: 2px solid var(--ui-color-primary-500);
-    outline-offset: 4px;
-    border-radius: 8px;
-}
-</style>

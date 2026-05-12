@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { KEYBOARD_SHORTCUTS } from '../composables/useKeyboardShortcuts'
+
 const open = defineModel<boolean>('open', { default: false })
 </script>
 
@@ -17,26 +19,22 @@ const open = defineModel<boolean>('open', { default: false })
                         키보드 단축키
                     </h3>
                     <ul class="list-none m-0 p-0 flex flex-col gap-2">
-                        <li class="flex items-center gap-3 text-xs text-default">
+                        <li
+                            v-for="shortcut in KEYBOARD_SHORTCUTS"
+                            :key="shortcut.description"
+                            class="flex items-center gap-3 text-xs text-default"
+                        >
                             <span class="inline-flex items-center gap-1 min-w-[5rem]">
-                                <UKbd value="1" size="sm" color="neutral" variant="outline" />
-                                <UKbd value="2" size="sm" color="neutral" variant="outline" />
-                                <UKbd value="3" size="sm" color="neutral" variant="outline" />
-                                <UKbd value="4" size="sm" color="neutral" variant="outline" />
+                                <UKbd
+                                    v-for="key in shortcut.keys"
+                                    :key="key"
+                                    :value="key"
+                                    size="sm"
+                                    color="neutral"
+                                    variant="outline"
+                                />
                             </span>
-                            <span>탭 전환</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-xs text-default">
-                            <span class="inline-flex items-center gap-1 min-w-[5rem]">
-                                <UKbd value="/" size="sm" color="neutral" variant="outline" />
-                            </span>
-                            <span>검색 포커스</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-xs text-default">
-                            <span class="inline-flex items-center gap-1 min-w-[5rem]">
-                                <UKbd value="?" size="sm" color="neutral" variant="outline" />
-                            </span>
-                            <span>이 도움말 열기/닫기</span>
+                            <span>{{ shortcut.description }}</span>
                         </li>
                     </ul>
                 </section>
