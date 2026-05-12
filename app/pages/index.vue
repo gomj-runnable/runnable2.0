@@ -34,7 +34,6 @@ import FacilityMarkerPopup from '~/entities/facility/ui/FacilityMarkerPopup.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
-import { useMobileDetect } from '~/shared/lib/useMobileDetect'
 import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
 import { useFabGroups } from '~/widgets/map-shell/model/useFabGroups'
 import { useMapFeatureInit } from '~/widgets/map-shell/model/useMapFeatureInit'
@@ -222,17 +221,13 @@ const { overlayContext, showRouteInfoChip, showSimulationChip } = useOverlayCont
     sectionInfo
 })
 
-// ─── 모바일 감지 ────────────────────────────────────────────────
-const { isMobile } = useMobileDetect()
-
 /** 모바일: 경로 그리기 도움말 모달 표시 여부 */
 const showDrawingHelpModal = ref(false)
 
-/** 모바일에서 드로잉이 시작되면 자동으로 도움말 모달을 표시한다 */
 watch(
     () => drawing.isDrawingActive,
     (active) => {
-        if (active && isMobile.value) {
+        if (active && window.matchMedia('(max-width: 1023px)').matches) {
             showDrawingHelpModal.value = true
         }
     }
@@ -312,11 +307,8 @@ const handleLogout = async () => {
 
             <template #overlay>
                 <WeatherOverlay
-                    :style="
-                        !isMobile && slideOver.isOpen.value
-                            ? { left: '24rem', transition: 'left 300ms ease' }
-                            : { transition: 'left 300ms ease' }
-                    "
+                    :class="slideOver.isOpen.value ? 'lg:left-96' : ''"
+                    style="transition: left 300ms ease"
                     :selected-date="weather.selectedDate.value"
                     :selected-hour="weather.selectedHour.value"
                     :selected-month="weather.selectedMonth.value"
@@ -416,7 +408,10 @@ const handleLogout = async () => {
                 </div>
                 <!-- 모바일: 드로잉 중 "완료" 플로팅 버튼 -->
                 <Teleport to="body">
-                    <div v-if="isMobile && drawing.isDrawingActive" class="drawing-finish-btn">
+                    <div
+                        v-if="drawing.isDrawingActive"
+                        class="drawing-finish-btn max-lg:block hidden"
+                    >
                         <UButton
                             icon="i-lucide-check"
                             label="경로 완성"
@@ -653,8 +648,8 @@ const handleLogout = async () => {
 
         <!-- 모바일: SlideOver 닫혔을 때 다시 열기 탭 -->
         <div
-            v-if="isMobile && !slideOver.isOpen.value"
-            class="fixed top-1/2 left-0 z-30 -translate-y-1/2"
+            v-if="!slideOver.isOpen.value"
+            class="fixed top-1/2 left-0 z-30 -translate-y-1/2 max-lg:flex hidden"
         >
             <UButton
                 icon="i-lucide-chevron-right"
