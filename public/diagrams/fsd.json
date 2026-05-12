@@ -115,6 +115,12 @@
       "kind": "imports"
     },
     {
+      "id": "widgets/map-shell->shared/ui",
+      "source": "widgets/map-shell",
+      "target": "shared/ui",
+      "kind": "imports"
+    },
+    {
       "id": "widgets/map-shell->shared/lib",
       "source": "widgets/map-shell",
       "target": "shared/lib",
@@ -398,9 +404,9 @@
     }
   ],
   "meta": {
-    "generatedAt": "2026-05-08T00:24:10.504Z",
-    "sourceCommit": "8b56802e8932f706baeb3b531e91bb40057daf07",
+    "generatedAt": "2026-05-11T15:30:05.689Z",
+    "sourceCommit": "b34d59081a15511c37127aa68b610c0f15c84b75",
     "nodeCount": 21,
-    "edgeCount": 48
+    "edgeCount": 49
   }
 }
