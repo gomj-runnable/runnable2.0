@@ -77,7 +77,7 @@ export default defineNuxtConfig({
                     'Content-Security-Policy': [
                         "default-src 'self'",
                         "img-src 'self' data: blob: https:",
-                        "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com",
+                        "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com https://mapprime.synology.me:15289 https://server.arcgisonline.com",
                         "style-src 'self' 'unsafe-inline'",
                         "script-src 'self' 'wasm-unsafe-eval' blob:",
                         "worker-src 'self' blob:",
