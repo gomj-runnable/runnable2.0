@@ -31,7 +31,7 @@ async function seed() {
         // 1. 최고관리자 계정 (ROLES.ADMIN)
         const ADMIN_ROLE_ID = 'admin_role_master_01'
         const adminRoleData = {
-            email: 'admin@runnable.com',
+            email: process.env.ADMIN_SEED_EMAIL ?? 'admin@runnable.com',
             password: adminPassword,
             name: '최고관리자'
         }
@@ -77,7 +77,7 @@ async function seed() {
         if (!isProduction && developerPassword) {
             const DEV_ID = 'developer_master_01'
             const devData = {
-                email: 'developer@runnable.com',
+                email: process.env.DEVELOPER_SEED_EMAIL ?? 'developer@runnable.com',
                 password: developerPassword,
                 name: 'developer'
             }
