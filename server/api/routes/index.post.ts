@@ -6,7 +6,7 @@ import {
     poiSchema
 } from '#shared/schemas/route.schema'
 import { routeService } from '../../services/route.service'
-import { requireSession } from '../../utils/session'
+import { withAuth } from '../../utils/withAuth'
 import { withExceptionHandler } from '../../utils/error'
 
 const requestSchema = z.object({
@@ -21,11 +21,12 @@ const requestSchema = z.object({
 })
 
 export default defineEventHandler(
-    withExceptionHandler(async (event) => {
-        const user = await requireSession(event)
-        const body = await readBody(event)
-        const { route: routeInput, sections: sectionInputs } = requestSchema.parse(body)
+    withExceptionHandler(
+        withAuth(async (event, user) => {
+            const body = await readBody(event)
+            const { route: routeInput, sections: sectionInputs } = requestSchema.parse(body)
 
-        return routeService.createRouteWithSections(routeInput, sectionInputs, user.userId)
-    })
+            return routeService.createRouteWithSections(routeInput, sectionInputs, user.userId)
+        })
+    )
 )

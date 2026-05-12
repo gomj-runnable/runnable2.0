@@ -1,7 +1,7 @@
 import { getQuery } from 'h3'
-import { weatherFacade } from '../../utils/weather/weather.facade'
-import { resolveWeatherKeys } from '../../utils/weather/event'
-import { formatDate, formatHour } from '../../utils/weather/common'
+import { weatherService } from '../../services/weather/weather.service'
+import { resolveWeatherKeys } from '../../services/weather/event'
+import { formatDate, formatHour } from '../../services/weather/common'
 import { routeService } from '../../services/route.service'
 import type { WeatherMetrics, RecommendedRoute } from '#shared/types/weather-recommend'
 
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     const keys = resolveWeatherKeys(event)
 
     const [monthlyWeather, routes] = await Promise.all([
-        weatherFacade.requestByDate(undefined, keys).catch((err) => {
+        weatherService.requestByDate(undefined, keys).catch((err) => {
             console.error('[recommend] weather fetch failed', err)
             return null
         }),
@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
 })
 
 const resolveCurrentWeather = (
-    monthlyWeather: Awaited<ReturnType<typeof weatherFacade.requestByDate>> | null
+    monthlyWeather: Awaited<ReturnType<typeof weatherService.requestByDate>> | null
 ): WeatherMetrics => {
     const fallback: WeatherMetrics = {
         temperature: 20,

@@ -1,6 +1,6 @@
 import { defineEventHandler } from 'h3'
-import { weatherFacade } from '../../utils/weather/weather.facade'
-import { resolveWeatherKeys } from '../../utils/weather/event'
+import { weatherService } from '../../services/weather/weather.service'
+import { resolveWeatherKeys } from '../../services/weather/event'
 import { badRequest } from '../../utils/error'
 
 export default defineEventHandler(async (event) => {
@@ -9,5 +9,5 @@ export default defineEventHandler(async (event) => {
         throw badRequest('date path param must be YYYY-MM-DD')
     }
 
-    return weatherFacade.requestByDate(dateParam, resolveWeatherKeys(event))
+    return weatherService.requestByDate(dateParam, resolveWeatherKeys(event))
 })
