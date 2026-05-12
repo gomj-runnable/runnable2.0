@@ -55,5 +55,13 @@ export default withNuxt(
         rules: noUpwardLayer('widgets 레이어는 상위 레이어(pages)를 import할 수 없습니다.', [
             '~/pages/**'
         ])
+    },
+    // enum 파일은 모든 값이 export되므로 unused-vars 경고 제외
+    {
+        files: ['shared/types/**/*.enum.ts', 'shared/types/enum-base.ts'],
+        rules: {
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': 'off'
+        }
     }
 )
