@@ -53,6 +53,8 @@ export interface SavedRoute extends RouteBase {
     userId?: string
     createdAt?: string
     authorName?: string
+    viewCount?: number
+    likeCount?: number
 }
 
 export interface RouteSectionBase {

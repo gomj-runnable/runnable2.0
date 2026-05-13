@@ -13,4 +13,7 @@ export interface RouteDiscoverCard {
     districts?: string[]
     createdAt?: string
     authorName?: string
+    viewCount?: number
+    likeCount?: number
+    likedByMe?: boolean
 }

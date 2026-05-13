@@ -2,22 +2,52 @@
 import type { RouteDiscoverCard } from '#shared/types/discover'
 import { getRouteInfoItems as getBaseRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 
-defineProps<{
+const props = defineProps<{
     /** 경로 카드 데이터 */
     route: RouteDiscoverCard
     /** 선택 상태 여부 */
     selected?: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
     /** 카드 클릭 시 경로 ID를 전달 */
     select: [routeId: string]
+    /** 좋아요 토글 시 경로 ID와 새 상태를 전달 */
+    like: [routeId: string, liked: boolean]
 }>()
+
+const isLiked = ref(props.route.likedByMe ?? false)
+const likeCount = ref(props.route.likeCount ?? 0)
+const isLiking = ref(false)
 
 function getRouteInfoItems(route: RouteDiscoverCard) {
     const items = getBaseRouteInfoItems(route)
     if (route.authorName) items.push({ key: '작성자', value: route.authorName })
     return items
+}
+
+async function toggleLike(e: Event) {
+    e.stopPropagation()
+    if (isLiking.value) return
+    isLiking.value = true
+    try {
+        if (isLiked.value) {
+            await $fetch(`/api/routes/${props.route.routeId}/like`, { method: 'DELETE' })
+            isLiked.value = false
+            likeCount.value = Math.max(0, likeCount.value - 1)
+        } else {
+            await $fetch(`/api/routes/${props.route.routeId}/like`, { method: 'POST' })
+            isLiked.value = true
+            likeCount.value += 1
+        }
+        emit('like', props.route.routeId, isLiked.value)
+    } catch {
+        // optimistic update 실패 시 원래 값 복구
+        isLiked.value = props.route.likedByMe ?? false
+        likeCount.value = props.route.likeCount ?? 0
+    } finally {
+        isLiking.value = false
+    }
 }
 </script>
 
@@ -58,5 +88,21 @@ function getRouteInfoItems(route: RouteDiscoverCard) {
                 </div>
             </template>
         </UScrollArea>
+
+        <template #footer>
+            <div class="flex items-center justify-between text-xs text-[var(--ui-text-muted)]">
+                <span v-if="route.viewCount !== undefined">조회 {{ route.viewCount }}</span>
+                <button
+                    class="flex items-center gap-1 transition-colors"
+                    :class="isLiked ? 'text-red-500' : 'hover:text-red-400'"
+                    :disabled="isLiking"
+                    @click="toggleLike"
+                    @keydown.enter.stop="toggleLike"
+                >
+                    <UIcon :name="isLiked ? 'i-heroicons-heart-solid' : 'i-heroicons-heart'" />
+                    <span>{{ likeCount }}</span>
+                </button>
+            </div>
+        </template>
     </UCard>
 </template>

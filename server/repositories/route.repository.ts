@@ -29,4 +29,12 @@ export interface IRouteRepository {
     deleteSectionsByRouteId(routeId: string): Promise<void>
     /** 특정 사용자가 이미 해당 원본 경로를 가져왔는지 확인한다 */
     hasRouteFromSource(userId: string, sourceRouteId: string): Promise<boolean>
+    /** 경로 조회수를 1 증가시킨다 */
+    incrementViewCount(routeId: string): Promise<void>
+    /** 경로에 좋아요를 추가하고 likeCount를 증가시킨다. 이미 좋아요한 경우 false를 반환한다 */
+    likeRoute(userId: string, routeId: string): Promise<boolean>
+    /** 경로 좋아요를 취소하고 likeCount를 감소시킨다. 좋아요하지 않은 경우 false를 반환한다 */
+    unlikeRoute(userId: string, routeId: string): Promise<boolean>
+    /** 특정 사용자가 해당 경로에 좋아요했는지 확인한다 */
+    isLikedByUser(userId: string, routeId: string): Promise<boolean>
 }

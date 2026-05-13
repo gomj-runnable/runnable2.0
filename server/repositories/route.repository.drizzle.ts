@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { eq, and, ilike, or, desc } from 'drizzle-orm'
+import { eq, and, ilike, or, desc, sql } from 'drizzle-orm'
 import type { RouteDraftInput, SectionAttr } from '#shared/types/route'
 import type { GeoJsonLineString } from '#shared/types/geojson'
 import type { PoiDraftInput } from '#shared/types/facility'
@@ -10,7 +10,7 @@ import type {
     CreateSectionInput
 } from './route.repository'
 import type { getDb } from '../database/client'
-import { routes, routeSections } from '../database/schema/routes'
+import { routes, routeSections, routeLikes } from '../database/schema/routes'
 import { users } from '../database/schema/users'
 
 type Db = Awaited<ReturnType<typeof getDb>>
@@ -40,6 +40,8 @@ const toSavedRoute = (row: typeof routes.$inferSelect, authorName?: string): Sav
     sourceRouteId: row.sourceRouteId ?? undefined,
     sgg: safeParseJson<string[] | undefined>(row.sgg, undefined, 'sgg'),
     emd: safeParseJson<string[] | undefined>(row.emd, undefined, 'emd'),
+    viewCount: row.viewCount,
+    likeCount: row.likeCount,
     createdAt: row.createdAt.toISOString(),
     authorName
 })
@@ -197,6 +199,54 @@ export class DrizzleRouteRepository implements IRouteRepository {
             .select({ routeId: routes.routeId })
             .from(routes)
             .where(and(eq(routes.userId, userId), eq(routes.sourceRouteId, sourceRouteId)))
+            .limit(1)
+        return rows.length > 0
+    }
+
+    async incrementViewCount(routeId: string): Promise<void> {
+        await this.db
+            .update(routes)
+            .set({ viewCount: sql`${routes.viewCount} + 1` })
+            .where(eq(routes.routeId, routeId))
+    }
+
+    async likeRoute(userId: string, routeId: string): Promise<boolean> {
+        const existing = await this.db
+            .select()
+            .from(routeLikes)
+            .where(and(eq(routeLikes.userId, userId), eq(routeLikes.routeId, routeId)))
+            .limit(1)
+
+        if (existing.length > 0) return false
+
+        await this.db.insert(routeLikes).values({ userId, routeId })
+        await this.db
+            .update(routes)
+            .set({ likeCount: sql`${routes.likeCount} + 1` })
+            .where(eq(routes.routeId, routeId))
+        return true
+    }
+
+    async unlikeRoute(userId: string, routeId: string): Promise<boolean> {
+        const result = await this.db
+            .delete(routeLikes)
+            .where(and(eq(routeLikes.userId, userId), eq(routeLikes.routeId, routeId)))
+            .returning()
+
+        if (result.length === 0) return false
+
+        await this.db
+            .update(routes)
+            .set({ likeCount: sql`GREATEST(${routes.likeCount} - 1, 0)` })
+            .where(eq(routes.routeId, routeId))
+        return true
+    }
+
+    async isLikedByUser(userId: string, routeId: string): Promise<boolean> {
+        const rows = await this.db
+            .select()
+            .from(routeLikes)
+            .where(and(eq(routeLikes.userId, userId), eq(routeLikes.routeId, routeId)))
             .limit(1)
         return rows.length > 0
     }
