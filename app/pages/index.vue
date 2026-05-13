@@ -533,6 +533,7 @@ const handleLogout = async () => {
                     @add-section="drawing.addSection"
                     @remove-poi="drawing.removePoiFromSection($event.sectionIndex, $event.poiIndex)"
                     @select-section="drawing.activeSectionIndex = $event.index"
+                    @import-gpx="drawing.importFromGpxFile"
                 />
 
                 <!-- 탐색 -->
