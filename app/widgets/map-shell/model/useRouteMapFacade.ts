@@ -12,8 +12,10 @@ import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import {
     createHeightAwareRouteGeom,
     createInitialSectionDraft,
+    createInitialSectionPointRanges,
     createWaypointBasedSectionRanges
 } from '~/entities/route/lib/useRouteDrawDraft'
+import { parseGpxToPositions } from '~/entities/route/lib/useGpxParser'
 import useRouteDrawSideeffect from '~/features/draw-route/api/useRouteDrawSideeffect'
 import { useRouteClosingSideeffect } from '~/features/draw-route/api/useRouteClosingSideeffect'
 import { useRouteDownloadSideeffect } from '~/features/draw-route/api/useRouteDownloadSideeffect'
@@ -244,6 +246,55 @@ export const useRouteMapFacade = (
         await startDrawing()
     }
 
+    /**
+     * GPX 파일에서 추출한 포인트 배열을 드로잉 상태에 주입한다.
+     * 지형 고도 샘플링 후 기존 저장·구간 편집 플로우와 연결된다.
+     *
+     * @param file - 사용자가 선택한 .gpx 파일
+     */
+    const importFromGpxFile = async (file: File) => {
+        const xml = await file.text()
+        const positions = parseGpxToPositions(xml)
+
+        if (positions.length < 2) {
+            notification.notify({
+                title: 'GPX 오류',
+                message: '유효한 경로 포인트가 2개 미만입니다.',
+                tone: NotificationToneEnum.WARNING
+            })
+            return
+        }
+
+        closeElevationChart()
+        drawEffect.cancelDrawing()
+        store.resetRouteDrawState()
+
+        store.drawnPositions.value = positions
+        store.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
+        store.sectionDraft.value = createInitialSectionDraft(positions)
+
+        const sectionInputs = buildDraftSectionInputs(
+            positions,
+            store.sectionPointRanges.value,
+            store.sectionDraft.value?.attrs
+        )
+        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
+        const terrainPositions = densified.flatMap((s) => s.positions)
+
+        if (terrainPositions.length === positions.length) {
+            store.drawnPositions.value = terrainPositions
+            store.sectionDraft.value = createInitialSectionDraft(terrainPositions)
+        }
+
+        drawEffect.redrawSectionGraphics()
+
+        notification.notify({
+            title: 'GPX 불러오기 완료',
+            message: `${positions.length}개 포인트를 불러왔습니다.`,
+            tone: NotificationToneEnum.SUCCESS
+        })
+    }
+
     const buildSavePayload = () =>
         buildRouteSavePayload({
             sectionDraft: store.sectionDraft.value,
@@ -374,7 +425,8 @@ export const useRouteMapFacade = (
         removeSection: drawEffect.handleRemoveSection,
         addSection: drawEffect.handleAddSection,
         addPoiToSection,
-        removePoiFromSection
+        removePoiFromSection,
+        importFromGpxFile
     })
 
     const saveModal = reactive({
