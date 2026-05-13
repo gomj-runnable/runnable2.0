@@ -1,3 +1,4 @@
+import { onScopeDispose } from 'vue'
 import { createMachine, createActor } from 'xstate'
 import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 
@@ -30,14 +31,19 @@ export function usePlaybackStateMachine() {
 
     function _createActor() {
         const actor = createActor(playbackMachine)
-        actor.subscribe((snapshot) => {
-            current.value = stateMap[snapshot.value as PlaybackStateKey] ?? PlaybackStateEnum.STOPPED
+        const subscription = actor.subscribe((snapshot) => {
+            current.value =
+                stateMap[snapshot.value as PlaybackStateKey] ?? PlaybackStateEnum.STOPPED
         })
         actor.start()
-        return actor
+        return { actor, subscription }
     }
 
-    let actor = _createActor()
+    let { actor, subscription } = _createActor()
+
+    onScopeDispose(() => {
+        actor.stop()
+    })
 
     /** 이벤트에 따라 상태를 전이한다. 유효하지 않은 전이면 false를 반환한다. */
     function send(event: PlaybackEvent): boolean {
@@ -58,8 +64,9 @@ export function usePlaybackStateMachine() {
 
     /** 상태를 STOPPED으로 강제 리셋한다 (cleanup 용도). */
     function reset() {
+        subscription.unsubscribe()
         actor.stop()
-        actor = _createActor()
+        ;({ actor, subscription } = _createActor())
     }
 
     return {
