@@ -32,11 +32,23 @@ const confirmSplit = () => {
     pendingSplitIndex.value = null
 }
 
+const gpxFileInput = ref<HTMLInputElement | null>(null)
+
+function handleGpxFileChange(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (file) {
+        emit('importGpx', file)
+    }
+    if (gpxFileInput.value) gpxFileInput.value.value = ''
+}
+
 const emit = defineEmits<{
     /** 경로 초기화 버튼 클릭 시 발생 */
     reset: []
     /** 경로 저장 버튼 클릭 시 발생 */
     save: []
+    /** GPX 파일 가져오기 클릭 시 선택된 파일을 전달 */
+    importGpx: [file: File]
     /** 특정 구간의 필드 값이 변경될 때 인덱스·필드명·값을 전달 */
     updateSectionAttr: [
         payload: { index: number; field: 'name' | 'comment' | 'description'; value: string }
@@ -81,6 +93,22 @@ const POI_ICON: Record<string, string> = {
                 @click="$emit('save')"
             />
         </div>
+
+        <input
+            ref="gpxFileInput"
+            type="file"
+            accept=".gpx"
+            class="hidden"
+            @change="handleGpxFileChange"
+        />
+        <UButton
+            icon="i-lucide-upload"
+            variant="outline"
+            color="neutral"
+            block
+            label="GPX 가져오기"
+            @click="gpxFileInput?.click()"
+        />
 
         <div class="map-section-label">구간 목록</div>
 
