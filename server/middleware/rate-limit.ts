@@ -1,3 +1,11 @@
+// PoC #115: nuxt-api-shield 전환 비교 중. 기존 구현은 아래 주석으로 보존.
+// nuxt-api-shield 가 전역 기본값(60 req/min)을 처리하므로 이 미들웨어는 비활성화.
+// 전환 확정 시 이 파일 삭제, 취소 시 아래 구현 복원.
+export default defineEventHandler(() => {})
+
+/*
+[기존 구현 — 비교 대상]
+
 interface RateLimitEntry {
     count: number
     windowStart: number
@@ -74,3 +82,4 @@ export default defineEventHandler((event) => {
     setHeader(event, 'X-RateLimit-Limit', String(limit))
     setHeader(event, 'X-RateLimit-Remaining', String(limit - entry.count))
 })
+*/
