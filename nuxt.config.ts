@@ -7,7 +7,25 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 export default defineNuxtConfig({
     ssr: false,
 
-    modules: ['@nuxt/eslint', '@nuxt/ui'],
+    // nuxt-api-shield PoC (#115): 기존 server/middleware/rate-limit.ts 대체 검토
+    // pnpm install 후 pnpm dev 로 동작 확인.
+    modules: ['nuxt-api-shield', '@nuxt/eslint', '@nuxt/ui'],
+
+    // 전역 기본: 60 req/min (기존 middleware default 동일)
+    // auth 경로(10/min), weather 경로(30/min) 는 per-route useShield() 적용 필요.
+    // 멀티 인스턴스: storage 어댑터를 Redis 로 교체하면 인스턴스 간 카운터 공유 가능.
+    apiShield: {
+        limit: {
+            max: 60,
+            interval: 60,
+        },
+        headers: {
+            retryAfter: 'Retry-After',
+            xRateLimitLimit: 'X-RateLimit-Limit',
+            xRateLimitRemaining: 'X-RateLimit-Remaining',
+            xRateLimitReset: 'X-RateLimit-Reset',
+        },
+    },
 
     components: false,
 
