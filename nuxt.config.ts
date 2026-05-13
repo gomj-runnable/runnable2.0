@@ -76,10 +76,10 @@ export default defineNuxtConfig({
                         "default-src 'self'",
                         "img-src 'self' data: blob: https:",
                         "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com https://mapprime.synology.me:15289 https://server.arcgisonline.com",
-                        "style-src 'self' 'unsafe-inline'",
-                        "script-src 'self' 'wasm-unsafe-eval' blob:",
+                        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+                        "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:",
                         "worker-src 'self' blob:",
-                        "font-src 'self' data:",
+                        "font-src 'self' data: https://cdn.jsdelivr.net",
                         "frame-ancestors 'none'"
                     ].join('; '),
                     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
