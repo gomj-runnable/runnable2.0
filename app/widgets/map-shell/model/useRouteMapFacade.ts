@@ -11,8 +11,10 @@ import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import {
     createHeightAwareRouteGeom,
     createInitialSectionDraft,
+    createInitialSectionPointRanges,
     createWaypointBasedSectionRanges
 } from '~/entities/route/lib/useRouteDrawDraft'
+import { parseGpxToPositions } from '~/entities/route/lib/useGpxParser'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
@@ -259,6 +261,82 @@ export const useRouteMapFacade = (
         }
     }
 
+    /**
+     * GPX 파일에서 추출한 포인트 배열을 드로잉 상태에 주입한다.
+     * 지형 고도 샘플링 후 기존 저장·구간 편집 플로우와 연결된다.
+     *
+     * @param file - 사용자가 선택한 .gpx 파일
+     */
+    const importFromGpxFile = async (file: File) => {
+        try {
+            if (file.size > 10 * 1024 * 1024) {
+                notification.notify({
+                    title: 'GPX 파일 너무 큼',
+                    message: '파일 크기가 10MB를 초과합니다. 더 작은 파일을 사용해주세요.',
+                    tone: NotificationToneEnum.WARNING
+                })
+                return
+            }
+
+            const xml = await file.text()
+            const positions = parseGpxToPositions(xml)
+
+            if (positions.length < 2) {
+                notification.notify({
+                    title: 'GPX 오류',
+                    message: '유효한 경로 포인트가 2개 미만입니다.',
+                    tone: NotificationToneEnum.WARNING
+                })
+                return
+            }
+
+            elevationFacade.close()
+            drawingFacade.cancelDrawing()
+            store.resetRouteDrawState()
+
+            store.drawnPositions.value = positions
+            store.sectionPointRanges.value = createInitialSectionPointRanges(positions.length)
+            store.sectionDraft.value = createInitialSectionDraft(positions)
+
+            const sectionInputs = buildDraftSectionInputs(
+                positions,
+                store.sectionPointRanges.value,
+                store.sectionDraft.value?.attrs
+            )
+            const densified = await terrainFacade.densifyAndSampleSections(sectionInputs)
+            const terrainPositions = densified.flatMap((s) => s.positions)
+
+            if (terrainPositions.length === positions.length) {
+                store.drawnPositions.value = terrainPositions
+                store.sectionDraft.value = createInitialSectionDraft(terrainPositions)
+            } else {
+                notification.notify({
+                    title: '지형 고도 보정 건너뜀',
+                    message:
+                        '지형 고도 샘플링 결과가 포인트 수와 맞지 않아 원본 고도를 사용합니다.',
+                    tone: NotificationToneEnum.WARNING
+                })
+            }
+
+            drawingFacade.redrawSectionGraphics()
+
+            notification.notify({
+                title: 'GPX 불러오기 완료',
+                message: `${positions.length}개 포인트를 불러왔습니다.`,
+                tone: NotificationToneEnum.SUCCESS
+            })
+        } catch (error) {
+            notification.notify({
+                title: 'GPX 불러오기 실패',
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : 'GPX 파일을 불러오는 중 오류가 발생했습니다.',
+                tone: NotificationToneEnum.ERROR
+            })
+        }
+    }
+
     const downloadRouteGpx = async (routeId: string) => {
         try {
             const route = store.routes.value.find((item) => item.routeId === routeId)
@@ -305,7 +383,8 @@ export const useRouteMapFacade = (
         removeSection: drawingFacade.removeSection,
         addSection: drawingFacade.addSection,
         addPoiToSection: drawingFacade.addPoiToSection,
-        removePoiFromSection: drawingFacade.removePoiFromSection
+        removePoiFromSection: drawingFacade.removePoiFromSection,
+        importFromGpxFile
     })
 
     const saveModal = reactive({
