@@ -14,7 +14,9 @@
         "typecheck": "nuxt typecheck",
         "seed": "tsx server/database/seed.ts",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "test:e2e": "playwright test",
+        "test:e2e:update": "playwright test --update-snapshots"
     },
     "dependencies": {
         "@electric-sql/pglite": "^0.4.5",
@@ -41,6 +43,7 @@
         "@nuxt/eslint": "^1.13.0",
         "@nuxt/eslint-config": "^1.13.0",
         "@nuxt/test-utils": "^4.0.3",
+        "@playwright/test": "^1.60.0",
         "@tailwindcss/vite": "^4.1.18",
         "@types/node": "^25.2.0",
         "@types/papaparse": "^5.5.2",
