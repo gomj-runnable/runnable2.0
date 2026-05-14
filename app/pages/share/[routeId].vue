@@ -1,11 +1,18 @@
 <script setup lang="ts">
 /**
  * 공유 경로 페이지 — 인증 없이 접근 가능한 경로 공유 뷰.
- * 3D 지도 위에 경로와 경로정보 마커를 표시하고 경로정보를 남길 수 있다.
+ * 3D 지도 위에 경로 폴리라인을 렌더링하고 경로 메타 정보를 표시한다.
  */
 import type { SavedRoute, SavedSection } from '#shared/types/route'
+import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { useMapInit } from '~/shared/lib/map/useMapInit'
+import { useShareViewerSideeffect } from '~/features/share-viewer/api/useShareViewerSideeffect'
 
 definePageMeta({ ssr: false, layout: 'default' })
+
+useHead({
+    link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }]
+})
 
 const route = useRoute()
 const routeId = route.params.routeId as string
@@ -18,6 +25,10 @@ const sharedData = ref<{
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 
+const viewer = shallowRef<CesiumViewer | null>(null)
+const { init } = useMapInit()
+const shareViewer = useShareViewerSideeffect({ viewer })
+
 onMounted(async () => {
     try {
         const data = await $fetch(`/api/routes/share/${routeId}`)
@@ -28,50 +39,66 @@ onMounted(async () => {
     } finally {
         isLoading.value = false
     }
+
+    await init()
+    viewer.value = (window as Window & { viewer?: CesiumViewer }).viewer ?? null
+
+    if (sharedData.value && viewer.value) {
+        shareViewer.renderSections(sharedData.value.sections)
+    }
+})
+
+onUnmounted(() => {
+    shareViewer.clear()
+})
+
+const distanceKm = computed(() => {
+    const d = sharedData.value?.route.distance
+    return d ? (Number(d) / 1000).toFixed(2) : null
+})
+
+const elevationRange = computed(() => {
+    const r = sharedData.value?.route
+    if (!r?.highHeight || !r?.lowHeight) return null
+    return `${Math.round(Number(r.lowHeight))}m ~ ${Math.round(Number(r.highHeight))}m`
 })
 </script>
 
 <template>
-    <div
-        class="w-full h-screen flex flex-col bg-[var(--color-bg,#111)] text-[var(--color-text,#fff)]"
-    >
+    <div class="relative w-full h-screen overflow-hidden bg-[#111]">
+        <!-- Cesium 지도 컨테이너 -->
+        <div id="map" class="absolute inset-0" />
+
+        <!-- 로딩 -->
         <div
             v-if="isLoading"
-            class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]"
+            class="absolute inset-0 flex items-center justify-center text-base text-[var(--color-text-muted,#888)] z-10"
         >
             경로를 불러오는 중...
         </div>
 
+        <!-- 오류 -->
         <div
             v-else-if="error"
-            class="flex items-center justify-center h-full text-base text-[var(--color-text-muted,#888)]"
+            class="absolute inset-0 flex items-center justify-center text-base text-red-400 z-10"
         >
             {{ error }}
         </div>
 
-        <div v-else-if="sharedData" class="flex flex-col h-full">
-            <div class="px-5 py-4 border-b border-[var(--color-border,#333)]">
-                <h1 class="text-xl font-bold m-0 mb-1">{{ sharedData.route.title }}</h1>
-                <p
-                    v-if="sharedData.route.description"
-                    class="text-sm text-[var(--color-text-muted,#aaa)] m-0"
-                >
-                    {{ sharedData.route.description }}
-                </p>
-            </div>
-
-            <div class="flex gap-4 px-5 py-2 text-[13px] text-[var(--color-text-muted,#aaa)]">
-                <span v-if="sharedData.route?.distance">
-                    거리: {{ (Number(sharedData.route.distance) / 1000).toFixed(2) }}km
-                </span>
+        <!-- 경로 정보 오버레이 -->
+        <div
+            v-else-if="sharedData"
+            class="absolute top-4 left-4 z-10 max-w-xs rounded-xl bg-black/70 backdrop-blur-sm px-4 py-3 text-white shadow-lg"
+        >
+            <h1 class="text-base font-bold leading-tight mb-1">{{ sharedData.route.title }}</h1>
+            <p v-if="sharedData.route.description" class="text-xs text-gray-300 mb-2 line-clamp-2">
+                {{ sharedData.route.description }}
+            </p>
+            <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-400">
+                <span v-if="distanceKm">거리 {{ distanceKm }} km</span>
+                <span v-if="elevationRange">고도 {{ elevationRange }}</span>
+                <span v-if="sharedData.route.authorName">by {{ sharedData.route.authorName }}</span>
                 <span>경로정보 {{ sharedData.routeInfos.length }}개</span>
-            </div>
-
-            <!-- TODO: 3D 지도 뷰어 + 경로정보 마커 렌더링 -->
-            <div
-                class="flex-1 flex items-center justify-center text-sm text-[var(--color-text-muted,#666)] bg-[var(--color-surface,#1a1a1a)]"
-            >
-                3D 지도 뷰어 영역 (Phase 2에서 구현)
             </div>
         </div>
     </div>
