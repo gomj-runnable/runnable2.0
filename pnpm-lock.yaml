@@ -114,6 +114,9 @@ importers:
       lint-staged:
         specifier: ^17.0.4
         version: 17.0.4
+      nuxt-api-shield:
+        specifier: ^0.5.0
+        version: 0.5.0(magicast@0.5.1)
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -5811,6 +5814,9 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
+  nuxt-api-shield@0.5.0:
+    resolution: {integrity: sha512-52UURoSGxch9Ftu+RB0KNN574cKRR5HAaNTzjLAU2kDKYhluxGTeIqx+sjm/YkZ4I7ye6g6g96AttLAYcqY6Cw==}
+
   nuxt@4.3.0:
     resolution: {integrity: sha512-99Iw3E3L5/2QtJyV4errZ0axkX/S9IAFK0AHm0pmRHkCu37OFn8mz2P4/CYTt6B/TG3mcKbXAVaeuF2FsAc1cA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -8761,7 +8767,7 @@ snapshots:
     dependencies:
       c12: 3.3.3(magicast@0.5.1)
       consola: 3.4.2
-      defu: 6.1.4
+      defu: 6.1.7
       destr: 2.0.5
       errx: 0.1.0
       exsolve: 1.0.8
@@ -13275,7 +13281,7 @@ snapshots:
     dependencies:
       citty: 0.1.6
       consola: 3.4.2
-      defu: 6.1.4
+      defu: 6.1.7
       node-fetch-native: 1.6.7
       nypm: 0.6.4
       pathe: 2.0.3
@@ -13764,7 +13770,7 @@ snapshots:
       clipboardy: 4.0.0
       consola: 3.4.2
       crossws: 0.3.5
-      defu: 6.1.4
+      defu: 6.1.7
       get-port-please: 3.2.0
       h3: 1.15.5
       http-shutdown: 1.2.2
@@ -14021,7 +14027,7 @@ snapshots:
       croner: 9.1.0
       crossws: 0.3.5
       db0: 0.3.4(@electric-sql/pglite@0.4.5)(drizzle-orm@0.45.1(@electric-sql/pglite@0.4.5)(@types/pg@8.16.0)(kysely@0.28.11)(pg@8.18.0))
-      defu: 6.1.4
+      defu: 6.1.7
       destr: 2.0.5
       dot-prop: 10.1.0
       esbuild: 0.27.2
@@ -14137,6 +14143,13 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+
+  nuxt-api-shield@0.5.0(magicast@0.5.1):
+    dependencies:
+      '@nuxt/kit': 3.21.2(magicast@0.5.1)
+      defu: 6.1.7
+    transitivePeerDependencies:
+      - magicast
 
   nuxt@4.3.0(@electric-sql/pglite@0.4.5)(@parcel/watcher@2.5.6)(@types/node@25.2.0)(@vue/compiler-sfc@3.5.33)(cac@6.7.14)(commander@13.1.0)(db0@0.3.4(@electric-sql/pglite@0.4.5)(drizzle-orm@0.45.1(@electric-sql/pglite@0.4.5)(@types/pg@8.16.0)(kysely@0.28.11)(pg@8.18.0)))(drizzle-orm@0.45.1(@electric-sql/pglite@0.4.5)(@types/pg@8.16.0)(kysely@0.28.11)(pg@8.18.0))(eslint@9.39.2(jiti@2.6.1))(ioredis@5.9.2)(lightningcss@1.32.0)(magicast@0.5.1)(optionator@0.9.4)(rollup@4.57.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0))(vue-tsc@3.2.4(typescript@5.9.3))(yaml@2.9.0):
     dependencies:
@@ -15179,7 +15192,7 @@ snapshots:
 
   serve-placeholder@2.0.2:
     dependencies:
-      defu: 6.1.4
+      defu: 6.1.7
 
   serve-static@2.2.1:
     dependencies:

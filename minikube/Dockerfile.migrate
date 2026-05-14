@@ -7,7 +7,7 @@ COPY drizzle.config.ts ./
 COPY server/database/ ./server/database/
 COPY server/data/facilities/ ./server/data/facilities/
 COPY server/utils/config.ts ./server/utils/config.ts
-COPY server/utils/db.ts ./server/utils/db.ts
+COPY shared/constants/ ./shared/constants/
 
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm install --frozen-lockfile --ignore-scripts

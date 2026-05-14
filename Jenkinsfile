@@ -13,7 +13,7 @@ pipeline {
         PATH         = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
         DOCKER_IMAGE = "myeongjunkim0615/runnable"
         LOCAL_PORT   = "3333"
-        SECRETS_DIR  = "${env.HOME}/.jenkins/secrets/runnable"
+        SECRETS_DIR  = "${env.HOME}/developer/projects/runnable2.0/minikube/k8s/config"
     }
 
     options {
@@ -112,7 +112,7 @@ pipeline {
                     set -euo pipefail
                     eval $(minikube docker-env)
 
-                    echo "==> 시크릿/설정 파일 복사 (Git 미추적 → Jenkins 로컬)"
+                    echo "==> 시크릿/설정 파일 복사 (Jenkins 로컬 → 워크스페이스)"
                     for f in secret.prod.yaml configmap.prod.yaml; do
                         src="${SECRETS_DIR}/${f}"
                         if [ ! -f "$src" ]; then
