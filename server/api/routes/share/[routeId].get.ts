@@ -16,6 +16,8 @@ export default defineEventHandler(async (event) => {
         throw forbidden('비공개 경로입니다.')
     }
 
+    await routeService.incrementViewCount(routeId)
+
     const sections = await routeService.getSectionsByRouteId(routeId)
     const routeInfoItems = await (await getRouteInfoRepository()).findByRouteId(routeId)
 

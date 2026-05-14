@@ -86,6 +86,28 @@ export const routeService = {
         return (await getRouteRepository()).getSectionsByRouteId(routeId)
     },
 
+    async incrementViewCount(routeId: string): Promise<void> {
+        return (await getRouteRepository()).incrementViewCount(routeId)
+    },
+
+    async likeRoute(userId: string, routeId: string): Promise<boolean> {
+        const repo = await getRouteRepository()
+        const route = await repo.getRoute(routeId)
+        if (!route) throw notFound('경로를 찾을 수 없습니다.')
+        return repo.likeRoute(userId, routeId)
+    },
+
+    async unlikeRoute(userId: string, routeId: string): Promise<boolean> {
+        const repo = await getRouteRepository()
+        const route = await repo.getRoute(routeId)
+        if (!route) throw notFound('경로를 찾을 수 없습니다.')
+        return repo.unlikeRoute(userId, routeId)
+    },
+
+    async isLikedByUser(userId: string, routeId: string): Promise<boolean> {
+        return (await getRouteRepository()).isLikedByUser(userId, routeId)
+    },
+
     async forkRoute(
         sourceRouteId: string,
         userId: string
