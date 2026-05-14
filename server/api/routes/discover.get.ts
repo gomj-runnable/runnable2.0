@@ -1,6 +1,7 @@
 import { routeService } from '../../services/route.service'
 import { routeDiscoverFilterSchema } from '#shared/schemas/discover.schema'
 import { badRequest } from '../../utils/error'
+import { getSessionUser } from '../../utils/session'
 import type { RouteDiscoverCard } from '#shared/types/discover'
 
 export default defineEventHandler(async (event) => {
@@ -13,7 +14,10 @@ export default defineEventHandler(async (event) => {
 
     const { district, sortBy = 'recent', limit = 20 } = parsed.data
 
-    const routes = await routeService.searchPublicRoutes()
+    const [routes, user] = await Promise.all([
+        routeService.searchPublicRoutes(),
+        getSessionUser(event)
+    ])
 
     const filtered = district ? routes.filter((r) => r.sgg?.includes(district)) : routes
 
@@ -25,14 +29,26 @@ export default defineEventHandler(async (event) => {
             return (b.highHeight ?? 0) - (a.highHeight ?? 0)
         }
         if (sortBy === 'popular') {
-            return (b.distance ?? 0) - (a.distance ?? 0)
+            return (b.likeCount ?? 0) - (a.likeCount ?? 0)
         }
         const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0
         const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0
         return dateB - dateA
     })
 
-    const result: RouteDiscoverCard[] = sorted.slice(0, limit).map((r) => ({
+    const sliced = sorted.slice(0, limit)
+
+    const likedSet = new Set<string>()
+    if (user) {
+        await Promise.all(
+            sliced.map(async (r) => {
+                const liked = await routeService.isLikedByUser(user.userId, r.routeId)
+                if (liked) likedSet.add(r.routeId)
+            })
+        )
+    }
+
+    const result: RouteDiscoverCard[] = sliced.map((r) => ({
         routeId: r.routeId,
         title: r.title,
         distance: r.distance ? Number(r.distance) : undefined,
@@ -40,7 +56,10 @@ export default defineEventHandler(async (event) => {
         lowHeight: r.lowHeight ? Number(r.lowHeight) : undefined,
         districts: r.sgg?.length ? r.sgg : undefined,
         createdAt: r.createdAt,
-        authorName: r.authorName
+        authorName: r.authorName,
+        viewCount: r.viewCount ?? 0,
+        likeCount: r.likeCount ?? 0,
+        likedByMe: likedSet.has(r.routeId)
     }))
 
     return result
