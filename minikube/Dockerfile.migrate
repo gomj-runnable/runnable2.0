@@ -12,4 +12,5 @@ COPY shared/constants/ ./shared/constants/
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm install --frozen-lockfile --ignore-scripts
 
-CMD ["sh", "-c", "pnpm drizzle-kit push --force && pnpm tsx server/database/seed.ts"]
+ENV CI=true
+CMD ["sh", "-c", "printf '\\n' | pnpm drizzle-kit push --force && pnpm tsx server/database/seed.ts"]

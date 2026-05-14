@@ -133,8 +133,12 @@ async function seed() {
 
             let totalInserted = 0
             for (const file of files) {
-                const data = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8'))
-                if (!data.length) continue
+                const raw = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8'))
+                if (!raw.length) continue
+                // 배치 내 중복 ID 제거 (마지막 항목 우선)
+                const seen = new Map<string, number>()
+                for (let i = 0; i < raw.length; i++) seen.set(raw[i].id, i)
+                const data = [...seen.values()].map((i) => raw[i])
 
                 const BATCH_SIZE = 500
                 for (let i = 0; i < data.length; i += BATCH_SIZE) {

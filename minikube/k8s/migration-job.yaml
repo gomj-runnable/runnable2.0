@@ -59,11 +59,23 @@ spec:
                                 key: POSTGRES_DB
                       - name: DATABASE_URL
                         value: 'postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)'
+                      - name: USE_DATABASE_MODE
+                        value: POSTGRES
+                      - name: ADMIN_SEED_EMAIL
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: ADMIN_SEED_EMAIL
                       - name: ADMIN_SEED_PASSWORD
                         valueFrom:
                             secretKeyRef:
                                 name: runnable-secret
                                 key: ADMIN_SEED_PASSWORD
+                      - name: DEVELOPER_SEED_EMAIL
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: DEVELOPER_SEED_EMAIL
                       - name: DEVELOPER_SEED_PASSWORD
                         valueFrom:
                             secretKeyRef:
@@ -72,7 +84,7 @@ spec:
                   resources:
                       requests:
                           cpu: 100m
-                          memory: 256Mi
+                          memory: 512Mi
                       limits:
                           cpu: 500m
-                          memory: 512Mi
+                          memory: 1024Mi
