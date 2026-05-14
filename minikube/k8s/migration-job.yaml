@@ -1,73 +1,78 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: runnable-migrate
-  namespace: runnable
+    name: runnable-migrate
+    namespace: runnable
 spec:
-  backoffLimit: 3
-  ttlSecondsAfterFinished: 300
-  template:
-    metadata:
-      labels:
-        app: runnable-migrate
-    spec:
-      restartPolicy: Never
-      initContainers:
-        - name: wait-db
-          image: postgres:17-alpine
-          command:
-            - sh
-            - -c
-            - |
-              echo "Waiting for PostgreSQL..."
-              until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER"; do
-                sleep 2
-              done
-              echo "PostgreSQL is ready"
-          env:
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: runnable-secret
-                  key: POSTGRES_USER
-          resources:
-            requests:
-              cpu: 50m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
-      containers:
-        - name: migrate
-          image: runnable-migrate:latest
-          imagePullPolicy: Never
-          env:
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: runnable-secret
-                  key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: runnable-secret
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: runnable-secret
-                  key: POSTGRES_DB
-            - name: DATABASE_URL
-              value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
-            - name: ADMIN_SEED_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: runnable-secret
-                  key: ADMIN_SEED_PASSWORD
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+    backoffLimit: 3
+    ttlSecondsAfterFinished: 300
+    template:
+        metadata:
+            labels:
+                app: runnable-migrate
+        spec:
+            restartPolicy: Never
+            initContainers:
+                - name: wait-db
+                  image: postgres:17-alpine
+                  command:
+                      - sh
+                      - -c
+                      - |
+                          echo "Waiting for PostgreSQL..."
+                          until pg_isready -h postgres -p 5432 -U "$POSTGRES_USER"; do
+                            sleep 2
+                          done
+                          echo "PostgreSQL is ready"
+                  env:
+                      - name: POSTGRES_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: POSTGRES_USER
+                  resources:
+                      requests:
+                          cpu: 50m
+                          memory: 32Mi
+                      limits:
+                          cpu: 100m
+                          memory: 64Mi
+            containers:
+                - name: migrate
+                  image: runnable-migrate:latest
+                  imagePullPolicy: Never
+                  env:
+                      - name: POSTGRES_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: POSTGRES_USER
+                      - name: POSTGRES_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: POSTGRES_PASSWORD
+                      - name: POSTGRES_DB
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: POSTGRES_DB
+                      - name: DATABASE_URL
+                        value: 'postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)'
+                      - name: ADMIN_SEED_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: ADMIN_SEED_PASSWORD
+                      - name: DEVELOPER_SEED_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: runnable-secret
+                                key: DEVELOPER_SEED_PASSWORD
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 256Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
