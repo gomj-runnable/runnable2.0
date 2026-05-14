@@ -1,5 +1,17 @@
 # 실행방법
 
+## E2E 스냅샷 테스트 (Playwright)
+
+```bash
+# 테스트 실행 (개발 서버 자동 시작)
+pnpm test:e2e
+
+# 스냅샷 baseline 갱신 (spec 변경 또는 UI 변경 후 실행)
+pnpm test:e2e:update
+```
+
+> **참고**: spec 파일은 `tests/e2e/` 디렉터리에 위치한다. 현재는 기반 인프라만 구축된 상태이며, diagram-studio spec은 #126 완료 후 추가될 예정이다. 스냅샷 파일은 git에 포함시키고, 변경 시 PR 리뷰에서 확인한다.
+
 ## 도커 실행
 
 ```bash
