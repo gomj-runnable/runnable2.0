@@ -6,7 +6,6 @@ import {
     buildDraftSectionInputs,
     buildSavedSectionInputs
 } from '~/entities/route/lib/useRouteElevationProfile'
-import { useTerrainSampler } from '~/shared/lib/map/useTerrainSampler'
 import { createRouteGpx, toGpxFileName } from '~/entities/route/lib/useRouteGpx'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import {
@@ -14,21 +13,24 @@ import {
     createInitialSectionDraft,
     createWaypointBasedSectionRanges
 } from '~/entities/route/lib/useRouteDrawDraft'
-import useRouteDrawSideeffect from '~/features/draw-route/api/useRouteDrawSideeffect'
-import { useRouteClosingSideeffect } from '~/features/draw-route/api/useRouteClosingSideeffect'
-import { useRouteDownloadSideeffect } from '~/features/draw-route/api/useRouteDownloadSideeffect'
-import { useRouteSaveSideeffect } from '~/features/draw-route/api/useRouteSaveSideeffect'
-import { useRouteListSideeffect } from '~/features/draw-route/api/useRouteListSideeffect'
-import { useRouteOptimizationSideeffect } from '~/features/draw-route/api/useRouteOptimizationSideeffect'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
+import { useRouteDrawingFacade } from './useRouteDrawingFacade'
+import { useRouteClosingFacade } from './useRouteClosingFacade'
+import { useRouteSaveFacade } from './useRouteSaveFacade'
+import { useRouteListFacade } from './useRouteListFacade'
+import { useRouteDownloadFacade } from './useRouteDownloadFacade'
+import { useRouteOptimizationFacade } from './useRouteOptimizationFacade'
+import { useRouteElevationFacade } from './useRouteElevationFacade'
+import { useRouteTerrainSamplerFacade } from './useRouteTerrainSamplerFacade'
 
 /**
  * 경로 지도 화면의 모든 기능을 단일 진입점으로 제공하는 Facade.
  *
- * 내부적으로 store, draw/save/list sideeffect를 조합하며,
+ * 내부적으로 단일 책임 sub-facade 8종을 조합한다 (#127 Phase 2 시범 이관).
  * 페이지는 이 composable만 사용해 그리기·저장·목록 기능을 이용한다.
+ * 외부 API는 sub-facade 도입 전과 동일하므로 호출처(`app/pages/index.vue`) 변경 없이 동작한다.
  *
  * @param viewer - 페이지에서 초기화한 Cesium 뷰어 ref
  */
@@ -40,85 +42,37 @@ export const useRouteMapFacade = (
     viewer: ShallowRef<CesiumViewer | null>,
     facadeOptions?: RouteMapFacadeOptions
 ) => {
-    // ─── 내부 의존성 조합 ─────────────────────────────────────────
+    // ─── sub-facade 조합 ──────────────────────────────────────────
 
     const store = useRouteDrawStore()
     const notification = useNotificationStore()
 
-    const drawEffect = useRouteDrawSideeffect({
-        viewer,
-        drawnPositions: store.drawnPositions,
-        drawMetrics: store.drawMetrics,
-        sectionDraft: store.sectionDraft,
-        sectionPointRanges: store.sectionPointRanges,
-        isRouteSaveModalOpen: store.isRouteSaveModalOpen,
-        resetRouteDrawState: store.resetRouteDrawState,
-        closingMode: store.closingMode,
-        notify: notification.notify
-    })
-
-    useRouteClosingSideeffect({
-        viewer,
-        drawnPositions: store.drawnPositions,
-        closingMode: store.closingMode
-    })
-
-    const saveEffect = useRouteSaveSideeffect()
-    const downloadEffect = useRouteDownloadSideeffect()
+    const drawingFacade = useRouteDrawingFacade(viewer)
+    const closingFacade = useRouteClosingFacade(viewer)
+    const saveFacade = useRouteSaveFacade()
+    const downloadFacade = useRouteDownloadFacade()
+    const terrainFacade = useRouteTerrainSamplerFacade(viewer)
+    const listFacade = useRouteListFacade(viewer)
+    const optimizationFacade = useRouteOptimizationFacade()
+    const elevationFacade = useRouteElevationFacade()
 
     const showRouteInfoGuide = ref(false)
 
-    const terrainSampler = useTerrainSampler(viewer)
-
-    const listEffect = useRouteListSideeffect({
-        viewer,
-        routes: store.routes,
-        selectedRouteId: store.selectedRouteId,
-        drawnPositions: store.drawnPositions
-    })
-
-    const optimizationEffect = useRouteOptimizationSideeffect({
-        isOptimizing: store.isOptimizing
-    })
-
     /** 경로 폴리라인을 숨긴다 (경사도 등 오버레이 표시 시 사용) */
     const hideRoutePolylines = () => {
-        drawEffect.hideSectionPolylines()
-        listEffect.hidePreviewPolylines()
+        drawingFacade.hideSectionPolylines()
+        listFacade.hidePreviewPolylines()
     }
 
     /** 숨긴 경로 폴리라인을 복원한다 */
     const showRoutePolylines = () => {
-        drawEffect.showSectionPolylines()
-        listEffect.showPreviewPolylines()
-    }
-
-    const closeElevationChart = () => {
-        store.isElevationChartOpen.value = false
-        store.elevationProfile.value = null
-    }
-
-    const setElevationChartOpen = (open: boolean) => {
-        store.isElevationChartOpen.value = open
-    }
-
-    const openElevationChart = (
-        title: string,
-        profile: ReturnType<typeof createRouteElevationProfile>
-    ) => {
-        if (!profile) {
-            closeElevationChart()
-            return
-        }
-
-        store.elevationChartTitle.value = title
-        store.elevationProfile.value = profile
-        store.isElevationChartOpen.value = true
+        drawingFacade.showSectionPolylines()
+        listFacade.showPreviewPolylines()
     }
 
     const startDrawing = async () => {
-        closeElevationChart()
-        let positions = await drawEffect.handleDrawReset()
+        elevationFacade.close()
+        let positions = await drawingFacade.handleDrawReset()
 
         if (!positions?.length) {
             return
@@ -126,7 +80,7 @@ export const useRouteMapFacade = (
 
         if (store.optimizationMode.value !== 'NONE') {
             const originalWaypoints = [...positions]
-            const result = await optimizationEffect.optimizeRoute(
+            const result = await optimizationFacade.optimizeRoute(
                 positions,
                 store.optimizationMode.value
             )
@@ -141,7 +95,7 @@ export const useRouteMapFacade = (
                     positions,
                     createHeightAwareRouteGeom(store.drawMetrics.value ?? undefined, positions)
                 )
-                drawEffect.redrawSectionGraphics()
+                drawingFacade.redrawSectionGraphics()
                 notification.notify({
                     title: '경로 보정 완료',
                     message: '보행자 경로로 자동 보정되었습니다.',
@@ -161,26 +115,26 @@ export const useRouteMapFacade = (
             store.sectionPointRanges.value,
             store.sectionDraft.value?.attrs
         )
-        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
+        const densified = await terrainFacade.densifyAndSampleSections(sectionInputs)
 
-        openElevationChart('경로 고도 그래프', createRouteElevationProfile(densified))
+        elevationFacade.open('경로 고도 그래프', createRouteElevationProfile(densified))
         showRouteInfoGuide.value = true
     }
 
     const selectRoute = async (routeId: string) => {
-        const sections = await listEffect.selectRoute(routeId)
+        const sections = await listFacade.selectRoute(routeId)
 
         if (!sections?.length) {
-            closeElevationChart()
+            elevationFacade.close()
             return
         }
 
         const selectedRoute = store.routes.value.find((route) => route.routeId === routeId)
 
         const sectionInputs = buildSavedSectionInputs(sections)
-        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
+        const densified = await terrainFacade.densifyAndSampleSections(sectionInputs)
 
-        openElevationChart(
+        elevationFacade.open(
             selectedRoute?.title ?? '경로 고도 그래프',
             createRouteElevationProfile(densified)
         )
@@ -191,17 +145,20 @@ export const useRouteMapFacade = (
     /** 탐색 탭에서 공개 경로를 선택해 지도에 미리보기 + 고도 그래프를 표시한다 */
     const exploreSelectRoute = async (routeId: string, routeTitle?: string) => {
         // selectRoute는 내부에서 fetchRouteSections를 호출하므로 별도 호출 불필요
-        listEffect.clearPreview()
-        const sections = await listEffect.selectRoute(routeId)
+        listFacade.clearPreview()
+        const sections = await listFacade.selectRoute(routeId)
         if (!sections?.length) {
-            closeElevationChart()
+            elevationFacade.close()
             return
         }
 
         const sectionInputs = buildSavedSectionInputs(sections)
-        const densified = await terrainSampler.densifyAndSampleSections(sectionInputs)
+        const densified = await terrainFacade.densifyAndSampleSections(sectionInputs)
 
-        openElevationChart(routeTitle ?? '경로 고도 그래프', createRouteElevationProfile(densified))
+        elevationFacade.open(
+            routeTitle ?? '경로 고도 그래프',
+            createRouteElevationProfile(densified)
+        )
     }
 
     // ─── 내부 오케스트레이션 ──────────────────────────────────────
@@ -209,37 +166,30 @@ export const useRouteMapFacade = (
     /** 그리기 탭 진입 시 미리보기를 정리하고 드로잉을 시작한다 */
     watch(store.activeNav, async (next, prev) => {
         if (next === '그리기' && prev !== '그리기') {
-            listEffect.clearPreview()
-            listEffect.clearSelection()
+            listFacade.clearPreview()
+            listFacade.clearSelection()
             await nextTick()
             await startDrawing()
             return
         }
 
         if (prev === '그리기' && next !== '그리기') {
-            drawEffect.cancelDrawing()
+            drawingFacade.cancelDrawing()
         }
 
         if (next !== '그리기' && next !== '목록') {
-            closeElevationChart()
+            elevationFacade.close()
         }
     })
 
     /** 페이지 마운트 시 저장된 경로 목록을 자동으로 불러온다 */
     onMounted(async () => {
-        await listEffect.fetchRoutes()
+        await listFacade.fetchRoutes()
     })
-
-    // ─── 파생 상태 ────────────────────────────────────────────────
-
-    /** 검색어로 필터링된 경로 목록 */
-    const filteredRoutes = computed(() =>
-        store.routes.value.filter((r) => r.title.includes(store.searchQuery.value))
-    )
 
     /** 진행 중인 드로잉이 있으면 취소한 뒤 새 드로잉을 시작한다. */
     const restartDrawing = async () => {
-        drawEffect.cancelDrawing()
+        drawingFacade.cancelDrawing()
         await nextTick()
         await startDrawing()
     }
@@ -278,9 +228,9 @@ export const useRouteMapFacade = (
             const editId = store.editingRouteId.value
 
             if (editId) {
-                await saveEffect.updateRoute(editId, routeDraftPayload, sectionPayloads)
+                await saveFacade.updateRoute(editId, routeDraftPayload, sectionPayloads)
             } else {
-                const saveResult = (await saveEffect.saveRoute(
+                const saveResult = (await saveFacade.saveRoute(
                     routeDraftPayload,
                     sectionPayloads
                 )) as {
@@ -289,7 +239,7 @@ export const useRouteMapFacade = (
                 await facadeOptions?.onAfterSave?.(saveResult.route.routeId)
             }
 
-            await listEffect.fetchRoutes()
+            await listFacade.fetchRoutes()
 
             store.isRouteSaveModalOpen.value = false
             store.resetRouteDrawState()
@@ -317,13 +267,13 @@ export const useRouteMapFacade = (
                 throw new Error('경로 정보를 찾을 수 없습니다.')
             }
 
-            const sections = await listEffect.fetchRouteSections(routeId)
+            const sections = await listFacade.fetchRouteSections(routeId)
 
             if (!sections.length) {
                 throw new Error('다운로드할 경로 구간이 없습니다.')
             }
 
-            downloadEffect.downloadTextFile(
+            downloadFacade.downloadTextFile(
                 toGpxFileName(route.title),
                 createRouteGpx(route, sections),
                 'application/gpx+xml;charset=utf-8'
@@ -343,38 +293,19 @@ export const useRouteMapFacade = (
         }
     }
 
-    const addPoiToSection = (
-        sectionIndex: number,
-        poi: import('#shared/types/facility').PoiDraftInput
-    ) => {
-        const current = store.sectionPois.value[sectionIndex] ?? []
-        store.sectionPois.value = {
-            ...store.sectionPois.value,
-            [sectionIndex]: [...current, poi]
-        }
-    }
-
-    const removePoiFromSection = (sectionIndex: number, poiIndex: number) => {
-        const current = store.sectionPois.value[sectionIndex] ?? []
-        store.sectionPois.value = {
-            ...store.sectionPois.value,
-            [sectionIndex]: current.filter((_, i) => i !== poiIndex)
-        }
-    }
-
     const drawing = reactive({
         sectionDraft: store.sectionDraft,
         sectionPois: store.sectionPois,
         activeSectionIndex: store.activeSectionIndex,
-        isDrawingActive: drawEffect.isDrawingActive,
+        isDrawingActive: drawingFacade.isDrawingActive,
         start: restartDrawing,
-        finish: drawEffect.finishDrawing,
-        openSaveModal: () => drawEffect.handleDrawSave(),
-        updateSectionAttr: drawEffect.handleUpdateSectionAttr,
-        removeSection: drawEffect.handleRemoveSection,
-        addSection: drawEffect.handleAddSection,
-        addPoiToSection,
-        removePoiFromSection
+        finish: drawingFacade.finishDrawing,
+        openSaveModal: drawingFacade.openSaveModal,
+        updateSectionAttr: drawingFacade.updateSectionAttr,
+        removeSection: drawingFacade.removeSection,
+        addSection: drawingFacade.addSection,
+        addPoiToSection: drawingFacade.addPoiToSection,
+        removePoiFromSection: drawingFacade.removePoiFromSection
     })
 
     const saveModal = reactive({
@@ -386,27 +317,27 @@ export const useRouteMapFacade = (
     })
 
     const routeList = reactive({
-        searchQuery: store.searchQuery,
-        filteredRoutes,
-        selectedRouteId: store.selectedRouteId,
+        searchQuery: listFacade.searchQuery,
+        filteredRoutes: listFacade.filteredRoutes,
+        selectedRouteId: listFacade.selectedRouteId,
         select: selectRoute,
         download: downloadRouteGpx,
-        refresh: () => listEffect.fetchRoutes()
+        refresh: () => listFacade.fetchRoutes()
     })
 
     const elevationChart = reactive({
-        open: store.isElevationChartOpen,
-        title: store.elevationChartTitle,
-        profile: store.elevationProfile,
-        setOpen: setElevationChartOpen,
-        close: closeElevationChart
+        open: elevationFacade.isOpen,
+        title: elevationFacade.title,
+        profile: elevationFacade.profile,
+        setOpen: elevationFacade.setOpen,
+        close: elevationFacade.close
     })
 
     const closing = reactive({
-        mode: store.closingMode,
-        setMode: store.setClosingMode,
-        isLoopClose: store.isLoopClose,
-        isRoundTrip: store.isRoundTrip
+        mode: closingFacade.mode,
+        setMode: closingFacade.setMode,
+        isLoopClose: closingFacade.isLoopClose,
+        isRoundTrip: closingFacade.isRoundTrip
     })
 
     // ─── 공개 인터페이스 ──────────────────────────────────────────
