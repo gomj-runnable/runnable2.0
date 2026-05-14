@@ -12,7 +12,7 @@ pipeline {
         BUILD_TAG    = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
         PATH         = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
         DOCKER_IMAGE = "myeongjunkim0615/runnable"
-        LOCAL_PORT   = "3333"
+        LOCAL_PORT   = "3000"
         SECRETS_DIR  = "${env.HOME}/developer/projects/runnable2.0/minikube/k8s/config"
     }
 
