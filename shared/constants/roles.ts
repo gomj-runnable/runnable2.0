@@ -7,8 +7,8 @@
  * SUPPORT/QA/MODERATOR/ANALYST의 실제 권한 분기는 별도 Role × Permission 매트릭스로 관리한다
  * (#129 결정 후 #130에서 도입 예정).
  *
- * NOTE. DEVELOPER 권한은 다이어그램 스튜디오 dev 백도어 용도. seed 단계에서 prod 환경에는 시드되지
- *       않도록 차단되어 있다 (`server/database/seed.ts` 의 NODE_ENV 가드 참고).
+ * NOTE. DEVELOPER 권한은 다이어그램 스튜디오 등 dev 백도어 용도. seed 단계에서 prod 포함 모든 환경에
+ *       시드되며, 자격증명 노출에 주의해 `DEVELOPER_SEED_PASSWORD` env 를 안전하게 관리한다.
  * TODO. 정식 admin/role 체계 정립 시 ROLES.DEVELOPER 자체 제거 검토.
  */
 export const ROLES = {
