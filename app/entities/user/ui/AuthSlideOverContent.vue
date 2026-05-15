@@ -22,7 +22,9 @@ const form = reactive({
     email: '',
     password: '',
     error: '',
-    isLoading: false
+    isLoading: false,
+    agreedToTerms: false,
+    agreedToPrivacy: false
 })
 
 const reset = () => {
@@ -30,6 +32,8 @@ const reset = () => {
     form.email = ''
     form.password = ''
     form.error = ''
+    form.agreedToTerms = false
+    form.agreedToPrivacy = false
     mode.value = 'login'
 }
 
@@ -39,9 +43,17 @@ const toggleMode = () => {
     form.email = ''
     form.password = ''
     form.error = ''
+    form.agreedToTerms = false
+    form.agreedToPrivacy = false
 }
 
+const canSubmit = computed(() => {
+    if (mode.value !== 'signup') return true
+    return form.agreedToTerms && form.agreedToPrivacy
+})
+
 const submit = async () => {
+    if (!canSubmit.value) return
     form.error = ''
     form.isLoading = true
     try {
@@ -129,6 +141,20 @@ defineExpose({ reset })
                     autocomplete="current-password"
                 />
             </label>
+            <template v-if="mode === 'signup'">
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <UCheckbox v-model="form.agreedToTerms" class="mt-0.5 shrink-0" />
+                    <span class="text-sm text-(--ui-text-muted)">
+                        <a href="/policy/terms" target="_blank" class="underline text-(--ui-text-default)">이용약관</a>에 동의합니다 (필수)
+                    </span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <UCheckbox v-model="form.agreedToPrivacy" class="mt-0.5 shrink-0" />
+                    <span class="text-sm text-(--ui-text-muted)">
+                        <a href="/policy/privacy" target="_blank" class="underline text-(--ui-text-default)">개인정보처리방침</a>에 동의합니다 (필수)
+                    </span>
+                </label>
+            </template>
             <div v-if="form.error" class="text-sm text-(--ui-text-error) flex items-center gap-1">
                 <UIcon name="i-lucide-alert-circle" />
                 {{ form.error }}
@@ -137,6 +163,7 @@ defineExpose({ reset })
                 color="primary"
                 :label="mode === 'login' ? '로그인' : '가입'"
                 :loading="form.isLoading"
+                :disabled="!canSubmit"
                 block
                 @click="submit"
             />

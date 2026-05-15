@@ -26,6 +26,13 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const isLoading = ref(false)
+const agreedToTerms = ref(false)
+const agreedToPrivacy = ref(false)
+
+const canSubmit = computed(() => {
+    if (props.mode !== 'signup') return true
+    return agreedToTerms.value && agreedToPrivacy.value
+})
 
 /** 폼 입력값과 에러 메시지를 초기화한다 */
 const resetForm = () => {
@@ -33,6 +40,8 @@ const resetForm = () => {
     email.value = ''
     password.value = ''
     errorMessage.value = ''
+    agreedToTerms.value = false
+    agreedToPrivacy.value = false
 }
 
 watch(
@@ -55,6 +64,7 @@ const authEffect = useAuthSideeffect()
 
 /** 모드에 따라 로그인 또는 회원가입을 요청하고 결과를 처리한다 */
 const handleSubmit = async () => {
+    if (!canSubmit.value) return
     // 에러 초기화 후 로딩 시작
     errorMessage.value = ''
     isLoading.value = true
@@ -114,6 +124,21 @@ const toggleMode = () => {
                     />
                 </label>
 
+                <template v-if="mode === 'signup'">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <UCheckbox v-model="agreedToTerms" class="mt-0.5 shrink-0" />
+                        <span class="text-sm text-(--ui-text-muted)">
+                            <a href="/policy/terms" target="_blank" class="underline text-(--ui-text-default)">이용약관</a>에 동의합니다 (필수)
+                        </span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <UCheckbox v-model="agreedToPrivacy" class="mt-0.5 shrink-0" />
+                        <span class="text-sm text-(--ui-text-muted)">
+                            <a href="/policy/privacy" target="_blank" class="underline text-(--ui-text-default)">개인정보처리방침</a>에 동의합니다 (필수)
+                        </span>
+                    </label>
+                </template>
+
                 <div
                     v-if="errorMessage"
                     class="flex items-start gap-[0.375rem] text-xs text-(--ui-error) px-3 py-[0.625rem] rounded-2xl bg-[color-mix(in_srgb,var(--ui-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--ui-error)_22%,transparent)]"
@@ -142,7 +167,7 @@ const toggleMode = () => {
                     variant="solid"
                     color="primary"
                     :label="mode === 'login' ? '로그인' : '가입'"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canSubmit"
                     @click="handleSubmit"
                 />
             </div>
