@@ -2,41 +2,46 @@ import type { createRouteElevationProfile } from '~/entities/route/lib/useRouteE
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 
 /**
- * 경로 고도 그래프 상태/제어를 단일 책임 단위로 노출하는 facade.
- *
- * 실제 elevation 계산은 `useRouteElevationProfile` lib에 있고,
- * 본 facade는 store와 결합한 차트 open/close/setOpen 책임만 진다.
- *
- * #112 결정(8분할, 점진적 마이그레이션, `useXxxFacade` 명명) 반영.
+ * 고도 차트 열기/닫기 상태를 제공하는 sub-facade.
  */
 export const useRouteElevationFacade = () => {
     const store = useRouteDrawStore()
 
-    const close = () => {
+    const closeElevationChart = () => {
         store.isElevationChartOpen.value = false
         store.elevationProfile.value = null
     }
 
-    const setOpen = (open: boolean) => {
+    const setElevationChartOpen = (open: boolean) => {
         store.isElevationChartOpen.value = open
     }
 
-    const open = (title: string, profile: ReturnType<typeof createRouteElevationProfile>) => {
+    const openElevationChart = (
+        title: string,
+        profile: ReturnType<typeof createRouteElevationProfile>
+    ) => {
         if (!profile) {
-            close()
+            closeElevationChart()
             return
         }
+
         store.elevationChartTitle.value = title
         store.elevationProfile.value = profile
         store.isElevationChartOpen.value = true
     }
 
-    return {
-        isOpen: store.isElevationChartOpen,
+    const elevationChart = reactive({
+        open: store.isElevationChartOpen,
         title: store.elevationChartTitle,
         profile: store.elevationProfile,
-        open,
-        close,
-        setOpen
+        setOpen: setElevationChartOpen,
+        close: closeElevationChart
+    })
+
+    return {
+        elevationChart,
+        openElevationChart,
+        closeElevationChart,
+        setElevationChartOpen
     }
 }
