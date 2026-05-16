@@ -1,19 +1,19 @@
-import { useRouteOptimizationSideeffect } from '~/features/draw-route/api/useRouteOptimizationSideeffect'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
+import { useRouteOptimizationSideeffect } from '~/features/draw-route/api/useRouteOptimizationSideeffect'
 
 /**
- * 경로 최적화(보행자 보정 등) sideeffect를 단일 책임 단위로 노출하는 facade.
- *
- * #112 결정(8분할, 점진적 마이그레이션, `useXxxFacade` 명명) 반영.
+ * 경로 최적화(보행자 경로 보정) 관련 기능을 제공하는 sub-facade.
  */
 export const useRouteOptimizationFacade = () => {
     const store = useRouteDrawStore()
-    const effect = useRouteOptimizationSideeffect({
+
+    const optimizationEffect = useRouteOptimizationSideeffect({
         isOptimizing: store.isOptimizing
     })
+
     return {
-        mode: store.optimizationMode,
-        isOptimizing: store.isOptimizing,
-        optimizeRoute: effect.optimizeRoute
+        optimizationEffect,
+        optimizationMode: store.optimizationMode,
+        isOptimizing: store.isOptimizing
     }
 }
