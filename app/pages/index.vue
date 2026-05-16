@@ -275,8 +275,10 @@ watch(
             @drawing-start="drawing.start()"
             @toggle-recommend="showRecommend = !showRecommend"
             @auth-success="
-                slideOver.close()
-                fetchRoutes()
+                () => {
+                    slideOver.close()
+                    fetchRoutes()
+                }
             "
             @auth-logout="authEffect.logout()"
             @go-login="slideOver.select(NavKey.AUTH)"
