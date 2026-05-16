@@ -81,22 +81,7 @@ pipeline {
             }
         }
 
-        // ── 4. Docker Hub Push ──
-        stage('Docker Push') {
-            steps {
-                sh '''#!/bin/bash
-                    set -euo pipefail
-
-                    docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${BUILD_TAG} -f minikube/Dockerfile .
-                    docker push ${DOCKER_IMAGE}:latest
-                    docker push ${DOCKER_IMAGE}:${BUILD_TAG}
-
-                    echo "==> Docker Hub: ${DOCKER_IMAGE}:${BUILD_TAG}"
-                '''
-            }
-        }
-
-        // ── 5. K8s 리소스 + DB 마이그레이션 ──
+        // ── 4. K8s 리소스 + DB 마이그레이션 ──
         stage('Migrate') {
             steps {
                 sh '''#!/bin/bash
