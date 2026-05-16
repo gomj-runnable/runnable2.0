@@ -67,16 +67,13 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
         clearSectionGraphics()
         options.resetRouteDrawState()
-
         isDrawingActive.value = true
-
         options.notify({ title: '경로 그리기', message: '좌클릭: 구간 추가\n우클릭: 완료' })
 
         const result = await options.viewer.value._drawAction({
             shapeType: 1,
             showLabel: true
         })
-
         isDrawingActive.value = false
 
         if (!result || !('data' in result) || !result.data) {
@@ -92,10 +89,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         const data = result.data
         const positions = normalizeDrawPositions(getCesiumRuntime(), data)
         const routeGeom = createHeightAwareRouteGeom(data, positions)
-
-        if (positions.length === 0) {
-            return null
-        }
+        if (positions.length === 0) return null
 
         options.drawMetrics.value = data
             ? {
@@ -112,10 +106,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     /** 진행 중인 드로잉을 취소하고 지도 위 구간 그래픽을 정리한다. */
     const cancelDrawing = () => {
-        if (!options.viewer.value) {
-            return
-        }
-
+        if (!options.viewer.value) return
         isDrawingActive.value = false
         options.viewer.value._cancelDrawAction()
         clearSectionGraphics()
@@ -123,13 +114,9 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     /** 진행 중인 드로잉을 현재 포인트로 완료한다. (모바일 우클릭 대체) */
     const finishDrawing = () => {
-        if (!options.viewer.value) {
-            return
-        }
-
+        if (!options.viewer.value) return
         options.viewer.value._finishDrawAction()
     }
-
     /** 현재 구간 초안을 Zod 스키마로 파싱하고 저장 모달을 연다. */
     const handleDrawSave = () => {
         if (!options.drawnPositions.value?.length || !options.sectionDraft.value) {
@@ -140,34 +127,23 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
             })
             return
         }
-
         options.sectionDraft.value = createSectionSchema.parse(options.sectionDraft.value)
         options.isRouteSaveModalOpen.value = true
     }
 
-    /**
-     * 구간 초안의 특정 구간 속성을 업데이트한다.
-     */
+    /** 구간 초안의 특정 구간 속성을 업데이트한다. */
     const handleUpdateSectionAttr = (payload: {
         index: number
         field: 'name' | 'comment' | 'description'
         value: string
     }) => {
-        if (!options.sectionDraft.value) {
-            return
-        }
-
+        if (!options.sectionDraft.value) return
         options.sectionDraft.value = updateSectionDraftAttr(options.sectionDraft.value, payload)
     }
 
-    /**
-     * 특정 구간을 삭제하고 직전 구간과 병합한다.
-     */
+    /** 특정 구간을 삭제하고 직전 구간과 병합한다. */
     const handleRemoveSection = ({ index }: { index: number }) => {
-        if (!options.sectionDraft.value) {
-            return
-        }
-
+        if (!options.sectionDraft.value) return
         options.sectionPointRanges.value = mergeSectionPointRanges(
             options.sectionPointRanges.value,
             index
@@ -179,10 +155,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         }
         redrawSectionGraphics()
     }
-
-    /**
-     * 특정 구간의 포인트를 시각화하여 사용자가 분할 지점을 직접 선택하도록 한다.
-     */
+    /** 특정 구간의 포인트를 시각화하여 분할 지점을 선택하도록 한다. */
     const handleAddSection = ({ index }: { index: number }) => {
         if (!options.sectionDraft.value) return
 
@@ -198,11 +171,8 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
         enterSplitMode(index)
     }
-
     if (options.closingMode) {
-        watch(options.closingMode, () => {
-            redrawSectionGraphics()
-        })
+        watch(options.closingMode, () => redrawSectionGraphics())
     }
 
     onBeforeUnmount(() => {

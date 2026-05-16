@@ -22,7 +22,6 @@ interface UseFacilitySideeffectOptions {
     activeTypes: Ref<Set<FacilityType>>
     isLoading: Ref<boolean>
     isSearching: Ref<boolean>
-    /** POI 엔티티 클릭 시 호출되는 콜백. 활성 구간 연결에 사용한다. */
     onPoiClick?: (poi: PoiDraftInput) => void
 }
 
@@ -87,19 +86,14 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
             handler.setInputAction((movement) => {
                 if (!movement.position) return
-
                 const picked = v.scene.pick(movement.position as import('cesium').Cartesian2)
-
                 if (!picked?.id) {
                     facilityStore.selectedFacility.value = null
                     return
                 }
-
                 const entity = picked.id as Entity
                 const facility = renderer.getFacilityByEntity(entity)
-
                 if (!facility) return
-
                 if (onPoiClick) {
                     const poi = facilityToPoiDraft(facility)
                     if (poi) {
@@ -107,7 +101,6 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                         return
                     }
                 }
-
                 facilityStore.selectedFacility.value = facility
             }, C.ScreenSpaceEventType.LEFT_CLICK)
 
@@ -134,18 +127,12 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
     const activeTypesKey = computed(() => [...activeTypes.value].sort().join(','))
 
     const syncLayers = async () => {
-        const current = activeTypes.value
         await fetchFacilities()
-
         for (const type of ALL_FACILITY_TYPES) {
-            const shouldShow = current.has(type)
+            const shouldShow = activeTypes.value.has(type)
             const isShown = renderer.isLayerShown(type)
-
-            if (shouldShow && !isShown) {
-                renderer.showLayer(type)
-            } else if (!shouldShow && isShown) {
-                renderer.removeLayer(type)
-            }
+            if (shouldShow && !isShown) renderer.showLayer(type)
+            else if (!shouldShow && isShown) renderer.removeLayer(type)
         }
     }
 
