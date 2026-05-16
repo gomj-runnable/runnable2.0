@@ -41,7 +41,7 @@ export async function architectureFlowchart(feature: Feature): Promise<string> {
 
 export async function architectureDependency(feature: Feature): Promise<string> {
     const pkg = await readPkg()
-    const isDev = feature.id === 'architecture:dev-tools'
+    const isDev = feature.id === 'library:dev-tools'
     const map = (isDev ? pkg.devDependencies : pkg.dependencies) ?? {}
     const lines: string[] = ['flowchart LR']
     const rootId = sanitizeId(pkg.name ?? 'app')

@@ -1,4 +1,4 @@
-export type DomainTab = 'frontend' | 'backend' | 'architecture'
+export type DomainTab = 'planning' | 'frontend' | 'backend' | 'library'
 
 export type DiagramType = 'class' | 'flowchart' | 'sequence' | 'dependency'
 

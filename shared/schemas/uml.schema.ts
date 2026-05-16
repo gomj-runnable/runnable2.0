@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const domainTabSchema = z.enum(['frontend', 'backend', 'architecture'])
+export const domainTabSchema = z.enum(['planning', 'frontend', 'backend', 'library'])
 
 export const diagramTypeSchema = z.enum(['class', 'flowchart', 'sequence', 'dependency'])
 

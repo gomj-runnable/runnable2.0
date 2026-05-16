@@ -18,16 +18,19 @@ const BACKEND_GROUPS = [
     { dir: 'server/utils', label: 'utils' }
 ] as const
 
-interface ArchCategory {
+interface InfraCategory {
     id: string
+    domain: DomainTab
     name: string
     description: string
     paths: string[]
 }
 
-const ARCH_CATEGORIES: ArchCategory[] = [
+// #125: 기존 architecture 카테고리 5종을 library(3) / backend:infra(2) 로 재매핑
+const LIBRARY_CATEGORIES: InfraCategory[] = [
     {
-        id: 'architecture:runtime',
+        id: 'library:runtime',
+        domain: 'library',
         name: 'runtime',
         description: 'Nuxt/Nitro 런타임, plugins, middleware',
         paths: [
@@ -39,26 +42,33 @@ const ARCH_CATEGORIES: ArchCategory[] = [
         ]
     },
     {
-        id: 'architecture:dependencies',
+        id: 'library:dependencies',
+        domain: 'library',
         name: 'dependencies',
         description: 'package.json 프로덕션 의존성',
         paths: ['package.json']
     },
     {
-        id: 'architecture:dev-tools',
+        id: 'library:dev-tools',
+        domain: 'library',
         name: 'dev-tools',
         description: 'devDependencies, 빌드/테스트 도구',
         paths: ['package.json', 'eslint.config.mjs', 'vitest.config.ts', 'tsconfig.json']
-    },
+    }
+]
+
+const BACKEND_INFRA_CATEGORIES: InfraCategory[] = [
     {
-        id: 'architecture:data-layer',
-        name: 'data-layer',
+        id: 'backend:infra:data-layer',
+        domain: 'backend',
+        name: 'infra/data-layer',
         description: 'DB, ORM, 캐시',
         paths: ['server/database', 'server/repositories']
     },
     {
-        id: 'architecture:external-services',
-        name: 'external-services',
+        id: 'backend:infra:external-services',
+        domain: 'backend',
+        name: 'infra/external-services',
         description: '외부 API/인증/지도 등',
         paths: ['server/services']
     }
@@ -188,43 +198,53 @@ async function detectBackend(): Promise<Feature[]> {
     return features
 }
 
-async function detectArchitecture(): Promise<Feature[]> {
-    const features: Feature[] = []
-    const now = new Date().toISOString()
-
-    for (const cat of ARCH_CATEGORIES) {
-        let fileCount = 0
-        for (const p of cat.paths) {
-            const abs = resolve(repoRoot, p)
-            if (!(await exists(abs))) continue
-            const stat = await fs.stat(abs)
-            if (stat.isDirectory()) {
-                fileCount += await countSourceFiles(abs)
-            } else {
-                fileCount += 1
-            }
+async function countCategoryFiles(cat: InfraCategory): Promise<number> {
+    let fileCount = 0
+    for (const p of cat.paths) {
+        const abs = resolve(repoRoot, p)
+        if (!(await exists(abs))) continue
+        const stat = await fs.stat(abs)
+        if (stat.isDirectory()) {
+            fileCount += await countSourceFiles(abs)
+        } else {
+            fileCount += 1
         }
+    }
+    return fileCount
+}
+
+async function detectFromCategories(categories: InfraCategory[]): Promise<Feature[]> {
+    const now = new Date().toISOString()
+    const features: Feature[] = []
+    for (const cat of categories) {
         features.push({
             id: cat.id,
-            domain: 'architecture',
+            domain: cat.domain,
             name: cat.name,
             description: cat.description,
             paths: cat.paths,
-            fileCount,
+            fileCount: await countCategoryFiles(cat),
             detectedAt: now
         })
     }
     return features
 }
 
+// #125: 기획 다이어그램(user-journey 등)은 데이터 소스가 추가될 때까지 자리만 마련
+async function detectPlanning(): Promise<Feature[]> {
+    return []
+}
+
 export async function detectAllFeatures(): Promise<FeaturesPayload> {
-    const [fe, be, ar] = await Promise.all([
+    const [pl, fe, be, beInfra, lib] = await Promise.all([
+        detectPlanning(),
         detectFrontend(),
         detectBackend(),
-        detectArchitecture()
+        detectFromCategories(BACKEND_INFRA_CATEGORIES),
+        detectFromCategories(LIBRARY_CATEGORIES)
     ])
     return {
-        features: [...fe, ...be, ...ar],
+        features: [...pl, ...fe, ...be, ...beInfra, ...lib],
         scannedAt: new Date().toISOString()
     }
 }
