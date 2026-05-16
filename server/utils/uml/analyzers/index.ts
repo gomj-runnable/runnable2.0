@@ -8,15 +8,31 @@ import { buildFrontendDiagram } from './frontend'
 import { buildBackendDiagram } from './backend'
 import { buildArchitectureDiagram } from './architecture'
 
+function pickAnalyzer(
+    feature: Feature
+): (f: Feature, t: AnalyzeRequestParsed['diagramType']) => Promise<string> {
+    // #125: 인프라 시각(library + backend:infra) 은 architecture 분석기를 공유
+    if (feature.id.startsWith('library:') || feature.id.startsWith('backend:infra:')) {
+        return buildArchitectureDiagram
+    }
+    if (feature.domain === 'frontend') return buildFrontendDiagram
+    if (feature.domain === 'backend') return buildBackendDiagram
+    return buildArchitectureDiagram
+}
+
 async function buildOne(
     feature: Feature,
     type: AnalyzeRequestParsed['diagramType']
 ): Promise<AnalyzeResponseItem> {
+    if (feature.domain === 'planning') {
+        return {
+            featureId: feature.id,
+            mermaid: 'flowchart LR\n  todo["기획 다이어그램 데이터 소스 미정 (#125 후속)"]'
+        }
+    }
     try {
-        let mermaid: string
-        if (feature.domain === 'frontend') mermaid = await buildFrontendDiagram(feature, type)
-        else if (feature.domain === 'backend') mermaid = await buildBackendDiagram(feature, type)
-        else mermaid = await buildArchitectureDiagram(feature, type)
+        const analyzer = pickAnalyzer(feature)
+        const mermaid = await analyzer(feature, type)
 
         const cachePath = diagramCachePath(feature.domain, feature.id)
         await fs.mkdir(dirname(cachePath), { recursive: true })
