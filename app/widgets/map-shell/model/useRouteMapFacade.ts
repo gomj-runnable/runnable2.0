@@ -138,10 +138,8 @@ export const useRouteMapFacade = (
         }
     })
 
-    /** 페이지 마운트 시 저장된 경로 목록을 자동으로 불러온다 */
-    onMounted(async () => {
-        await listEffect.fetchRoutes()
-    })
+    /** 경로 목록을 불러온다. 페이지에서 인증 상태 확인 후 호출한다. */
+    const fetchRoutes = () => listEffect.fetchRoutes()
 
     // ─── 파생 객체 조합 ───────────────────────────────────────────
 
@@ -173,6 +171,7 @@ export const useRouteMapFacade = (
         isOptimizing: optimizationFacade.isOptimizing,
         hideRoutePolylines,
         showRoutePolylines,
-        showRouteInfoGuide
+        showRouteInfoGuide,
+        fetchRoutes
     }
 }

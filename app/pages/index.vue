@@ -12,6 +12,7 @@ import SlideOverContent from '~/widgets/map-shell/ui/SlideOverContent.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
+import { NavKey } from '~/widgets/map-shell/model/nav-key'
 import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
 import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
@@ -48,7 +49,8 @@ const {
     exploreSelectRoute,
     hideRoutePolylines,
     showRoutePolylines,
-    showRouteInfoGuide
+    showRouteInfoGuide,
+    fetchRoutes
 } = facade
 
 const features = useMapFeatureInit({
@@ -130,7 +132,10 @@ const { districtEffect, sigunguOptions, dongOptions, handleExploreSelect, handle
         notification
     })
 
-onMounted(() => districtEffect.init())
+onMounted(async () => {
+    await districtEffect.init()
+    if (authStore.isLoggedIn.value) await fetchRoutes()
+})
 
 defineShortcuts({
     escape: () => {
@@ -248,6 +253,7 @@ watch(
             :current-nav="slideOver.current.value"
             :title="slideOverTitle"
             :description="slideOverDescription"
+            :is-logged-in="authStore.isLoggedIn.value"
             :route-list="routeList"
             :current-user-id="authStore.user.value?.id"
             :section-info="sectionInfo"
@@ -268,8 +274,12 @@ watch(
             @step-back="handleStepBack"
             @drawing-start="drawing.start()"
             @toggle-recommend="showRecommend = !showRecommend"
-            @auth-success="slideOver.close()"
+            @auth-success="
+                slideOver.close()
+                fetchRoutes()
+            "
             @auth-logout="authEffect.logout()"
+            @go-login="slideOver.select(NavKey.AUTH)"
         />
 
         <UModal v-model:open="showStepBackConfirm" title="구간정보 닫기">
