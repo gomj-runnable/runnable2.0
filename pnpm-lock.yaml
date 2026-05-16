@@ -115,8 +115,8 @@ importers:
         specifier: ^17.0.4
         version: 17.0.4
       nuxt-api-shield:
-        specifier: ^0.5.0
-        version: 0.5.0(magicast@0.5.1)
+        specifier: ^0.10.2
+        version: 0.10.2(magicast@0.5.1)
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -5814,8 +5814,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nuxt-api-shield@0.5.0:
-    resolution: {integrity: sha512-52UURoSGxch9Ftu+RB0KNN574cKRR5HAaNTzjLAU2kDKYhluxGTeIqx+sjm/YkZ4I7ye6g6g96AttLAYcqY6Cw==}
+  nuxt-api-shield@0.10.2:
+    resolution: {integrity: sha512-oMc48DpA2FG2VwjTxRf2MZsFf9Xu4/uhsVf3utWUqJNs7kYxMXQtJTMktPb+KiGRawyENnI3xhg+f2mmgM6Ffg==}
 
   nuxt@4.3.0:
     resolution: {integrity: sha512-99Iw3E3L5/2QtJyV4errZ0axkX/S9IAFK0AHm0pmRHkCu37OFn8mz2P4/CYTt6B/TG3mcKbXAVaeuF2FsAc1cA==}
@@ -14144,9 +14144,9 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuxt-api-shield@0.5.0(magicast@0.5.1):
+  nuxt-api-shield@0.10.2(magicast@0.5.1):
     dependencies:
-      '@nuxt/kit': 3.21.2(magicast@0.5.1)
+      '@nuxt/kit': 4.4.2(magicast@0.5.1)
       defu: 6.1.7
     transitivePeerDependencies:
       - magicast
