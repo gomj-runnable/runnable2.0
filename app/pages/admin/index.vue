@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import { useAuthStore } from '~/entities/user/model/useAuthStore'
+import { hasDeveloperAccess } from '../../../shared/constants/roles'
+
 definePageMeta({ ssr: false })
+
+const { user } = useAuthStore()
+const showUmlCard = computed(() => import.meta.dev && hasDeveloperAccess(user.value?.role))
 
 const { data: seedStatus } = await useFetch('/api/admin/seed/status')
 
@@ -100,6 +106,23 @@ async function runSeed() {
                 </template>
                 <p class="text-sm text-(--ui-text-muted)">준비 중</p>
             </UCard>
+
+            <NuxtLink v-if="showUmlCard" to="/dev/uml" class="block">
+                <UCard :ui="{ root: 'hover:ring-2 hover:ring-primary-500 transition' }">
+                    <template #header>
+                        <div class="flex items-center gap-2">
+                            <UIcon name="i-lucide-git-graph" class="w-5 h-5" />
+                            <h2 class="font-medium">UML Dashboard</h2>
+                            <UBadge color="info" variant="subtle" size="xs" class="ml-auto">
+                                개발 전용
+                            </UBadge>
+                        </div>
+                    </template>
+                    <p class="text-sm text-(--ui-text-muted)">
+                        프로젝트 구조 시각화 (DEVELOPER 권한 · 개발 모드 전용).
+                    </p>
+                </UCard>
+            </NuxtLink>
         </div>
 
         <UModal v-model:open="isConfirmOpen">
@@ -107,17 +130,23 @@ async function runSeed() {
                 <UCard>
                     <template #header>
                         <div class="flex items-center gap-2">
-                            <UIcon name="i-lucide-alert-triangle" class="w-5 h-5 text-warning-500" />
+                            <UIcon
+                                name="i-lucide-alert-triangle"
+                                class="w-5 h-5 text-warning-500"
+                            />
                             <h3 class="font-medium">시드 재실행 확인</h3>
                         </div>
                     </template>
 
                     <div class="space-y-2 text-sm text-(--ui-text-muted)">
-                        <p>최고관리자 계정을 다시 시드합니다. 기존 계정 데이터는 환경변수 값으로 업데이트됩니다.</p>
+                        <p>
+                            최고관리자 계정을 다시 시드합니다. 기존 계정 데이터는 환경변수 값으로
+                            업데이트됩니다.
+                        </p>
                         <p>
                             시설물 데이터는 CLI
-                            <code class="font-mono bg-(--ui-bg-muted) px-1 rounded">pnpm seed</code>를
-                            사용하세요.
+                            <code class="font-mono bg-(--ui-bg-muted) px-1 rounded">pnpm seed</code
+                            >를 사용하세요.
                         </p>
                     </div>
 

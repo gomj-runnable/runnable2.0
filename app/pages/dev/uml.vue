@@ -19,9 +19,10 @@ const colorMode = useColorMode()
 const domain = useState<DomainTab>('uml:domain', () => 'frontend')
 const diagramType = useState<DiagramType>('uml:diagramType', () => 'flowchart')
 const activeMap = useState<Record<DomainTab, string[]>>('uml:active', () => ({
+    planning: [],
     frontend: [],
     backend: [],
-    architecture: []
+    library: []
 }))
 const search = useState<string>('uml:search', () => '')
 
@@ -29,7 +30,13 @@ if (import.meta.client) {
     const saved = window.localStorage.getItem('uml:active')
     if (saved) {
         try {
-            activeMap.value = JSON.parse(saved)
+            const parsed = JSON.parse(saved) as Partial<Record<DomainTab, string[]>>
+            activeMap.value = {
+                planning: parsed.planning ?? [],
+                frontend: parsed.frontend ?? [],
+                backend: parsed.backend ?? [],
+                library: parsed.library ?? []
+            }
         } catch {
             /* ignore */
         }
@@ -90,6 +97,9 @@ async function rescan() {
 }
 
 const diagramTypeOptions = computed(() => {
+    if (domain.value === 'planning') {
+        return [{ label: 'Flowchart (자리만 마련)', value: 'flowchart' as DiagramType }]
+    }
     if (domain.value === 'frontend') {
         return [
             { label: 'Flowchart (import 그래프)', value: 'flowchart' as DiagramType },
@@ -116,10 +126,18 @@ watch(domain, () => {
 })
 
 const tabItems = [
-    { label: 'Frontend', value: 'frontend' as DomainTab, icon: 'i-lucide-layout-template' },
-    { label: 'Backend', value: 'backend' as DomainTab, icon: 'i-lucide-server' },
-    { label: 'Architecture', value: 'architecture' as DomainTab, icon: 'i-lucide-network' }
+    { label: '기획', value: 'planning' as DomainTab, icon: 'i-lucide-clipboard-list' },
+    { label: '프론트', value: 'frontend' as DomainTab, icon: 'i-lucide-layout-template' },
+    { label: '백', value: 'backend' as DomainTab, icon: 'i-lucide-server' },
+    { label: '라이브러리', value: 'library' as DomainTab, icon: 'i-lucide-package' }
 ]
+
+const DOMAIN_ICONS: Record<DomainTab, string> = {
+    planning: 'i-lucide-clipboard-list',
+    frontend: 'i-lucide-layout-template',
+    backend: 'i-lucide-server',
+    library: 'i-lucide-package'
+}
 
 const results = ref<AnalyzeResponseItem[]>([])
 const analyzing = ref(false)
@@ -305,16 +323,7 @@ function withTheme(src: string, theme: string): string {
                     <UCard v-for="f in activeFeatures" :key="f.id">
                         <template #header>
                             <div class="flex items-center gap-2">
-                                <UIcon
-                                    :name="
-                                        f.domain === 'frontend'
-                                            ? 'i-lucide-layout-template'
-                                            : f.domain === 'backend'
-                                              ? 'i-lucide-server'
-                                              : 'i-lucide-network'
-                                    "
-                                    class="w-4 h-4"
-                                />
+                                <UIcon :name="DOMAIN_ICONS[f.domain]" class="w-4 h-4" />
                                 <h3 class="font-medium text-sm truncate" :title="f.id">
                                     {{ f.name }}
                                 </h3>
