@@ -61,9 +61,8 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         code: string
     ): HourlyWeather | undefined => {
         for (const [dongCode, daily] of snapshot) {
-            if (code.startsWith(dongCode.slice(0, 5)) || dongCode.startsWith(code.slice(0, 5))) {
+            if (code.startsWith(dongCode.slice(0, 5)) || dongCode.startsWith(code.slice(0, 5)))
                 return daily
-            }
         }
         return undefined
     }
@@ -82,10 +81,20 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         async (month: string) => $fetch<SeoulMonthlyWeather>(`/api/weather/monthly/${month}`),
         { label: 'WeatherSideeffect', retry: 1 }
     )
-
     const _fetchAvailability = withErrorBoundary(
         async (month: string) => $fetch<MonthAvailability>(`/api/weather/availability/${month}`),
         { label: 'WeatherSideeffect', retry: 1 }
+    )
+    const _loadGeoJsonDataSource = withErrorBoundary(
+        async (Cesium: CesiumRuntime, geojson: object) => {
+            return await Cesium.GeoJsonDataSource.load(geojson, {
+                stroke: Cesium.Color.fromCssColorString('rgba(255,255,255,0.85)'),
+                fill: Cesium.Color.fromCssColorString(NO_DATA_COLOR),
+                strokeWidth: 2,
+                clampToGround: true
+            })
+        },
+        { label: 'WeatherSideeffect' }
     )
 
     const fetchMonthlyWeather = async () => {
@@ -94,7 +103,6 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
             const month = `${selectedMonth.value.slice(0, 4)}-${selectedMonth.value.slice(4)}`
             const data = await _fetchMonthlyData(month)
             monthlyData.value = data
-
             if (data?.sourceErrors?.length && !weatherErrorNotified) {
                 weatherErrorNotified = true
                 notify({
@@ -120,32 +128,16 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     const fetchAvailability = async () => {
         const month = `${selectedMonth.value.slice(0, 4)}-${selectedMonth.value.slice(4)}`
         const data = await _fetchAvailability(month)
-        if (data) {
-            sourceAvailability.value = data.sourceAvailability
-        }
+        if (data) sourceAvailability.value = data.sourceAvailability
     }
-
-    const _loadGeoJsonDataSource = withErrorBoundary(
-        async (Cesium: CesiumRuntime, geojson: object) => {
-            return await Cesium.GeoJsonDataSource.load(geojson, {
-                stroke: Cesium.Color.fromCssColorString('rgba(255,255,255,0.85)'),
-                fill: Cesium.Color.fromCssColorString(NO_DATA_COLOR),
-                strokeWidth: 2,
-                clampToGround: true
-            })
-        },
-        { label: 'WeatherSideeffect' }
-    )
 
     const loadBoundaryDataSource = async () => {
         const v = viewer.value
         if (!v || !boundaryGeojson.value) return
-
         const Cesium = getCesiumRuntime()
         try {
             const ds = await _loadGeoJsonDataSource(Cesium, boundaryGeojson.value as object)
             if (!ds) return
-
             await (
                 v as unknown as { dataSources: { add(ds: unknown): Promise<void> } }
             ).dataSources.add(ds)
@@ -162,7 +154,7 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
                 weatherOutlineInstances
             })
         } catch {
-            // 에러는 withErrorBoundary에서 로깅됨 — DataSource 실패가 전체 초기화를 깨뜨리지 않도록 격리
+            // 에러는 withErrorBoundary에서 로깅됨
         }
     }
 
@@ -181,14 +173,12 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
     const clearWeatherLayer = () => {
         const v = viewer.value
         if (!v) return
-
         if (weatherDataSource) {
             ;(v as unknown as { dataSources: { remove(ds: unknown): void } }).dataSources.remove(
                 weatherDataSource
             )
             weatherDataSource = null
         }
-
         if (weatherOutlinePrimitive) {
             v.scene.primitives.remove(weatherOutlinePrimitive)
             weatherOutlinePrimitive = null
@@ -207,15 +197,12 @@ export const useWeatherSideeffect = (options: UseWeatherSideeffectOptions) => {
         if (weatherDataSource) {
             ;(weatherDataSource as unknown as { show: boolean }).show = v
         }
-        if (weatherOutlinePrimitive) {
-            weatherOutlinePrimitive.show = v
-        }
+        if (weatherOutlinePrimitive) weatherOutlinePrimitive.show = v
     })
     watch(selectedMonth, () => {
         fetchMonthlyWeather()
         fetchAvailability()
     })
-
     onBeforeUnmount(() => clearWeatherLayer())
 
     return { init, clearWeatherLayer, fetchAvailability }
