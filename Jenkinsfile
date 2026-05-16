@@ -62,28 +62,19 @@ pipeline {
             }
         }
 
-        // ── 3. 인프라 준비 (Colima + minikube) ──
+        // ── 3. 인프라 준비 (Docker + K8s 연결 확인) ──
         stage('Infra') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
                     echo "==> Docker 데몬 확인"
-                    if ! docker info &>/dev/null; then
-                        echo "    Docker 연결 실패 — Colima 재시작"
-                        colima stop 2>/dev/null || true
-                        colima start
-                    fi
+                    docker info &>/dev/null || { echo "ERROR: Docker 연결 실패"; exit 1; }
+                    echo "    Docker OK"
 
-                    echo "==> minikube 확인"
-                    if ! minikube status &>/dev/null; then
-                        echo "    minikube 시작"
-                        minikube start
-                    fi
-
-                    echo "==> PostGIS 이미지 준비"
-                    eval $(minikube docker-env)
-                    docker pull imresamu/postgis:17-3.5-alpine 2>/dev/null || true
+                    echo "==> K8s 클러스터 확인"
+                    kubectl cluster-info &>/dev/null || { echo "ERROR: K8s 클러스터 연결 실패"; exit 1; }
+                    kubectl -n runnable get deployment 2>/dev/null || echo "    runnable 네임스페이스 아직 없음 (최초 배포)"
 
                     echo "==> 인프라 준비 완료"
                 '''
@@ -110,7 +101,6 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
-                    eval $(minikube docker-env)
 
                     echo "==> 시크릿/설정 파일 복사 (Jenkins 로컬 → 워크스페이스)"
                     for f in secret.prod.yaml configmap.prod.yaml; do
@@ -129,8 +119,9 @@ pipeline {
                     kubectl apply -f minikube/k8s/postgres.yaml
                     kubectl -n runnable rollout status deployment/postgres --timeout=120s
 
-                    echo "==> Migration 이미지 빌드 + 실행"
+                    echo "==> Migration 이미지 빌드 + minikube 로드"
                     docker build --no-cache -t runnable-migrate:latest -f minikube/Dockerfile.migrate .
+                    minikube image load runnable-migrate:latest
                     kubectl delete job runnable-migrate -n runnable --ignore-not-found
                     kubectl apply -f minikube/k8s/migration-job.yaml
                     kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=300s
@@ -145,10 +136,10 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
-                    eval $(minikube docker-env)
 
-                    echo "==> App 이미지 빌드 + Rolling Update"
+                    echo "==> App 이미지 빌드 + minikube 로드 + Rolling Update"
                     docker build --no-cache -t runnable-app:latest -f minikube/Dockerfile .
+                    minikube image load runnable-app:latest
                     kubectl apply -f minikube/k8s/app.yaml
                     kubectl -n runnable rollout restart deployment/runnable-app
                     kubectl -n runnable rollout status deployment/runnable-app --timeout=180s
@@ -158,39 +149,17 @@ pipeline {
             }
         }
 
-        // ── 7. 헬스체크 + Funnel ──
-        // port-forward는 LaunchAgent(com.runnable.portforward)가 상시 관리
+        // ── 7. 헬스체크 ──
         stage('Expose') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
-                    echo "==> 헬스체크 (LaunchAgent port-forward 재연결 대기)"
-                    for i in $(seq 1 10); do
-                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${LOCAL_PORT}" --max-time 5 2>/dev/null || echo "000")
-                        if [ "$HTTP_CODE" = "200" ]; then
-                            echo "    OK (HTTP 200)"
-                            break
-                        fi
-                        echo "    시도 ${i}/10 — HTTP ${HTTP_CODE}"
-                        sleep 3
-                    done
+                    echo "==> K8s 배포 상태 확인"
+                    kubectl -n runnable get pods
+                    kubectl -n runnable rollout status deployment/runnable-app --timeout=60s || true
 
-                    if [ "$HTTP_CODE" != "200" ]; then
-                        echo "ERROR: 헬스체크 실패 (HTTP ${HTTP_CODE})"
-                        kubectl -n runnable logs deployment/runnable-app --tail=20
-                        exit 1
-                    fi
-
-                    echo "==> Tailscale Funnel 연결"
-                    if command -v tailscale &>/dev/null; then
-                        tailscale funnel --https=443 off 2>/dev/null || true
-                        tailscale funnel --bg --https=443 "http://localhost:${LOCAL_PORT}" || echo "    Funnel 설정 실패"
-                        echo "    외부 URL:"
-                        tailscale funnel status 2>/dev/null | grep "https://" | head -1 || true
-                    fi
-
-                    echo "==> 외부 공개 완료"
+                    echo "==> 배포 완료 — port-forward 및 Tailscale Funnel은 LaunchAgent가 관리"
                 '''
             }
         }
