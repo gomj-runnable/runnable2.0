@@ -18,6 +18,7 @@ const props = defineProps<{
     currentNav: string
     title: string
     description: string
+    isLoggedIn: boolean
     routeList: any
     currentUserId: string | undefined
     sectionInfo: any
@@ -43,6 +44,7 @@ const emit = defineEmits<{
     'toggle-recommend': []
     'auth-success': []
     'auth-logout': []
+    'go-login': []
 }>()
 
 const authContentRef = ref<InstanceType<typeof AuthSlideOverContent> | null>(null)
@@ -68,10 +70,20 @@ watch(
         @update:open="emit('update:open', $event)"
     >
         <template #body>
-            <!-- 목록 -->
+            <!-- 목록 (로그인 필요) -->
             <div v-if="currentNav === NavKey.LIST" class="flex flex-col gap-1">
+                <div
+                    v-if="!isLoggedIn"
+                    class="flex flex-col items-center justify-center gap-4 py-12 text-center"
+                >
+                    <UIcon name="i-lucide-lock" class="size-10 text-[var(--ui-text-dimmed)]" />
+                    <p class="text-sm text-[var(--ui-text-muted)]">
+                        내 경로 목록을 보려면 로그인이 필요합니다.
+                    </p>
+                    <UButton label="로그인" color="primary" @click="emit('go-login')" />
+                </div>
                 <SectionInfoSlideContent
-                    v-if="sectionInfo.isOpen.value"
+                    v-else-if="sectionInfo.isOpen.value"
                     back-label="경로목록"
                     :panel-title="sectionInfo.panelTitle.value"
                     :sections="sectionInfo.sections.value"
