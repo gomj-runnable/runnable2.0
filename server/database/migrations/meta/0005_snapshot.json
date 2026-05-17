@@ -1,0 +1,1597 @@
+{
+    "id": "21718efe-02fb-451f-a3da-cf5f9ae88daf",
+    "prevId": "56ba654c-1db6-4fc7-baaf-4b12cadd3e0d",
+    "version": "7",
+    "dialect": "postgresql",
+    "tables": {
+        "public.user_accounts": {
+            "name": "user_accounts",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "account_id": {
+                    "name": "account_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "provider_id": {
+                    "name": "provider_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "access_token": {
+                    "name": "access_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "refresh_token": {
+                    "name": "refresh_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "access_token_expires_at": {
+                    "name": "access_token_expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "refresh_token_expires_at": {
+                    "name": "refresh_token_expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "scope": {
+                    "name": "scope",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "id_token": {
+                    "name": "id_token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "password": {
+                    "name": "password",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "user_account_user_idx": {
+                    "name": "user_account_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "user_accounts_user_id_users_id_fk": {
+                    "name": "user_accounts_user_id_users_id_fk",
+                    "tableFrom": "user_accounts",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.user_sessions": {
+            "name": "user_sessions",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "token": {
+                    "name": "token",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "ip_address": {
+                    "name": "ip_address",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_agent": {
+                    "name": "user_agent",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "user_session_user_idx": {
+                    "name": "user_session_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "user_session_token_idx": {
+                    "name": "user_session_token_idx",
+                    "columns": [
+                        {
+                            "expression": "token",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "user_sessions_user_id_users_id_fk": {
+                    "name": "user_sessions_user_id_users_id_fk",
+                    "tableFrom": "user_sessions",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "user_sessions_token_unique": {
+                    "name": "user_sessions_token_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["token"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.user_verifications": {
+            "name": "user_verifications",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "identifier": {
+                    "name": "identifier",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "value": {
+                    "name": "value",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "user_verification_identifier_idx": {
+                    "name": "user_verification_identifier_idx",
+                    "columns": [
+                        {
+                            "expression": "identifier",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.users": {
+            "name": "users",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "email": {
+                    "name": "email",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "email_verified": {
+                    "name": "email_verified",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "image": {
+                    "name": "image",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "role": {
+                    "name": "role",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 1
+                },
+                "banned": {
+                    "name": "banned",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": false
+                },
+                "ban_reason": {
+                    "name": "ban_reason",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "ban_expires": {
+                    "name": "ban_expires",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {
+                "users_email_unique": {
+                    "name": "users_email_unique",
+                    "nullsNotDistinct": false,
+                    "columns": ["email"]
+                }
+            },
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.route_likes": {
+            "name": "route_likes",
+            "schema": "",
+            "columns": {
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "route_likes_user_id_users_id_fk": {
+                    "name": "route_likes_user_id_users_id_fk",
+                    "tableFrom": "route_likes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "route_likes_route_id_routes_route_id_fk": {
+                    "name": "route_likes_route_id_routes_route_id_fk",
+                    "tableFrom": "route_likes",
+                    "tableTo": "routes",
+                    "columnsFrom": ["route_id"],
+                    "columnsTo": ["route_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {
+                "route_likes_user_id_route_id_pk": {
+                    "name": "route_likes_user_id_route_id_pk",
+                    "columns": ["user_id", "route_id"]
+                }
+            },
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.route_sections": {
+            "name": "route_sections",
+            "schema": "",
+            "columns": {
+                "section_id": {
+                    "name": "section_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "geom": {
+                    "name": "geom",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "attrs": {
+                    "name": "attrs",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "pois": {
+                    "name": "pois",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "section_route_idx": {
+                    "name": "section_route_idx",
+                    "columns": [
+                        {
+                            "expression": "route_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "route_sections_route_id_routes_route_id_fk": {
+                    "name": "route_sections_route_id_routes_route_id_fk",
+                    "tableFrom": "route_sections",
+                    "tableTo": "routes",
+                    "columnsFrom": ["route_id"],
+                    "columnsTo": ["route_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.routes": {
+            "name": "routes",
+            "schema": "",
+            "columns": {
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "title": {
+                    "name": "title",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "high_height": {
+                    "name": "high_height",
+                    "type": "numeric(10, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "low_height": {
+                    "name": "low_height",
+                    "type": "numeric(10, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "distance": {
+                    "name": "distance",
+                    "type": "numeric(12, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "is_public": {
+                    "name": "is_public",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "source_route_id": {
+                    "name": "source_route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "sgg": {
+                    "name": "sgg",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "emd": {
+                    "name": "emd",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "view_count": {
+                    "name": "view_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "like_count": {
+                    "name": "like_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "route_user_idx": {
+                    "name": "route_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "route_public_idx": {
+                    "name": "route_public_idx",
+                    "columns": [
+                        {
+                            "expression": "is_public",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "route_title_idx": {
+                    "name": "route_title_idx",
+                    "columns": [
+                        {
+                            "expression": "title",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "route_like_count_idx": {
+                    "name": "route_like_count_idx",
+                    "columns": [
+                        {
+                            "expression": "like_count",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "routes_user_id_users_id_fk": {
+                    "name": "routes_user_id_users_id_fk",
+                    "tableFrom": "routes",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.route_infos": {
+            "name": "route_infos",
+            "schema": "",
+            "columns": {
+                "route_info_id": {
+                    "name": "route_info_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "longitude": {
+                    "name": "longitude",
+                    "type": "numeric(12, 8)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "latitude": {
+                    "name": "latitude",
+                    "type": "numeric(12, 8)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "elevation": {
+                    "name": "elevation",
+                    "type": "numeric(10, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "author_name": {
+                    "name": "author_name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "route_info_route_idx": {
+                    "name": "route_info_route_idx",
+                    "columns": [
+                        {
+                            "expression": "route_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "route_info_user_idx": {
+                    "name": "route_info_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "route_infos_route_id_routes_route_id_fk": {
+                    "name": "route_infos_route_id_routes_route_id_fk",
+                    "tableFrom": "route_infos",
+                    "tableTo": "routes",
+                    "columnsFrom": ["route_id"],
+                    "columnsTo": ["route_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "route_infos_user_id_users_id_fk": {
+                    "name": "route_infos_user_id_users_id_fk",
+                    "tableFrom": "route_infos",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.facilities": {
+            "name": "facilities",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "varchar(255)",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "type": {
+                    "name": "type",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "lng": {
+                    "name": "lng",
+                    "type": "numeric(12, 8)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "lat": {
+                    "name": "lat",
+                    "type": "numeric(12, 8)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "hours": {
+                    "name": "hours",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "tel": {
+                    "name": "tel",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "has_signal": {
+                    "name": "has_signal",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "polyline": {
+                    "name": "polyline",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "facility_type_idx": {
+                    "name": "facility_type_idx",
+                    "columns": [
+                        {
+                            "expression": "type",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.segment_efforts": {
+            "name": "segment_efforts",
+            "schema": "",
+            "columns": {
+                "effort_id": {
+                    "name": "effort_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "segment_id": {
+                    "name": "segment_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "duration_sec": {
+                    "name": "duration_sec",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "pace_sec_per_km": {
+                    "name": "pace_sec_per_km",
+                    "type": "numeric(8, 2)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "completed_at": {
+                    "name": "completed_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "effort_segment_idx": {
+                    "name": "effort_segment_idx",
+                    "columns": [
+                        {
+                            "expression": "segment_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "effort_user_idx": {
+                    "name": "effort_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "effort_duration_idx": {
+                    "name": "effort_duration_idx",
+                    "columns": [
+                        {
+                            "expression": "segment_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "duration_sec",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "segment_efforts_segment_id_segments_segment_id_fk": {
+                    "name": "segment_efforts_segment_id_segments_segment_id_fk",
+                    "tableFrom": "segment_efforts",
+                    "tableTo": "segments",
+                    "columnsFrom": ["segment_id"],
+                    "columnsTo": ["segment_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "segment_efforts_user_id_users_id_fk": {
+                    "name": "segment_efforts_user_id_users_id_fk",
+                    "tableFrom": "segment_efforts",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.segments": {
+            "name": "segments",
+            "schema": "",
+            "columns": {
+                "segment_id": {
+                    "name": "segment_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "owner_id": {
+                    "name": "owner_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "start_position_index": {
+                    "name": "start_position_index",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "end_position_index": {
+                    "name": "end_position_index",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "distance_km": {
+                    "name": "distance_km",
+                    "type": "numeric(8, 3)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "elevation_gain_m": {
+                    "name": "elevation_gain_m",
+                    "type": "numeric(8, 2)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "is_public": {
+                    "name": "is_public",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "effort_count": {
+                    "name": "effort_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "segment_route_idx": {
+                    "name": "segment_route_idx",
+                    "columns": [
+                        {
+                            "expression": "route_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "segment_owner_idx": {
+                    "name": "segment_owner_idx",
+                    "columns": [
+                        {
+                            "expression": "owner_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "segment_public_idx": {
+                    "name": "segment_public_idx",
+                    "columns": [
+                        {
+                            "expression": "is_public",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "segments_owner_id_users_id_fk": {
+                    "name": "segments_owner_id_users_id_fk",
+                    "tableFrom": "segments",
+                    "tableTo": "users",
+                    "columnsFrom": ["owner_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "segments_route_id_routes_route_id_fk": {
+                    "name": "segments_route_id_routes_route_id_fk",
+                    "tableFrom": "segments",
+                    "tableTo": "routes",
+                    "columnsFrom": ["route_id"],
+                    "columnsTo": ["route_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.run_records": {
+            "name": "run_records",
+            "schema": "",
+            "columns": {
+                "record_id": {
+                    "name": "record_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "run_date": {
+                    "name": "run_date",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "distance_km": {
+                    "name": "distance_km",
+                    "type": "numeric(8, 3)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "duration_sec": {
+                    "name": "duration_sec",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "avg_pace_sec_per_km": {
+                    "name": "avg_pace_sec_per_km",
+                    "type": "numeric(8, 2)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "rpe": {
+                    "name": "rpe",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "condition": {
+                    "name": "condition",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "sleep_hours": {
+                    "name": "sleep_hours",
+                    "type": "numeric(4, 1)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "stress_level": {
+                    "name": "stress_level",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "pain_areas": {
+                    "name": "pain_areas",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "weather_snapshot": {
+                    "name": "weather_snapshot",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "run_record_user_idx": {
+                    "name": "run_record_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "run_record_date_idx": {
+                    "name": "run_record_date_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "run_date",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "run_record_route_idx": {
+                    "name": "run_record_route_idx",
+                    "columns": [
+                        {
+                            "expression": "route_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "run_records_user_id_users_id_fk": {
+                    "name": "run_records_user_id_users_id_fk",
+                    "tableFrom": "run_records",
+                    "tableTo": "users",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "run_records_route_id_routes_route_id_fk": {
+                    "name": "run_records_route_id_routes_route_id_fk",
+                    "tableFrom": "run_records",
+                    "tableTo": "routes",
+                    "columnsFrom": ["route_id"],
+                    "columnsTo": ["route_id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.curation_collections": {
+            "name": "curation_collections",
+            "schema": "",
+            "columns": {
+                "collection_id": {
+                    "name": "collection_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "created_by": {
+                    "name": "created_by",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "title": {
+                    "name": "title",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "season": {
+                    "name": "season",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "theme": {
+                    "name": "theme",
+                    "type": "varchar(30)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "valid_from": {
+                    "name": "valid_from",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "valid_to": {
+                    "name": "valid_to",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "cover_image_url": {
+                    "name": "cover_image_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "route_count": {
+                    "name": "route_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "curation_season_idx": {
+                    "name": "curation_season_idx",
+                    "columns": [
+                        {
+                            "expression": "season",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "curation_valid_idx": {
+                    "name": "curation_valid_idx",
+                    "columns": [
+                        {
+                            "expression": "valid_from",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "valid_to",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "curation_collections_created_by_users_id_fk": {
+                    "name": "curation_collections_created_by_users_id_fk",
+                    "tableFrom": "curation_collections",
+                    "tableTo": "users",
+                    "columnsFrom": ["created_by"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.curation_routes": {
+            "name": "curation_routes",
+            "schema": "",
+            "columns": {
+                "curation_route_id": {
+                    "name": "curation_route_id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "collection_id": {
+                    "name": "collection_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "route_id": {
+                    "name": "route_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "recommended_hour_local": {
+                    "name": "recommended_hour_local",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "photo_url": {
+                    "name": "photo_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "note": {
+                    "name": "note",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "sort_order": {
+                    "name": "sort_order",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                }
+            },
+            "indexes": {
+                "curation_route_collection_idx": {
+                    "name": "curation_route_collection_idx",
+                    "columns": [
+                        {
+                            "expression": "collection_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "curation_routes_collection_id_curation_collections_collection_id_fk": {
+                    "name": "curation_routes_collection_id_curation_collections_collection_id_fk",
+                    "tableFrom": "curation_routes",
+                    "tableTo": "curation_collections",
+                    "columnsFrom": ["collection_id"],
+                    "columnsTo": ["collection_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "curation_routes_route_id_routes_route_id_fk": {
+                    "name": "curation_routes_route_id_routes_route_id_fk",
+                    "tableFrom": "curation_routes",
+                    "tableTo": "routes",
+                    "columnsFrom": ["route_id"],
+                    "columnsTo": ["route_id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        }
+    },
+    "enums": {},
+    "schemas": {},
+    "sequences": {},
+    "roles": {},
+    "policies": {},
+    "views": {},
+    "_meta": {
+        "columns": {},
+        "schemas": {},
+        "tables": {}
+    }
+}
