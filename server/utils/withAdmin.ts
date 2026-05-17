@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import { authService, type SessionUser } from './auth.service'
-import { hasAdminAccess } from '#shared/constants/roles'
+import { hasPermission, Permission } from '#shared/constants/permissions'
 import { forbidden } from './error'
 
 /**
@@ -15,7 +15,7 @@ import { forbidden } from './error'
  *       )
  *   )
  *
- * 세션이 없으면 401, 관리자 미만 권한이면 403, 통과하면 user를 콜백에 주입하고
+ * 세션이 없으면 401, VIEW_ADMIN_PAGE 권한이 없으면 403, 통과하면 user를 콜백에 주입하고
  * `event.context.user` 에도 저장한다.
  */
 export function withAdmin<T>(
@@ -23,7 +23,7 @@ export function withAdmin<T>(
 ): (event: H3Event) => Promise<T> {
     return async (event: H3Event) => {
         const user = await authService.requireSession(event)
-        if (!hasAdminAccess(user.role)) {
+        if (!hasPermission(user.role, Permission.VIEW_ADMIN_PAGE)) {
             throw forbidden('관리자 권한이 필요합니다.')
         }
         event.context.user = user

@@ -1,6 +1,6 @@
 import { createAuthClient } from 'better-auth/vue'
 import { defineDeveloperGate, defineAdminGate } from '~/shared/lib/auth-gate'
-import { hasAdminAccess, hasDeveloperAccess } from '../../shared/constants/roles'
+import { hasPermission, Permission } from '../../shared/constants/permissions'
 
 export default defineNuxtPlugin(() => {
     const client = createAuthClient({ baseURL: window.location.origin })
@@ -24,6 +24,6 @@ export default defineNuxtPlugin(() => {
         }
     }
 
-    defineDeveloperGate(async () => hasDeveloperAccess(await getRole()))
-    defineAdminGate(async () => hasAdminAccess(await getRole()))
+    defineDeveloperGate(async () => hasPermission(await getRole(), Permission.VIEW_DEV_PAGE))
+    defineAdminGate(async () => hasPermission(await getRole(), Permission.VIEW_ADMIN_PAGE))
 })

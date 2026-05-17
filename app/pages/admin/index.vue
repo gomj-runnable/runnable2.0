@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
-import { hasDeveloperAccess } from '../../../shared/constants/roles'
+import { hasPermission, Permission } from '../../../shared/constants/permissions'
 
 definePageMeta({ ssr: false })
 
 const { user } = useAuthStore()
-const showUmlCard = computed(() => import.meta.dev && hasDeveloperAccess(user.value?.role))
+const showUmlCard = computed(
+    () => import.meta.dev && hasPermission(user.value?.role, Permission.VIEW_DEV_PAGE)
+)
 
 const { data: seedStatus } = await useFetch('/api/admin/seed/status')
 
