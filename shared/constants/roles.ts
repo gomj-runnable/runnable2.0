@@ -39,13 +39,3 @@ export function getRoleName(role: number): string {
 
 /** 모든 역할 목록 (역할 코드 오름차순). */
 export const ALL_ROLES = Object.values(ROLES) as RoleCode[]
-
-/** 관리자 이상 권한 보유 여부 (ADMIN/DEVELOPER 모두 true). */
-export function hasAdminAccess(role?: number | null): boolean {
-    return role !== undefined && role !== null && role >= ROLES.ADMIN
-}
-
-/** 개발자 권한 보유 여부 (DEVELOPER 만 true). */
-export function hasDeveloperAccess(role?: number | null): boolean {
-    return role !== undefined && role !== null && role >= ROLES.DEVELOPER
-}
