@@ -6,7 +6,7 @@
  */
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { useAuthSideeffect } from '~/entities/user/api/useAuthSideeffect'
-import { hasAdminAccess } from '../../../../shared/constants/roles'
+import { hasPermission, Permission } from '../../../../shared/constants/permissions'
 
 const emit = defineEmits<{
     success: []
@@ -63,7 +63,9 @@ const handleLogout = async () => {
     emit('logout')
 }
 
-const showAdminLink = computed(() => hasAdminAccess(authStore.user.value?.role))
+const showAdminLink = computed(() =>
+    hasPermission(authStore.user.value?.role, Permission.VIEW_ADMIN_PAGE)
+)
 
 const goToAdmin = () => {
     navigateTo('/admin')

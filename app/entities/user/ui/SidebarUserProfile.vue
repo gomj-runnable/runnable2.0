@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, navigateTo } from '#imports'
-import { hasAdminAccess } from '../../../../shared/constants/roles'
+import { hasPermission, Permission } from '../../../../shared/constants/permissions'
 
 const props = withDefaults(
     defineProps<{
@@ -31,7 +31,7 @@ const menuItems = computed(() => {
         onSelect: () => void
     }> = []
 
-    if (hasAdminAccess(props.role)) {
+    if (hasPermission(props.role, Permission.VIEW_ADMIN_PAGE)) {
         accountGroup.push({
             label: '관리자 페이지',
             icon: 'i-lucide-shield',
