@@ -1,6 +1,11 @@
 import 'dotenv/config'
 
 async function seed() {
+    if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PROD_SEED) {
+        console.error('운영 환경에서 seed가 차단되었습니다. ALLOW_PROD_SEED=1 로 명시적 허용 필요.')
+        process.exit(0)
+    }
+
     const { dbMode } = await import('../utils/config')
     const { getDb } = await import('./client')
     const { users, userAccounts } = await import('./schema/users')
