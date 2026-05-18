@@ -325,7 +325,7 @@ watch(
         <FloatingActionMenu :groups="fabGroups" />
         <div
             v-if="fabNearbyVisible"
-            class="fixed bottom-16 right-[5.5rem] z-35 max-lg:block hidden"
+            class="fixed bottom-16 right-[5.5rem] z-30 max-lg:block hidden"
         >
             <UButton
                 icon="i-lucide-locate"

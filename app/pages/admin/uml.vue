@@ -10,7 +10,6 @@ import type {
 } from '~~/shared/types/uml'
 
 definePageMeta({
-    middleware: ['dev-uml-only'],
     ssr: false
 })
 

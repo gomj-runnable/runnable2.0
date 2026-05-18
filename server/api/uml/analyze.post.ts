@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody } from 'h3'
 import { analyzeRequestSchema } from '#shared/schemas/uml.schema'
 import { findFeatures, getOrDetectFeatures } from '../../utils/uml/detect-features'
 import { analyzeFeatures } from '../../utils/uml/analyzers'
@@ -8,10 +8,6 @@ import { withAdmin } from '../../utils/withAdmin'
 export default defineEventHandler(
     withExceptionHandler(
         withAdmin(async (event) => {
-            if (process.env.NODE_ENV === 'production') {
-                throw createError({ statusCode: 404, statusMessage: 'Not Found' })
-            }
-
             const body = await readBody(event)
             const parsed = analyzeRequestSchema.safeParse(body)
             if (!parsed.success) {

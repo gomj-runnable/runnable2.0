@@ -9,8 +9,8 @@
  *   can(user.role, Permission.VIEW_DEV_PAGE)             // 동일 (단축)
  *
  * 의도된 행동 변화 (#129/#130 결정):
- *   - DEVELOPER 는 /admin 진입 불가 (VIEW_ADMIN_PAGE 없음)
- *   - QA 는 /dev/uml 진입 가능 (VIEW_DEV_PAGE 있음)
+ *   - DEVELOPER 는 /admin 진입 가능 (VIEW_ADMIN_PAGE 있음)
+ *   - UML Dashboard 는 /admin/uml 로 이동 (VIEW_ADMIN_PAGE 권한 필요)
  */
 
 import { ROLES } from './roles'
@@ -18,7 +18,7 @@ import { ROLES } from './roles'
 export enum Permission {
     /** /admin 페이지 접근 */
     VIEW_ADMIN_PAGE = 'VIEW_ADMIN_PAGE',
-    /** /dev/uml 등 개발 도구 접근 */
+    /** 개발 도구 접근 */
     VIEW_DEV_PAGE = 'VIEW_DEV_PAGE',
     /** 통계 대시보드 조회 — PII 미포함 */
     VIEW_STATS_DASHBOARD = 'VIEW_STATS_DASHBOARD',
@@ -68,6 +68,7 @@ export const ROLE_PERMISSIONS: Record<number, Permission[]> = {
     ],
 
     [ROLES.DEVELOPER]: [
+        Permission.VIEW_ADMIN_PAGE,
         Permission.VIEW_DEV_PAGE,
         Permission.VIEW_STATS_DASHBOARD,
         Permission.READ_USER_DATA_ANON,

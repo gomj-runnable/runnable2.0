@@ -101,7 +101,7 @@ const handleTimeChange = (value: any) => {
 </script>
 
 <template>
-    <div class="absolute inset-0 flex flex-col !pointer-events-none z-[12]">
+    <div class="absolute inset-0 flex flex-col !pointer-events-none z-10">
         <div
             class="flex items-start gap-2.5 p-4 pointer-events-auto max-md:justify-center max-md:p-2"
         >
