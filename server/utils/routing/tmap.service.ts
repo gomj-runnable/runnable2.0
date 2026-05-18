@@ -53,7 +53,8 @@ export class TMapRoutingService extends AbstractRoutingService {
                 appKey: this.apiKey,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(8_000)
         })
     }
 
