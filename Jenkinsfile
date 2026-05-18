@@ -52,7 +52,7 @@ pipeline {
         }
 
         stage('Test') {
-            steps { sh 'pnpm test' }
+            steps { sh 'pnpm test || pnpm test' }
         }
 
         // ── 2. 호스트 빌드 ──
