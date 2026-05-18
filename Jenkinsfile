@@ -104,9 +104,9 @@ pipeline {
                     kubectl apply -f minikube/k8s/postgres.yaml
                     kubectl -n runnable rollout status deployment/postgres --timeout=120s
 
-                    echo "==> Migration 이미지 빌드 + minikube 로드"
+                    echo "==> Migration 이미지 빌드 (minikube Docker)"
+                    eval $(minikube docker-env)
                     docker build --no-cache -t runnable-migrate:latest -f minikube/Dockerfile.migrate .
-                    minikube image load runnable-migrate:latest
                     kubectl delete job runnable-migrate -n runnable --ignore-not-found
                     kubectl apply -f minikube/k8s/migration-job.yaml
                     kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=300s
@@ -122,9 +122,9 @@ pipeline {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
-                    echo "==> App 이미지 빌드 + minikube 로드 + Rolling Update"
+                    echo "==> App 이미지 빌드 (minikube Docker) + Rolling Update"
+                    eval $(minikube docker-env)
                     docker build --no-cache -t runnable-app:latest -f minikube/Dockerfile .
-                    minikube image load runnable-app:latest
                     kubectl apply -f minikube/k8s/app.yaml
                     kubectl -n runnable rollout restart deployment/runnable-app
                     kubectl -n runnable rollout status deployment/runnable-app --timeout=180s
