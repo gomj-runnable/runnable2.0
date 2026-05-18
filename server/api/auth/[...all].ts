@@ -11,10 +11,14 @@ export default defineEventHandler(async (event) => {
         if (error && typeof error === 'object' && 'statusCode' in error) {
             throw error
         }
-        // better-auth 내부 에러 로깅 + 전파
+        // better-auth 내부 에러 로깅 + 운영에서는 메시지 숨김
         console.error('[auth] better-auth handler error:', error)
         throw internalError(
-            error instanceof Error ? error.message : '인증 처리 중 오류가 발생했습니다.'
+            process.env.NODE_ENV === 'production'
+                ? '인증 처리 중 오류가 발생했습니다.'
+                : error instanceof Error
+                  ? error.message
+                  : '인증 처리 중 오류가 발생했습니다.'
         )
     }
 })
