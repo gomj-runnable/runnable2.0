@@ -1,5 +1,7 @@
 FROM node:24-alpine
 
+RUN addgroup -S app && adduser -S app -G app
+
 WORKDIR /workspace
 
 COPY package.json pnpm-lock.yaml ./
@@ -10,7 +12,10 @@ COPY server/utils/config.ts ./server/utils/config.ts
 COPY shared/constants/ ./shared/constants/
 
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile --ignore-scripts && \
+    chown -R app:app /workspace
+
+USER app
 
 ENV CI=true
 CMD ["sh", "-c", "printf '\\n' | pnpm drizzle-kit push --force && pnpm tsx server/database/seed.ts"]
