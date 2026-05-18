@@ -1,13 +1,22 @@
 import { routeService } from '../../../services/route.service'
 import { requireSession } from '../../../utils/session'
-import { conflict } from '../../../utils/error'
+import { requireRouteIdParam } from '../../../utils/params'
+import { conflict, withExceptionHandler } from '../../../utils/error'
 
-export default defineEventHandler(async (event) => {
-    const user = await requireSession(event)
-    const routeId = getRouterParam(event, 'routeId')!
+export default defineEventHandler(
+    withExceptionHandler(async (event) => {
+        const user = await requireSession(event)
+        const routeId = requireRouteIdParam(event)
 
-    const liked = await routeService.likeRoute(user.userId, routeId)
-    if (!liked) throw conflict('이미 좋아요한 경로입니다.')
+        const route = await routeService.getRouteById(routeId)
+        if (!route) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
+        if (!route.isPublic && route.userId !== user.userId) {
+            throw createError({ statusCode: 403, message: '비공개 경로입니다.' })
+        }
 
-    return { success: true }
-})
+        const liked = await routeService.likeRoute(user.userId, routeId)
+        if (!liked) throw conflict('이미 좋아요한 경로입니다.')
+
+        return { success: true }
+    })
+)
