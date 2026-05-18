@@ -18,7 +18,11 @@ export default defineNuxtConfig({
         retryAfterHeader: true,
         routes: [
             { path: '/api/auth', max: 10, duration: 60 },
-            { path: '/api/weather', max: 30, duration: 60 }
+            { path: '/api/weather', max: 30, duration: 60 },
+            { path: '/api/routes/optimize', max: 10, duration: 60 },
+            { path: '/api/facilities/nearby', max: 30, duration: 60 },
+            { path: '/api/admin', max: 10, duration: 60 },
+            { path: '/api/uml', max: 5, duration: 60 }
         ]
     },
 

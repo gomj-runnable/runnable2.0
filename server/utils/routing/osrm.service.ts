@@ -20,7 +20,12 @@ export class OsrmRoutingService extends AbstractRoutingService {
     protected async callApi(positions: GeoJsonPosition[]): Promise<Response> {
         const coordinates = positions.map(([lng, lat]) => `${lng},${lat}`).join(';')
 
-        return fetch(`${this.baseUrl}/${coordinates}?overview=full&geometries=geojson&steps=false`)
+        return fetch(
+            `${this.baseUrl}/${coordinates}?overview=full&geometries=geojson&steps=false`,
+            {
+                signal: AbortSignal.timeout(8_000)
+            }
+        )
     }
 
     protected parseCoords(data: unknown): [number, number][] {

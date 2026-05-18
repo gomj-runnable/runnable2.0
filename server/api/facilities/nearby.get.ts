@@ -1,24 +1,26 @@
 import { defineEventHandler, getQuery } from 'h3'
+import { z } from 'zod'
 import { getFacilityRepository } from '../../repositories'
-import { badRequest } from '../../utils/error'
+import { withExceptionHandler } from '../../utils/error'
 import type { FacilityType } from '#shared/types/facility'
 
-const DEFAULT_RADIUS_M = 1000
+const VALID_TYPES = ['crosswalk', 'fountain', 'hospital', 'toilet', 'locker'] as const
 
-export default defineEventHandler(async (event) => {
-    const query = getQuery(event)
-    const lat = parseFloat(query.lat as string)
-    const lng = parseFloat(query.lng as string)
-    const radius = Math.min(parseFloat(query.radius as string) || DEFAULT_RADIUS_M, 5000)
-    const typesParam = (query.types as string) ?? ''
-
-    if (isNaN(lat) || isNaN(lng)) {
-        throw badRequest('lat, lng 파라미터가 필요합니다')
-    }
-
-    const requestedTypes = typesParam
-        ? (typesParam.split(',').filter(Boolean) as FacilityType[])
-        : (['crosswalk', 'fountain', 'hospital', 'toilet'] as FacilityType[])
-
-    return (await getFacilityRepository()).findNearby(lat, lng, radius, requestedTypes)
+const nearbySchema = z.object({
+    lat: z.coerce.number().finite().min(-90).max(90),
+    lng: z.coerce.number().finite().min(-180).max(180),
+    radius: z.coerce.number().positive().max(5000).default(1000),
+    types: z.string().optional()
 })
+
+export default defineEventHandler(
+    withExceptionHandler(async (event) => {
+        const { lat, lng, radius, types } = nearbySchema.parse(getQuery(event))
+
+        const requestedTypes = types
+            ? (types.split(',').filter((t) => VALID_TYPES.includes(t as any)) as FacilityType[])
+            : ([...VALID_TYPES] as FacilityType[])
+
+        return (await getFacilityRepository()).findNearby(lat, lng, radius, requestedTypes)
+    })
+)

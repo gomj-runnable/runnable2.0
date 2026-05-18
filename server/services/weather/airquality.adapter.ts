@@ -94,7 +94,7 @@ export class AirQualityAdapter implements IAirQualityAdapter {
 
         const url = `${AIRKOREA_BASE_URL}?serviceKey=${serviceKey}&${params.toString()}`
 
-        const response = await fetch(url)
+        const response = await fetch(url, { signal: AbortSignal.timeout(8_000) })
         if (!response.ok) {
             throw new Error(`AirKorea request failed for ${stationName} (${response.status})`)
         }
