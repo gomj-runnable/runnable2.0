@@ -3,14 +3,19 @@ import { createRouteInfoSchema } from '#shared/schemas/routeInfo.schema'
 import { getRouteInfoRepository } from '../../../../repositories'
 import { routeService } from '../../../../services/route.service'
 import { requireRouteIdParam } from '../../../../utils/params'
-import { requireRouteOwnership, requireSession } from '../../../../utils/session'
+import { requireSession } from '../../../../utils/session'
 import { withExceptionHandler } from '../../../../utils/error'
 
 export default defineEventHandler(
     withExceptionHandler(async (event) => {
         const routeId = requireRouteIdParam(event)
-        await requireRouteOwnership(event, routeId, routeService.getRouteById)
         const user = await requireSession(event)
+
+        const route = await routeService.getRouteById(routeId)
+        if (!route) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
+        if (!route.isPublic && route.userId !== user.userId) {
+            throw createError({ statusCode: 403, message: '비공개 경로입니다.' })
+        }
 
         const body = await readBody(event)
         const input = createRouteInfoSchema.parse(body)
