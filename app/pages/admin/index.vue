@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import { hasPermission, Permission } from '../../../shared/constants/permissions'
+import type { SavedCurationCollection } from '../../../shared/types/curation'
+import type { SavedSegment } from '../../../shared/types/segment'
 
 definePageMeta({ ssr: false })
 
@@ -10,6 +12,8 @@ const showUmlCard = computed(
 )
 
 const { data: seedStatus } = await useFetch('/api/admin/seed/status')
+const { data: curations } = await useFetch<SavedCurationCollection[]>('/api/curation')
+const { data: segments } = await useFetch<SavedSegment[]>('/api/segments')
 
 const isConfirmOpen = ref(false)
 const isRunning = ref(false)
@@ -99,14 +103,36 @@ async function runSeed() {
                 </div>
             </UCard>
 
-            <UCard class="opacity-60 cursor-not-allowed">
+            <NuxtLink to="/admin/curation" class="block">
+                <UCard :ui="{ root: 'hover:ring-2 hover:ring-primary-500 transition' }">
+                    <template #header>
+                        <div class="flex items-center gap-2">
+                            <UIcon name="i-lucide-sparkles" class="w-5 h-5" />
+                            <h2 class="font-medium">큐레이션 관리</h2>
+                            <UBadge color="info" variant="subtle" size="xs" class="ml-auto">
+                                {{ curations?.length ?? 0 }}개
+                            </UBadge>
+                        </div>
+                    </template>
+                    <p class="text-sm text-(--ui-text-muted)">
+                        계절·시간대별 경로 큐레이션 컬렉션을 관리합니다.
+                    </p>
+                </UCard>
+            </NuxtLink>
+
+            <UCard>
                 <template #header>
                     <div class="flex items-center gap-2">
-                        <UIcon name="i-lucide-users" class="w-5 h-5" />
-                        <h2 class="font-medium">세션 관리</h2>
+                        <UIcon name="i-lucide-trophy" class="w-5 h-5" />
+                        <h2 class="font-medium">세그먼트 현황</h2>
+                        <UBadge color="neutral" variant="subtle" size="xs" class="ml-auto">
+                            {{ segments?.length ?? 0 }}개
+                        </UBadge>
                     </div>
                 </template>
-                <p class="text-sm text-(--ui-text-muted)">준비 중</p>
+                <p class="text-sm text-(--ui-text-muted)">
+                    등록된 세그먼트 {{ segments?.length ?? 0 }}개, 리더보드 활성 중.
+                </p>
             </UCard>
 
             <NuxtLink v-if="showUmlCard" to="/dev/uml" class="block">
