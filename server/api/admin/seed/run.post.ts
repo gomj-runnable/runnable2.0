@@ -16,9 +16,15 @@ export default defineEventHandler(
             const db = await getDb()
             const adminEmail = process.env.ADMIN_SEED_EMAIL ?? 'admin@runnable.com'
             const ADMIN_ROLE_ID = 'admin_role_master_01'
-            const hashedPassword = await hashPassword(adminPassword)
+            const hashedAdminPassword = await hashPassword(adminPassword)
+
+            const devEmail = process.env.DEVELOPER_SEED_EMAIL ?? 'developer@runnable.com'
+            const devPassword = process.env.DEVELOPER_SEED_PASSWORD ?? 'developer1234'
+            const DEV_ROLE_ID = 'dev_role_master_01'
+            const hashedDevPassword = await hashPassword(devPassword)
 
             await db.transaction(async (tx) => {
+                // 최고관리자
                 await tx
                     .insert(users)
                     .values({
@@ -40,18 +46,47 @@ export default defineEventHandler(
                         userId: ADMIN_ROLE_ID,
                         accountId: adminEmail,
                         providerId: 'credential',
-                        password: hashedPassword
+                        password: hashedAdminPassword
                     })
                     .onConflictDoUpdate({
                         target: userAccounts.id,
-                        set: { password: hashedPassword }
+                        set: { password: hashedAdminPassword }
+                    })
+
+                // 개발자
+                await tx
+                    .insert(users)
+                    .values({
+                        id: DEV_ROLE_ID,
+                        name: '개발자',
+                        email: devEmail,
+                        role: ROLES.DEVELOPER,
+                        emailVerified: true
+                    })
+                    .onConflictDoUpdate({
+                        target: users.id,
+                        set: { email: devEmail, name: '개발자', role: ROLES.DEVELOPER }
+                    })
+
+                await tx
+                    .insert(userAccounts)
+                    .values({
+                        id: `acc_${DEV_ROLE_ID}`,
+                        userId: DEV_ROLE_ID,
+                        accountId: devEmail,
+                        providerId: 'credential',
+                        password: hashedDevPassword
+                    })
+                    .onConflictDoUpdate({
+                        target: userAccounts.id,
+                        set: { password: hashedDevPassword }
                     })
             })
 
             return {
                 success: true,
                 executedAt: new Date().toISOString(),
-                message: '최고관리자 계정 시드 완료 (시설물 데이터는 CLI pnpm seed 사용)'
+                message: '최고관리자 + 개발자 계정 시드 완료 (시설물 데이터는 CLI pnpm seed 사용)'
             }
         })
     )
