@@ -10,12 +10,22 @@ let _auth: AuthInstance | null = null
 export async function getAuthInstance(): Promise<AuthInstance> {
     if (_auth) return _auth
     const db = await getDb()
+    const isProduction = process.env.NODE_ENV === 'production'
+
     _auth = betterAuth({
         secret: process.env.BETTER_AUTH_SECRET,
         baseURL: process.env.BETTER_AUTH_URL || `http://localhost:${process.env.PORT || 3000}`,
         trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS
             ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(',')
             : undefined,
+        advanced: {
+            useSecureCookies: isProduction,
+            defaultCookieAttributes: {
+                sameSite: 'lax' as const,
+                secure: isProduction,
+                httpOnly: true
+            }
+        },
         database: drizzleAdapter(db, {
             provider: 'pg',
             schema: {
@@ -27,7 +37,7 @@ export async function getAuthInstance(): Promise<AuthInstance> {
         }),
         emailAndPassword: {
             enabled: true,
-            minPasswordLength: 6
+            minPasswordLength: 10
         },
         user: {
             additionalFields: {
