@@ -9,7 +9,7 @@ let sggPromise: Promise<FeatureCollection> | null = null
 let emdPromise: Promise<FeatureCollection> | null = null
 
 async function fetchGeoJson(url: string): Promise<FeatureCollection> {
-    const res = await fetch(url)
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) throw new Error(`Failed to fetch: ${url}`)
     return res.json() as Promise<FeatureCollection>
 }

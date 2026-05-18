@@ -13,7 +13,7 @@ const modeKeys = Object.keys(ROUTE_OPTIMIZATION_MODES) as [string, ...string[]]
 export const routeOptimizationModeSchema = z.enum(modeKeys)
 
 export const routeOptimizeRequestSchema = z.object({
-    positions: z.array(geoJsonPositionSchema).min(2),
+    positions: z.array(geoJsonPositionSchema).min(2).max(100),
     mode: routeOptimizationModeSchema
 })
 

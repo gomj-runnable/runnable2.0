@@ -60,7 +60,7 @@ const fetchVilageFcst = async (
 
     const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&${params.toString()}`
 
-    const response = await fetch(url)
+    const response = await fetch(url, { signal: AbortSignal.timeout(8_000) })
     if (!response.ok) {
         throw new Error(`KMA forecast request failed (${response.status})`)
     }
