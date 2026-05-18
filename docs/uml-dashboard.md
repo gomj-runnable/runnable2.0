@@ -1,14 +1,14 @@
-# UML Dashboard (`/dev/uml`)
+# UML Dashboard (`/admin/uml`)
 
 Nuxt 3 + Nitro 단일 코드베이스에서, **에이전트가 채워 넣은 코드를 직접 읽지 않고도 구조를 시각적으로 파악**하기 위한 내부 개발 대시보드입니다.
 
 ## 1. 접근
 
-- 라우트: `/dev/uml`
-- 게이트: **개발 환경(`import.meta.dev`)** + **DEVELOPER(99) 권한**을 동시에 만족해야 진입할 수 있습니다.
-    - production 빌드에서는 404
+- 라우트: `/admin/uml`
+- 게이트: **VIEW_ADMIN_PAGE 권한** (ADMIN·DEVELOPER 역할)이 필요합니다.
+    - `/admin` 하위 전체에 `admin-only.global.ts` 미들웨어가 적용됩니다.
     - 권한 없는 사용자는 `/` 로 리다이렉트
-- 서버 API(`/api/uml/*`)도 동일하게 production 에서는 404
+- 서버 API(`/api/uml/*`)는 `withAdmin` 래퍼로 보호
 
 ## 2. 화면 구성
 
@@ -109,7 +109,7 @@ Array<{
 
 ## 7. 사용 흐름
 
-1. `pnpm dev` 후 `http://localhost:3000/dev/uml`
+1. `pnpm dev` 후 `http://localhost:3000/admin/uml`
 2. DEVELOPER 계정으로 로그인 (`developer@runnable.com` / `developer1234`)
 3. 도메인 탭 선택 → 사이드 패널에서 Feature 토글 → 다이어그램 종류 선택 → "분석 실행"
 4. 결과가 Feature 별 카드로 렌더링됨

@@ -49,7 +49,7 @@ const hasSearchableActive = computed(() =>
 </script>
 
 <template>
-    <div class="absolute top-4 right-4 hidden md:flex flex-col gap-1 pointer-events-auto z-[12]">
+    <div class="absolute top-4 right-4 hidden md:flex flex-col gap-1 pointer-events-auto z-10">
         <div class="flex gap-1 flex-wrap justify-end">
             <UButton
                 v-if="hasSearchableActive"

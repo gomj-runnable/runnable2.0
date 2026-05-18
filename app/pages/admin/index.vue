@@ -7,9 +7,7 @@ import type { SavedSegment } from '../../../shared/types/segment'
 definePageMeta({ ssr: false })
 
 const { user } = useAuthStore()
-const showUmlCard = computed(
-    () => import.meta.dev && hasPermission(user.value?.role, Permission.VIEW_DEV_PAGE)
-)
+const showUmlCard = computed(() => hasPermission(user.value?.role, Permission.VIEW_ADMIN_PAGE))
 
 const { data: seedStatus } = await useFetch('/api/admin/seed/status')
 const { data: curations } = await useFetch<SavedCurationCollection[]>('/api/curation')
@@ -135,19 +133,19 @@ async function runSeed() {
                 </p>
             </UCard>
 
-            <NuxtLink v-if="showUmlCard" to="/dev/uml" class="block">
+            <NuxtLink v-if="showUmlCard" to="/admin/uml" class="block">
                 <UCard :ui="{ root: 'hover:ring-2 hover:ring-primary-500 transition' }">
                     <template #header>
                         <div class="flex items-center gap-2">
                             <UIcon name="i-lucide-git-graph" class="w-5 h-5" />
                             <h2 class="font-medium">UML Dashboard</h2>
-                            <UBadge color="info" variant="subtle" size="xs" class="ml-auto">
-                                개발 전용
+                            <UBadge color="neutral" variant="subtle" size="xs" class="ml-auto">
+                                관리자
                             </UBadge>
                         </div>
                     </template>
                     <p class="text-sm text-(--ui-text-muted)">
-                        프로젝트 구조 시각화 (DEVELOPER 권한 · 개발 모드 전용).
+                        프로젝트 구조를 Mermaid 다이어그램으로 시각화합니다.
                     </p>
                 </UCard>
             </NuxtLink>
