@@ -1,11 +1,23 @@
 import { getRouteInfoRepository } from '../../../../repositories'
-import { badRequest } from '../../../../utils/error'
+import { routeService } from '../../../../services/route.service'
+import { requireRouteIdParam } from '../../../../utils/params'
+import { getSessionUser } from '../../../../utils/session'
+import { withExceptionHandler } from '../../../../utils/error'
 
-export default defineEventHandler(async (event) => {
-    const routeId = getRouterParam(event, 'routeId')
-    if (!routeId) {
-        throw badRequest('경로 ID가 필요합니다.')
-    }
+export default defineEventHandler(
+    withExceptionHandler(async (event) => {
+        const routeId = requireRouteIdParam(event)
 
-    return (await getRouteInfoRepository()).findByRouteId(routeId)
-})
+        const route = await routeService.getRouteById(routeId)
+        if (!route) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
+
+        if (!route.isPublic) {
+            const session = await getSessionUser(event)
+            if (!session || route.userId !== session.userId) {
+                throw createError({ statusCode: 403, message: '비공개 경로입니다.' })
+            }
+        }
+
+        return (await getRouteInfoRepository()).findByRouteId(routeId)
+    })
+)
