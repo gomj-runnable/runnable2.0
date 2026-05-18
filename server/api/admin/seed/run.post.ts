@@ -20,7 +20,7 @@ export default defineEventHandler(
 
             const devEmail = process.env.DEVELOPER_SEED_EMAIL ?? 'develop@runnable.com'
             const devPassword = process.env.DEVELOPER_SEED_PASSWORD ?? 'develop1234'
-            const DEV_ROLE_ID = 'dev_role_master_01'
+            const DEV_ROLE_ID = 'developer_master_01'
             const hashedDevPassword = await hashPassword(devPassword)
 
             await db.transaction(async (tx) => {
