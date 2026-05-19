@@ -70,15 +70,28 @@ const visibleCards = computed(() =>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <AdminSeedCard />
 
-            <component
-                :is="card.to ? resolveComponent('NuxtLink') : 'div'"
-                v-for="card in visibleCards"
-                :key="card.key"
-                v-bind="card.to ? { to: card.to, class: 'block' } : {}"
-            >
-                <UCard
-                    :ui="card.to ? { root: 'hover:ring-2 hover:ring-primary-500 transition' } : {}"
-                >
+            <template v-for="card in visibleCards" :key="card.key">
+                <NuxtLink v-if="card.to" :to="card.to" class="block">
+                    <UCard :ui="{ root: 'hover:ring-2 hover:ring-primary-500 transition' }">
+                        <template #header>
+                            <div class="flex items-center gap-2">
+                                <UIcon :name="card.icon" class="w-5 h-5" />
+                                <h2 class="font-medium">{{ card.title }}</h2>
+                                <UBadge
+                                    v-if="card.badge"
+                                    :color="(card.badgeColor as any) ?? 'neutral'"
+                                    variant="subtle"
+                                    size="xs"
+                                    class="ml-auto"
+                                >
+                                    {{ card.badge() }}
+                                </UBadge>
+                            </div>
+                        </template>
+                        <p class="text-sm text-(--ui-text-muted)">{{ card.description }}</p>
+                    </UCard>
+                </NuxtLink>
+                <UCard v-else>
                     <template #header>
                         <div class="flex items-center gap-2">
                             <UIcon :name="card.icon" class="w-5 h-5" />
@@ -96,7 +109,7 @@ const visibleCards = computed(() =>
                     </template>
                     <p class="text-sm text-(--ui-text-muted)">{{ card.description }}</p>
                 </UCard>
-            </component>
+            </template>
         </div>
     </div>
 </template>
