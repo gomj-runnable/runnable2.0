@@ -4,8 +4,7 @@ import { defineNuxtRouteMiddleware, navigateTo } from '#imports'
 
 /**
  * /admin 전 영역에 대한 권한 게이트.
- * VIEW_ADMIN_PAGE 권한이 있는 역할(ADMIN)만 통과.
- * DEVELOPER 는 이 권한이 없으므로 진입 불가 (#129/#130 결정).
+ * VIEW_ADMIN_PAGE 권한이 있는 역할(ADMIN, DEVELOPER)만 통과 (#129/#130 결정).
  */
 export default defineNuxtRouteMiddleware((to) => {
     if (!to.path.startsWith('/admin')) return

@@ -70,7 +70,10 @@ async function seed() {
                 })
                 .onConflictDoUpdate({
                     target: userAccounts.id,
-                    set: { password: hashedAdminRolePassword }
+                    set: {
+                        accountId: adminRoleData.email,
+                        password: hashedAdminRolePassword
+                    }
                 })
         })
         console.log('✅ 최고관리자 계정 설정 완료 (ID: ' + ADMIN_ROLE_ID + ')')
@@ -79,9 +82,9 @@ async function seed() {
         // TODO. 정식 권한 체계 정립 시 이 시드와 ROLES.DEVELOPER 자체를 제거 검토.
         const DEV_ID = 'developer_master_01'
         const devData = {
-            email: process.env.DEVELOPER_SEED_EMAIL ?? 'developer@runnable.com',
+            email: process.env.DEVELOPER_SEED_EMAIL ?? 'develop@runnable.com',
             password: developerPassword,
-            name: 'developer'
+            name: 'develop'
         }
         const hashedDevPassword = await hashPassword(devData.password)
 
@@ -115,7 +118,10 @@ async function seed() {
                 })
                 .onConflictDoUpdate({
                     target: userAccounts.id,
-                    set: { password: hashedDevPassword }
+                    set: {
+                        accountId: devData.email,
+                        password: hashedDevPassword
+                    }
                 })
         })
         console.log('✅ developer 계정 설정 완료 (ID: ' + DEV_ID + ')')
