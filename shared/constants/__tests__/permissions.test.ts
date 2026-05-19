@@ -14,8 +14,8 @@ describe('hasPermission()', () => {
         expect(hasPermission(ROLES.ADMIN, Permission.VIEW_ADMIN_PAGE)).toBe(true)
     })
 
-    it('DEVELOPER는 VIEW_ADMIN_PAGE 접근 불가 (#129/#130 결정)', () => {
-        expect(hasPermission(ROLES.DEVELOPER, Permission.VIEW_ADMIN_PAGE)).toBe(false)
+    it('DEVELOPER는 VIEW_ADMIN_PAGE 접근 가능 (#205 — UML 페이지가 /admin 으로 이동)', () => {
+        expect(hasPermission(ROLES.DEVELOPER, Permission.VIEW_ADMIN_PAGE)).toBe(true)
     })
 
     it('QA는 VIEW_DEV_PAGE 접근 가능 (#129/#130 결정)', () => {
@@ -67,7 +67,7 @@ describe('hasPermission()', () => {
 describe('can()', () => {
     it('hasPermission과 동일하게 동작한다', () => {
         expect(can(ROLES.ADMIN, Permission.VIEW_ADMIN_PAGE)).toBe(true)
-        expect(can(ROLES.DEVELOPER, Permission.VIEW_ADMIN_PAGE)).toBe(false)
+        expect(can(ROLES.DEVELOPER, Permission.VIEW_ADMIN_PAGE)).toBe(true)
         expect(can(null, Permission.VIEW_ADMIN_PAGE)).toBe(false)
     })
 })
