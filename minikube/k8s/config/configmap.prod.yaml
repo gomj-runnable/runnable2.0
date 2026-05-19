@@ -8,6 +8,6 @@ data:
   PORT: "3000"
   TZ: Asia/Seoul
   BETTER_AUTH_URL: https://macmini.tail070e2e.ts.net
-  BETTER_AUTH_TRUSTED_ORIGINS: https://macmini.tail070e2e.ts.net,http://localhost:3000
+  BETTER_AUTH_TRUSTED_ORIGINS: https://macmini.tail070e2e.ts.net,http://localhost:3000,http://localhost:3333
   USE_DATABASE_MODE: POSTGRES
   ROUTE_MODE: TMAP
