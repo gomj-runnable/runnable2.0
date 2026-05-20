@@ -21,8 +21,8 @@ vi.mock('../paths', async () => {
         repoRoot: process.cwd(),
         umlCacheDir: root,
         featuresCachePath: path.join(root, 'features.json'),
-        diagramCachePath: (domain: string, featureId: string) =>
-            path.join(root, domain, `${featureId.replace(/[^a-z0-9_-]/gi, '_')}.mmd`)
+        diagramCachePath: (domain: string, featureId: string, diagramType: string) =>
+            path.join(root, domain, `${featureId.replace(/[^a-z0-9_-]/gi, '_')}.${diagramType}.mmd`)
     }
 })
 
