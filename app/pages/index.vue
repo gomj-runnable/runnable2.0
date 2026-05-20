@@ -17,6 +17,7 @@ import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
 import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSideeffect'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { useExploreRouteActions } from '~/features/explore/model/useExploreRouteActions'
@@ -158,7 +159,11 @@ const handleRouteInfoSubmit = async (payload: { name: string; description: strin
         try {
             await routeInfoEffect.submitRouteInfo(routeList.selectedRouteId, input)
         } catch {
-            alert('경로정보 등록에 실패했습니다.')
+            notification.notify({
+                title: '경로정보 등록 실패',
+                message: '경로정보 등록에 실패했습니다.',
+                tone: NotificationToneEnum.ERROR
+            })
         }
     } else {
         routeInfoStore.addLocalRouteInfo(input)
@@ -318,6 +323,7 @@ watch(
                 color="neutral"
                 variant="solid"
                 class="rounded-l-none rounded-r-lg shadow-lg opacity-70"
+                aria-label="사이드바 다시 열기"
                 @click="slideOver.select(slideOver.lastActive.value)"
             />
         </div>

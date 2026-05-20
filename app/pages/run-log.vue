@@ -4,6 +4,10 @@ import type {
     RunInsightWeekly,
     ConditionLevel
 } from '../../shared/types/run-record'
+import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
+
+const notification = useNotificationStore()
 
 definePageMeta({ ssr: false })
 
@@ -76,7 +80,11 @@ async function createRecord() {
         await refresh()
     } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : '기록 실패'
-        alert(msg)
+        notification.notify({
+            title: '기록 추가 실패',
+            message: msg,
+            tone: NotificationToneEnum.ERROR
+        })
     } finally {
         isSubmitting.value = false
     }
@@ -89,7 +97,11 @@ async function deleteRecord(recordId: string) {
         await ($fetch as any)(`/api/run-records/${recordId}`, { method: 'DELETE' })
         await refresh()
     } catch {
-        alert('삭제 실패')
+        notification.notify({
+            title: '삭제 실패',
+            message: '러닝 기록 삭제에 실패했습니다.',
+            tone: NotificationToneEnum.ERROR
+        })
     }
 }
 
@@ -211,6 +223,7 @@ const conditionEmoji = (c: ConditionLevel) => (c === 'good' ? '😊' : c === 'no
                         color="error"
                         variant="ghost"
                         size="xs"
+                        aria-label="기록 삭제"
                         @click="deleteRecord(rec.recordId)"
                     />
                 </div>
