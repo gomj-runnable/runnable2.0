@@ -43,7 +43,12 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => [
 
         <template #right>
             <UDropdownMenu :items="dropdownItems" :modal="false">
-                <UButton icon="i-lucide-menu" color="neutral" variant="ghost" />
+                <UButton
+                    icon="i-lucide-menu"
+                    color="neutral"
+                    variant="ghost"
+                    aria-label="메뉴 열기"
+                />
             </UDropdownMenu>
         </template>
     </UHeader>

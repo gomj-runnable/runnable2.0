@@ -84,6 +84,7 @@ const formatTime = (sec: number) => {
                 color="primary"
                 class="shrink-0"
                 size="sm"
+                :aria-label="store.isPlaying.value ? '일시정지' : '재생'"
                 @click="onPlayPause"
             />
 
@@ -93,6 +94,7 @@ const formatTime = (sec: number) => {
                 variant="ghost"
                 class="shrink-0"
                 size="sm"
+                aria-label="정지"
                 @click="onStop"
             />
 

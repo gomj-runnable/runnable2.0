@@ -5,6 +5,10 @@ import type {
     CurationSeason,
     CurationTheme
 } from '../../../shared/types/curation'
+import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
+import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
+
+const notification = useNotificationStore()
 
 definePageMeta({ ssr: false })
 
@@ -59,7 +63,11 @@ async function createCollection() {
         await refresh()
     } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : '생성 실패'
-        alert(msg)
+        notification.notify({
+            title: '컬렉션 생성 실패',
+            message: msg,
+            tone: NotificationToneEnum.ERROR
+        })
     } finally {
         isSubmitting.value = false
     }
@@ -72,7 +80,11 @@ async function deleteCollection(collectionId: string) {
         await ($fetch as any)(`/api/curation/${collectionId}`, { method: 'DELETE' })
         await refresh()
     } catch {
-        alert('삭제 실패')
+        notification.notify({
+            title: '삭제 실패',
+            message: '컬렉션 삭제에 실패했습니다.',
+            tone: NotificationToneEnum.ERROR
+        })
     }
 }
 
@@ -110,6 +122,7 @@ const themeLabel = (t: CurationTheme) => themeOptions.find((o) => o.value === t)
                             color="error"
                             variant="ghost"
                             size="xs"
+                            aria-label="컬렉션 삭제"
                             @click="deleteCollection(col.collectionId)"
                         />
                     </div>
