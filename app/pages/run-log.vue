@@ -122,7 +122,10 @@ const conditionEmoji = (c: ConditionLevel) => (c === 'good' ? '😊' : c === 'no
                     달리기 기록과 컨디션을 추적합니다.
                 </p>
             </div>
-            <UButton icon="i-lucide-plus" @click="isCreateOpen = true">기록 추가</UButton>
+            <div class="flex items-center gap-2">
+                <UColorModeButton />
+                <UButton icon="i-lucide-plus" @click="isCreateOpen = true">기록 추가</UButton>
+            </div>
         </header>
 
         <!-- 주간 인사이트 -->

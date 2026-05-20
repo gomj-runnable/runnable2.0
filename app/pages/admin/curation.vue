@@ -92,7 +92,10 @@ const themeLabel = (t: CurationTheme) => themeOptions.find((o) => o.value === t)
                     계절·시간대별 경로 큐레이션 컬렉션을 관리합니다.
                 </p>
             </div>
-            <UButton icon="i-lucide-plus" @click="isCreateOpen = true">새 컬렉션</UButton>
+            <div class="flex items-center gap-2">
+                <UColorModeButton />
+                <UButton icon="i-lucide-plus" @click="isCreateOpen = true">새 컬렉션</UButton>
+            </div>
         </header>
 
         <div v-if="!collections?.length" class="text-center py-12 text-(--ui-text-muted)">
