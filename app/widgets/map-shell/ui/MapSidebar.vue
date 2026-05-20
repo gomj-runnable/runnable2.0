@@ -42,6 +42,7 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => [
         </template>
 
         <template #right>
+            <UColorModeButton />
             <UDropdownMenu :items="dropdownItems" :modal="false">
                 <UButton
                     icon="i-lucide-menu"

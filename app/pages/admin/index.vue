@@ -62,9 +62,12 @@ const visibleCards = computed(() =>
 
 <template>
     <div class="container mx-auto p-6">
-        <header class="mb-6">
-            <h1 class="text-2xl font-semibold">관리자 대시보드</h1>
-            <p class="text-sm text-(--ui-text-muted) mt-1">관리자/개발자용 운영 도구입니다.</p>
+        <header class="mb-6 flex items-start justify-between gap-2">
+            <div>
+                <h1 class="text-2xl font-semibold">관리자 대시보드</h1>
+                <p class="text-sm text-(--ui-text-muted) mt-1">관리자/개발자용 운영 도구입니다.</p>
+            </div>
+            <UColorModeButton />
         </header>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
