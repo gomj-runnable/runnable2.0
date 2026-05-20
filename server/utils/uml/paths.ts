@@ -1,10 +1,8 @@
-import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
+import { resolve } from 'node:path'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-
-// server/utils/uml/paths.ts → repo root
-export const repoRoot = resolve(__dirname, '../../../')
+// dev(tsx 직실행)와 prod(.output/server) 모두에서 프로젝트 루트는 process.cwd().
+// __dirname 은 prod 빌드에서 .output/server/... 안쪽을 가리키므로 사용 금지.
+export const repoRoot = process.cwd()
 
 export const umlCacheDir = resolve(repoRoot, '.omc/uml-cache')
 export const featuresCachePath = resolve(umlCacheDir, 'features.json')
