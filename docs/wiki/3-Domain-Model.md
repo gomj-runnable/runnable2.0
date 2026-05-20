@@ -1,0 +1,132 @@
+# 3. Domain Model
+
+## 3.1 도메인 카탈로그
+
+`shared/types/` 와 `shared/schemas/` 에 정의된 도메인 객체 목록입니다. 각 도메인의 상세 mermaid 다이어그램은 후속 페이지(3.2 ~)에서 단계적으로 정리됩니다.
+
+### 핵심 도메인
+
+| Domain        | 타입 파일                                           | Zod 스키마                                                               | 책임                                |
+| ------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
+| Route         | `route.ts`, `routeInfo.ts`, `route-optimization.ts` | `route.schema.ts`, `routeInfo.schema.ts`, `route-optimization.schema.ts` | 러닝 경로 본체                      |
+| Segment       | `segment.ts`                                        | `segment.schema.ts`                                                      | 경로 구간 + 리더보드                |
+| Weather       | `weather.ts`, `weather-recommend.ts`                | `weather.schema.ts`                                                      | 기상 정보 (예보·관측·대기질)        |
+| Safety        | (server/services/safety)                            | —                                                                        | 안전 점수 정규화 (Z-score)          |
+| Route-Compare | `route-compare.ts`                                  | —                                                                        | 경로 비교 지표 (거리·고도·예상시간) |
+| Facility      | `facility.ts`                                       | `facility.schema.ts`                                                     | 편의 시설 (식수대·화장실 등)        |
+| Run-Record    | `run-record.ts`                                     | `run-record.schema.ts`                                                   | 러닝 기록 + 주간 인사이트           |
+| Curation      | `curation.ts`                                       | `curation.schema.ts`                                                     | 큐레이션 컬렉션                     |
+| Discover      | `discover.ts`                                       | `discover.schema.ts`                                                     | 발견 피드                           |
+| UML           | `uml.ts`                                            | `uml.schema.ts`                                                          | 코드 UML 분석 (features / paths)    |
+| User-Route    | `user-route.ts`                                     | `user-route.schema.ts`                                                   | 사용자-경로 관계 (좋아요·포크)      |
+| GeoJSON       | `geojson.ts`                                        | `geojson.schema.ts`                                                      | 지리 데이터                         |
+| Gradient      | `gradient.ts`                                       | —                                                                        | 고도 그래프 색상 매핑               |
+| Simulation    | `simulation.ts`                                     | —                                                                        | 재생 시뮬레이션                     |
+| Stats         | `stats.ts`                                          | —                                                                        | 통계                                |
+| District      | `district.ts`                                       | —                                                                        | 행정 구역 (서울 동·구)              |
+
+### Enum 카탈로그
+
+| Enum                              | 용도                   |
+| --------------------------------- | ---------------------- |
+| `camera-view-mode.enum.ts`        | 카메라 시점 모드       |
+| `difficulty-level.enum.ts`        | 난이도                 |
+| `facility-type.enum.ts`           | 편의 시설 타입         |
+| `ground-clamp-mode.enum.ts`       | 지표면 고정 모드       |
+| `map-overlay-context.enum.ts`     | 지도 오버레이 컨텍스트 |
+| `notification-tone.enum.ts`       | 알림 톤                |
+| `playback-state.enum.ts`          | 재생 상태              |
+| `pm10-grade.enum.ts`              | 미세먼지 등급          |
+| `route-closing-mode.enum.ts`      | 경로 폐쇄 모드         |
+| `route-optimization-mode.enum.ts` | 최적화 모드            |
+| `weather-condition.enum.ts`       | 날씨 상태              |
+| `weather-layer.enum.ts`           | 날씨 레이어            |
+
+### 보조 타입
+
+| File           | 용도             |
+| -------------- | ---------------- |
+| `common.ts`    | 공통 헬퍼 타입   |
+| `cesium.ts`    | Cesium 관련 헬퍼 |
+| `enum-base.ts` | enum 베이스 정의 |
+| `theme-map.ts` | 테마 색상 매핑   |
+
+## 도메인 간 관계 (overview)
+
+```mermaid
+classDiagram
+    class Route {
+      +id
+      +name
+      +ownerId
+      +createdAt
+    }
+    class Segment {
+      +id
+      +routeId
+      +order
+      +points
+    }
+    class RouteInfo {
+      +routeId
+      +distanceKm
+      +ascentM
+      +durationMin
+    }
+    class RouteCompare {
+      +distanceKm
+      +ascentM
+      +durationMin
+    }
+    class RunRecord {
+      +id
+      +userId
+      +routeId
+      +startedAt
+      +endedAt
+    }
+    class UserRoute {
+      +userId
+      +routeId
+      +liked
+      +forkedFromId
+    }
+    class Facility {
+      +id
+      +type
+      +geo
+    }
+    class Curation {
+      +id
+      +ownerId
+      +routeIds
+    }
+    class Weather {
+      +date
+      +condition
+      +temp
+      +pm10Grade
+    }
+    class WeatherRecommend {
+      +date
+      +score
+      +reason
+    }
+    class UML {
+      +features
+      +paths
+    }
+
+    Route "1" --> "*" Segment
+    Route "1" --> "1" RouteInfo
+    Route "1" --> "*" UserRoute
+    Route ..> RouteCompare : compare(a,b)
+    UserRoute "1" --> "*" RunRecord
+    Curation "1" --> "*" Route
+    Route ..> Facility : nearby()
+    Weather ..> WeatherRecommend
+```
+
+> 각 도메인의 상세(필드, 관련 API, 사용처) 는 3.2 이후 페이지에서 mermaid 클래스 다이어그램 + API 라우트 + 호출 흐름으로 정리됩니다.
+
+다음 → [6-Testing-and-TDD](6-Testing-and-TDD.md) (TDD 섹션이 먼저 채워졌습니다)
