@@ -7,6 +7,7 @@ import type {
 } from '../../../shared/types/curation'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
+import AppEmptyState from '~/shared/ui/AppEmptyState.vue'
 
 const notification = useNotificationStore()
 
@@ -110,10 +111,11 @@ const themeLabel = (t: CurationTheme) => themeOptions.find((o) => o.value === t)
             </div>
         </header>
 
-        <div v-if="!collections?.length" class="text-center py-12 text-(--ui-text-muted)">
-            <UIcon name="i-lucide-inbox" class="w-12 h-12 mx-auto mb-3 opacity-40" />
-            <p>등록된 큐레이션이 없습니다.</p>
-        </div>
+        <AppEmptyState
+            v-if="!collections?.length"
+            icon="i-lucide-inbox"
+            title="등록된 큐레이션이 없습니다."
+        />
 
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <UCard v-for="col in collections" :key="col.collectionId">
