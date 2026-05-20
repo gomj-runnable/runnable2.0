@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 import { promises as fs } from 'node:fs'
 import type { FeaturesPayload } from '~~/shared/types/uml'
 
@@ -6,7 +6,8 @@ import {
     findFeatures,
     writeFeaturesCache,
     getOrDetectFeatures,
-    loadFeaturesCache
+    loadFeaturesCache,
+    detectAllFeatures
 } from '../detect-features'
 
 // 캐시 경로를 테스트마다 격리된 tmp 경로로 redirect 한다.
@@ -145,5 +146,35 @@ describe('getOrDetectFeatures() — 빈 캐시 무시', () => {
         // 3) 새 detect 결과로 캐시가 덮어쓰여 더 이상 비어있지 않아야 한다.
         const after = await loadFeaturesCache()
         expect(after?.features.length).toBeGreaterThan(0)
+    })
+})
+
+describe('detectAllFeatures() integration', () => {
+    let result: FeaturesPayload
+
+    beforeAll(async () => {
+        result = await detectAllFeatures()
+    })
+
+    it('frontend 도메인에서 최소 1개 이상 detect 한다', () => {
+        const frontend = result.features.filter((f) => f.domain === 'frontend')
+        expect(frontend.length).toBeGreaterThan(0)
+    })
+
+    it('backend 도메인에서 최소 1개 이상 detect 한다', () => {
+        const backend = result.features.filter((f) => f.domain === 'backend')
+        expect(backend.length).toBeGreaterThan(0)
+    })
+
+    it('library 도메인에서 최소 1개 이상 detect 한다', () => {
+        const library = result.features.filter((f) => f.domain === 'library')
+        expect(library.length).toBeGreaterThan(0)
+    })
+
+    it('frontend/backend 도메인의 fileCount 총합이 0 보다 크다 (전부 빈 detect 회귀 방어)', () => {
+        const totalSource = result.features
+            .filter((f) => f.domain === 'frontend' || f.domain === 'backend')
+            .reduce((sum, f) => sum + f.fileCount, 0)
+        expect(totalSource).toBeGreaterThan(0)
     })
 })
