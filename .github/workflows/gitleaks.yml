@@ -1,0 +1,26 @@
+name: Gitleaks
+
+on:
+    pull_request:
+    push:
+        branches: [master]
+    workflow_dispatch:
+
+jobs:
+    scan:
+        name: Secret Scan
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  # 전체 히스토리 스캔이 가능하도록 fetch
+                  fetch-depth: 0
+
+            - uses: gitleaks/gitleaks-action@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITLEAKS_CONFIG: .gitleaks.toml
+                  GITLEAKS_ENABLE_COMMENTS: false
+                  GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true

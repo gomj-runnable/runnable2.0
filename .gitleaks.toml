@@ -1,0 +1,68 @@
+# gitleaks 설정 (#173 step 3).
+#
+# 기본 룰셋(generic api key, github PAT, AWS, Slack 등)을 그대로 사용하고
+# 프로젝트 특화 시크릿 패턴만 [[rules]] 로 추가한다.
+#
+# 실행:
+#   gitleaks protect --staged --config .gitleaks.toml      # 스테이지된 변경만 검사 (pre-commit)
+#   gitleaks detect --config .gitleaks.toml --no-banner    # 전체 히스토리 스캔 (CI)
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "runnable-better-auth-secret"
+description = "BETTER_AUTH_SECRET 평문 노출"
+regex = '''(?i)better[_-]?auth[_-]?secret\s*[:=]\s*['"]?[A-Za-z0-9_\-]{16,}['"]?'''
+tags = ["secret", "auth"]
+
+[[rules]]
+id = "runnable-webhook-secret"
+description = "WEBHOOK_SECRET 평문 노출"
+regex = '''(?i)webhook[_-]?secret\s*[:=]\s*['"]?[A-Za-z0-9_\-]{16,}['"]?'''
+tags = ["secret", "webhook"]
+
+[[rules]]
+id = "runnable-admin-seed-password"
+description = "ADMIN_SEED_PASSWORD 평문 노출"
+regex = '''(?i)admin[_-]?seed[_-]?password\s*[:=]\s*['"]?[^\s'"]{8,}['"]?'''
+tags = ["secret", "admin"]
+
+[[rules]]
+id = "runnable-tmap-api-key"
+description = "TMAP_API_KEY 평문 노출"
+regex = '''(?i)tmap[_-]?api[_-]?key\s*[:=]\s*['"]?[A-Za-z0-9]{16,}['"]?'''
+tags = ["secret", "external-api"]
+
+[[rules]]
+id = "runnable-public-data-api-key"
+description = "공공데이터/기상청 API 키 평문 노출"
+regex = '''(?i)(public[_-]?data|kma|weather)[_-]?api[_-]?key\s*[:=]\s*['"]?[A-Za-z0-9%+/=_-]{16,}['"]?'''
+tags = ["secret", "external-api"]
+
+[[rules]]
+id = "runnable-postgres-connection"
+description = "PostgreSQL 접속 문자열 평문 노출"
+regex = '''postgres(?:ql)?:\/\/[^:\/\s]+:[^@\s]+@[^\s/]+'''
+tags = ["secret", "db"]
+
+[allowlist]
+description = "검사 제외 경로 (lockfile, build artifact, node_modules)"
+paths = [
+    '''pnpm-lock\.yaml''',
+    '''package-lock\.json''',
+    '''yarn\.lock''',
+    '''\.output/''',
+    '''node_modules/''',
+    '''dist/''',
+    '''\.next/''',
+    '''\.nuxt/''',
+    '''\.gitleaks\.toml'''
+]
+
+# 테스트 픽스처에 사용되는 더미 값 — 패턴은 매칭되지만 시크릿이 아님
+regexes = [
+    '''(?i)example[_-]?secret''',
+    '''(?i)dummy[_-]?key''',
+    '''postgres://user:password@localhost'''
+]
