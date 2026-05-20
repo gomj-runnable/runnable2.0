@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import type { Position } from 'geojson'
-import type {
-    DEFAULT_SAFETY_WEIGHTS,
+import {
     splitRouteIntoSegments,
     computeSegmentSafetyScores,
+    type DEFAULT_SAFETY_WEIGHTS,
     type SegmentSourceSamples
 } from '../segment'
 
