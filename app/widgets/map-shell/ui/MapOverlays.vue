@@ -4,7 +4,6 @@
  * 지도 위에 표시되는 모든 오버레이 UI를 조합하는 컴포넌트.
  * 부모로부터 facade 객체를 직접 받아 내부에서 바인딩한다.
  */
-import ConfirmGuideModal from '~/shared/ui/ConfirmGuideModal.vue'
 import WeatherOverlay from '~/features/weather-overlay/ui/WeatherOverlay.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
@@ -123,11 +122,21 @@ const emit = defineEmits<{
         @close="facility.selectedFacility.value = null"
     />
     <!-- 그리기 완료 후 경로정보 안내 모달 -->
-    <ConfirmGuideModal
+    <UModal
         :open="showRouteInfoGuide"
-        message="화면을 클릭해 해당 위치에 장소 설명을 추가할 수 있습니다."
-        @close="emit('close-route-info-guide')"
-    />
+        title="안내"
+        :ui="{ footer: 'justify-center' }"
+        @update:open="(v: boolean) => !v && emit('close-route-info-guide')"
+    >
+        <template #body>
+            <p class="text-sm text-center">
+                화면을 클릭해 해당 위치에 장소 설명을 추가할 수 있습니다.
+            </p>
+        </template>
+        <template #footer>
+            <UButton label="확인" @click="emit('close-route-info-guide')" />
+        </template>
+    </UModal>
     <!-- 모바일: 드로잉 중 "완료" 플로팅 버튼 -->
     <Teleport to="body">
         <div v-if="drawing.isDrawingActive" class="drawing-finish-btn max-lg:block hidden">
