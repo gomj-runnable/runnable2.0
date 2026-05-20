@@ -1,0 +1,40 @@
+name: PR Closes Check
+
+on:
+    pull_request:
+        types: [opened, edited, synchronize, ready_for_review, labeled, unlabeled]
+
+jobs:
+    check-closes-keyword:
+        name: Verify Closes Keyword
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check PR body for Closes/Fixes/Resolves keyword
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const body = pr.body || '';
+                      const labels = pr.labels.map((l) => l.name);
+
+                      if (labels.includes('no-issue')) {
+                        core.info('`no-issue` label present — skipping Closes keyword check.');
+                        return;
+                      }
+
+                      const pattern = /(?:^|\s)(?:closes|fixes|resolves)\s+#\d+/i;
+                      if (pattern.test(body)) {
+                        core.info('Closes/Fixes/Resolves keyword found in PR body.');
+                        return;
+                      }
+
+                      core.setFailed(
+                        [
+                          'PR body must contain an auto-close keyword referencing an issue.',
+                          '',
+                          'Add one of: `Closes #N`, `Fixes #N`, or `Resolves #N` to the PR body.',
+                          'Subject-line references like `(#N)` do NOT trigger GitHub auto-close.',
+                          '',
+                          'If this PR is not tied to an issue (chore/docs/log), add the `no-issue` label to bypass.',
+                        ].join('\n'),
+                      );
