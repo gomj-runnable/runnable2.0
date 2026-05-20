@@ -30,11 +30,27 @@ async function buildOne(
             mermaid: 'flowchart LR\n  todo["기획 다이어그램 데이터 소스 미정 (#125 후속)"]'
         }
     }
+    const cachePath = diagramCachePath(feature.domain, feature.id, type)
+
+    // prod 컨테이너에는 소스 트리가 없어 live analyze 가 (no source files) 로 떨어진다.
+    // 빌드 시점에 동봉된 prebuilt .mmd 가 있으면 그걸 그대로 반환.
+    if (process.env.NODE_ENV === 'production') {
+        try {
+            const mermaid = await fs.readFile(cachePath, 'utf-8')
+            return { featureId: feature.id, mermaid }
+        } catch {
+            return {
+                featureId: feature.id,
+                mermaid: `flowchart LR\n  miss["(prebuilt 캐시 없음: ${feature.id} / ${type})"]`,
+                error: 'prebuilt cache miss'
+            }
+        }
+    }
+
     try {
         const analyzer = pickAnalyzer(feature)
         const mermaid = await analyzer(feature, type)
 
-        const cachePath = diagramCachePath(feature.domain, feature.id)
         await fs.mkdir(dirname(cachePath), { recursive: true })
         await fs.writeFile(cachePath, mermaid, 'utf-8')
 

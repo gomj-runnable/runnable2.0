@@ -7,7 +7,7 @@ export const repoRoot = process.cwd()
 export const umlCacheDir = resolve(repoRoot, '.omc/uml-cache')
 export const featuresCachePath = resolve(umlCacheDir, 'features.json')
 
-export function diagramCachePath(domain: string, featureId: string): string {
+export function diagramCachePath(domain: string, featureId: string, diagramType: string): string {
     const safe = featureId.replace(/[^a-z0-9_-]/gi, '_')
-    return resolve(umlCacheDir, domain, `${safe}.mmd`)
+    return resolve(umlCacheDir, domain, `${safe}.${diagramType}.mmd`)
 }
