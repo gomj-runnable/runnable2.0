@@ -1,1 +1,15 @@
 pnpm exec lint-staged
+
+# gitleaks 시크릿 사전 차단 (#173 step 3) — 바이너리 없으면 안내 후 통과
+if command -v gitleaks >/dev/null 2>&1; then
+    gitleaks protect --staged --redact --config .gitleaks.toml || {
+        echo ""
+        echo "❌ gitleaks: 스테이지된 변경에서 시크릿이 감지되었습니다."
+        echo "   해결: 값을 .env 또는 secret manager 로 옮긴 뒤 다시 커밋하세요."
+        echo "   오탐이면 .gitleaks.toml [allowlist] 에 패턴 추가."
+        exit 1
+    }
+else
+    echo "⚠️  gitleaks 미설치 — 시크릿 검사를 건너뜁니다."
+    echo "   설치: brew install gitleaks (macOS) | https://github.com/gitleaks/gitleaks"
+fi
