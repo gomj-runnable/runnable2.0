@@ -259,6 +259,9 @@ export async function loadFeaturesCache(): Promise<FeaturesPayload | null> {
 }
 
 export async function writeFeaturesCache(payload: FeaturesPayload): Promise<void> {
+    // prod 컨테이너는 소스 트리가 없어 detect 결과가 빈약하다. 빌드 시점에 동봉된
+    // prebuilt cache 를 덮어쓰지 않도록 write 자체를 차단한다. (build:uml-cache 가 생성)
+    if (process.env.NODE_ENV === 'production') return
     // 빈 detect 결과는 cache poisoning 의 원인이므로 저장 skip.
     if (payload.features.length === 0) return
     await fs.mkdir(dirname(featuresCachePath), { recursive: true })
