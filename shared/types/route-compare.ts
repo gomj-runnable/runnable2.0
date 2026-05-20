@@ -1,3 +1,5 @@
+import type { SavedRoute, SavedSection } from './route'
+
 /**
  * 경로 비교 지표 (#189).
  *
@@ -15,4 +17,22 @@ export interface RouteCompareMeta {
     estimatedDurationMin: number
     /** 경로 주변 시설물 카운트. key 는 FacilityType 문자열. */
     facilityCounts: Record<string, number>
+}
+
+/**
+ * 단일 경로의 비교 응답 항목 (#188).
+ * 경로 메타데이터·sections·집계 메트릭을 한 번에 반환한다.
+ */
+export interface RouteCompareItem {
+    route: SavedRoute
+    sections: SavedSection[]
+    meta: RouteCompareMeta
+}
+
+/**
+ * `/api/routes/compare` 응답 (#188).
+ */
+export interface RouteCompareResponse {
+    routeA: RouteCompareItem
+    routeB: RouteCompareItem
 }
