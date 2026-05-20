@@ -259,13 +259,15 @@ export async function loadFeaturesCache(): Promise<FeaturesPayload | null> {
 }
 
 export async function writeFeaturesCache(payload: FeaturesPayload): Promise<void> {
+    // 빈 detect 결과는 cache poisoning 의 원인이므로 저장 skip.
+    if (payload.features.length === 0) return
     await fs.mkdir(dirname(featuresCachePath), { recursive: true })
     await fs.writeFile(featuresCachePath, JSON.stringify(payload, null, 2), 'utf-8')
 }
 
 export async function getOrDetectFeatures(): Promise<FeaturesPayload> {
     const cached = await loadFeaturesCache()
-    if (cached) return cached
+    if (cached && cached.features.length > 0) return cached
     const fresh = await detectAllFeatures()
     await fs.mkdir(umlCacheDir, { recursive: true })
     await writeFeaturesCache(fresh)
