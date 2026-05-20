@@ -64,6 +64,11 @@ const visibleFeatures = computed<Feature[]>(() => {
         : inDomain
 })
 
+// detect 실패(도메인 0건) 여부 — 검색 미일치(>0)와 빈 상태 UX 구분에 사용.
+const inDomainCount = computed(
+    () => (featuresData.value?.features ?? []).filter((f) => f.domain === domain.value).length
+)
+
 const activeIds = computed(() => activeMap.value[domain.value] ?? [])
 const activeFeatures = computed<Feature[]>(() => {
     const all = featuresData.value?.features ?? []
@@ -231,11 +236,28 @@ function withTheme(src: string, theme: string): string {
                     <USkeleton v-for="i in 5" :key="i" class="h-8 w-full" />
                 </div>
                 <div v-else class="flex flex-col gap-1 px-2 pb-4">
-                    <div
-                        v-if="visibleFeatures.length === 0"
-                        class="text-xs text-(--ui-text-muted) px-2 py-4"
-                    >
-                        매칭되는 Feature 가 없습니다.
+                    <div v-if="visibleFeatures.length === 0" class="px-2 py-4 flex flex-col gap-2">
+                        <template v-if="inDomainCount === 0">
+                            <div class="text-xs text-(--ui-text-muted)">
+                                감지된 Feature 가 없습니다. 재스캔을 시도해보세요.
+                            </div>
+                            <div class="text-[11px] text-(--ui-text-muted) leading-snug">
+                                prod 빌드에서 캐시가 비어있다면
+                                <code>.omc/uml-cache/features.json</code> 을 삭제 후 재스캔하세요.
+                            </div>
+                            <UButton
+                                size="xs"
+                                variant="soft"
+                                icon="i-lucide-refresh-cw"
+                                :loading="featuresLoading"
+                                @click="rescan"
+                            >
+                                재스캔
+                            </UButton>
+                        </template>
+                        <div v-else class="text-xs text-(--ui-text-muted)">
+                            "{{ search }}" 검색 결과가 없습니다. 검색어를 변경해보세요.
+                        </div>
                     </div>
                     <label
                         v-for="f in visibleFeatures"
