@@ -6,6 +6,7 @@ import type {
 } from '../../shared/types/run-record'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
+import AppEmptyState from '~/shared/ui/AppEmptyState.vue'
 
 const notification = useNotificationStore()
 
@@ -193,13 +194,15 @@ const conditionEmoji = (c: ConditionLevel) => (c === 'good' ? '😊' : c === 'no
         </UCard>
 
         <!-- 기록 목록 -->
-        <div v-if="!records?.length" class="text-center py-12 text-(--ui-text-muted)">
-            <UIcon name="i-lucide-notebook-pen" class="w-12 h-12 mx-auto mb-3 opacity-40" />
-            <p>아직 러닝 기록이 없습니다.</p>
-            <UButton class="mt-4" variant="outline" @click="isCreateOpen = true">
-                첫 기록 작성하기
-            </UButton>
-        </div>
+        <AppEmptyState
+            v-if="!records?.length"
+            icon="i-lucide-notebook-pen"
+            title="아직 러닝 기록이 없습니다."
+        >
+            <template #action>
+                <UButton variant="outline" @click="isCreateOpen = true">첫 기록 작성하기</UButton>
+            </template>
+        </AppEmptyState>
 
         <div v-else class="space-y-3">
             <UCard v-for="rec in records" :key="rec.recordId">

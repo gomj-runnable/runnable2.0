@@ -29,7 +29,9 @@ const viewer = shallowRef<CesiumViewer | null>(null)
 const { init } = useMapInit()
 const shareViewer = useShareViewerSideeffect({ viewer })
 
-onMounted(async () => {
+async function loadShare() {
+    isLoading.value = true
+    error.value = null
     try {
         const data = await $fetch(`/api/routes/share/${routeId}`)
         sharedData.value = data as typeof sharedData.value
@@ -39,7 +41,17 @@ onMounted(async () => {
     } finally {
         isLoading.value = false
     }
+}
 
+async function retry() {
+    await loadShare()
+    if (sharedData.value && viewer.value) {
+        shareViewer.renderSections(sharedData.value.sections)
+    }
+}
+
+onMounted(async () => {
+    await loadShare()
     await init()
     viewer.value = (window as Window & { viewer?: CesiumViewer }).viewer ?? null
 
@@ -80,9 +92,35 @@ const elevationRange = computed(() => {
         <!-- 오류 -->
         <div
             v-else-if="error"
-            class="absolute inset-0 flex items-center justify-center text-base text-red-400 z-10"
+            class="absolute inset-0 flex items-center justify-center z-10 px-4"
         >
-            {{ error }}
+            <div
+                class="rounded-xl bg-black/70 backdrop-blur-sm px-6 py-5 text-white text-center max-w-sm"
+            >
+                <UIcon
+                    name="i-lucide-circle-alert"
+                    class="w-10 h-10 mx-auto mb-3 text-red-400"
+                />
+                <p class="text-base font-medium">{{ error }}</p>
+                <p class="text-xs text-gray-400 mt-2">잠시 후 다시 시도해주세요.</p>
+                <div class="mt-4 flex items-center justify-center gap-2">
+                    <UButton
+                        label="다시 시도"
+                        icon="i-lucide-rotate-cw"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
+                        @click="retry"
+                    />
+                    <UButton
+                        label="홈으로"
+                        to="/"
+                        size="sm"
+                        color="neutral"
+                        variant="ghost"
+                    />
+                </div>
+            </div>
         </div>
 
         <!-- 경로 정보 오버레이 -->
