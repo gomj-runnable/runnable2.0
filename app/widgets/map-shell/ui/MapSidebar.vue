@@ -37,8 +37,9 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => [
 
 <template>
     <!-- isolate: 헤더가 자체 stacking context 를 강제 형성해서
-         외부의 USlideover (z-30) 가 header (z-50) 위로 stacking 되는 케이스를 차단 (#239) -->
-    <UHeader title="Runnable" :toggle="false" class="isolate">
+         외부의 USlideover (z-30) 가 header (z-50) 위로 stacking 되는 케이스를 차단 (#239).
+         class fall-through 가 root 에 안 닿아서(#247) ui slot 으로 직접 주입한다. -->
+    <UHeader title="Runnable" :toggle="false" :ui="{ root: 'isolate' }">
         <template #title>
             <img src="/logo/runnable_logo_main.svg" alt="Runnable" class="h-6 w-auto" />
         </template>
