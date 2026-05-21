@@ -127,16 +127,27 @@ export async function frontendClass(feature: Feature): Promise<string> {
         const className = sanitizeId(baseName)
 
         const props: string[] = []
-        // defineProps<...>() — 타입 본문이 너무 길면 잘라 표시
-        const propsTypeMatch = src.match(/defineProps<\s*([\s\S]*?)\s*>\(/)
-        const propsLitMatch = src.match(/defineProps\(\s*([\s\S]*?)\s*\)/)
-        if (propsTypeMatch?.[1]) props.push(`+props: ${truncate(propsTypeMatch[1])}`)
-        else if (propsLitMatch?.[1]) props.push(`+props: ${truncate(propsLitMatch[1])}`)
+        // defineProps<{ key: type, ... }>() — 각 key 를 클래스 멤버로 분해
+        const propsTypeMatch = src.match(/defineProps<\s*\{([\s\S]*?)\}\s*>\(/)
+        if (propsTypeMatch?.[1]) {
+            for (const { name, type } of extractTypeMembers(propsTypeMatch[1]).slice(0, 12)) {
+                props.push(`+${name}: ${truncate(type, 30)}`)
+            }
+        } else {
+            const propsLitMatch = src.match(/defineProps\(\s*([\s\S]*?)\s*\)/)
+            if (propsLitMatch?.[1]) props.push(`+props: ${truncate(propsLitMatch[1])}`)
+        }
 
-        const emitsTypeMatch = src.match(/defineEmits<\s*([\s\S]*?)\s*>\(/)
-        const emitsLitMatch = src.match(/defineEmits\(\s*([\s\S]*?)\s*\)/)
-        if (emitsTypeMatch?.[1]) props.push(`+emits: ${truncate(emitsTypeMatch[1])}`)
-        else if (emitsLitMatch?.[1]) props.push(`+emits: ${truncate(emitsLitMatch[1])}`)
+        // defineEmits<{ event: [payload] }>() — 각 event 를 멤버로 분해
+        const emitsTypeMatch = src.match(/defineEmits<\s*\{([\s\S]*?)\}\s*>\(/)
+        if (emitsTypeMatch?.[1]) {
+            for (const { name, type } of extractTypeMembers(emitsTypeMatch[1]).slice(0, 8)) {
+                props.push(`+@${name}: ${truncate(type, 30)}`)
+            }
+        } else {
+            const emitsLitMatch = src.match(/defineEmits\(\s*([\s\S]*?)\s*\)/)
+            if (emitsLitMatch?.[1]) props.push(`+emits: ${truncate(emitsLitMatch[1])}`)
+        }
 
         // export const/function 시그니처
         const exportRe =
@@ -155,6 +166,32 @@ export async function frontendClass(feature: Feature): Promise<string> {
     return lines.join('\n')
 }
 
+// `{ key: type, key2: type2 }` 본문에서 멤버 추출 (JSdoc/줄바꿈/중첩 generic 일부 처리).
+// 정규식 기반이라 깊은 중첩은 보수적으로 잘라낸다 — 단조로운 한 줄보다 분해된 표시가 목적.
+function extractTypeMembers(body: string): Array<{ name: string; type: string }> {
+    // Vue defineProps 는 보통 newline 으로 멤버 구분 (`,` 없음) — newline 도 separator.
+    const cleaned = body.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+    const members: Array<{ name: string; type: string }> = []
+    // 같은 depth 의 토큰 단위로 split: { ... } / [ ... ] / ( ... ) / <...> 안의 separator 는 무시
+    let depth = 0
+    let buf = ''
+    const parts: string[] = []
+    for (const ch of cleaned) {
+        if (ch === '{' || ch === '[' || ch === '(' || ch === '<') depth++
+        else if (ch === '}' || ch === ']' || ch === ')' || ch === '>') depth--
+        if (depth === 0 && (ch === ',' || ch === ';' || ch === '\n')) {
+            if (buf.trim()) parts.push(buf.trim())
+            buf = ''
+        } else buf += ch
+    }
+    if (buf.trim()) parts.push(buf.trim())
+    for (const part of parts) {
+        const m = part.match(/^(\w+)\??\s*:\s*([\s\S]+)$/)
+        if (m?.[1] && m[2]) members.push({ name: m[1], type: m[2].trim() })
+    }
+    return members
+}
+
 // mermaid classDiagram member 라인 안전화.
 // `{`, `}`, JSdoc 블록 주석, `…` 등이 들어가면 v11 파서가 통째로 깨진다.
 function truncate(s: string, max = 40): string {
@@ -162,7 +199,8 @@ function truncate(s: string, max = 40): string {
         .replace(/\/\*[\s\S]*?\*\//g, '') // 블록 주석 제거 (JSdoc 포함)
         .replace(/\/\/.*$/gm, '') // 라인 주석 제거
         .replace(/[\n\r]+/g, ' ') // 줄바꿈 → 공백
-        .replace(/[{}<>"'`]/g, '') // mermaid 구문 충돌 문자 제거
+        .replace(/<([^<>]+)>/g, '~$1~') // generic `Set<T>` → mermaid 문법 `Set~T~`
+        .replace(/[{}"'`]/g, '') // 그 외 mermaid 구문 충돌 문자 제거
         .replace(/\s+/g, ' ')
         .trim()
     return compact.length > max ? compact.slice(0, max - 1) + '...' : compact
