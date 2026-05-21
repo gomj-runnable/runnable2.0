@@ -9,14 +9,14 @@ describe('repoRoot', () => {
 })
 
 describe('umlCacheDir', () => {
-    it('.omc/uml-cache 경로', () => {
-        expect(umlCacheDir).toBe(resolve(process.cwd(), '.omc/uml-cache'))
+    it('.cache/uml 경로', () => {
+        expect(umlCacheDir).toBe(resolve(process.cwd(), '.cache/uml'))
     })
 })
 
 describe('featuresCachePath', () => {
-    it('.omc/uml-cache/features.json 경로', () => {
-        expect(featuresCachePath).toBe(resolve(process.cwd(), '.omc/uml-cache/features.json'))
+    it('.cache/uml/features.json 경로', () => {
+        expect(featuresCachePath).toBe(resolve(process.cwd(), '.cache/uml/features.json'))
     })
 })
 
@@ -24,7 +24,7 @@ describe('diagramCachePath()', () => {
     it('domain/featureId/diagramType 기반 .mmd 경로 반환', () => {
         const result = diagramCachePath('frontend', 'frontend:pages:auth', 'flowchart')
         expect(result).toBe(
-            resolve(process.cwd(), '.omc/uml-cache/frontend/frontend_pages_auth.flowchart.mmd')
+            resolve(process.cwd(), '.cache/uml/frontend/frontend_pages_auth.flowchart.mmd')
         )
     })
 

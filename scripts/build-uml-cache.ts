@@ -2,7 +2,7 @@
 // 호스트 빌드 시점에:
 //  1) features.json (사이드바용 메타데이터)
 //  2) 각 feature × diagramType 조합의 .mmd (분석 실행 결과)
-// 를 미리 만들어 .omc/uml-cache/ 아래에 두면, prod 에선 두 단계 모두 캐시 hit.
+// 를 미리 만들어 .cache/uml/ 아래에 두면, prod 에선 두 단계 모두 캐시 hit.
 import { promises as fs } from 'node:fs'
 import { dirname, relative } from 'node:path'
 import type { DiagramType, DomainTab, Feature } from '../shared/types/uml'

@@ -8,7 +8,7 @@ vi.mock('../../utils/uml/detect-features', () => ({
 
 vi.mock('../../utils/uml/paths', () => ({
     repoRoot: '/fake/repo',
-    featuresCachePath: '/fake/repo/.omc/uml-cache/features.json'
+    featuresCachePath: '/fake/repo/.cache/uml/features.json'
 }))
 
 const { getOrDetectFeatures } = await import('../../utils/uml/detect-features')
@@ -82,7 +82,7 @@ describe('uml-warmup plugin', () => {
         const [, meta] = warnSpy.mock.calls[0]
         expect(meta).toMatchObject({
             repoRoot: '/fake/repo',
-            featuresCachePath: '/fake/repo/.omc/uml-cache/features.json',
+            featuresCachePath: '/fake/repo/.cache/uml/features.json',
             scannedAt: '2026-05-20T00:00:00Z'
         })
     })
