@@ -112,9 +112,10 @@ export async function frontendFlowchart(feature: Feature): Promise<string> {
 export async function frontendClass(feature: Feature): Promise<string> {
     const absRoots = feature.paths.map((p) => resolve(repoRoot, p))
     const files = await collectSourceFiles(absRoots)
-    if (files.length === 0) return `classDiagram\n  class Empty`
+    if (files.length === 0) return `classDiagram\n  direction TB\n  class Empty`
 
-    const lines: string[] = ['classDiagram']
+    // direction TB: 카드 가로폭이 좁아도 vertical stack 으로 박스가 squash 되지 않음 (#257)
+    const lines: string[] = ['classDiagram', '  direction TB']
     for (const file of files) {
         const src = await readSource(file)
         if (!src) continue

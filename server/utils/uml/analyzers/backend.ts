@@ -12,9 +12,10 @@ import {
 export async function backendClass(feature: Feature): Promise<string> {
     const absRoots = feature.paths.map((p) => resolve(repoRoot, p))
     const files = await collectSourceFiles(absRoots)
-    if (files.length === 0) return `classDiagram\n  class Empty`
+    if (files.length === 0) return `classDiagram\n  direction TB\n  class Empty`
 
-    const lines: string[] = ['classDiagram']
+    // direction TB: 카드 가로폭이 좁아도 vertical stack — squash 방지 (#257)
+    const lines: string[] = ['classDiagram', '  direction TB']
     for (const file of files) {
         const src = await fs.readFile(file, 'utf-8')
         const rel = relative(repoRoot, file)
