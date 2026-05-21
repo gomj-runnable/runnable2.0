@@ -1,0 +1,35 @@
+{
+    "$schema": "https://unpkg.com/knip@5/schema.json",
+    "entry": [
+        "nuxt.config.ts",
+        "app/app.vue",
+        "app/app.config.ts",
+        "app/error.vue",
+        "app/pages/**/*.vue",
+        "app/middleware/**/*.ts",
+        "app/plugins/**/*.ts",
+        "server/api/**/*.{ts,js}",
+        "server/middleware/**/*.ts",
+        "server/plugins/**/*.ts",
+        "server/routes/**/*.ts",
+        "server/database/seed.ts",
+        "scripts/**/*.{ts,mjs}",
+        "drizzle.config.ts",
+        "vitest.config.ts",
+        "playwright.config.ts",
+        "**/__tests__/**/*.test.ts",
+        "**/*.spec.ts"
+    ],
+    "project": ["app/**/*.{ts,vue}", "server/**/*.ts", "shared/**/*.ts"],
+    "ignore": [
+        ".claude/**",
+        ".nuxt/**",
+        ".output/**",
+        "node_modules/**",
+        "**/*.d.ts",
+        "lib/**",
+        "docs/**",
+        "minikube/**"
+    ],
+    "ignoreDependencies": ["@types/*"]
+}
