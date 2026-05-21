@@ -155,9 +155,17 @@ export async function frontendClass(feature: Feature): Promise<string> {
     return lines.join('\n')
 }
 
+// mermaid classDiagram member 라인 안전화.
+// `{`, `}`, JSdoc 블록 주석, `…` 등이 들어가면 v11 파서가 통째로 깨진다.
 function truncate(s: string, max = 40): string {
-    const compact = s.replace(/\s+/g, ' ').trim()
-    return compact.length > max ? compact.slice(0, max - 1) + '…' : compact
+    const compact = s
+        .replace(/\/\*[\s\S]*?\*\//g, '') // 블록 주석 제거 (JSdoc 포함)
+        .replace(/\/\/.*$/gm, '') // 라인 주석 제거
+        .replace(/[\n\r]+/g, ' ') // 줄바꿈 → 공백
+        .replace(/[{}<>"'`]/g, '') // mermaid 구문 충돌 문자 제거
+        .replace(/\s+/g, ' ')
+        .trim()
+    return compact.length > max ? compact.slice(0, max - 1) + '...' : compact
 }
 
 export async function buildFrontendDiagram(feature: Feature, type: DiagramType): Promise<string> {
