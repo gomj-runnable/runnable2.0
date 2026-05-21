@@ -30,7 +30,7 @@ UDashboardGroup
 
 ## 3. Feature 탐지 휴리스틱
 
-탐지 결과는 `.omc/uml-cache/features.json` 에 캐시되며, "재스캔" 버튼으로 갱신할 수 있습니다.
+탐지 결과는 `.cache/uml/features.json` 에 캐시되며, "재스캔" 버튼으로 갱신할 수 있습니다.
 
 ### Frontend
 
@@ -68,14 +68,14 @@ UDashboardGroup
 
 - 변환은 `ts-morph` 기반 AST + 휴리스틱
 - `p-limit` 으로 동시 분석 4개 제한
-- 결과는 `.omc/uml-cache/<domain>/<featureId>.mmd` 에 캐시 (디버깅용; 갱신은 API 호출마다 덮어씀)
+- 결과는 `.cache/uml/<domain>/<featureId>.mmd` 에 캐시 (디버깅용; 갱신은 API 호출마다 덮어씀)
 
 ## 5. 캐시 위치
 
-| 종류                | 경로                                      |
-| ------------------- | ----------------------------------------- |
-| Feature 메타데이터  | `.omc/uml-cache/features.json`            |
-| 도메인별 다이어그램 | `.omc/uml-cache/<domain>/<featureId>.mmd` |
+| 종류                | 경로                                  |
+| ------------------- | ------------------------------------- |
+| Feature 메타데이터  | `.cache/uml/features.json`            |
+| 도메인별 다이어그램 | `.cache/uml/<domain>/<featureId>.mmd` |
 
 `/api/uml/features/rescan` 또는 사이드 패널 "재스캔" 버튼으로 features 캐시를 갱신할 수 있습니다.
 

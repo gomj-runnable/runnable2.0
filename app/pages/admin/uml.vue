@@ -253,7 +253,7 @@ function withTheme(src: string, theme: string): string {
                             </div>
                             <div class="text-[11px] text-(--ui-text-muted) leading-snug">
                                 prod 빌드에서 캐시가 비어있다면
-                                <code>.omc/uml-cache/features.json</code> 을 삭제 후 재스캔하세요.
+                                <code>.cache/uml/features.json</code> 을 삭제 후 재스캔하세요.
                             </div>
                             <UButton
                                 size="xs"

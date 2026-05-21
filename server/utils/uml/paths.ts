@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 // __dirname 은 prod 빌드에서 .output/server/... 안쪽을 가리키므로 사용 금지.
 export const repoRoot = process.cwd()
 
-export const umlCacheDir = resolve(repoRoot, '.omc/uml-cache')
+export const umlCacheDir = resolve(repoRoot, '.cache/uml')
 export const featuresCachePath = resolve(umlCacheDir, 'features.json')
 
 export function diagramCachePath(domain: string, featureId: string, diagramType: string): string {
