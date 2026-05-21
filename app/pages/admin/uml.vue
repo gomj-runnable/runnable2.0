@@ -298,7 +298,10 @@ function withTheme(src: string, theme: string): string {
 
             <UTabs v-model="domain" :items="tabItems" value-key="value" class="px-4 pt-4" />
 
-            <div class="px-4 py-4 flex flex-col gap-4">
+            <!-- flex-1 + overflow-y-auto + min-h-0: UDashboardPanel 안에서 카드 grid 가
+                 자체 스크롤 컨테이너가 되도록 (#256). min-h-0 이 없으면 flex child 가
+                 콘텐츠 높이만큼 자라 panel 자체가 viewport 밖으로 밀린다. -->
+            <div class="px-4 py-4 flex flex-col gap-4 flex-1 overflow-y-auto min-h-0">
                 <UCard>
                     <div class="flex items-end gap-3 flex-wrap">
                         <UFormField label="다이어그램 종류" class="min-w-56">
