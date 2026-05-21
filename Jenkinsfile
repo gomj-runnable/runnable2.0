@@ -27,6 +27,32 @@ pipeline {
     }
 
     stages {
+        // ── 0. 디스크 사전 검증 ──
+        // minikube node 디스크가 임계치 초과면 적극적 prune 으로 회수 후 빌드 진행 (#253).
+        // 사후 정리(#252) 와 합쳐 양방향 안전망 — 누적 stale 로 빌드 도중 InsufficientStorage 발생 방지.
+        stage('DiskPreflight') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+
+                    THRESHOLD=80
+                    USAGE=$(minikube ssh -- "df / --output=pcent | tail -1 | tr -d '% '" 2>/dev/null | tr -d '\\r ')
+                    echo "==> minikube node 디스크 사용률: ${USAGE}% (임계치 ${THRESHOLD}%)"
+
+                    if [ "${USAGE:-0}" -ge "$THRESHOLD" ]; then
+                        echo "==> 임계치 초과 — 적극적 정리 실행"
+                        eval $(minikube docker-env)
+                        docker image prune -af
+                        docker container prune -f
+                        AFTER=$(minikube ssh -- "df / --output=pcent | tail -1 | tr -d '% '" 2>/dev/null | tr -d '\\r ')
+                        echo "==> 정리 완료 — 사용률 ${USAGE}% → ${AFTER}%"
+                    else
+                        echo "==> 임계치 미만 — 정리 생략"
+                    fi
+                '''
+            }
+        }
+
         // ── 1. 품질 검사 ──
         stage('Install') {
             steps {
