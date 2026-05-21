@@ -20,12 +20,12 @@ const props = defineProps<{
     currentUserId: string | undefined
     sectionInfo: any
     sectionTotalDistance: number
-    sectionTotalTime: number
+    sectionTotalTime: string
     sectionDistances: number[]
     drawing: any
     explore: any
-    sigunguOptions: unknown[]
-    dongOptions: unknown[]
+    sigunguOptions: string[]
+    dongOptions: string[]
     showRecommend: boolean
     weatherRecommend: any
 }>()

@@ -10,7 +10,7 @@ defineProps<{
     currentUserId: string | undefined
     sectionInfo: any
     sectionTotalDistance: number
-    sectionTotalTime: number
+    sectionTotalTime: string
 }>()
 
 const emit = defineEmits<{
