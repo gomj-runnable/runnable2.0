@@ -134,6 +134,22 @@ pipeline {
             }
         }
 
+        // ── 6.5. 빌드 산출물 정리 ──
+        // 매 빌드마다 `--no-cache` 로 새 runnable-app/migrate layer 가 생기는데
+        // 직전 layer 는 untagged 로 남아 minikube node 디스크를 누적 점유한다 (#249).
+        // 본 단계에서 dangling 만 안전하게 회수. active layer 는 prune 대상에서 자동 제외.
+        stage('PruneStaleImages') {
+            steps {
+                sh '''#!/bin/bash
+                    set -euo pipefail
+
+                    eval $(minikube docker-env)
+                    echo "==> dangling 이미지 정리 (active layer 는 자동 보존)"
+                    docker image prune -f
+                '''
+            }
+        }
+
         // ── 7. 헬스체크 ──
         stage('Expose') {
             steps {
