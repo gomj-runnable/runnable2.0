@@ -23,7 +23,8 @@ describe('useSlideOverNav', () => {
     let activeNav: ReturnType<typeof ref<string>>
 
     beforeEach(() => {
-        activeNav = ref<string>(NavKey.LIST)
+        // 진입 기본 탭은 EXPLORE (#260)
+        activeNav = ref<string>(NavKey.EXPLORE)
     })
 
     describe('select() - Nav Rail 클릭 핸들러', () => {
@@ -36,8 +37,8 @@ describe('useSlideOverNav', () => {
 
         it('동일 항목을 다시 선택하면 패널을 닫는다 (current=null)', () => {
             const nav = useSlideOverNav(activeNav as any)
-            // 초기 current 가 LIST 이므로 LIST 한 번 더 선택 = 토글 닫힘
-            nav.select(NavKey.LIST)
+            // 초기 current 가 EXPLORE 이므로 EXPLORE 한 번 더 선택 = 토글 닫힘
+            nav.select(NavKey.EXPLORE)
             expect(nav.current.value).toBeNull()
         })
 
@@ -45,7 +46,7 @@ describe('useSlideOverNav', () => {
             const nav = useSlideOverNav(activeNav as any)
             nav.select(NavKey.AUTH)
             expect(nav.current.value).toBe(NavKey.AUTH)
-            expect(activeNav.value).toBe(NavKey.LIST)
+            expect(activeNav.value).toBe(NavKey.EXPLORE)
         })
     })
 
@@ -79,12 +80,13 @@ describe('useSlideOverNav', () => {
 
         it('current 와 동일한 값으로 activeNav 가 변경되면 무한 루프 없이 안정 상태를 유지한다', async () => {
             const nav = useSlideOverNav(activeNav as any)
-            nav.select(NavKey.EXPLORE)
-            expect(activeNav.value).toBe(NavKey.EXPLORE)
+            // default EXPLORE 와 다른 값으로 전환해야 select 가 토글 닫힘이 아닌 전환을 트리거한다
+            nav.select(NavKey.DRAW)
+            expect(activeNav.value).toBe(NavKey.DRAW)
             // 같은 값 재할당 — watcher가 다시 발화하더라도 값은 안정적이어야 한다.
-            activeNav.value = NavKey.EXPLORE
+            activeNav.value = NavKey.DRAW
             await nextTick()
-            expect(nav.current.value).toBe(NavKey.EXPLORE)
+            expect(nav.current.value).toBe(NavKey.DRAW)
         })
     })
 })
