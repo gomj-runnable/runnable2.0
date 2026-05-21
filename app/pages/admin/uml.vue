@@ -181,6 +181,16 @@ function resultFor(id: string): AnalyzeResponseItem | undefined {
     return results.value.find((r) => r.featureId === id)
 }
 
+// 카드 클릭 → 확대 모달
+const expandedFeatureId = ref<string | null>(null)
+const expandedFeature = computed<Feature | undefined>(() =>
+    activeFeatures.value.find((f) => f.id === expandedFeatureId.value)
+)
+const expandedMermaid = computed<string | undefined>(() => {
+    if (!expandedFeatureId.value) return undefined
+    return resultFor(expandedFeatureId.value)?.mermaid
+})
+
 function withTheme(src: string, theme: string): string {
     if (src.startsWith('%%{init')) return src
     return `%%{init: { 'theme': '${theme}' }}%%\n${src}`
@@ -341,7 +351,16 @@ function withTheme(src: string, theme: string): string {
                 </UCard>
 
                 <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                    <UCard v-for="f in activeFeatures" :key="f.id">
+                    <UCard
+                        v-for="f in activeFeatures"
+                        :key="f.id"
+                        :class="
+                            resultFor(f.id)
+                                ? 'cursor-zoom-in hover:ring-2 hover:ring-(--ui-primary)/40 transition-shadow'
+                                : ''
+                        "
+                        @click="resultFor(f.id) && (expandedFeatureId = f.id)"
+                    >
                         <template #header>
                             <div class="flex items-center gap-2">
                                 <UIcon :name="DOMAIN_ICONS[f.domain]" class="w-4 h-4" />
@@ -379,6 +398,29 @@ function withTheme(src: string, theme: string): string {
                 </div>
             </div>
         </UDashboardPanel>
+
+        <UModal
+            :open="expandedFeatureId !== null"
+            :title="expandedFeature?.name ?? ''"
+            :description="expandedFeature?.paths.join(', ') ?? ''"
+            :ui="{ content: 'max-w-[95vw] sm:max-w-5xl', body: 'p-4 sm:p-6' }"
+            @update:open="
+                (v: boolean) => {
+                    if (!v) expandedFeatureId = null
+                }
+            "
+        >
+            <template #body>
+                <div class="uml-diagram-container-expanded overflow-auto">
+                    <ClientOnly>
+                        <VueMermaidString
+                            v-if="expandedMermaid"
+                            :value="withTheme(expandedMermaid, mermaidTheme)"
+                        />
+                    </ClientOnly>
+                </div>
+            </template>
+        </UModal>
     </UDashboardGroup>
 </template>
 
@@ -386,5 +428,11 @@ function withTheme(src: string, theme: string): string {
 .uml-diagram-container :deep(svg) {
     max-width: 100%;
     height: auto;
+}
+/* 확대 모달은 svg 자체를 크게 — 가로 100% 까지 확장, 세로는 viewport 80%까지 */
+.uml-diagram-container-expanded :deep(svg) {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
 }
 </style>
