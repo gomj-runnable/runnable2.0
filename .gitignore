@@ -6,6 +6,7 @@
 .data/pglite/
 .nitro
 .cache
+coverage
 dist
 
 # Node dependencies
