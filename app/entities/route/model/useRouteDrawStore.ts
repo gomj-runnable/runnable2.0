@@ -21,8 +21,9 @@ export const useRouteDrawStore = () => {
     /** 사이드바 경로 목록의 검색 입력값 */
     const searchQuery = useState('routeDraw.searchQuery', () => '')
 
-    /** 현재 활성화된 사이드바 탭 이름 */
-    const activeNav = useState('routeDraw.activeNav', () => '목록')
+    /** 현재 활성화된 사이드바 탭 이름. 기본 진입 탭은 '탐색' (NavKey.EXPLORE). */
+    // entities 가 widgets/map-shell 의 NavKey 를 import 하지 않도록 raw string 사용 — FSD 레이어 방향 유지.
+    const activeNav = useState('routeDraw.activeNav', () => '탐색')
 
     /** 지도 드로잉 완료 후 저장된 경도/위도/고도 포인트 배열. 드로잉 전이면 `null`. */
     const drawnPositions = useState<GeoJsonPosition[] | null>(

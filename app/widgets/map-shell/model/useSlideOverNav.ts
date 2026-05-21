@@ -12,8 +12,8 @@ import { useAuthStore } from '~/entities/user/model/useAuthStore'
 export const useSlideOverNav = (activeNav: Ref<string>) => {
     const authStore = useAuthStore()
 
-    /** 현재 SlideOver에 표시 중인 네비게이션 (null이면 닫힘) */
-    const current = ref<NavKeyValue | null>(NavKey.LIST)
+    /** 현재 SlideOver에 표시 중인 네비게이션 (null이면 닫힘). 진입 기본: EXPLORE */
+    const current = ref<NavKeyValue | null>(NavKey.EXPLORE)
 
     const isOpen = computed({
         get: () => current.value !== null,
@@ -84,7 +84,7 @@ export const useSlideOverNav = (activeNav: Ref<string>) => {
 
     /** 마지막으로 선택된 네비게이션 (닫혀도 active 표시용) */
     const lastActive = computed(() => current.value ?? _lastNav.value)
-    const _lastNav = ref<NavKeyValue>(NavKey.LIST)
+    const _lastNav = ref<NavKeyValue>(NavKey.EXPLORE)
     watch(current, (nav) => {
         if (nav) _lastNav.value = nav
     })
