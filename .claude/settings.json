@@ -2,17 +2,11 @@
     "env": {
         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
     },
-    "enabledPlugins": {
-        "oh-my-claudecode@omc": true
-    },
     "permissions": {
         "allow": [
-            "Bash(mkdir -p /Users/kmj/WebstormProjects/Runnable/static/icons /Users/kmj/WebstormProjects/Runnable/static/images)",
-            "Bash(cp /Users/kmj/WebstormProjects/Runnable/public/static/icons/* /Users/kmj/WebstormProjects/Runnable/static/icons/)",
-            "Bash(cp /Users/kmj/WebstormProjects/Runnable/sample/static/images/* /Users/kmj/WebstormProjects/Runnable/static/images/)",
             "Skill(update-config)",
-            "Read(//Users/kmj/.claude/**)",
-            "Read(//Users/kmj/.claude/skills/**)",
+            "Read(//Users/mjkim/.claude/**)",
+            "Read(//Users/mjkim/.claude/skills/**)",
             "Bash(find ~/.claude -name *.md -path */skills/*)",
             "Bash(grep -E '\\\\.\\(ts|js|json|yaml|yml|md|sh|env|config|rc|mjs\\)$|\\\\.dockerignore|\\\\.editorconfig|\\\\.npmrc|Dockerfile|docker-compose')",
             "WebSearch",
@@ -23,7 +17,6 @@
             "WebFetch(domain:www.data.go.kr)",
             "WebFetch(domain:velog.io)",
             "Bash(grep:*)",
-            "Bash(bash \"/Users/kmj/.claude/plugins/marketplaces/omc//scripts/setup-progress.sh\" resume)",
             "Read(**)",
             "Edit(**)",
             "Write(**)"

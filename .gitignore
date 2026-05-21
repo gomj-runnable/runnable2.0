@@ -41,7 +41,11 @@ public/uploads/
 public/crosswalk/
 .mcp.json
 
-# Oh My ClaudeCode
+# Claude Code 로컬 아티팩트 (스크린샷, 런타임 lock 등)
+.claude/*.png
+.claude/scheduled_tasks.lock
+
+# Oh My ClaudeCode (omc) 플러그인 런타임 state — 루트/서브디렉터리 모두 무시
 .omc/
 
 # TODO
