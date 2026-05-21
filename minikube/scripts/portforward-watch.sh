@@ -14,13 +14,14 @@ CHECK_INTERVAL=10
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 
-# minikube + Pod Ready 대기
+# Pod Ready 대기 — minikube status 는 InsufficientStorage 같은 경고성 상태에서도
+# exit code 1 을 던지므로 의도적으로 검사하지 않는다. apiserver/kubelet 이 죽었다면
+# kubectl 호출 자체가 실패하므로 그것만으로 충분.
 wait_ready() {
-    log "minikube 및 Pod 준비 대기..."
+    log "Pod 준비 대기..."
     while true; do
-        if minikube status &>/dev/null &&
-           kubectl -n "$NAMESPACE" get pods 2>/dev/null | grep -q Running; then
-            log "minikube + Pod 준비 완료"
+        if kubectl -n "$NAMESPACE" get pods 2>/dev/null | grep -q Running; then
+            log "Pod 준비 완료"
             return 0
         fi
         sleep "$CHECK_INTERVAL"
