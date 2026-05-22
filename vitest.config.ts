@@ -42,12 +42,13 @@ export default defineConfig({
                 'server/data/**',
                 'shared/types/**/*.ts'
             ],
-            // Phase 0: 임계값 placeholder — 모두 0 으로 비활성. Phase 6 에서 활성화.
+            // Phase E (epic #267): 75% 라인 커버리지 달성 후 임계값 잠금.
+            // 회귀 방지용 floor — 추가 커버리지 작업으로 향후 상향 가능.
             thresholds: {
-                lines: 0,
-                functions: 0,
-                branches: 0,
-                statements: 0
+                lines: 75,
+                functions: 75,
+                branches: 65,
+                statements: 74
             }
         }
     }
