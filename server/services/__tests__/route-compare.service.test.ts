@@ -253,7 +253,6 @@ describe('routeCompareService.computeMeta()', () => {
             {
                 geom: {
                     coordinates: [
-                        // @ts-expect-error lng undefined 시나리오
                         [undefined, 37],
                         [127, 37]
                     ]

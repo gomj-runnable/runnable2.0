@@ -53,8 +53,8 @@ describe('GET /api/routes/recommend', () => {
         const result = await handler(makeEvent({ limit: '1' }))
 
         expect(result).toHaveLength(1)
-        expect(typeof result[0].score).toBe('number')
-        expect(result[0].score).toBeGreaterThan(0)
+        expect(typeof result[0]!.score).toBe('number')
+        expect(result[0]!.score).toBeGreaterThan(0)
     })
 
     it('경로 fetch 실패 시 빈 배열', async () => {
@@ -75,7 +75,7 @@ describe('GET /api/routes/recommend', () => {
 
         const result = await handler(makeEvent({}))
 
-        expect(result[0].score).toBeGreaterThanOrEqual(result[1].score)
+        expect(result[0]!.score).toBeGreaterThanOrEqual(result[1]!.score)
     })
 
     it('완벽한 날씨 + elevation 큰 경로 → #달리기좋은날 / #전망맛집 태그', async () => {
@@ -86,8 +86,8 @@ describe('GET /api/routes/recommend', () => {
 
         const result = await handler(makeEvent({ limit: '1' }))
 
-        expect(result[0].tags).toContain('#달리기좋은날')
-        expect(result[0].tags).toContain('#전망맛집')
+        expect(result[0]!.tags).toContain('#달리기좋은날')
+        expect(result[0]!.tags).toContain('#전망맛집')
     })
 
     it('현재 시각 슬롯과 매칭되는 dong hourly 데이터가 있으면 그 값으로 점수 계산', async () => {
@@ -109,7 +109,7 @@ describe('GET /api/routes/recommend', () => {
         const result = await handler(makeEvent({}))
 
         // 35° hot + rainy + 단거리 → #더위주의, #비올때도OK, #단거리추천
-        expect(result[0].tags).toEqual(expect.arrayContaining(['#더위주의']))
-        expect(result[0].tags).toEqual(expect.arrayContaining(['#비올때도OK']))
+        expect(result[0]!.tags).toEqual(expect.arrayContaining(['#더위주의']))
+        expect(result[0]!.tags).toEqual(expect.arrayContaining(['#비올때도OK']))
     })
 })

@@ -255,7 +255,7 @@ watch(
 
         <SlideOverContent
             :is-open="slideOver.isOpen.value"
-            :current-nav="slideOver.current.value"
+            :current-nav="slideOver.current.value ?? ''"
             :title="slideOverTitle"
             :description="slideOverDescription"
             :is-logged-in="authStore.isLoggedIn.value"

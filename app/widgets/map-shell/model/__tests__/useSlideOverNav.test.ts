@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { ref, nextTick } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useSlideOverNav } from '../useSlideOverNav'
 import { NavKey } from '../nav-key'
@@ -20,7 +21,7 @@ vi.mock('~/entities/user/model/useAuthStore', () => {
 })
 
 describe('useSlideOverNav', () => {
-    let activeNav: ReturnType<typeof ref<string>>
+    let activeNav: Ref<string>
 
     beforeEach(() => {
         // 진입 기본 탭은 EXPLORE (#260)

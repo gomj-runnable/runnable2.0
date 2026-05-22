@@ -29,8 +29,8 @@ describe('GET /api/boundary/seoul', () => {
         expect(result.features).toHaveLength(SEOUL_GU_DATA.length)
         const first = result.features[0]
         expect(first.type).toBe('Feature')
-        expect(first.properties.SIG_KOR_NM).toBe(SEOUL_GU_DATA[0].name)
-        expect(first.properties.SIG_CD).toBe(SEOUL_GU_DATA[0].code)
+        expect(first!.properties!.SIG_KOR_NM).toBe(SEOUL_GU_DATA[0]!.name)
+        expect(first!.properties!.SIG_CD).toBe(SEOUL_GU_DATA[0]!.code)
         expect(first.geometry.type).toBe('Polygon')
         // 원형 폴리곤은 16분할 + 시작점 닫힘 = 17개 좌표
         expect(first.geometry.coordinates[0]).toHaveLength(17)

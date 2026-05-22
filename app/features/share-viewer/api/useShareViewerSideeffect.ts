@@ -36,7 +36,7 @@ export const useShareViewerSideeffect = (options: UseShareViewerOptions) => {
                     positions,
                     width: 4,
                     material: (
-                        C as unknown as { Color: { fromCssColorString: (s: string) => unknown } }
+                        C as unknown as { Color: { fromCssColorString: (s: string) => any } }
                     ).Color.fromCssColorString(color)
                 })
             })
@@ -54,7 +54,7 @@ export const useShareViewerSideeffect = (options: UseShareViewerOptions) => {
                 BoundingSphere: {
                     fromPoints: (pts: unknown[]) => unknown
                 }
-                HeadingPitchRange: new (h: number, p: number, r: number) => unknown
+                HeadingPitchRange: new (h: number, p: number, r: number) => any
             }
             const sphere = CLib.BoundingSphere.fromPoints(allPositions)
             v.camera.flyToBoundingSphere(

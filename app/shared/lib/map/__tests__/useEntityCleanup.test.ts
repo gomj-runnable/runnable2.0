@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { ref, shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
 
@@ -29,7 +30,7 @@ const makeViewer = () => {
 }
 
 describe('createEntityGroup()', () => {
-    let viewer: ReturnType<typeof shallowRef<CesiumViewer | null>>
+    let viewer: ShallowRef<CesiumViewer | null>
 
     beforeEach(() => {
         viewer = shallowRef<CesiumViewer | null>(makeViewer())

@@ -77,9 +77,9 @@ describe('createRouteElevationProfile()', () => {
     })
 
     it('elevation 누락 시 0 으로 처리 (z 없음)', () => {
-        const positions: GeoJsonPosition[] = [
-            [127.0, 37.0],
-            [127.001, 37.0]
+        const positions = [
+            [127.0, 37.0] as unknown as GeoJsonPosition,
+            [127.001, 37.0] as unknown as GeoJsonPosition
         ]
         const profile = createRouteElevationProfile([sec(positions)])
         expect(profile!.elevationGain).toBe(0)

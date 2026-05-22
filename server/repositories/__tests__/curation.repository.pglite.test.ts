@@ -38,7 +38,7 @@ const collectionInput = (overrides: Record<string, unknown> = {}) => ({
     title: '봄맞이 컬렉션',
     description: '봄에 좋은 경로',
     season: 'spring' as const,
-    theme: 'flower' as const,
+    theme: 'cherry-blossom' as const,
     validFrom: '2026-03-01',
     validTo: '2026-05-31',
     coverImageUrl: 'https://example.com/x.jpg',
