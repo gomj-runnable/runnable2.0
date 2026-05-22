@@ -27,3 +27,22 @@ vi.stubGlobal('getRouterParam', (event: any, name: string) => event?.context?.pa
 vi.stubGlobal('getQuery', (event: any) => event?.query ?? {})
 vi.stubGlobal('readBody', async (event: any) => event?.body)
 vi.stubGlobal('defineEventHandler', <T>(fn: T) => fn)
+vi.stubGlobal(
+    'getRequestURL',
+    (event: any) => new URL(event?.path ?? event?.url ?? '/', 'http://localhost')
+)
+
+// h3 모듈을 직접 import 하는 server/utils/error.ts 등에 동일 stub 적용.
+vi.mock('h3', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('h3')>()
+    return {
+        ...actual,
+        createError: (opts: { statusCode: number; message?: string; statusMessage?: string }) =>
+            new H3Error(opts),
+        getRouterParam: (event: any, name: string) => event?.context?.params?.[name],
+        getQuery: (event: any) => event?.query ?? {},
+        readBody: async (event: any) => event?.body,
+        defineEventHandler: <T>(fn: T) => fn,
+        getRequestURL: (event: any) => new URL(event?.path ?? event?.url ?? '/', 'http://localhost')
+    }
+})
