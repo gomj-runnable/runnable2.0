@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useRouteGraphicsRenderer } from '~/features/draw-route/lib/useRouteGraphicsRenderer'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
@@ -35,9 +36,9 @@ const makeViewer = () => {
 }
 
 describe('useRouteGraphicsRenderer', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
-    let drawnPositions: ReturnType<typeof ref<any>>
-    let sectionPointRanges: ReturnType<typeof ref<any>>
+    let viewer: ShallowRef<any>
+    let drawnPositions: Ref<any>
+    let sectionPointRanges: Ref<any>
 
     beforeEach(() => {
         viewer = shallowRef(makeViewer())

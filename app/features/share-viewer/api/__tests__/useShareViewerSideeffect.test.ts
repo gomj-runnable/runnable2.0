@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 // createClampedPolyline / getSectionColor 의존 import 는 그대로 둠 (Cesium 만 stub).
 import { useShareViewerSideeffect } from '~/features/share-viewer/api/useShareViewerSideeffect'
@@ -37,7 +38,7 @@ const makeViewer = () => {
 }
 
 describe('useShareViewerSideeffect.renderSections()', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
+    let viewer: ShallowRef<any>
 
     beforeEach(() => {
         viewer = shallowRef(makeViewer())

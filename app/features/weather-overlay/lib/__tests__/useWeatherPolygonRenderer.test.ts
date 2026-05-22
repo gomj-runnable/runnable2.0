@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { updateCesiumPolygons } from '~/features/weather-overlay/lib/useWeatherPolygonRenderer'
 
@@ -28,10 +29,10 @@ const makeDataSource = (entities: any[]) =>
     }) as any
 
 describe('updateCesiumPolygons()', () => {
-    let dailySnapshot: ReturnType<typeof ref<any>>
-    let activeLayer: ReturnType<typeof ref<any>>
-    let isVisible: ReturnType<typeof ref<boolean>>
-    let weatherOutlineInstances: ReturnType<typeof shallowRef<any>>
+    let dailySnapshot: Ref<any>
+    let activeLayer: Ref<any>
+    let isVisible: Ref<boolean>
+    let weatherOutlineInstances: ShallowRef<any>
 
     beforeEach(() => {
         dailySnapshot = ref(new Map())

@@ -51,8 +51,8 @@ describe('useSimulationStore', () => {
 
     it('setPlaybackSpeed / setProgressInfo 반영', () => {
         const s = useSimulationStore()
-        s.setPlaybackSpeed(4)
-        expect(s.playbackSpeed.value).toBe(4)
+        s.setPlaybackSpeed(5)
+        expect(s.playbackSpeed.value).toBe(5)
 
         const info = { distanceM: 1, elevationM: 2, gradeRatio: 0.01 } as any
         s.setProgressInfo(info)

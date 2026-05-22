@@ -11,7 +11,7 @@ describe('OsrmRoutingService', () => {
     })
 
     it('osrmServiceFactory 는 OsrmRoutingService 인스턴스 반환', () => {
-        expect(osrmServiceFactory({} as any)).toBeInstanceOf(OsrmRoutingService)
+        expect(osrmServiceFactory()).toBeInstanceOf(OsrmRoutingService)
     })
 
     it('Ok 응답을 파싱해 좌표 반환', async () => {

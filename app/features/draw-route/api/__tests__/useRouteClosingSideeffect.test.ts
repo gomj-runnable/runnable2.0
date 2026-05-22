@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef, nextTick, watchEffect as vueWatchEffect } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useRouteClosingSideeffect } from '~/features/draw-route/api/useRouteClosingSideeffect'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
@@ -37,9 +38,9 @@ const makeViewer = () => {
 }
 
 describe('useRouteClosingSideeffect', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
-    let drawnPositions: ReturnType<typeof ref<any>>
-    let closingMode: ReturnType<typeof ref<any>>
+    let viewer: ShallowRef<any>
+    let drawnPositions: Ref<any>
+    let closingMode: Ref<any>
 
     beforeEach(() => {
         viewer = shallowRef(makeViewer())

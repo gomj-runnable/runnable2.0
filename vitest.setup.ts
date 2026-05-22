@@ -3,7 +3,10 @@ import { vi } from 'vitest'
 
 // Nuxt auto-import인 useState를 Vue의 ref로 대체한다.
 // 각 테스트 파일에서 store composable을 직접 호출할 수 있게 해준다.
-vi.stubGlobal('useState', (_key: string, init?: () => any) => ref(init?.()))
+// init 결과를 T 로 캐스팅해 호출부에서 Ref<T | undefined> 가 아닌 Ref<T> 가 되도록 함.
+vi.stubGlobal('useState', <T>(_key: string, init?: () => T) =>
+    ref(init ? (init() as T) : (undefined as unknown as T))
+)
 vi.stubGlobal('computed', vueComputed)
 vi.stubGlobal('ref', ref)
 vi.stubGlobal('watch', vueWatch)
