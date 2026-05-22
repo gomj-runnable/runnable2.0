@@ -1,12 +1,26 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import {
     computeDistanceKm,
     computeAscentM,
     computeDescentM,
     estimateDurationMin,
-    sampleCoords
+    sampleCoords,
+    routeCompareService
 } from '../route-compare.service'
 import type { Position } from 'geojson'
+
+const routeRepo = vi.hoisted(() => ({
+    getSectionsByRouteId: vi.fn()
+}))
+const facilityRepo = vi.hoisted(() => ({
+    findNearby: vi.fn()
+}))
+
+vi.mock('../../repositories', () => ({
+    getRouteRepository: vi.fn(async () => routeRepo),
+    getFacilityRepository: vi.fn(async () => facilityRepo)
+}))
 
 describe('computeDistanceKm()', () => {
     it('좌표가 1개 이하면 0', () => {
@@ -140,5 +154,117 @@ describe('sampleCoords()', () => {
             [10, 10],
             [11, 11]
         ])
+    })
+})
+
+describe('routeCompareService.computeMeta()', () => {
+    beforeEach(() => {
+        routeRepo.getSectionsByRouteId.mockReset()
+        facilityRepo.findNearby.mockReset()
+    })
+
+    it('sections 가 비어 있으면 0 메타 + 시설물 카운트는 모두 0', async () => {
+        routeRepo.getSectionsByRouteId.mockResolvedValue([])
+        const meta = await routeCompareService.computeMeta('r-1')
+        expect(meta.distanceKm).toBe(0)
+        expect(meta.ascentM).toBe(0)
+        expect(meta.descentM).toBe(0)
+        expect(meta.estimatedDurationMin).toBe(0)
+        expect(meta.facilityCounts).toEqual({
+            sidewalk: 0,
+            crosswalk: 0,
+            fountain: 0,
+            locker: 0,
+            hospital: 0,
+            toilet: 0
+        })
+        // 좌표가 0개라서 시설물 조회는 호출되지 않음
+        expect(facilityRepo.findNearby).not.toHaveBeenCalled()
+    })
+
+    it('section 의 z 좌표로 ascent/descent, distance, duration 을 계산', async () => {
+        routeRepo.getSectionsByRouteId.mockResolvedValue([
+            {
+                geom: {
+                    coordinates: [
+                        [127, 37, 0],
+                        [127.001, 37.001, 10],
+                        [127.002, 37.002, 5]
+                    ]
+                }
+            }
+        ])
+        facilityRepo.findNearby.mockResolvedValue([])
+
+        const meta = await routeCompareService.computeMeta('r-1', 5)
+        expect(meta.ascentM).toBe(10)
+        expect(meta.descentM).toBe(5)
+        expect(meta.distanceKm).toBeGreaterThan(0)
+        expect(meta.estimatedDurationMin).toBeCloseTo(meta.distanceKm * 5, 5)
+    })
+
+    it('시설물 카운트는 type 별로 누적되고 동일 id 는 중복 카운트하지 않음', async () => {
+        // stride 10 — 좌표 21개라면 sample 은 [0, 10, 20] 3개
+        const coords = Array.from({ length: 21 }, (_, i) => [127 + i * 0.0001, 37, 0])
+        routeRepo.getSectionsByRouteId.mockResolvedValue([{ geom: { coordinates: coords } }])
+
+        facilityRepo.findNearby
+            .mockResolvedValueOnce([
+                { id: 'f-1', type: 'sidewalk' },
+                { id: 'f-2', type: 'crosswalk' }
+            ])
+            .mockResolvedValueOnce([
+                { id: 'f-1', type: 'sidewalk' }, // 중복 — 무시
+                { id: 'f-3', type: 'fountain' }
+            ])
+            .mockResolvedValueOnce([])
+
+        const meta = await routeCompareService.computeMeta('r-1')
+        expect(meta.facilityCounts.sidewalk).toBe(1)
+        expect(meta.facilityCounts.crosswalk).toBe(1)
+        expect(meta.facilityCounts.fountain).toBe(1)
+        expect(meta.facilityCounts.hospital).toBe(0)
+    })
+
+    it('id 가 없는 시설물도 type 카운트는 누적 (중복 검사 스킵)', async () => {
+        routeRepo.getSectionsByRouteId.mockResolvedValue([
+            { geom: { coordinates: [[127, 37, 0]] } }
+        ])
+        facilityRepo.findNearby.mockResolvedValueOnce([
+            { type: 'toilet' },
+            { type: 'toilet' },
+            { type: 'hospital' }
+        ])
+
+        const meta = await routeCompareService.computeMeta('r-1')
+        expect(meta.facilityCounts.toilet).toBe(2)
+        expect(meta.facilityCounts.hospital).toBe(1)
+    })
+
+    it('section.geom 이 undefined 이면 좌표 없이 진행', async () => {
+        routeRepo.getSectionsByRouteId.mockResolvedValue([{ geom: undefined }, { geom: null }])
+        const meta = await routeCompareService.computeMeta('r-1')
+        expect(meta.distanceKm).toBe(0)
+        expect(facilityRepo.findNearby).not.toHaveBeenCalled()
+    })
+
+    it('좌표의 lng/lat 가 undefined 면 해당 좌표는 시설물 조회 스킵', async () => {
+        routeRepo.getSectionsByRouteId.mockResolvedValue([
+            {
+                geom: {
+                    coordinates: [
+                        // @ts-expect-error lng undefined 시나리오
+                        [undefined, 37],
+                        [127, 37]
+                    ]
+                }
+            }
+        ])
+        facilityRepo.findNearby.mockResolvedValue([])
+
+        await routeCompareService.computeMeta('r-1')
+        // sampling 은 [0번, 마지막] 둘 다 sample 에 포함되지만 lng=undefined 인 0번은 skip → 1회만 호출
+        expect(facilityRepo.findNearby).toHaveBeenCalledTimes(1)
+        expect(facilityRepo.findNearby).toHaveBeenCalledWith(37, 127, 50, expect.any(Array))
     })
 })
