@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useRouteListSideeffect } from '~/features/draw-route/api/useRouteListSideeffect'
 
@@ -34,10 +35,10 @@ const makeViewer = () => {
 }
 
 describe('useRouteListSideeffect', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
-    let routes: ReturnType<typeof ref<any[]>>
-    let selectedRouteId: ReturnType<typeof ref<string | null>>
-    let drawnPositions: ReturnType<typeof ref<any>>
+    let viewer: ShallowRef<any>
+    let routes: Ref<any[]>
+    let selectedRouteId: Ref<string | null>
+    let drawnPositions: Ref<any>
 
     beforeEach(() => {
         viewer = shallowRef(makeViewer())

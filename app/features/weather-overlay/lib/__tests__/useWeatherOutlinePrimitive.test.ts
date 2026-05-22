@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef, computed } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import {
     buildBoundaryOutlinePrimitive,
@@ -69,11 +70,11 @@ describe('getPolygonRings()', () => {
 })
 
 describe('buildBoundaryOutlinePrimitive()', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
-    let boundaryGeojson: ReturnType<typeof ref<any>>
-    let activeLayer: ReturnType<typeof ref<any>>
-    let isVisible: ReturnType<typeof ref<boolean>>
-    let weatherOutlineInstances: ReturnType<typeof shallowRef<any>>
+    let viewer: ShallowRef<any>
+    let boundaryGeojson: Ref<any>
+    let activeLayer: Ref<any>
+    let isVisible: Ref<boolean>
+    let weatherOutlineInstances: ShallowRef<any>
     let removedPrimitives: any[]
 
     const makeViewer = () => {

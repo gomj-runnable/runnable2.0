@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useTerrainSampler } from '~/shared/lib/map/useTerrainSampler'
 
@@ -14,7 +15,7 @@ const C = {
 vi.stubGlobal('window', { Cesium: C } as any)
 
 describe('useTerrainSampler.sampleTerrain()', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
+    let viewer: ShallowRef<any>
 
     beforeEach(() => {
         viewer = shallowRef({ terrainProvider: { id: 'tp' } })
@@ -56,7 +57,7 @@ describe('useTerrainSampler.sampleTerrain()', () => {
 })
 
 describe('useTerrainSampler.densifyAndSample() / Sections()', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
+    let viewer: ShallowRef<any>
 
     beforeEach(() => {
         viewer = shallowRef({ terrainProvider: {} })

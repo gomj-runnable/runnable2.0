@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { shallowRef } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useCameraViewSideeffect } from '~/features/camera/api/useCameraViewSideeffect'
 
@@ -31,7 +32,7 @@ const makeCtrl = () => ({
 const makeViewer = () => ({ screenSpaceCameraController: makeCtrl() })
 
 describe('useCameraViewSideeffect', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
+    let viewer: ShallowRef<any>
 
     beforeEach(() => {
         viewer = shallowRef(makeViewer())

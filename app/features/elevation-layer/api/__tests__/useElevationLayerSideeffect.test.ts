@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 
 import { useElevationLayerSideeffect } from '~/features/elevation-layer/api/useElevationLayerSideeffect'
 
@@ -31,8 +32,8 @@ const makeViewer = () => {
 }
 
 describe('useElevationLayerSideeffect', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
-    let isVisible: ReturnType<typeof ref<boolean>>
+    let viewer: ShallowRef<any>
+    let isVisible: Ref<boolean>
 
     beforeEach(() => {
         viewer = shallowRef(makeViewer())

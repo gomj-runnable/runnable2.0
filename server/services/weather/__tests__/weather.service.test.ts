@@ -63,7 +63,7 @@ describe('weatherService (WeatherFacade)', () => {
         expect(forecastFetch).toHaveBeenCalled()
         expect(airFetch).toHaveBeenCalled()
         expect(result.dongs).toHaveLength(25)
-        expect(result.dongs[0].hourly).toHaveLength(1)
+        expect(result.dongs[0]!.hourly).toHaveLength(1)
         expect(result.activeSources).toContain('observed')
         expect(result.activeSources).toContain('forecast')
         expect(result.activeSources).toContain('airquality')
@@ -144,11 +144,11 @@ describe('weatherService (WeatherFacade)', () => {
         const jongno = result.dongs.find((d) => d.dongCode === guCode)
         expect(jongno).toBeDefined()
         // pm10 이미 있던 첫 슬롯은 그대로 30, pm25 는 새로 들어옴
-        expect(jongno!.hourly[0].pm10).toBe(30)
-        expect(jongno!.hourly[0].pm25).toBe(50)
+        expect(jongno!.hourly[0]!.pm10).toBe(30)
+        expect(jongno!.hourly[0]!.pm25).toBe(50)
         // pm10 null 이던 둘째 슬롯은 88 로 보충
-        expect(jongno!.hourly[1].pm10).toBe(88)
-        expect(jongno!.hourly[1].pm25).toBe(40)
+        expect(jongno!.hourly[1]!.pm10).toBe(88)
+        expect(jongno!.hourly[1]!.pm25).toBe(40)
     })
 
     it('requestByDate: 날짜 → 해당 월 조회로 위임 (today fallback 포함)', async () => {
@@ -165,7 +165,7 @@ describe('weatherService (WeatherFacade)', () => {
         expect(spy).toHaveBeenCalledWith('2026-05', expect.anything())
 
         await weatherService.requestByDate() // today
-        expect(spy.mock.calls[1][0]).toMatch(/^\d{4}-\d{2}$/)
+        expect(spy.mock.calls[1]![0]).toMatch(/^\d{4}-\d{2}$/)
 
         spy.mockRestore()
     })

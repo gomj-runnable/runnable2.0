@@ -125,7 +125,7 @@ describe('routeService', () => {
 
             await routeService.createRouteWithSections({ title: 't' } as any, [], 'me')
 
-            const [enriched] = repo.createRoute.mock.calls[0]
+            const [enriched] = repo.createRoute.mock.calls[0]!
             expect(enriched.sgg).toBeUndefined()
             expect(enriched.emd).toBeUndefined()
         })
@@ -179,7 +179,7 @@ describe('routeService', () => {
                 { geom: { type: 'LineString', coordinates: [[127, 37]] }, attrs: [], pois: [] }
             ] as any)
 
-            const [, patch] = repo.updateRoute.mock.calls[0]
+            const [, patch] = repo.updateRoute.mock.calls[0]!
             expect(patch.sgg).toEqual(['강남구'])
             expect(patch.emd).toBeUndefined()
         })

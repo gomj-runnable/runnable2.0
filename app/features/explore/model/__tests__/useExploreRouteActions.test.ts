@@ -90,7 +90,7 @@ describe('useExploreRouteActions', () => {
         districtMock.getDongList.mockReturnValue(['역삼동', '청담동'])
 
         const explore = buildExplore()
-        explore.filter.selectedSigungu.value = '강남구'
+        explore.filter.selectedSigungu.value = '강남구' as any
         const { actions } = createActions(ref('탐색'), explore)
         expect(actions.dongOptions.value).toEqual([FILTER_ALL, '역삼동', '청담동'])
     })

@@ -19,7 +19,7 @@ describe('GET /api/curation/active', () => {
         const result = await handler({} as any)
 
         expect(listActiveCollections).toHaveBeenCalledTimes(1)
-        const [arg] = listActiveCollections.mock.calls[0]
+        const [arg] = listActiveCollections.mock.calls[0]!
         expect(arg).toMatch(/^\d{4}-\d{2}-\d{2}$/)
         expect(result).toBe(fixture)
     })
