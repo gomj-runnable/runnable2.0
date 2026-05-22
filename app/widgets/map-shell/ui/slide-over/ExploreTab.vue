@@ -9,9 +9,9 @@ defineProps<{
     explore: any
     sectionInfo: any
     sectionTotalDistance: number
-    sectionTotalTime: number
-    sigunguOptions: unknown[]
-    dongOptions: unknown[]
+    sectionTotalTime: string
+    sigunguOptions: string[]
+    dongOptions: string[]
     showRecommend: boolean
     weatherRecommend: any
 }>()

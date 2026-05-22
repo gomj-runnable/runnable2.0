@@ -63,7 +63,7 @@ describe('findFeatures()', () => {
     it('도메인과 ID 가 일치하는 Feature 만 반환', () => {
         const result = findFeatures(payload, 'frontend', ['frontend:pages:auth'])
         expect(result).toHaveLength(1)
-        expect(result[0].id).toBe('frontend:pages:auth')
+        expect(result[0]?.id).toBe('frontend:pages:auth')
     })
 
     it('다른 도메인의 ID 는 반환하지 않음', () => {
