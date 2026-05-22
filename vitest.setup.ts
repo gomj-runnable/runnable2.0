@@ -31,6 +31,7 @@ vi.stubGlobal(
     'getRequestURL',
     (event: any) => new URL(event?.path ?? event?.url ?? '/', 'http://localhost')
 )
+vi.stubGlobal('useRuntimeConfig', () => ({}))
 
 // h3 모듈을 직접 import 하는 server/utils/error.ts 등에 동일 stub 적용.
 vi.mock('h3', async (importOriginal) => {

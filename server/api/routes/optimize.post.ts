@@ -3,6 +3,7 @@ import {
     RouteOptimizeResponseBody
 } from '#shared/schemas/route-optimization.schema'
 import { withAuth } from '../../utils/withAuth'
+import { getRoutingService } from '../../utils/routing/registry'
 
 export default defineEventHandler(
     withAuth(async (event) => {
