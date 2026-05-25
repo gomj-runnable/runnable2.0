@@ -3,7 +3,6 @@ import { hasPermission } from '../../../shared/constants/permissions'
 import type { Permission } from '../../../shared/constants/permissions'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import type { SavedCurationCollection } from '../../../shared/types/curation'
-import type { SavedSegment } from '../../../shared/types/segment'
 import AdminSeedCard from './_components/AdminSeedCard.vue'
 
 definePageMeta({ ssr: false })
@@ -11,7 +10,6 @@ definePageMeta({ ssr: false })
 const { user } = useAuthStore()
 
 const { data: curations } = await useFetch<SavedCurationCollection[]>('/api/curation')
-const { data: segments } = await useFetch<SavedSegment[]>('/api/segments')
 
 interface AdminFeatureCard {
     key: string
@@ -33,14 +31,6 @@ const featureCards: AdminFeatureCard[] = [
         to: '/admin/curation',
         badge: () => `${curations.value?.length ?? 0}개`,
         badgeColor: 'info'
-    },
-    {
-        key: 'segment',
-        icon: 'i-lucide-trophy',
-        title: '세그먼트 현황',
-        description: '등록된 세그먼트 현황과 리더보드를 확인합니다.',
-        badge: () => `${segments.value?.length ?? 0}개`,
-        badgeColor: 'neutral'
     }
 ]
 
