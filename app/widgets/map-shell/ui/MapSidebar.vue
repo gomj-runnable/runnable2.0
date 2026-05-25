@@ -35,14 +35,6 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => {
         }
     ]
 
-    if (props.isLoggedIn) {
-        items.push({
-            label: '러닝 기록',
-            icon: 'i-lucide-activity',
-            to: '/run-log'
-        })
-    }
-
     if (isAdmin) {
         items.push({
             label: '관리자',
