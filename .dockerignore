@@ -2,6 +2,11 @@ node_modules
 .nuxt
 .git
 .gitignore
-Dockerfile
-docker-compose.yml
+compose
+.env
+.env.*
+!.env.prod.example
+!.env.example
 *.log
+coverage
+minikube
