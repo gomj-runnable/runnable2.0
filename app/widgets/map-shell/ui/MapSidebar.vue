@@ -1,38 +1,78 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { NavKey, type NavKeyValue } from '../model/nav-key'
+import { ROLES } from '#shared/constants/roles'
 
 const props = defineProps<{
     activeNav: NavKeyValue | null
     isLoggedIn?: boolean
+    userRole?: number | null
 }>()
 
 const emit = defineEmits<{
     select: [value: NavKeyValue]
 }>()
 
-const dropdownItems = computed<DropdownMenuItem[]>(() => [
-    {
-        label: NavKey.LIST,
-        icon: 'i-lucide-list',
-        onSelect: () => emit('select', NavKey.LIST)
-    },
-    {
-        label: NavKey.DRAW,
-        icon: 'i-lucide-pencil',
-        onSelect: () => emit('select', NavKey.DRAW)
-    },
-    {
-        label: NavKey.EXPLORE,
-        icon: 'i-lucide-search',
-        onSelect: () => emit('select', NavKey.EXPLORE)
-    },
-    {
+const dropdownItems = computed<DropdownMenuItem[]>(() => {
+    const role = props.userRole ?? 0
+    const isAdmin = role >= ROLES.ADMIN
+    const isDeveloper = role >= ROLES.DEVELOPER
+
+    const items: DropdownMenuItem[] = [
+        {
+            label: NavKey.LIST,
+            icon: 'i-lucide-list',
+            onSelect: () => emit('select', NavKey.LIST)
+        },
+        {
+            label: NavKey.DRAW,
+            icon: 'i-lucide-pencil',
+            onSelect: () => emit('select', NavKey.DRAW)
+        },
+        {
+            label: NavKey.EXPLORE,
+            icon: 'i-lucide-search',
+            onSelect: () => emit('select', NavKey.EXPLORE)
+        }
+    ]
+
+    if (props.isLoggedIn) {
+        items.push({
+            label: '러닝 기록',
+            icon: 'i-lucide-activity',
+            to: '/run-log'
+        })
+    }
+
+    if (isAdmin) {
+        items.push({
+            label: '관리자',
+            icon: 'i-lucide-shield',
+            to: '/admin'
+        })
+        items.push({
+            label: '큐레이션',
+            icon: 'i-lucide-bookmark',
+            to: '/admin/curation'
+        })
+    }
+
+    if (isDeveloper) {
+        items.push({
+            label: 'UML 분석',
+            icon: 'i-lucide-network',
+            to: '/admin/uml'
+        })
+    }
+
+    items.push({
         label: props.isLoggedIn ? '내 계정' : '로그인',
         icon: 'i-lucide-user',
         onSelect: () => emit('select', NavKey.AUTH)
-    }
-])
+    })
+
+    return items
+})
 </script>
 
 <template>
