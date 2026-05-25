@@ -3,5 +3,12 @@ node_modules
 .git
 .gitignore
 Dockerfile
+Dockerfile.migrate
 docker-compose.yml
+.env
+.env.*
+!.env.prod.example
+!.env.example
 *.log
+coverage
+minikube

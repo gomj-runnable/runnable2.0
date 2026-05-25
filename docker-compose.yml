@@ -1,0 +1,128 @@
+# ============================================================
+# Runnable — 단일 호스트 docker-compose 운영 형상
+# minikube/k8s → docker-compose 전환. 마이크로서비스 규모 축소가 목표.
+#
+# Services:
+#   - db        : PostGIS (지도 도메인) — 데이터는 named volume 영속
+#   - app       : Nuxt 빌드 산출물 (.output) 컨테이너 — Jenkins가 매 빌드마다 교체
+#   - migrate   : drizzle-kit push + seed (profile: migrate, 일회성)
+#   - jenkins   : CI/CD — docker.sock 마운트로 자기 자신 빌드/배포 트리거
+#
+# 외부 노출:
+#   - app:3333  → Tailscale Funnel 그대로 (minikube 시점 port-forward 와 동일 포트)
+#   - jenkins:8080
+#
+# 운영:
+#   docker compose --env-file .env.prod up -d db app jenkins
+#   docker compose --env-file .env.prod --profile migrate run --rm migrate
+# ============================================================
+
+services:
+    db:
+        image: imresamu/postgis:17-3.5-alpine
+        container_name: runnable_db_prod
+        restart: unless-stopped
+        command: ['postgres', '-c', 'timezone=Asia/Seoul']
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+            TZ: Asia/Seoul
+            PGDATA: /var/lib/postgresql/data/pgdata
+        volumes:
+            - runnable_db_prod_data:/var/lib/postgresql/data
+        ports:
+            # 충돌 회피: 기존 dev runnable_db(6432) 와 분리
+            - '127.0.0.1:5433:5432'
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+        networks:
+            - runnable_net
+        mem_limit: 1g
+        cpus: 1.0
+
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: runnable-app:latest
+        container_name: runnable_app_prod
+        restart: unless-stopped
+        depends_on:
+            db:
+                condition: service_healthy
+        env_file:
+            - .env.prod
+        environment:
+            DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
+            # Nuxt runtimeConfig 런타임 오버라이드 (NUXT_ 접두사 필요)
+            NUXT_PUBLIC_ROUTE_MODE: ${ROUTE_MODE}
+            NUXT_TMAP_API: ${TMAP_API}
+            HOST: 0.0.0.0
+            PORT: '3000'
+        ports:
+            # Jenkinsfile/Tailscale Funnel 이 기존에 쓰던 3333 외부 포트 유지
+            - '3333:3000'
+        volumes:
+            - runnable_uploads:/app/public/uploads
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/ >/dev/null 2>&1 || exit 1']
+            interval: 15s
+            timeout: 5s
+            retries: 6
+            start_period: 20s
+        networks:
+            - runnable_net
+        mem_limit: 1536m
+        cpus: 2.0
+
+    migrate:
+        profiles: ['migrate']
+        build:
+            context: .
+            dockerfile: Dockerfile.migrate
+        image: runnable-migrate:latest
+        depends_on:
+            db:
+                condition: service_healthy
+        env_file:
+            - .env.prod
+        environment:
+            DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
+            USE_DATABASE_MODE: POSTGRES
+        networks:
+            - runnable_net
+
+    jenkins:
+        image: jenkins/jenkins:lts
+        container_name: jenkins
+        restart: unless-stopped
+        user: root # docker.sock 접근 위해. 운영 강화 시 docker GID 매핑으로 분리 권장.
+        environment:
+            JENKINS_OPTS: '--prefix=/'
+            TZ: Asia/Seoul
+        ports:
+            - '8080:8080'
+            - '50000:50000'
+        volumes:
+            - jenkins_home:/var/jenkins_home
+            - /var/run/docker.sock:/var/run/docker.sock
+            # 호스트 docker CLI 재사용 — Jenkinsfile 의 `docker compose` 호출 가능하게
+            - /opt/homebrew/bin/docker:/usr/local/bin/docker:ro
+        networks:
+            - runnable_net
+
+volumes:
+    runnable_db_prod_data:
+    runnable_uploads:
+    jenkins_home:
+        # 기존 데이터 보존: 이미 존재하는 jenkins_home 볼륨을 그대로 사용
+        external: true
+
+networks:
+    runnable_net:
+        driver: bridge

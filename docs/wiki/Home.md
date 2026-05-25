@@ -14,14 +14,14 @@
 
 ## 기술 스택 요약
 
-| Layer    | Stack                                              |
-| -------- | -------------------------------------------------- |
-| Frontend | Nuxt 4 + Vue 3 + TailwindCSS 4 + Cesium 1.140      |
-| Backend  | Nitro (Nuxt 4) + Drizzle ORM + PostgreSQL / PGlite |
-| Auth     | better-auth                                        |
-| State    | useState composables + xstate 5 (재생 상태머신)    |
-| Test     | Vitest 4 + Playwright 1.60 + @nuxt/test-utils      |
-| Build/CI | pnpm + Jenkinsfile (minikube / Tailscale 배포)     |
+| Layer    | Stack                                                |
+| -------- | ---------------------------------------------------- |
+| Frontend | Nuxt 4 + Vue 3 + TailwindCSS 4 + Cesium 1.140        |
+| Backend  | Nitro (Nuxt 4) + Drizzle ORM + PostgreSQL / PGlite   |
+| Auth     | better-auth                                          |
+| State    | useState composables + xstate 5 (재생 상태머신)      |
+| Test     | Vitest 4 + Playwright 1.60 + @nuxt/test-utils        |
+| Build/CI | pnpm + Jenkinsfile (docker-compose / Tailscale 배포) |
 
 ## 구조 한 장 요약
 

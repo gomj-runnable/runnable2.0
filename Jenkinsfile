@@ -1,19 +1,18 @@
 // =============================================================================
-// Jenkinsfile — Runnable CI/CD Pipeline
+// Jenkinsfile — Runnable CI/CD (docker-compose 운영)
 //
 // 트리거: master push / 수동
-// 흐름: 품질검사 → 빌드 → 인프라 → Docker Hub → K8s 배포 → 포트포워드 → 헬스체크
+// 흐름: 품질검사 → TDD 게이트(테스트 실패 시 abort) → 빌드 → 이미지 → compose up
+// minikube/k8s 의존성 제거 (#???). docker compose 만으로 단일 호스트 운영.
 // =============================================================================
 
 pipeline {
     agent any
 
     environment {
-        BUILD_TAG    = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
-        PATH         = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
-        DOCKER_IMAGE = "myeongjunkim0615/runnable"
-        LOCAL_PORT   = "3000"
-        SECRETS_DIR  = "${env.HOME}/developer/projects/runnable2.0/minikube/k8s/config"
+        BUILD_TAG  = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
+        PATH       = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
+        COMPOSE    = "docker compose --env-file .env.prod"
     }
 
     options {
@@ -27,32 +26,6 @@ pipeline {
     }
 
     stages {
-        // ── 0. 디스크 사전 검증 ──
-        // minikube node 디스크가 임계치 초과면 적극적 prune 으로 회수 후 빌드 진행 (#253).
-        // 사후 정리(#252) 와 합쳐 양방향 안전망 — 누적 stale 로 빌드 도중 InsufficientStorage 발생 방지.
-        stage('DiskPreflight') {
-            steps {
-                sh '''#!/bin/bash
-                    set -euo pipefail
-
-                    THRESHOLD=80
-                    USAGE=$(minikube ssh -- "df / --output=pcent | tail -1 | tr -d '% '" 2>/dev/null | tr -d '\\r ')
-                    echo "==> minikube node 디스크 사용률: ${USAGE}% (임계치 ${THRESHOLD}%)"
-
-                    if [ "${USAGE:-0}" -ge "$THRESHOLD" ]; then
-                        echo "==> 임계치 초과 — 적극적 정리 실행"
-                        eval $(minikube docker-env)
-                        docker image prune -af
-                        docker container prune -f
-                        AFTER=$(minikube ssh -- "df / --output=pcent | tail -1 | tr -d '% '" 2>/dev/null | tr -d '\\r ')
-                        echo "==> 정리 완료 — 사용률 ${USAGE}% → ${AFTER}%"
-                    else
-                        echo "==> 임계치 미만 — 정리 생략"
-                    fi
-                '''
-            }
-        }
-
         // ── 1. 품질 검사 ──
         stage('Install') {
             steps {
@@ -77,116 +50,82 @@ pipeline {
             steps { sh 'pnpm typecheck || true' }
         }
 
+        // ── 2. TDD 게이트 ──
+        // 테스트 실패 시 배포 중단 — "성공 시 신규 이미지 컨테이너 교체" 원칙.
         stage('Test') {
-            steps { sh 'pnpm test || pnpm test' }
+            steps { sh 'pnpm test' }
         }
 
-        // ── 2. 호스트 빌드 ──
+        // ── 3. 호스트 빌드 (.output 산출) ──
         stage('Build') {
-            steps {
-                sh 'pnpm build'
-            }
+            steps { sh 'pnpm build' }
         }
 
-        // ── 3. 인프라 준비 (Docker + K8s 연결 확인) ──
-        stage('Infra') {
+        // ── 4. Docker 데몬 확인 ──
+        stage('DockerCheck') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
-
                     echo "==> Docker 데몬 확인"
                     docker info &>/dev/null || { echo "ERROR: Docker 연결 실패"; exit 1; }
                     echo "    Docker OK"
-
-                    echo "==> K8s 클러스터 확인"
-                    kubectl cluster-info &>/dev/null || { echo "ERROR: K8s 클러스터 연결 실패"; exit 1; }
-                    kubectl -n runnable get deployment 2>/dev/null || echo "    runnable 네임스페이스 아직 없음 (최초 배포)"
-
-                    echo "==> 인프라 준비 완료"
+                    docker compose version &>/dev/null || { echo "ERROR: docker compose v2 필요"; exit 1; }
                 '''
             }
         }
 
-        // ── 4. K8s 리소스 + DB 마이그레이션 ──
+        // ── 5. DB 보장 + 마이그레이션 ──
         stage('Migrate') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
+                    echo "==> db 서비스 기동 (이미 떠있으면 noop)"
+                    ${COMPOSE} up -d db
 
-                    echo "==> 시크릿/설정 파일 복사 (Jenkins 로컬 → 워크스페이스)"
-                    for f in secret.prod.yaml configmap.prod.yaml; do
-                        src="${SECRETS_DIR}/${f}"
-                        if [ ! -f "$src" ]; then
-                            echo "ERROR: ${src} 가 없습니다. Jenkins 서버에 시크릿 파일을 배치하세요."
-                            exit 1
-                        fi
-                        cp "$src" minikube/k8s/config/
-                    done
-
-                    echo "==> K8s 리소스 적용"
-                    kubectl apply -f minikube/k8s/namespace.yaml
-                    kubectl apply -f minikube/k8s/config/secret.prod.yaml
-                    kubectl apply -f minikube/k8s/config/configmap.prod.yaml
-                    kubectl apply -f minikube/k8s/postgres.yaml
-                    kubectl -n runnable rollout status deployment/postgres --timeout=120s
-
-                    echo "==> Migration 이미지 빌드 (minikube Docker)"
-                    eval $(minikube docker-env)
-                    docker build --no-cache -t runnable-migrate:latest -f minikube/Dockerfile.migrate .
-                    kubectl delete job runnable-migrate -n runnable --ignore-not-found
-                    kubectl apply -f minikube/k8s/migration-job.yaml
-                    kubectl wait --for=condition=complete job/runnable-migrate -n runnable --timeout=300s
-
-                    echo "==> DB 마이그레이션 완료"
+                    echo "==> migrate 일회성 실행 (drizzle push + seed)"
+                    ${COMPOSE} --profile migrate run --rm --build migrate
                 '''
             }
         }
 
-        // ── 6. App 배포 ──
+        // ── 6. App 이미지 빌드 + 컨테이너 교체 ──
         stage('Deploy') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
-                    echo "==> App 이미지 빌드 (minikube Docker) + Rolling Update"
-                    eval $(minikube docker-env)
-                    docker build --no-cache -t runnable-app:latest -f minikube/Dockerfile .
-                    kubectl apply -f minikube/k8s/app.yaml
-                    kubectl -n runnable rollout restart deployment/runnable-app
-                    kubectl -n runnable rollout status deployment/runnable-app --timeout=180s
+                    echo "==> app 이미지 재빌드 + 컨테이너 교체"
+                    ${COMPOSE} build app
+                    ${COMPOSE} up -d --no-deps app
 
-                    echo "==> 배포 완료"
-                '''
-            }
-        }
-
-        // ── 6.5. 빌드 산출물 정리 ──
-        // 매 빌드마다 `--no-cache` 로 새 runnable-app/migrate layer 가 생기는데
-        // 직전 layer 는 untagged 로 남아 minikube node 디스크를 누적 점유한다 (#249).
-        // 본 단계에서 dangling 만 안전하게 회수. active layer 는 prune 대상에서 자동 제외.
-        stage('PruneStaleImages') {
-            steps {
-                sh '''#!/bin/bash
-                    set -euo pipefail
-
-                    eval $(minikube docker-env)
-                    echo "==> dangling 이미지 정리 (active layer 는 자동 보존)"
+                    echo "==> 직전 빌드 이미지 정리 (dangling 만 prune)"
                     docker image prune -f
                 '''
             }
         }
 
-        // ── 7. 헬스체크 ──
-        stage('Expose') {
+        // ── 7. Smoke ──
+        stage('Smoke') {
             steps {
                 sh '''#!/bin/bash
                     set -euo pipefail
 
-                    echo "==> K8s 배포 상태 확인"
-                    kubectl -n runnable get pods
-                    kubectl -n runnable rollout status deployment/runnable-app --timeout=60s || true
+                    echo "==> 헬스체크 대기 (최대 60초)"
+                    for i in $(seq 1 12); do
+                        STATUS=$(docker inspect -f '{{.State.Health.Status}}' runnable_app_prod 2>/dev/null || echo "starting")
+                        echo "    [$i/12] app health: $STATUS"
+                        if [ "$STATUS" = "healthy" ]; then break; fi
+                        sleep 5
+                    done
 
-                    echo "==> 배포 완료 — port-forward 및 Tailscale Funnel은 LaunchAgent가 관리"
+                    echo "==> HTTP 200 확인 (외부 3333)"
+                    HTTP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3333 --max-time 10 || echo "000")
+                    if [ "$HTTP" != "200" ]; then
+                        echo "ERROR: smoke 실패 (HTTP $HTTP)"
+                        ${COMPOSE} logs --tail=50 app
+                        exit 1
+                    fi
+                    echo "    OK (HTTP $HTTP)"
                 '''
             }
         }
@@ -195,7 +134,6 @@ pipeline {
     post {
         success { echo "Pipeline SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }
         failure { echo "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }
-        // port-forward는 LaunchAgent가 상시 관리하므로 별도 조치 불필요
         cleanup { cleanWs() }
     }
 }

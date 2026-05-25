@@ -26,7 +26,7 @@ runnable2.0/
 │  └─ constants/         # roles, permissions
 ├─ tests/                # E2E (Playwright)
 ├─ docs/                 # 가이드 문서
-└─ minikube/             # 로컬 K8s 매니페스트
+└─ docker-compose.yml    # 운영 형상 (db + app + jenkins)
 ```
 
 ## 2.2 레이어 책임

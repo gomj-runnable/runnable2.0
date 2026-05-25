@@ -1,4 +1,5 @@
-# ── 런타임 전용 (빌드는 호스트에서 수행) ──
+# ── 런타임 전용 (빌드는 호스트/Jenkins 에서 수행) ──
+# minikube → docker-compose 전환. 빌드 컨텍스트는 프로젝트 루트.
 FROM node:20-slim
 
 RUN groupadd -r app && useradd -r -g app app
