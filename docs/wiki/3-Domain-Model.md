@@ -9,7 +9,6 @@
 | Domain        | 타입 파일                                           | Zod 스키마                                                               | 책임                                |
 | ------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
 | Route         | `route.ts`, `routeInfo.ts`, `route-optimization.ts` | `route.schema.ts`, `routeInfo.schema.ts`, `route-optimization.schema.ts` | 러닝 경로 본체                      |
-| Segment       | `segment.ts`                                        | `segment.schema.ts`                                                      | 경로 구간 + 리더보드                |
 | Weather       | `weather.ts`, `weather-recommend.ts`                | `weather.schema.ts`                                                      | 기상 정보 (예보·관측·대기질)        |
 | Safety        | (server/services/safety)                            | —                                                                        | 안전 점수 정규화 (Z-score)          |
 | Route-Compare | `route-compare.ts`                                  | —                                                                        | 경로 비교 지표 (거리·고도·예상시간) |
@@ -58,12 +57,6 @@ classDiagram
       +ownerId
       +createdAt
     }
-    class Segment {
-      +id
-      +routeId
-      +order
-      +points
-    }
     class RouteInfo {
       +routeId
       +distanceKm
@@ -102,7 +95,6 @@ classDiagram
       +score
       +reason
     }
-    Route "1" --> "*" Segment
     Route "1" --> "1" RouteInfo
     Route "1" --> "*" UserRoute
     Route ..> RouteCompare : compare(a,b)
