@@ -10,7 +10,6 @@ interface UseExploreRouteActionsOptions {
     exploreSelectRoute: (routeId: string, title?: string) => Promise<void>
     sectionInfo: any
     routeList: { refresh: () => Promise<void> }
-    stopSimulationForRouteChange: () => void
     notification: any
 }
 
@@ -20,7 +19,6 @@ export const useExploreRouteActions = ({
     exploreSelectRoute,
     sectionInfo,
     routeList,
-    stopSimulationForRouteChange,
     notification
 }: UseExploreRouteActionsOptions) => {
     const districtStore = useDistrictStore()
@@ -37,7 +35,6 @@ export const useExploreRouteActions = ({
 
     /** 탐색 결과에서 경로를 선택하면 지도 미리보기와 고도 차트를 표시한다. */
     const handleExploreSelect = async (routeId: string) => {
-        stopSimulationForRouteChange()
         explore.selectRoute(routeId)
         const route = explore.searchResults.value.find((r: any) => r.routeId === routeId)
         await exploreSelectRoute(routeId, route?.title)

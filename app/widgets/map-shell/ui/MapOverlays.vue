@@ -21,8 +21,6 @@ const _props = defineProps<{
     facility: any
     facilityEffect: any
     viewerReady: boolean
-    showSimulationChip: boolean
-    isSimDrawerOpen: boolean
     showRouteInfoChip: boolean
     overlayContext: any
     elevationChart: any
@@ -36,7 +34,6 @@ const _props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    'toggle-simulation': []
     'toggle-elevation-chart': []
     'route-info-submit': [payload: { name: string; description: string }]
     'close-route-info-guide': []
@@ -65,12 +62,9 @@ const emit = defineEmits<{
         :is-loading="facility.isLoading.value"
         :is-searching="facility.isSearching.value"
         :disabled="!viewerReady"
-        :show-simulation="showSimulationChip"
-        :simulation-active="isSimDrawerOpen"
         :show-route-info="showRouteInfoChip"
         @toggle="facility.toggleType($event)"
         @search-nearby="facilityEffect.searchNearby()"
-        @toggle-simulation="emit('toggle-simulation')"
     />
     <RouteOverlayBottomBar
         v-if="

@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ref, computed, nextTick } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
 import { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
-import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 
 const makeRouteInfoStore = () => ({
     isAddingRouteInfo: ref(false),
@@ -13,18 +12,6 @@ const makeRouteInfoStore = () => ({
 
 const makeRouteInfoEffect = () => ({
     cancelAdding: vi.fn()
-})
-
-const makeSimulation = () => ({
-    playbackState: ref(PlaybackStateEnum.STOPPED)
-})
-
-const makeSimulationEffect = () => ({
-    stopPlayback: vi.fn()
-})
-
-const makeSectionInfo = () => ({
-    isOpen: ref(false)
 })
 
 describe('useOverlayContext', () => {
@@ -38,11 +25,7 @@ describe('useOverlayContext', () => {
             exploreSelectedRouteId: ref<string | null>(null),
             showRecommend: ref(false),
             routeInfoStore: makeRouteInfoStore(),
-            routeInfoEffect: makeRouteInfoEffect(),
-            simulation: makeSimulation(),
-            simulationEffect: makeSimulationEffect(),
-            isSimDrawerOpen: ref(false),
-            sectionInfo: makeSectionInfo()
+            routeInfoEffect: makeRouteInfoEffect()
         }
     })
 
@@ -93,24 +76,10 @@ describe('useOverlayContext', () => {
         expect(showRouteInfoChip.value).toBe(true)
     })
 
-    it('showSimulationChip — 목록 탭에선 sectionInfo.isOpen 필요', () => {
-        opts.activeNav.value = '목록'
-        opts.selectedRouteId.value = 'r-1'
-        opts.sectionInfo.isOpen.value = false
-        const { showSimulationChip } = useOverlayContext(opts)
-        expect(showSimulationChip.value).toBe(false)
-
-        opts.sectionInfo.isOpen.value = true
-        // computed 재평가
-        expect(showSimulationChip.value).toBe(true)
-    })
-
-    it('overlayContext 가 활성 → 비활성으로 바뀌면 routeInfo/sim drawer 정리', async () => {
+    it('overlayContext 가 활성 → 비활성으로 바뀌면 routeInfo 정리', async () => {
         opts.activeNav.value = '목록'
         opts.selectedRouteId.value = 'r-1'
         opts.routeInfoStore.isAddingRouteInfo.value = true
-        opts.isSimDrawerOpen.value = true
-        opts.simulation.playbackState.value = PlaybackStateEnum.PLAYING
 
         useOverlayContext(opts)
         await nextTick()
@@ -121,8 +90,6 @@ describe('useOverlayContext', () => {
         await nextTick()
 
         expect(opts.routeInfoEffect.cancelAdding).toHaveBeenCalled()
-        expect(opts.isSimDrawerOpen.value).toBe(false)
-        expect(opts.simulationEffect.stopPlayback).toHaveBeenCalled()
         expect(opts.routeInfoStore.selectedMarkerRouteInfo.value).toBeNull()
     })
 

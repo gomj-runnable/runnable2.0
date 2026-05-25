@@ -9,7 +9,6 @@ import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
 import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
 import MapOverlays from '~/widgets/map-shell/ui/MapOverlays.vue'
 import SlideOverContent from '~/widgets/map-shell/ui/SlideOverContent.vue'
-import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
 import RouteCompareModal from '~/features/route-compare/ui/RouteCompareModal.vue'
 import SegmentsModal from '~/features/segments/ui/SegmentsModal.vue'
@@ -69,27 +68,21 @@ const features = useMapFeatureInit({
 const { authStore, authEffect } = features.auth
 const { store: weather, sources: weatherSources, recommend: weatherRecommend } = features.weather
 const { facility, facilityEffect, elevation, gradient } = features.mapLayers
-const { store: simulation, effect: simulationEffect } = features.simulation
 
 const slideOver = useSlideOverNav(activeNav)
 const showRecommend = ref(false)
-const isSimDrawerOpen = ref(false)
 const showDrawingHelpModal = ref(false)
 const compareEffect = useRouteCompareSideeffect()
 const segmentsEffect = useSegmentsSideeffect()
 
-const { overlayContext, showRouteInfoChip, showSimulationChip } = useOverlayContext({
+const { overlayContext, showRouteInfoChip } = useOverlayContext({
     activeNav,
     sectionDraft: computed(() => drawing.sectionDraft),
     selectedRouteId: routeList.selectedRouteId,
     exploreSelectedRouteId: computed(() => features.explore.selectedRouteId.value),
     showRecommend,
     routeInfoStore,
-    routeInfoEffect,
-    simulation,
-    simulationEffect,
-    isSimDrawerOpen,
-    sectionInfo: undefined as never // assigned after flow init
+    routeInfoEffect
 })
 
 const flow = useRouteSelectionFlow({
@@ -97,7 +90,6 @@ const flow = useRouteSelectionFlow({
     routeList,
     slideOver,
     activeNav,
-    simulation: features.simulation,
     routeInfoStore,
     routeInfoEffect
 })
@@ -111,7 +103,6 @@ const {
     slideOverDescription,
     handleStepBack,
     confirmStepBack,
-    stopSimulationForRouteChange,
     handleRouteSelect,
     handleRouteEdit
 } = flow
@@ -124,8 +115,6 @@ const { fabGroups, fabNearbyVisible } = useFabGroups({
     activeNav,
     closing,
     routeInfoStore,
-    isSimDrawerOpen,
-    showSimulationChip,
     showRouteInfoChip
 })
 const { districtEffect, sigunguOptions, dongOptions, handleExploreSelect, handleExploreImport } =
@@ -135,7 +124,6 @@ const { districtEffect, sigunguOptions, dongOptions, handleExploreSelect, handle
         exploreSelectRoute,
         sectionInfo,
         routeList,
-        stopSimulationForRouteChange,
         notification
     })
 
@@ -208,8 +196,6 @@ watch(
                         facility,
                         facilityEffect,
                         viewerReady: !!viewer,
-                        showSimulationChip,
-                        isSimDrawerOpen,
                         showRouteInfoChip,
                         overlayContext,
                         elevationChart,
@@ -221,7 +207,6 @@ watch(
                         routeInfoStore,
                         showRouteInfoGuide
                     }"
-                    @toggle-simulation="isSimDrawerOpen = !isSimDrawerOpen"
                     @toggle-elevation-chart="elevationChart.setOpen(!elevationChart.open)"
                     @route-info-submit="handleRouteInfoSubmit"
                     @close-route-info-guide="showRouteInfoGuide = false"
@@ -350,14 +335,6 @@ watch(
             />
         </div>
 
-        <SimulationDrawer
-            v-model:open="isSimDrawerOpen"
-            @play="simulationEffect.startPlayback(routeDrawStore.drawnPositions.value ?? [])"
-            @pause="simulationEffect.pausePlayback()"
-            @stop="simulationEffect.stopPlayback()"
-            @seek="simulationEffect.seekTo($event)"
-            @speed-change="simulation.setPlaybackSpeed($event)"
-        />
         <RouteSaveModal
             :open="saveModal.open"
             :title="saveModal.routeForm.title"

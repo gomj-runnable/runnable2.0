@@ -18,10 +18,6 @@ const props = defineProps<{
     isSearching: boolean
     /** 뷰어 미준비 시 칩 비활성화 */
     disabled?: boolean
-    /** 시뮬레이션 칩 표시 여부 */
-    showSimulation?: boolean
-    /** 시뮬레이션 Drawer 열림 여부 */
-    simulationActive?: boolean
     /** 경로정보 칩 표시 여부 */
     showRouteInfo?: boolean
 }>()
@@ -31,8 +27,6 @@ defineEmits<{
     toggle: [type: FacilityType]
     /** 현재 위치 기반 POI 검색 요청 */
     searchNearby: []
-    /** 시뮬레이션 칩 클릭 */
-    toggleSimulation: []
 }>()
 
 const sidewalk = useSidewalkStore()
@@ -140,16 +134,6 @@ const hasSearchableActive = computed(() =>
             />
         </div>
         <div class="flex gap-1 flex-wrap justify-end">
-            <UButton
-                v-if="showSimulation"
-                label="시뮬레이션"
-                icon="i-lucide-play-circle"
-                size="sm"
-                class="font-bold rounded-full"
-                :variant="simulationActive ? 'solid' : 'outline'"
-                :color="simulationActive ? 'primary' : 'neutral'"
-                @click="$emit('toggleSimulation')"
-            />
             <UButton
                 v-if="showRouteInfo"
                 label="경로정보"
