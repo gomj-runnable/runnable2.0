@@ -32,8 +32,6 @@ interface FabGroupsOptions {
         setMode: (mode: RouteClosingModeEnum | null) => void
     }
     routeInfoStore: ReturnType<typeof useRouteInfoStore>
-    isSimDrawerOpen: Ref<boolean>
-    showSimulationChip: ComputedRef<boolean>
     showRouteInfoChip: ComputedRef<boolean>
 }
 
@@ -49,8 +47,6 @@ export const useFabGroups = (options: FabGroupsOptions) => {
         activeNav,
         closing,
         routeInfoStore,
-        isSimDrawerOpen,
-        showSimulationChip,
         showRouteInfoChip
     } = options
 
@@ -209,19 +205,9 @@ export const useFabGroups = (options: FabGroupsOptions) => {
         {
             key: 'features',
             label: '기능',
-            icon: 'i-lucide-play-circle',
-            visible: showSimulationChip.value || showRouteInfoChip.value,
+            icon: 'i-lucide-message-circle',
+            visible: showRouteInfoChip.value,
             items: [
-                {
-                    key: 'simulation',
-                    label: '시뮬레이션',
-                    icon: 'i-lucide-play-circle',
-                    active: isSimDrawerOpen.value,
-                    visible: showSimulationChip.value,
-                    onClick: () => {
-                        isSimDrawerOpen.value = !isSimDrawerOpen.value
-                    }
-                },
                 {
                     key: 'route-info',
                     label: '경로정보',

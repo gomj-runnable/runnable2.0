@@ -31,7 +31,6 @@ describe('useExploreRouteActions', () => {
     const exploreSelectRoute = vi.fn(async () => {})
     const sectionInfoOpen = vi.fn()
     const sectionInfoClose = vi.fn()
-    const stopSimForRouteChange = vi.fn()
     const routeListRefresh = vi.fn(async () => {})
     const notificationNotify = vi.fn()
 
@@ -50,7 +49,6 @@ describe('useExploreRouteActions', () => {
         exploreSelectRoute.mockClear()
         sectionInfoOpen.mockClear()
         sectionInfoClose.mockClear()
-        stopSimForRouteChange.mockClear()
         routeListRefresh.mockClear()
         notificationNotify.mockClear()
         districtMock.guNames.value = []
@@ -67,7 +65,6 @@ describe('useExploreRouteActions', () => {
                 exploreSelectRoute,
                 sectionInfo,
                 routeList: { refresh: routeListRefresh },
-                stopSimulationForRouteChange: stopSimForRouteChange,
                 notification: { notify: notificationNotify }
             }),
             explore,
@@ -99,7 +96,6 @@ describe('useExploreRouteActions', () => {
         const { actions, explore } = createActions()
         await actions.handleExploreSelect('r-1')
 
-        expect(stopSimForRouteChange).toHaveBeenCalled()
         expect(explore.selectRoute).toHaveBeenCalledWith('r-1')
         expect(exploreSelectRoute).toHaveBeenCalledWith('r-1', 'A')
         expect(sectionInfoOpen).toHaveBeenCalledWith(

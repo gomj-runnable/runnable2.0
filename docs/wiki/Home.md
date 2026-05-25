@@ -66,4 +66,4 @@ flowchart TB
 ## 진행 상황
 
 - ✅ **완료** — 8개 섹션 모두, 총 21개 페이지, mermaid 다이어그램 20+개
-- 🚧 **확장 가능 영역** — 도메인 추가(geojson, gradient, simulation, stats, district 등), 2.x 레이어별 디테일 페이지, API 별 sequence 다이어그램
+- 🚧 **확장 가능 영역** — 도메인 추가(geojson, gradient, stats, district 등), 2.x 레이어별 디테일 페이지, API 별 sequence 다이어그램

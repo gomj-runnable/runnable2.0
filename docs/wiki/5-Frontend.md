@@ -11,7 +11,7 @@ app/
 │  ├─ route/  user/  weather/
 ├─ features/             # 기능 단위
 │  ├─ camera/  discover/  draw-route/  elevation-layer/
-│  ├─ explore/  route-info/  share-viewer/  simulation/
+│  ├─ explore/  route-info/  share-viewer/
 │  ├─ stats/  weather-overlay/
 ├─ widgets/              # 화면 단위
 │  ├─ facility-overlay/  map-shell/  right-panel/
