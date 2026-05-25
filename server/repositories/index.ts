@@ -2,18 +2,15 @@ import { getDb } from '../database/client'
 import type { IRouteRepository } from './route.repository'
 import type { IRouteInfoRepository } from './routeInfo.repository'
 import type { IFacilityRepository } from './facility.repository'
-import type { ISegmentRepository } from './segment.repository'
 import type { ICurationRepository } from './curation.repository'
 import { DrizzleRouteRepository } from './route.repository.drizzle'
 import { DrizzleRouteInfoRepository } from './routeInfo.repository.drizzle'
 import { DrizzleFacilityRepository } from './facility.repository.drizzle'
-import { DrizzleSegmentRepository } from './segment.repository.drizzle'
 import { DrizzleCurationRepository } from './curation.repository.drizzle'
 
 let _routeRepo: IRouteRepository | null = null
 let _routeInfoRepo: IRouteInfoRepository | null = null
 let _facilityRepo: IFacilityRepository | null = null
-let _segmentRepo: ISegmentRepository | null = null
 let _curationRepo: ICurationRepository | null = null
 
 export async function getRouteRepository(): Promise<IRouteRepository> {
@@ -29,11 +26,6 @@ export async function getRouteInfoRepository(): Promise<IRouteInfoRepository> {
 export async function getFacilityRepository(): Promise<IFacilityRepository> {
     if (!_facilityRepo) _facilityRepo = new DrizzleFacilityRepository(await getDb())
     return _facilityRepo
-}
-
-export async function getSegmentRepository(): Promise<ISegmentRepository> {
-    if (!_segmentRepo) _segmentRepo = new DrizzleSegmentRepository(await getDb())
-    return _segmentRepo
 }
 
 export async function getCurationRepository(): Promise<ICurationRepository> {
