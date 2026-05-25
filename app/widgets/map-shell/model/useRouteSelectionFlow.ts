@@ -1,7 +1,6 @@
 import type { Ref } from 'vue'
 import { useSectionInfoStore } from '~/entities/route/model/useSectionInfoStore'
 import type { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
-import type { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
 import type { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import {
     calculateTotalDistance,
@@ -21,10 +20,6 @@ interface UseRouteSelectionFlowOptions {
     }
     slideOver: { current: Ref<any>; meta: Ref<{ title: string; description: string }> }
     activeNav: Ref<string>
-    simulation: {
-        store: ReturnType<typeof useSimulationStore>
-        effect: { stopPlayback: () => void }
-    }
     routeInfoStore: ReturnType<typeof useRouteInfoStore>
     routeInfoEffect: ReturnType<typeof useRouteInfoSideeffect>
 }
@@ -32,15 +27,14 @@ interface UseRouteSelectionFlowOptions {
 /**
  * 경로 선택·수정 흐름 및 구간 정보 메트릭을 관리하는 composable.
  *
- * index.vue의 구간 정보(sectionInfo), 슬라이드오버 제목/설명, 경로 선택/수정 핸들러,
- * 경로 변경 시 시뮬레이션 정지 로직을 캡슐화한다.
+ * index.vue의 구간 정보(sectionInfo), 슬라이드오버 제목/설명, 경로 선택/수정 핸들러를
+ * 캡슐화한다.
  */
 export function useRouteSelectionFlow({
     routeDrawStore,
     routeList,
     slideOver,
     activeNav,
-    simulation,
     routeInfoStore,
     routeInfoEffect
 }: UseRouteSelectionFlowOptions) {
@@ -97,15 +91,7 @@ export function useRouteSelectionFlow({
 
     // ─── 경로 선택·수정 핸들러 ─────────────────────────────────────
 
-    /** 선택 경로가 바뀌면 기존 시뮬레이션을 즉시 정지한다. */
-    const stopSimulationForRouteChange = () => {
-        if (!simulation.store.playbackState.value.isStopped) {
-            simulation.effect.stopPlayback()
-        }
-    }
-
     const handleRouteSelect = async (routeId: string) => {
-        stopSimulationForRouteChange()
         const sections = await routeList.select(routeId)
         if (sections) {
             sectionInfo.open(routeId, sections as Parameters<typeof sectionInfo.open>[1])
@@ -114,7 +100,6 @@ export function useRouteSelectionFlow({
 
     /** 목록에서 내 경로를 수정 모드로 열어 그리기 탭으로 전환한다 */
     const handleRouteEdit = async (routeId: string) => {
-        stopSimulationForRouteChange()
         const sections = await routeList.select(routeId)
         if (!sections?.length) return
 
@@ -164,7 +149,6 @@ export function useRouteSelectionFlow({
         slideOverDescription,
         handleStepBack,
         confirmStepBack,
-        stopSimulationForRouteChange,
         handleRouteSelect,
         handleRouteEdit
     }

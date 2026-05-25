@@ -8,8 +8,6 @@ import {
 import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
 import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
-import { useSimulationStore } from '~/features/simulation/model/useSimulationStore'
-import { useSimulationSideeffect } from '~/features/simulation/api/useSimulationSideeffect'
 import type { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import type { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import type { useRouteMapFacade } from './useRouteMapFacade'
@@ -86,10 +84,6 @@ export function useMapFeatureInit({
     // ─── 탐색 ────────────────────────────────────────────────────────
     const explore = useExploreSearchSideeffect()
 
-    // ─── 시뮬레이션 ──────────────────────────────────────────────────
-    const simulation = useSimulationStore()
-    const simulationEffect = useSimulationSideeffect({ viewer })
-
     // ─── 마운트: 지도 초기화 → 각 기능 병렬 로드 ─────────────────────
     onMounted(async () => {
         await init()
@@ -127,7 +121,6 @@ export function useMapFeatureInit({
             gradientEffect
         },
         camera,
-        explore,
-        simulation: { store: simulation, effect: simulationEffect }
+        explore
     }
 }

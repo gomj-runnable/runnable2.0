@@ -13,7 +13,7 @@
 
 - `app/` : 프론트엔드 루트
 - `app/entities/` : 도메인 엔티티 슬라이스 (boundary, facility, gradient, notification, route, user, weather)
-- `app/features/` : 사용자 기능 슬라이스 (camera, discover, draw-route, elevation-layer, explore, route-info, simulation, weather-overlay)
+- `app/features/` : 사용자 기능 슬라이스 (camera, discover, draw-route, elevation-layer, explore, route-info, weather-overlay)
 - `app/shared/` : FSD 공용 레이어
 - `app/shared/lib/` : 공용 composable (map/useCesiumRuntime, map/useMapInit, map/useTerrainSampler, useWindow, useFormatUtils 등)
 - `app/shared/ui/` : 최소 단위 재사용 UI (BottomDrawer, Card, TextfieldCard 등)
@@ -26,6 +26,7 @@
 - `app/pages/` : 실제 라우트 페이지
 
 각 FSD 슬라이스 내부 레이어:
+
 - `api/` : 부수 효과 — 외부 API 통신, 브라우저 API 접근, Cesium Entity 조작 (구 `composables/sideeffect/`)
 - `lib/` : 순수 계산 — 독립적인 유틸리티 함수, 데이터 변환 (구 `composables/action/`)
 - `model/` : 상태 관리 — `useState` 기반 공유 상태, computed, mutation (구 `composables/store/`)
@@ -104,11 +105,11 @@
 
 모든 비trivial 작업은 아래 구조로 진행한다.
 
-| 역할 | 모델 | 책임 |
-|------|------|------|
-| **설계 (Architect)** | Claude Opus 4.6 | 시스템 분석, 구현 계획, 브리프 작성 |
-| **코딩 (Builder)** | Claude Sonnet 4.5 | 브리프 기반 코드 구현 |
-| **테스트 (Tester)** | Claude Sonnet 4.5 | 품질 검증, 성능 테스트 |
+| 역할                 | 모델              | 책임                                |
+| -------------------- | ----------------- | ----------------------------------- |
+| **설계 (Architect)** | Claude Opus 4.6   | 시스템 분석, 구현 계획, 브리프 작성 |
+| **코딩 (Builder)**   | Claude Sonnet 4.5 | 브리프 기반 코드 구현               |
+| **테스트 (Tester)**  | Claude Sonnet 4.5 | 품질 검증, 성능 테스트              |
 
 작업 순서: Architect → Builder → Tester → Architect(최종 확인)
 

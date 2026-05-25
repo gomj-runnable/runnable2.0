@@ -19,7 +19,6 @@
 | User-Route    | `user-route.ts`                                     | `user-route.schema.ts`                                                   | 사용자-경로 관계 (좋아요·포크)      |
 | GeoJSON       | `geojson.ts`                                        | `geojson.schema.ts`                                                      | 지리 데이터                         |
 | Gradient      | `gradient.ts`                                       | —                                                                        | 고도 그래프 색상 매핑               |
-| Simulation    | `simulation.ts`                                     | —                                                                        | 재생 시뮬레이션                     |
 | Stats         | `stats.ts`                                          | —                                                                        | 통계                                |
 | District      | `district.ts`                                       | —                                                                        | 행정 구역 (서울 동·구)              |
 

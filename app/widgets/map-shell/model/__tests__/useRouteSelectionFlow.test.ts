@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, nextTick } from 'vue'
-import { PlaybackStateEnum } from '#shared/types/playback-state.enum'
 
 import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
 
@@ -24,7 +23,6 @@ describe('useRouteSelectionFlow', () => {
     let routeList: any
     let slideOver: any
     let activeNav: any
-    let simulation: any
     let routeInfoStore: any
     let routeInfoEffect: any
 
@@ -52,10 +50,6 @@ describe('useRouteSelectionFlow', () => {
             meta: ref({ title: '기본 제목', description: '기본 설명' })
         }
         activeNav = ref('탐색')
-        simulation = {
-            store: { playbackState: ref(PlaybackStateEnum.STOPPED) },
-            effect: { stopPlayback: vi.fn() }
-        }
         routeInfoStore = {
             clearRouteInfos: vi.fn(),
             clearLocalRouteInfos: vi.fn()
@@ -72,7 +66,6 @@ describe('useRouteSelectionFlow', () => {
             routeList,
             slideOver,
             activeNav,
-            simulation,
             routeInfoStore,
             routeInfoEffect
         })
@@ -119,16 +112,6 @@ describe('useRouteSelectionFlow', () => {
         flow.confirmStepBack()
         expect(sharedSectionInfo.close).toHaveBeenCalled()
         expect(flow.showStepBackConfirm.value).toBe(false)
-    })
-
-    it('stopSimulationForRouteChange — playing 상태에서만 stopPlayback', () => {
-        const flow = create()
-        flow.stopSimulationForRouteChange()
-        expect(simulation.effect.stopPlayback).not.toHaveBeenCalled()
-
-        simulation.store.playbackState.value = PlaybackStateEnum.PLAYING
-        flow.stopSimulationForRouteChange()
-        expect(simulation.effect.stopPlayback).toHaveBeenCalled()
     })
 
     it('handleRouteSelect — select 결과 있으면 sectionInfo.open', async () => {

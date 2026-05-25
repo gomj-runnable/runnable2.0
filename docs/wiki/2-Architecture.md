@@ -8,7 +8,7 @@ Runnable 2.0은 Nuxt 모노리포지토리 안에서 **FSD(Feature-Sliced Design
 runnable2.0/
 ├─ app/                  # 프론트엔드 (FSD 적용)
 │  ├─ entities/          # 도메인 단위 (route, weather, facility, ...)
-│  ├─ features/          # 기능 단위 (camera, explore, simulation, ...)
+│  ├─ features/          # 기능 단위 (camera, explore, ...)
 │  ├─ widgets/           # 화면 단위 (map-shell, right-panel, ...)
 │  ├─ shared/            # 공통 ui / lib / model
 │  ├─ pages/             # Nuxt 라우팅
@@ -34,7 +34,7 @@ runnable2.0/
 | Layer                  | 책임                                               | 의존 방향                    |
 | ---------------------- | -------------------------------------------------- | ---------------------------- |
 | `app/widgets/`         | 화면 단위 컴포저블 (map-shell 등)                  | features → entities → shared |
-| `app/features/`        | 기능 단위 UI + 로직 (camera, simulation 등)        | entities → shared            |
+| `app/features/`        | 기능 단위 UI + 로직 (camera 등)                    | entities → shared            |
 | `app/entities/`        | 도메인 단위 (route, weather 등)                    | shared 만                    |
 | `app/shared/`          | UI primitives, composable utilities, map utilities | (자체 완결)                  |
 | `server/api/`          | HTTP 핸들러 — 얇게 유지                            | services, repositories       |
