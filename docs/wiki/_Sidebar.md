@@ -19,7 +19,6 @@
 - [3-5-Route-Compare](3-5-Route-Compare.md)
 - [3-7-Segment](3-7-Segment.md)
 - [3-8-Facility](3-8-Facility.md)
-- [3-9-RunRecord](3-9-RunRecord.md)
 - [3-10-Curation](3-10-Curation.md)
 - [3-11-UserRoute](3-11-UserRoute.md)
 
