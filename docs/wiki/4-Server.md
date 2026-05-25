@@ -6,18 +6,17 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 총 50+ 엔드포인트, 도메인별로 분류됩니다.
 
-| 도메인      | 엔드포인트 그룹                                                                                 |
-| ----------- | ----------------------------------------------------------------------------------------------- |
-| Auth        | `/api/auth/[...all]` (better-auth)                                                              |
-| Routes      | `/api/routes/**` (목록·생성·수정·삭제·검색·추천·최적화·통계·fork·like·share·feedbacks·sections) |
-| Segments    | `/api/segments/**` (생성·삭제·리더보드·기록 등록)                                               |
-| Run Records | `/api/run-records/**` (CRUD + `/insights/weekly`)                                               |
-| Weather     | `/api/weather/:date`, `/api/weather/monthly/:month`, `/api/weather/availability/:month`         |
-| Facilities  | `/api/facilities`, `/api/facilities/nearby`                                                     |
-| Curation    | `/api/curation/**` (collections + routes + active)                                              |
-| District    | `/api/district`                                                                                 |
-| Boundary    | `/api/boundary/seoul`, `/api/boundary/seoul-dong`                                               |
-| Admin       | `/api/admin/seed/status`, `/api/admin/seed/run`                                                 |
+| 도메인     | 엔드포인트 그룹                                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------- |
+| Auth       | `/api/auth/[...all]` (better-auth)                                                              |
+| Routes     | `/api/routes/**` (목록·생성·수정·삭제·검색·추천·최적화·통계·fork·like·share·feedbacks·sections) |
+| Segments   | `/api/segments/**` (생성·삭제·리더보드·기록 등록)                                               |
+| Weather    | `/api/weather/:date`, `/api/weather/monthly/:month`, `/api/weather/availability/:month`         |
+| Facilities | `/api/facilities`, `/api/facilities/nearby`                                                     |
+| Curation   | `/api/curation/**` (collections + routes + active)                                              |
+| District   | `/api/district`                                                                                 |
+| Boundary   | `/api/boundary/seoul`, `/api/boundary/seoul-dong`                                               |
+| Admin      | `/api/admin/seed/status`, `/api/admin/seed/run`                                                 |
 
 **디자인 원칙**:
 
@@ -50,14 +49,13 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 `server/repositories/` — 데이터 접근. **인터페이스 + Drizzle 구현 분리**.
 
-| Domain    | Interface                  | Drizzle 구현                       |
-| --------- | -------------------------- | ---------------------------------- |
-| Route     | `route.repository.ts`      | `route.repository.drizzle.ts`      |
-| RouteInfo | `routeInfo.repository.ts`  | `routeInfo.repository.drizzle.ts`  |
-| Segment   | `segment.repository.ts`    | `segment.repository.drizzle.ts`    |
-| Facility  | `facility.repository.ts`   | `facility.repository.drizzle.ts`   |
-| Curation  | `curation.repository.ts`   | `curation.repository.drizzle.ts`   |
-| RunRecord | `run-record.repository.ts` | `run-record.repository.drizzle.ts` |
+| Domain    | Interface                 | Drizzle 구현                      |
+| --------- | ------------------------- | --------------------------------- |
+| Route     | `route.repository.ts`     | `route.repository.drizzle.ts`     |
+| RouteInfo | `routeInfo.repository.ts` | `routeInfo.repository.drizzle.ts` |
+| Segment   | `segment.repository.ts`   | `segment.repository.drizzle.ts`   |
+| Facility  | `facility.repository.ts`  | `facility.repository.drizzle.ts`  |
+| Curation  | `curation.repository.ts`  | `curation.repository.drizzle.ts`  |
 
 `index.ts` 가 환경에 따라 구현체를 선택 (팩토리 패턴).
 
@@ -67,12 +65,12 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 `server/database/` — Drizzle ORM + PostgreSQL / PGlite.
 
-| 디렉터리      | 역할                                                                                                                                     |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `schema/`     | 도메인별 Drizzle 테이블 정의 (`routes.ts`, `curations.ts`, `routeInfos.ts`, `facilities.ts`, `runRecords.ts`, `segments.ts`, `users.ts`) |
-| `migrations/` | 생성된 마이그레이션 SQL (현재 6개) + 메타 스냅샷                                                                                         |
-| `client.ts`   | DB 클라이언트 (PG / PGlite 분기)                                                                                                         |
-| `seed.ts`     | `pnpm seed` 진입점                                                                                                                       |
+| 디렉터리      | 역할                                                                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `schema/`     | 도메인별 Drizzle 테이블 정의 (`routes.ts`, `curations.ts`, `routeInfos.ts`, `facilities.ts`, `segments.ts`, `users.ts`) |
+| `migrations/` | 생성된 마이그레이션 SQL (현재 6개) + 메타 스냅샷                                                                        |
+| `client.ts`   | DB 클라이언트 (PG / PGlite 분기)                                                                                        |
+| `seed.ts`     | `pnpm seed` 진입점                                                                                                      |
 
 ## 의존 흐름
 

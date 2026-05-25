@@ -14,7 +14,6 @@
 | Safety        | (server/services/safety)                            | —                                                                        | 안전 점수 정규화 (Z-score)          |
 | Route-Compare | `route-compare.ts`                                  | —                                                                        | 경로 비교 지표 (거리·고도·예상시간) |
 | Facility      | `facility.ts`                                       | `facility.schema.ts`                                                     | 편의 시설 (식수대·화장실 등)        |
-| Run-Record    | `run-record.ts`                                     | `run-record.schema.ts`                                                   | 러닝 기록 + 주간 인사이트           |
 | Curation      | `curation.ts`                                       | `curation.schema.ts`                                                     | 큐레이션 컬렉션                     |
 | Discover      | `discover.ts`                                       | `discover.schema.ts`                                                     | 발견 피드                           |
 | User-Route    | `user-route.ts`                                     | `user-route.schema.ts`                                                   | 사용자-경로 관계 (좋아요·포크)      |
@@ -77,13 +76,6 @@ classDiagram
       +ascentM
       +durationMin
     }
-    class RunRecord {
-      +id
-      +userId
-      +routeId
-      +startedAt
-      +endedAt
-    }
     class UserRoute {
       +userId
       +routeId
@@ -115,7 +107,6 @@ classDiagram
     Route "1" --> "1" RouteInfo
     Route "1" --> "*" UserRoute
     Route ..> RouteCompare : compare(a,b)
-    UserRoute "1" --> "*" RunRecord
     Curation "1" --> "*" Route
     Route ..> Facility : nearby()
     Weather ..> WeatherRecommend
