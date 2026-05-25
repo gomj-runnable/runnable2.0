@@ -15,7 +15,6 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 | Weather     | `/api/weather/:date`, `/api/weather/monthly/:month`, `/api/weather/availability/:month`         |
 | Facilities  | `/api/facilities`, `/api/facilities/nearby`                                                     |
 | Curation    | `/api/curation/**` (collections + routes + active)                                              |
-| UML         | `/api/uml/features`, `/api/uml/features/rescan`, `/api/uml/analyze`                             |
 | District    | `/api/district`                                                                                 |
 | Boundary    | `/api/boundary/seoul`, `/api/boundary/seoul-dong`                                               |
 | Admin       | `/api/admin/seed/status`, `/api/admin/seed/run`                                                 |

@@ -19,7 +19,7 @@ runnable2.0/
 │  ├─ services/          # 도메인 비즈니스 로직 (순수 함수 우선)
 │  ├─ repositories/      # 데이터 접근 (interface + drizzle 구현)
 │  ├─ database/          # schema, migrations, seed
-│  └─ utils/             # UML 분석, 공통 유틸
+│  └─ utils/             # 공통 유틸
 ├─ shared/               # 백엔드·프론트엔드 공유
 │  ├─ types/             # 도메인 타입 (30+)
 │  ├─ schemas/           # Zod 스키마 (12)

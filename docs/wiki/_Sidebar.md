@@ -17,7 +17,6 @@
 - [3-3-Weather](3-3-Weather.md)
 - [3-4-Safety](3-4-Safety.md)
 - [3-5-Route-Compare](3-5-Route-Compare.md)
-- [3-6-UML](3-6-UML.md)
 - [3-7-Segment](3-7-Segment.md)
 - [3-8-Facility](3-8-Facility.md)
 - [3-9-RunRecord](3-9-RunRecord.md)

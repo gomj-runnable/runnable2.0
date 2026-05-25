@@ -17,7 +17,6 @@
 | Run-Record    | `run-record.ts`                                     | `run-record.schema.ts`                                                   | 러닝 기록 + 주간 인사이트           |
 | Curation      | `curation.ts`                                       | `curation.schema.ts`                                                     | 큐레이션 컬렉션                     |
 | Discover      | `discover.ts`                                       | `discover.schema.ts`                                                     | 발견 피드                           |
-| UML           | `uml.ts`                                            | `uml.schema.ts`                                                          | 코드 UML 분석 (features / paths)    |
 | User-Route    | `user-route.ts`                                     | `user-route.schema.ts`                                                   | 사용자-경로 관계 (좋아요·포크)      |
 | GeoJSON       | `geojson.ts`                                        | `geojson.schema.ts`                                                      | 지리 데이터                         |
 | Gradient      | `gradient.ts`                                       | —                                                                        | 고도 그래프 색상 매핑               |
@@ -112,11 +111,6 @@ classDiagram
       +score
       +reason
     }
-    class UML {
-      +features
-      +paths
-    }
-
     Route "1" --> "*" Segment
     Route "1" --> "1" RouteInfo
     Route "1" --> "*" UserRoute
