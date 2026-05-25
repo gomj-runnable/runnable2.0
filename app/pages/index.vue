@@ -11,6 +11,10 @@ import MapOverlays from '~/widgets/map-shell/ui/MapOverlays.vue'
 import SlideOverContent from '~/widgets/map-shell/ui/SlideOverContent.vue'
 import SimulationDrawer from '~/features/simulation/ui/SimulationDrawer.vue'
 import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
+import RouteCompareModal from '~/features/route-compare/ui/RouteCompareModal.vue'
+import SegmentsModal from '~/features/segments/ui/SegmentsModal.vue'
+import { useRouteCompareSideeffect } from '~/features/route-compare/api/useRouteCompareSideeffect'
+import { useSegmentsSideeffect } from '~/features/segments/api/useSegmentsSideeffect'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
 import { NavKey } from '~/widgets/map-shell/model/nav-key'
 import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
@@ -71,6 +75,8 @@ const slideOver = useSlideOverNav(activeNav)
 const showRecommend = ref(false)
 const isSimDrawerOpen = ref(false)
 const showDrawingHelpModal = ref(false)
+const compareEffect = useRouteCompareSideeffect()
+const segmentsEffect = useSegmentsSideeffect()
 
 const { overlayContext, showRouteInfoChip, showSimulationChip } = useOverlayContext({
     activeNav,
@@ -362,6 +368,25 @@ watch(
             @update:title="saveModal.routeForm.title = $event"
             @update:description="saveModal.routeForm.description = $event"
             @submit="saveModal.confirm"
+        />
+        <RouteCompareModal
+            :open="compareEffect.isOpen.value"
+            :is-loading="compareEffect.isLoading.value"
+            :result="compareEffect.result.value"
+            :error-message="compareEffect.errorMessage.value"
+            @update:open="(v: boolean) => (v ? null : compareEffect.close())"
+        />
+        <SegmentsModal
+            :open="segmentsEffect.isOpen.value"
+            :segments="segmentsEffect.segments.value"
+            :is-loading-list="segmentsEffect.isLoadingList.value"
+            :selected-segment-id="segmentsEffect.selectedSegmentId.value"
+            :leaderboard="segmentsEffect.leaderboard.value"
+            :is-loading-leaderboard="segmentsEffect.isLoadingLeaderboard.value"
+            :is-logged-in="authStore.isLoggedIn.value"
+            @update:open="(v: boolean) => (v ? null : segmentsEffect.close())"
+            @select-segment="segmentsEffect.selectSegment"
+            @record-effort="segmentsEffect.recordEffort"
         />
     </div>
 </template>
