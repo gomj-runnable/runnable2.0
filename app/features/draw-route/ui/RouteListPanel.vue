@@ -3,6 +3,8 @@ import type { SavedRoute } from '#shared/types/route'
 import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 import { useRouteSocialActions } from '~/features/route-social/api/useRouteSocialActions'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
+import { useRouteCompareSideeffect } from '~/features/route-compare/api/useRouteCompareSideeffect'
+import { useSegmentsSideeffect } from '~/features/segments/api/useSegmentsSideeffect'
 
 const props = defineProps<{
     /** 저장된 경로 목록 */
@@ -23,6 +25,8 @@ defineEmits<{
 }>()
 
 const social = useRouteSocialActions(useNotificationStore())
+const compareEffect = useRouteCompareSideeffect()
+const segmentsEffect = useSegmentsSideeffect()
 const isOwner = (userId?: string) => !!props.currentUserId && userId === props.currentUserId
 
 /** 펼쳐진 카드의 routeId Set */
@@ -140,13 +144,37 @@ function toggleExpand(routeId: string) {
                                 :variant="social.isLiked(route.routeId) ? 'solid' : 'outline'"
                                 :color="social.isLiked(route.routeId) ? 'primary' : 'neutral'"
                                 size="sm"
-                                :icon="
-                                    social.isLiked(route.routeId)
-                                        ? 'i-lucide-heart'
-                                        : 'i-lucide-heart'
-                                "
+                                icon="i-lucide-heart"
                                 :label="`${social.displayLikeCount(route.routeId, route.likeCount ?? 0)}`"
                                 @click.stop="social.toggleLike(route.routeId, route.likeCount ?? 0)"
+                            />
+                            <UButton
+                                :variant="
+                                    compareEffect.pendingRouteId.value === route.routeId
+                                        ? 'solid'
+                                        : 'outline'
+                                "
+                                :color="
+                                    compareEffect.pendingRouteId.value === route.routeId
+                                        ? 'primary'
+                                        : 'neutral'
+                                "
+                                size="sm"
+                                icon="i-lucide-git-compare"
+                                :label="
+                                    compareEffect.pendingRouteId.value === route.routeId
+                                        ? '비교 대상 선택…'
+                                        : '비교'
+                                "
+                                @click.stop="compareEffect.pickRoute(route.routeId)"
+                            />
+                            <UButton
+                                variant="outline"
+                                color="neutral"
+                                size="sm"
+                                icon="i-lucide-flag"
+                                label="세그먼트"
+                                @click.stop="segmentsEffect.openForRoute(route.routeId)"
                             />
                         </div>
                     </template>
