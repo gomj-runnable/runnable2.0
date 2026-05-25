@@ -186,6 +186,7 @@ watch(
                 <MapSidebar
                     :active-nav="slideOver.lastActive.value"
                     :is-logged-in="authStore.isLoggedIn.value"
+                    :user-role="authStore.user.value?.role"
                     @select="slideOver.select"
                 />
             </template>
