@@ -16,7 +16,6 @@ const emit = defineEmits<{
 const dropdownItems = computed<DropdownMenuItem[]>(() => {
     const role = props.userRole ?? 0
     const isAdmin = role >= ROLES.ADMIN
-    const isDeveloper = role >= ROLES.DEVELOPER
 
     const items: DropdownMenuItem[] = [
         {
@@ -54,14 +53,6 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => {
             label: '큐레이션',
             icon: 'i-lucide-bookmark',
             to: '/admin/curation'
-        })
-    }
-
-    if (isDeveloper) {
-        items.push({
-            label: 'UML 분석',
-            icon: 'i-lucide-network',
-            to: '/admin/uml'
         })
     }
 

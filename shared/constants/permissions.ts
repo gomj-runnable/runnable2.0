@@ -10,7 +10,6 @@
  *
  * 의도된 행동 변화 (#129/#130 결정):
  *   - DEVELOPER 는 /admin 진입 가능 (VIEW_ADMIN_PAGE 있음)
- *   - UML Dashboard 는 /admin/uml 로 이동 (VIEW_ADMIN_PAGE 권한 필요)
  */
 
 import { ROLES } from './roles'

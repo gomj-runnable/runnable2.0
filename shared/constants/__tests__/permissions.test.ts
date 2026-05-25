@@ -14,7 +14,7 @@ describe('hasPermission()', () => {
         expect(hasPermission(ROLES.ADMIN, Permission.VIEW_ADMIN_PAGE)).toBe(true)
     })
 
-    it('DEVELOPER는 VIEW_ADMIN_PAGE 접근 가능 (#205 — UML 페이지가 /admin 으로 이동)', () => {
+    it('DEVELOPER는 VIEW_ADMIN_PAGE 접근 가능 (#205 — /admin 진입 권한)', () => {
         expect(hasPermission(ROLES.DEVELOPER, Permission.VIEW_ADMIN_PAGE)).toBe(true)
     })
 
