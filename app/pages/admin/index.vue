@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { hasPermission, Permission } from '../../../shared/constants/permissions'
+import { hasPermission } from '../../../shared/constants/permissions'
+import type { Permission } from '../../../shared/constants/permissions'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
 import type { SavedCurationCollection } from '../../../shared/types/curation'
 import type { SavedSegment } from '../../../shared/types/segment'
@@ -40,16 +41,6 @@ const featureCards: AdminFeatureCard[] = [
         description: '등록된 세그먼트 현황과 리더보드를 확인합니다.',
         badge: () => `${segments.value?.length ?? 0}개`,
         badgeColor: 'neutral'
-    },
-    {
-        key: 'uml',
-        icon: 'i-lucide-git-graph',
-        title: 'UML Dashboard',
-        description: '프로젝트 구조를 Mermaid 다이어그램으로 시각화합니다.',
-        to: '/admin/uml',
-        badge: () => '관리자',
-        badgeColor: 'neutral',
-        permission: Permission.VIEW_ADMIN_PAGE
     }
 ]
 
