@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
 import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
+import { useRouteSocialActions } from '~/features/route-social/api/useRouteSocialActions'
+import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 
-defineProps<{
+const props = defineProps<{
     /** 공개 경로 목록 */
     routes: SavedRoute[]
     /** 현재 선택된 경로 ID (없으면 null) */
@@ -11,6 +13,8 @@ defineProps<{
     isLoading: boolean
     /** 추천 모드 활성 여부 */
     recommendActive?: boolean
+    /** 현재 로그인 사용자 ID (좋아요/소유권 판별용) */
+    currentUserId?: string | null
 }>()
 
 defineEmits<{
@@ -21,6 +25,9 @@ defineEmits<{
     /** 추천 모드 토글 */
     recommend: []
 }>()
+
+const social = useRouteSocialActions(useNotificationStore())
+const isOwner = (userId?: string) => !!props.currentUserId && userId === props.currentUserId
 
 /** 펼쳐진 카드의 routeId Set */
 const expandedIds = ref<Set<string>>(new Set())
@@ -132,14 +139,35 @@ function toggleExpand(routeId: string) {
                         </template>
 
                         <template v-if="expandedIds.has(route.routeId)" #footer>
-                            <UButton
-                                icon="i-lucide-folder-input"
-                                variant="outline"
-                                color="neutral"
-                                size="sm"
-                                label="경로 가져오기"
-                                @click.stop="$emit('import', route.routeId)"
-                            />
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <UButton
+                                    icon="i-lucide-folder-input"
+                                    variant="outline"
+                                    color="neutral"
+                                    size="sm"
+                                    label="경로 가져오기"
+                                    @click.stop="$emit('import', route.routeId)"
+                                />
+                                <UButton
+                                    variant="outline"
+                                    color="neutral"
+                                    size="sm"
+                                    icon="i-lucide-share-2"
+                                    label="공유 링크"
+                                    @click.stop="social.copyShareLink(route.routeId)"
+                                />
+                                <UButton
+                                    v-if="currentUserId && !isOwner(route.userId)"
+                                    :variant="social.isLiked(route.routeId) ? 'solid' : 'outline'"
+                                    :color="social.isLiked(route.routeId) ? 'primary' : 'neutral'"
+                                    size="sm"
+                                    icon="i-lucide-heart"
+                                    :label="`${social.displayLikeCount(route.routeId, route.likeCount ?? 0)}`"
+                                    @click.stop="
+                                        social.toggleLike(route.routeId, route.likeCount ?? 0)
+                                    "
+                                />
+                            </div>
                         </template>
                     </UCard>
                 </li>

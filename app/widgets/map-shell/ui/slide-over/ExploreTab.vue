@@ -14,6 +14,7 @@ defineProps<{
     dongOptions: string[]
     showRecommend: boolean
     weatherRecommend: any
+    currentUserId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -81,6 +82,7 @@ const emit = defineEmits<{
                 :selected-route-id="explore.selectedRouteId.value"
                 :is-loading="explore.isSearching.value"
                 :recommend-active="showRecommend"
+                :current-user-id="currentUserId"
                 @select="emit('explore-select', $event)"
                 @import="emit('explore-import', $event)"
                 @recommend="emit('toggle-recommend')"
