@@ -9,7 +9,7 @@ runnable2.0/
 ├─ app/                  # 프론트엔드 (FSD 적용)
 │  ├─ entities/          # 도메인 단위 (route, weather, facility, ...)
 │  ├─ features/          # 기능 단위 (camera, explore, ...)
-│  ├─ widgets/           # 화면 단위 (map-shell, right-panel, ...)
+│  ├─ widgets/           # 화면 단위 (map-shell, ...)
 │  ├─ shared/            # 공통 ui / lib / model
 │  ├─ pages/             # Nuxt 라우팅
 │  ├─ middleware/, plugins/

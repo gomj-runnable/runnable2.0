@@ -1,22 +1,12 @@
 <script setup lang="ts">
-import MapPanelDrawer from './MapPanelDrawer.vue'
-
 const props = withDefaults(
     defineProps<{
         hideSidebar?: boolean
-        showSecondPanel?: boolean
-        panelDrawerOpen?: boolean
     }>(),
     {
-        hideSidebar: false,
-        showSecondPanel: false,
-        panelDrawerOpen: false
+        hideSidebar: false
     }
 )
-
-const emit = defineEmits<{
-    'update:panelDrawerOpen': [value: boolean]
-}>()
 </script>
 
 <template>
@@ -52,27 +42,5 @@ const emit = defineEmits<{
                 </div>
             </div>
         </div>
-
-        <!-- secondPanel 열기 버튼 (모든 폼팩터) -->
-        <div v-if="props.showSecondPanel && $slots.secondPanel" class="fixed bottom-4 right-4 z-30">
-            <UButton
-                icon="i-lucide-panel-bottom-open"
-                size="sm"
-                color="neutral"
-                variant="solid"
-                class="rounded-full shadow-lg"
-                aria-label="상세 정보 열기"
-                @click="emit('update:panelDrawerOpen', !props.panelDrawerOpen)"
-            />
-        </div>
-
-        <!-- Bottom Drawer (모든 폼팩터) -->
-        <MapPanelDrawer
-            v-if="props.showSecondPanel && $slots.secondPanel"
-            :open="props.panelDrawerOpen"
-            @update:open="emit('update:panelDrawerOpen', $event)"
-        >
-            <slot name="secondPanel" />
-        </MapPanelDrawer>
     </div>
 </template>
