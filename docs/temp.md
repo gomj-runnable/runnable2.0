@@ -17,7 +17,7 @@
 - `app/shared/` : FSD 공용 레이어
 - `app/shared/lib/` : 공용 composable (map/useCesiumRuntime, map/useMapInit, map/useTerrainSampler, useWindow, useFormatUtils 등)
 - `app/shared/ui/` : 최소 단위 재사용 UI (BottomDrawer, Card, TextfieldCard 등)
-- `app/widgets/` : 복합 위젯 (map-shell, facility-overlay, right-panel)
+- `app/widgets/` : 복합 위젯 (map-shell, facility-overlay)
 - `app/widgets/map-shell/` : 지도 셸 위젯 (MapShell, MapSidebar, MapFooter, MapSidebarTabs, useRouteMapFacade, useEntityCleanup)
 - `app/assets/css/` : 전역 CSS, 디자인 토큰, 지도 UI 스타일
 - `app/assets/images/` : 이미지 자산

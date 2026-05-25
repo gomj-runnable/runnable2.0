@@ -14,7 +14,7 @@ app/
 │  ├─ explore/  route-info/  share-viewer/
 │  ├─ stats/  weather-overlay/
 ├─ widgets/              # 화면 단위
-│  ├─ facility-overlay/  map-shell/  right-panel/
+│  ├─ facility-overlay/  map-shell/
 ├─ shared/               # 공통
 │  ├─ lib/               # composable utilities + map utilities
 │  ├─ model/             # 공유 model
@@ -65,11 +65,10 @@ app/
 
 ## 5.5 화면 단위 (Widgets)
 
-| Widget             | 역할                       |
-| ------------------ | -------------------------- |
-| `map-shell`        | Cesium 지도 + 기본 컨트롤  |
-| `right-panel`      | 우측 패널 (정보·결과 표시) |
-| `facility-overlay` | 시설물 레이어 오버레이     |
+| Widget             | 역할                      |
+| ------------------ | ------------------------- |
+| `map-shell`        | Cesium 지도 + 기본 컨트롤 |
+| `facility-overlay` | 시설물 레이어 오버레이    |
 
 ## 의존 흐름
 

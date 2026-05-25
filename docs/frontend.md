@@ -34,7 +34,6 @@ app/
 ├── widgets/           # 복합 위젯 — shared + entities + features import 가능
 │   ├── facility-overlay/ # 시설물 오버레이
 │   ├── map-shell/     # 지도 Shell (MapShell, MapSidebar, useRouteMapFacade)
-│   └── right-panel/   # 우측 2차 패널
 │
 ├── pages/             # 라우트 — 조합만 담당 (SSR: false)
 └── assets/css/        # 디자인 토큰 + 외부 CSS
