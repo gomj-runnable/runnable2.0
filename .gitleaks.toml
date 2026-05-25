@@ -47,7 +47,7 @@ regex = '''postgres(?:ql)?:\/\/[^:\/\s]+:[^@\s]+@[^\s/]+'''
 tags = ["secret", "db"]
 
 [allowlist]
-description = "검사 제외 경로 (lockfile, build artifact, node_modules)"
+description = "검사 제외 경로 — lockfile/빌드 산출물, placeholder 만 포함하는 예시·문서·테스트, 이미 삭제된 매니페스트(히스토리 only, 회전·rewrite 은 #173)"
 paths = [
     '''pnpm-lock\.yaml''',
     '''package-lock\.json''',
@@ -57,12 +57,35 @@ paths = [
     '''dist/''',
     '''\.next/''',
     '''\.nuxt/''',
-    '''\.gitleaks\.toml'''
+    '''\.gitleaks\.toml''',
+    # 예시 env 파일 (placeholder/포맷 설명만 포함)
+    '''\.env(\..+)?\.example$''',
+    # 테스트 픽스처
+    '''__tests__/''',
+    '''\.test\.[jt]sx?$''',
+    '''\.spec\.[jt]sx?$''',
+    # README placeholder (markdown 표/문서 예시)
+    '''^README\.md$''',
+    # 이미 삭제된 minikube 매니페스트 — 진짜 운영 secret 회전 + history rewrite 은 #173
+    '''^minikube/''',
+    # 이미 삭제된 운영 스크립트/단일 compose (히스토리 only)
+    '''^scripts/webhook-listener\.sh$''',
+    '''^deploy\.sh$''',
+    '''^docker-compose\.yml$''',
+    # vendored / minified 라이브러리 (Cesium 등) — JWT 등 우연 매칭
+    '''^lib/cesium/''',
+    '''\.min\.js$'''
 ]
 
-# 테스트 픽스처에 사용되는 더미 값 — 패턴은 매칭되지만 시크릿이 아님
+# 시크릿이 아닌데 패턴이 매칭되는 placeholder/픽스처 더미 값
 regexes = [
     '''(?i)example[_-]?secret''',
     '''(?i)dummy[_-]?key''',
-    '''postgres://user:password@localhost'''
+    '''postgres://user:password@localhost''',
+    # ${...} 환경변수 보간 (docker-compose, k8s manifest)
+    '''postgres(?:ql)?://[^:/\s]+:\$\{[^}]+\}@''',
+    # <NAME> 문서/주석 placeholder
+    '''postgres(?:ql)?://<[^>]+>:<[^>]+>@''',
+    # {name} python/jinja 스타일 placeholder
+    '''postgres(?:ql)?://\{[^}]+\}:\{[^}]+\}@'''
 ]
