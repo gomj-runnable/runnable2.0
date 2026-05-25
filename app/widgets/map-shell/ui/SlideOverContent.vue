@@ -96,6 +96,7 @@ watch(
                 :dong-options="dongOptions"
                 :show-recommend="showRecommend"
                 :weather-recommend="weatherRecommend"
+                :current-user-id="currentUserId"
                 @route-select="emit('route-select', $event)"
                 @explore-select="emit('explore-select', $event)"
                 @explore-import="emit('explore-import', $event)"

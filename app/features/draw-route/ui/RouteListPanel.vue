@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { SavedRoute } from '#shared/types/route'
 import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
+import { useRouteSocialActions } from '~/features/route-social/api/useRouteSocialActions'
+import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 
-defineProps<{
+const props = defineProps<{
     /** 저장된 경로 목록 */
     routes: SavedRoute[]
     /** 현재 선택된 경로 ID (없으면 null) */
@@ -19,6 +21,9 @@ defineEmits<{
     /** 수정 버튼 클릭 시 해당 경로 ID를 전달 */
     edit: [routeId: string]
 }>()
+
+const social = useRouteSocialActions(useNotificationStore())
+const isOwner = (userId?: string) => !!props.currentUserId && userId === props.currentUserId
 
 /** 펼쳐진 카드의 routeId Set */
 const expandedIds = ref<Set<string>>(new Set())
@@ -103,7 +108,7 @@ function toggleExpand(routeId: string) {
                     </template>
 
                     <template v-if="expandedIds.has(route.routeId)" #footer>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <UButton
                                 variant="outline"
                                 color="neutral"
@@ -113,13 +118,35 @@ function toggleExpand(routeId: string) {
                                 @click.stop="$emit('download', route.routeId)"
                             />
                             <UButton
-                                v-if="currentUserId && route.userId === currentUserId"
+                                v-if="isOwner(route.userId)"
                                 variant="outline"
                                 color="primary"
                                 size="sm"
                                 icon="i-lucide-pencil"
                                 label="수정"
                                 @click.stop="$emit('edit', route.routeId)"
+                            />
+                            <UButton
+                                v-if="route.isPublic"
+                                variant="outline"
+                                color="neutral"
+                                size="sm"
+                                icon="i-lucide-share-2"
+                                label="공유 링크"
+                                @click.stop="social.copyShareLink(route.routeId)"
+                            />
+                            <UButton
+                                v-if="route.isPublic && currentUserId && !isOwner(route.userId)"
+                                :variant="social.isLiked(route.routeId) ? 'solid' : 'outline'"
+                                :color="social.isLiked(route.routeId) ? 'primary' : 'neutral'"
+                                size="sm"
+                                :icon="
+                                    social.isLiked(route.routeId)
+                                        ? 'i-lucide-heart'
+                                        : 'i-lucide-heart'
+                                "
+                                :label="`${social.displayLikeCount(route.routeId, route.likeCount ?? 0)}`"
+                                @click.stop="social.toggleLike(route.routeId, route.likeCount ?? 0)"
                             />
                         </div>
                     </template>
