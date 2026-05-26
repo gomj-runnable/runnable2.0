@@ -58,7 +58,7 @@ flowchart TB
 전체 목차는 사이드바를 참조하세요.
 
 - **Overview / Architecture** — 1-Overview, 2-Architecture
-- **Domain Model** — 3-Domain-Model (카탈로그) + 도메인별 페이지 (Route, Weather, Safety, Route-Compare, Facility, Curation, UserRoute)
+- **Domain Model** — 3-Domain-Model (카탈로그) + 도메인별 페이지 (Route, Weather, Safety, Route-Compare, Facility, UserRoute)
 - **Layers** — 4-Server, 5-Frontend
 - **Testing & TDD** — 6-Testing-and-TDD + 4 세부 페이지 (Concepts, Infrastructure, Writing Guide, CI Gate)
 - **Operations / Contribution** — 7-Operations, 8-Contribution
