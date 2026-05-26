@@ -18,14 +18,8 @@ export default defineNuxtConfig({
         retryAfterHeader: true,
         routes: [
             { path: '/api/auth', max: 10, duration: 60 },
-            { path: '/api/weather', max: 30, duration: 60 },
             { path: '/api/routes/optimize', max: 10, duration: 60 },
-            { path: '/api/facilities/nearby', max: 30, duration: 60 },
-            { path: '/api/admin', max: 10, duration: 60 },
-            // admin 전용(withAdmin 가드) 이라 brute-force 위험 낮음.
-            // 사이드바 GET + 다이어그램 타입 전환 등으로 60s 내 5번을 쉽게 초과해
-            // 1시간 ban → ingress 502 로 떨어지던 문제(#237) 회피용으로 글로벌 기본값과 일치시킨다.
-            { path: '/api/uml', max: 60, duration: 60 }
+            { path: '/api/facilities/nearby', max: 30, duration: 60 }
         ]
     },
 
