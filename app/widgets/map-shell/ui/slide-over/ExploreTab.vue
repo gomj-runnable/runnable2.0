@@ -1,11 +1,9 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props, @typescript-eslint/no-explicit-any */
 import ExplorePanel from '~/features/explore/ui/ExplorePanel.vue'
-import SectionInfoSlideContent from '~/widgets/right-panel/ui/SectionInfoSlideContent.vue'
+import SectionInfoSlideContent from '~/widgets/map-shell/ui/slide-over/SectionInfoSlideContent.vue'
 import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
-import CurationSection from '~/features/curation/ui/CurationSection.vue'
 import { FILTER_ALL } from '~/features/explore/model/useExploreFilterStore'
-import { useCurationSideeffect } from '~/features/curation/api/useCurationSideeffect'
 
 defineProps<{
     explore: any
@@ -26,11 +24,6 @@ const emit = defineEmits<{
     'step-back': []
     'toggle-recommend': []
 }>()
-
-const curation = useCurationSideeffect()
-onMounted(() => {
-    if (curation.collections.value.length === 0) curation.loadActiveCollections()
-})
 </script>
 
 <template>
@@ -52,15 +45,6 @@ onMounted(() => {
             @back="emit('step-back')"
         />
         <template v-else>
-            <CurationSection
-                :collections="curation.collections.value"
-                :is-loading-collections="curation.isLoadingCollections.value"
-                :selected-collection-id="curation.selectedCollectionId.value"
-                :collection-routes="curation.collectionRoutes.value"
-                :is-loading-routes="curation.isLoadingRoutes.value"
-                @select-collection="curation.selectCollection"
-                @select-route="emit('route-select', $event)"
-            />
             <UInput
                 v-model="explore.searchQuery.value"
                 type="search"

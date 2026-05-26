@@ -18,7 +18,6 @@
 - [3-4-Safety](3-4-Safety.md)
 - [3-5-Route-Compare](3-5-Route-Compare.md)
 - [3-8-Facility](3-8-Facility.md)
-- [3-10-Curation](3-10-Curation.md)
 - [3-11-UserRoute](3-11-UserRoute.md)
 
 **4. Server**
