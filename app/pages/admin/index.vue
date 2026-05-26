@@ -1,8 +1,13 @@
 <script setup lang="ts">
+/**
+ * 관리자 대시보드 — 카드 분기점 스켈레톤.
+ *
+ * featureCards 에 항목을 추가하면 그리드에 카드로 노출된다.
+ * 카드별 icon / title / description / to (라우트) / permission (선택) 만 정의하면 된다.
+ */
 import { hasPermission } from '../../../shared/constants/permissions'
 import type { Permission } from '../../../shared/constants/permissions'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
-import AdminSeedCard from './_components/AdminSeedCard.vue'
 
 definePageMeta({ ssr: false })
 
@@ -38,9 +43,14 @@ const visibleCards = computed(() =>
             <UColorModeButton />
         </header>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <AdminSeedCard />
+        <div
+            v-if="visibleCards.length === 0"
+            class="rounded-lg border border-dashed border-(--ui-border) p-8 text-center text-sm text-(--ui-text-muted)"
+        >
+            추후 관리자 기능이 여기에 표시됩니다.
+        </div>
 
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <template v-for="card in visibleCards" :key="card.key">
                 <NuxtLink v-if="card.to" :to="card.to" class="block">
                     <UCard :ui="{ root: 'hover:ring-2 hover:ring-primary-500 transition' }">
