@@ -7,13 +7,12 @@ interface OverlayContextOptions {
     sectionDraft: ComputedRef<unknown> | { value: unknown }
     selectedRouteId: string | null | Ref<string | null>
     exploreSelectedRouteId: Ref<string | null>
-    showRecommend: Ref<boolean>
     routeInfoStore: ReturnType<typeof useRouteInfoStore>
     routeInfoEffect: ReturnType<typeof useRouteInfoSideeffect>
 }
 
 /**
- * 현재 탭·선택 상태·추천 모드에 따라 오버레이 UI 그룹의 표출 컨텍스트를 결정한다.
+ * 현재 탭·선택 상태에 따라 오버레이 UI 그룹의 표출 컨텍스트를 결정한다.
  * overlayContext 변경 시 연관 UI(경로정보)를 일괄 정리한다.
  */
 export const useOverlayContext = (options: OverlayContextOptions) => {
@@ -22,7 +21,6 @@ export const useOverlayContext = (options: OverlayContextOptions) => {
         sectionDraft,
         selectedRouteId,
         exploreSelectedRouteId,
-        showRecommend,
         routeInfoStore,
         routeInfoEffect
     } = options
@@ -38,9 +36,8 @@ export const useOverlayContext = (options: OverlayContextOptions) => {
         if (activeNav.value === '목록' && resolvedRouteId) {
             return MapOverlayContextEnum.LIST_SELECTED
         }
-        if (activeNav.value === '탐색') {
-            if (showRecommend.value) return MapOverlayContextEnum.RECOMMEND
-            if (exploreSelectedRouteId.value) return MapOverlayContextEnum.EXPLORE_SELECTED
+        if (activeNav.value === '탐색' && exploreSelectedRouteId.value) {
+            return MapOverlayContextEnum.EXPLORE_SELECTED
         }
         return MapOverlayContextEnum.NONE
     })

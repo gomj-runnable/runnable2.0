@@ -4,7 +4,6 @@
  * 지도 위에 표시되는 모든 오버레이 UI를 조합하는 컴포넌트.
  * 부모로부터 facade 객체를 직접 받아 내부에서 바인딩한다.
  */
-import WeatherOverlay from '~/features/weather-overlay/ui/WeatherOverlay.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
 import RouteElevationModal from '~/features/draw-route/ui/RouteElevationModal.vue'
@@ -15,8 +14,6 @@ import FacilityMarkerPopup from '~/entities/facility/ui/FacilityMarkerPopup.vue'
 
 const _props = defineProps<{
     slideOverOpen: boolean
-    weather: any
-    weatherSources: any
     elevation: any
     facility: any
     facilityEffect: any
@@ -41,22 +38,6 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <WeatherOverlay
-        :class="slideOverOpen ? 'lg:left-96' : ''"
-        style="transition: left 300ms ease"
-        :selected-date="weather.selectedDate.value"
-        :selected-hour="weather.selectedHour.value"
-        :selected-month="weather.selectedMonth.value"
-        :active-layer="weather.activeLayer.value"
-        :is-loading="weather.isLoading.value"
-        :is-elevation-active="elevation.isElevationVisible.value"
-        :available-dates="weatherSources.filteredAvailableDates.value"
-        @update:selected-date="weather.selectedDate.value = $event"
-        @update:selected-hour="weather.selectedHour.value = $event"
-        @update:selected-month="weather.selectedMonth.value = $event"
-        @update:active-layer="weather.activeLayer.value = $event"
-        @update:elevation-active="elevation.isElevationVisible.value = $event"
-    />
     <FacilityOverlay
         :active-types="facility.activeTypes.value"
         :is-loading="facility.isLoading.value"
@@ -85,7 +66,7 @@ const emit = defineEmits<{
     />
     <GradientLegend
         v-if="gradient.isGradientVisible.value"
-        :has-other-legend="!!weather.activeLayer.value || elevation.isElevationVisible.value"
+        :has-other-legend="elevation.isElevationVisible.value"
     />
     <RouteElevationModal
         :open="elevationChart.open"

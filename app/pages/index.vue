@@ -64,11 +64,9 @@ const features = useMapFeatureInit({
     showRoutePolylines
 })
 const { authStore, authEffect } = features.auth
-const { store: weather, sources: weatherSources, recommend: weatherRecommend } = features.weather
 const { facility, facilityEffect, elevation, gradient } = features.mapLayers
 
 const slideOver = useSlideOverNav(activeNav)
-const showRecommend = ref(false)
 const showDrawingHelpModal = ref(false)
 const compareEffect = useRouteCompareSideeffect()
 
@@ -77,7 +75,6 @@ const { overlayContext, showRouteInfoChip } = useOverlayContext({
     sectionDraft: computed(() => drawing.sectionDraft),
     selectedRouteId: routeList.selectedRouteId,
     exploreSelectedRouteId: computed(() => features.explore.selectedRouteId.value),
-    showRecommend,
     routeInfoStore,
     routeInfoEffect
 })
@@ -106,7 +103,6 @@ const {
 
 const { fabGroups, fabNearbyVisible } = useFabGroups({
     mapLayers: features.mapLayers,
-    weather: features.weather,
     overlayContext,
     elevationChart,
     activeNav,
@@ -187,8 +183,6 @@ watch(
                 <MapOverlays
                     v-bind="{
                         slideOverOpen: slideOver.isOpen.value,
-                        weather,
-                        weatherSources,
                         elevation,
                         facility,
                         facilityEffect,
@@ -258,8 +252,6 @@ watch(
             :explore="features.explore"
             :sigungu-options="sigunguOptions"
             :dong-options="dongOptions"
-            :show-recommend="showRecommend"
-            :weather-recommend="weatherRecommend"
             @update:open="slideOver.isOpen.value = $event"
             @route-select="handleRouteSelect"
             @route-edit="handleRouteEdit"
@@ -267,7 +259,6 @@ watch(
             @explore-import="handleExploreImport"
             @step-back="handleStepBack"
             @drawing-start="drawing.start()"
-            @toggle-recommend="showRecommend = !showRecommend"
             @auth-success="
                 () => {
                     slideOver.close()

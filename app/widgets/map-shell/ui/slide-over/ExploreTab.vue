@@ -2,7 +2,6 @@
 /* eslint-disable vue/no-mutating-props, @typescript-eslint/no-explicit-any */
 import ExplorePanel from '~/features/explore/ui/ExplorePanel.vue'
 import SectionInfoSlideContent from '~/widgets/map-shell/ui/slide-over/SectionInfoSlideContent.vue'
-import WeatherRecommendPanel from '~/features/weather-overlay/ui/WeatherRecommendPanel.vue'
 import { FILTER_ALL } from '~/features/explore/model/useExploreFilterStore'
 
 defineProps<{
@@ -12,8 +11,6 @@ defineProps<{
     sectionTotalTime: string
     sigunguOptions: string[]
     dongOptions: string[]
-    showRecommend: boolean
-    weatherRecommend: any
     currentUserId?: string | null
 }>()
 
@@ -22,7 +19,6 @@ const emit = defineEmits<{
     'explore-select': [routeId: string]
     'explore-import': [routeId: string]
     'step-back': []
-    'toggle-recommend': []
 }>()
 </script>
 
@@ -81,20 +77,10 @@ const emit = defineEmits<{
                 :routes="explore.filteredResults.value"
                 :selected-route-id="explore.selectedRouteId.value"
                 :is-loading="explore.isSearching.value"
-                :recommend-active="showRecommend"
                 :current-user-id="currentUserId"
                 @select="emit('explore-select', $event)"
                 @import="emit('explore-import', $event)"
-                @recommend="emit('toggle-recommend')"
-            >
-                <template #recommend>
-                    <WeatherRecommendPanel
-                        :routes="weatherRecommend.recommendedRoutes.value"
-                        :is-loading="weatherRecommend.isLoading.value"
-                        @select="emit('route-select', $event)"
-                    />
-                </template>
-            </ExplorePanel>
+            />
         </template>
     </div>
 </template>
