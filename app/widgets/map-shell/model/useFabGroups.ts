@@ -1,12 +1,10 @@
 import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
-import { WeatherLayerEnum } from '#shared/types/weather-layer.enum'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import type { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
 import type { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import type { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import type { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
 import type { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
-import type { useWeatherStore } from '~/entities/weather/model/useWeatherStore'
 import type { useGradientStore } from '~/entities/gradient/model/useGradientStore'
 import type { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 
@@ -18,7 +16,6 @@ interface FabGroupsOptions {
         boundary: ReturnType<typeof useBoundaryStore>
         gradient: ReturnType<typeof useGradientStore>
     }
-    weather: { store: ReturnType<typeof useWeatherStore> }
     overlayContext: ComputedRef<MapOverlayContextEnum>
     elevationChart: {
         title: string
@@ -41,7 +38,6 @@ interface FabGroupsOptions {
 export const useFabGroups = (options: FabGroupsOptions) => {
     const {
         mapLayers,
-        weather,
         overlayContext,
         elevationChart,
         activeNav,
@@ -96,9 +92,7 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     icon: 'i-lucide-mountain',
                     active: elevation.isElevationVisible.value,
                     onClick: () => {
-                        const next = !elevation.isElevationVisible.value
-                        elevation.isElevationVisible.value = next
-                        if (next) weather.store.activeLayer.value = null
+                        elevation.isElevationVisible.value = !elevation.isElevationVisible.value
                     }
                 },
                 {
@@ -116,44 +110,6 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     onClick: () => boundary.toggleDong()
                 }
             ]
-        },
-        {
-            key: 'weather',
-            label: '날씨',
-            icon: 'i-lucide-cloud-sun',
-            items: (
-                [
-                    {
-                        key: 'weather-layer',
-                        label: '예보',
-                        icon: 'i-lucide-cloud-sun',
-                        layer: WeatherLayerEnum.WEATHER
-                    },
-                    {
-                        key: 'temperature',
-                        label: '온도',
-                        icon: 'i-lucide-thermometer',
-                        layer: WeatherLayerEnum.TEMPERATURE
-                    },
-                    {
-                        key: 'pm10',
-                        label: '미세먼지',
-                        icon: 'i-lucide-wind',
-                        layer: WeatherLayerEnum.PM10
-                    }
-                ] as const
-            ).map(({ key, label, icon, layer }) => ({
-                key,
-                label,
-                icon,
-                active: weather.store.activeLayer.value?.equals(layer) ?? false,
-                onClick: () => {
-                    const next = weather.store.activeLayer.value?.equals(layer) ? null : layer
-                    weather.store.activeLayer.value = next
-                    if (next && elevation.isElevationVisible.value)
-                        elevation.isElevationVisible.value = false
-                }
-            }))
         },
         {
             key: 'route-tools',

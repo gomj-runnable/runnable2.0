@@ -10,7 +10,6 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 | ---------- | ----------------------------------------------------------------------------------------------- |
 | Auth       | `/api/auth/[...all]` (better-auth)                                                              |
 | Routes     | `/api/routes/**` (목록·생성·수정·삭제·검색·추천·최적화·통계·fork·like·share·feedbacks·sections) |
-| Weather    | `/api/weather/:date`, `/api/weather/monthly/:month`, `/api/weather/availability/:month`         |
 | Facilities | `/api/facilities`, `/api/facilities/nearby`                                                     |
 | District   | `/api/district`                                                                                 |
 | Boundary   | `/api/boundary/seoul`, `/api/boundary/seoul-dong`                                               |
@@ -26,16 +25,11 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 `server/services/` — 비즈니스 로직. **순수 함수 우선**.
 
-| Service                         | 책임                                                            |
-| ------------------------------- | --------------------------------------------------------------- |
-| `route.service.ts`              | 경로 관련 비즈니스 로직                                         |
-| `route-compare.service.ts`      | 경로 비교 지표 계산 ([3-5-Route-Compare](3-5-Route-Compare.md)) |
-| `safety/normalize.ts`           | 안전 점수 정규화 ([3-4-Safety](3-4-Safety.md))                  |
-| `weather/forecast.service.ts`   | 동네예보                                                        |
-| `weather/observed.service.ts`   | 관측 데이터                                                     |
-| `weather/airquality.service.ts` | 대기질                                                          |
-| `weather/merge.service.ts`      | 예보·관측·대기질 통합                                           |
-| `weather/weather.service.ts`    | 외부 응답 통합 진입점                                           |
+| Service                    | 책임                                                            |
+| -------------------------- | --------------------------------------------------------------- |
+| `route.service.ts`         | 경로 관련 비즈니스 로직                                         |
+| `route-compare.service.ts` | 경로 비교 지표 계산 ([3-5-Route-Compare](3-5-Route-Compare.md)) |
+| `safety/normalize.ts`      | 안전 점수 정규화 ([3-4-Safety](3-4-Safety.md))                  |
 
 **패턴**:
 

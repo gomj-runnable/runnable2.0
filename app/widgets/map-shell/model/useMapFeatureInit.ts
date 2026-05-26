@@ -12,7 +12,6 @@ import type { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore
 import type { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import type { useRouteMapFacade } from './useRouteMapFacade'
 import { useAuthFacade } from './useAuthFacade'
-import { useWeatherFacade } from './useWeatherFacade'
 import { useMapLayersFacade } from './useMapLayersFacade'
 
 type RouteDrawStore = ReturnType<typeof useRouteDrawStore>
@@ -56,8 +55,6 @@ export function useMapFeatureInit({
 
     // ─── 하위 퍼사드 조합 ────────────────────────────────────────────
     const { authStore, authEffect } = useAuthFacade()
-    const { weather, weatherSources, initWeather, weatherRecommend, weatherRecommendEffect } =
-        useWeatherFacade({ viewer })
     const {
         facility,
         sidewalk,
@@ -89,26 +86,17 @@ export function useMapFeatureInit({
         await init()
         viewer.value = window.viewer
         await Promise.all([
-            initWeather(),
             authEffect.fetchSession(),
             cameraEffect.init(),
             boundaryEffect.init(),
             elevationEffect.init(),
             gradientEffect.init(),
-            weatherRecommendEffect.fetchRecommendedRoutes(),
             ...additionalInits.map((fn) => fn())
         ])
     })
 
     return {
         auth: { authStore, authEffect },
-        weather: {
-            store: weather,
-            sources: weatherSources,
-            recommend: weatherRecommend,
-            recommendEffect: weatherRecommendEffect,
-            initWeather
-        },
         mapLayers: {
             facility,
             sidewalk,

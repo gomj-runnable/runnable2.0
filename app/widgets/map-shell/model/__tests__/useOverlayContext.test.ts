@@ -23,7 +23,6 @@ describe('useOverlayContext', () => {
             sectionDraft: ref(null),
             selectedRouteId: ref<string | null>(null),
             exploreSelectedRouteId: ref<string | null>(null),
-            showRecommend: ref(false),
             routeInfoStore: makeRouteInfoStore(),
             routeInfoEffect: makeRouteInfoEffect()
         }
@@ -53,13 +52,6 @@ describe('useOverlayContext', () => {
         opts.selectedRouteId = 'r-2'
         const { overlayContext } = useOverlayContext(opts)
         expect(overlayContext.value.key).toBe(MapOverlayContextEnum.LIST_SELECTED.key)
-    })
-
-    it('탐색 탭 + showRecommend → RECOMMEND', () => {
-        opts.activeNav.value = '탐색'
-        opts.showRecommend.value = true
-        const { overlayContext } = useOverlayContext(opts)
-        expect(overlayContext.value.key).toBe(MapOverlayContextEnum.RECOMMEND.key)
     })
 
     it('탐색 탭 + exploreSelectedRouteId → EXPLORE_SELECTED', () => {

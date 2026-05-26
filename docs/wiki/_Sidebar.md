@@ -14,7 +14,6 @@
 
 - [3-Domain-Model](3-Domain-Model.md) (카탈로그)
 - [3-2-Route](3-2-Route.md)
-- [3-3-Weather](3-3-Weather.md)
 - [3-4-Safety](3-4-Safety.md)
 - [3-5-Route-Compare](3-5-Route-Compare.md)
 - [3-8-Facility](3-8-Facility.md)

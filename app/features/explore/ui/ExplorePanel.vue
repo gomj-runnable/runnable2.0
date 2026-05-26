@@ -12,8 +12,6 @@ const props = defineProps<{
     selectedRouteId: string | null
     /** 경로 로딩 중 여부 */
     isLoading: boolean
-    /** 추천 모드 활성 여부 */
-    recommendActive?: boolean
     /** 현재 로그인 사용자 ID (좋아요/소유권 판별용) */
     currentUserId?: string | null
 }>()
@@ -23,8 +21,6 @@ defineEmits<{
     select: [routeId: string]
     /** 경로 가져오기 버튼 클릭 시 경로 ID를 전달 */
     import: [routeId: string]
-    /** 추천 모드 토글 */
-    recommend: []
 }>()
 
 const social = useRouteSocialActions(useNotificationStore())
@@ -45,23 +41,9 @@ function toggleExpand(routeId: string) {
 
 <template>
     <div class="flex flex-col gap-3 w-full">
-        <div class="flex items-center justify-between">
-            <div class="map-section-label">공개 경로</div>
-            <UButton
-                label="추천"
-                icon="i-lucide-cloud-sun"
-                size="sm"
-                :variant="recommendActive ? 'solid' : 'outline'"
-                :color="recommendActive ? 'primary' : 'neutral'"
-                @click="$emit('recommend')"
-            />
-        </div>
+        <div class="map-section-label">공개 경로</div>
 
-        <template v-if="recommendActive">
-            <slot name="recommend" />
-        </template>
-
-        <template v-else>
+        <template>
             <div v-if="isLoading" class="py-4 text-sm text-text-muted text-center">검색 중...</div>
 
             <div v-else-if="routes.length === 0" class="py-4 text-sm text-text-muted text-center">
