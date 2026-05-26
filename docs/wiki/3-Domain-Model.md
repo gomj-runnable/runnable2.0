@@ -9,7 +9,6 @@
 | Domain        | 타입 파일                                           | Zod 스키마                                                               | 책임                                |
 | ------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
 | Route         | `route.ts`, `routeInfo.ts`, `route-optimization.ts` | `route.schema.ts`, `routeInfo.schema.ts`, `route-optimization.schema.ts` | 러닝 경로 본체                      |
-| Weather       | `weather.ts`, `weather-recommend.ts`                | `weather.schema.ts`                                                      | 기상 정보 (예보·관측·대기질)        |
 | Safety        | (server/services/safety)                            | —                                                                        | 안전 점수 정규화 (Z-score)          |
 | Route-Compare | `route-compare.ts`                                  | —                                                                        | 경로 비교 지표 (거리·고도·예상시간) |
 | Facility      | `facility.ts`                                       | `facility.schema.ts`                                                     | 편의 시설 (식수대·화장실 등)        |
@@ -34,8 +33,6 @@
 | `pm10-grade.enum.ts`              | 미세먼지 등급          |
 | `route-closing-mode.enum.ts`      | 경로 폐쇄 모드         |
 | `route-optimization-mode.enum.ts` | 최적화 모드            |
-| `weather-condition.enum.ts`       | 날씨 상태              |
-| `weather-layer.enum.ts`           | 날씨 레이어            |
 
 ### 보조 타입
 
@@ -78,22 +75,10 @@ classDiagram
       +type
       +geo
     }
-    class Weather {
-      +date
-      +condition
-      +temp
-      +pm10Grade
-    }
-    class WeatherRecommend {
-      +date
-      +score
-      +reason
-    }
     Route "1" --> "1" RouteInfo
     Route "1" --> "*" UserRoute
     Route ..> RouteCompare : compare(a,b)
     Route ..> Facility : nearby()
-    Weather ..> WeatherRecommend
 ```
 
 > 각 도메인의 상세(필드, 관련 API, 사용처) 는 3.2 이후 페이지에서 mermaid 클래스 다이어그램 + API 라우트 + 호출 흐름으로 정리됩니다.

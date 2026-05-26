@@ -26,8 +26,6 @@ const props = defineProps<{
     explore: any
     sigunguOptions: string[]
     dongOptions: string[]
-    showRecommend: boolean
-    weatherRecommend: any
 }>()
 
 const emit = defineEmits<{
@@ -38,7 +36,6 @@ const emit = defineEmits<{
     'explore-import': [routeId: string]
     'step-back': []
     'drawing-start': []
-    'toggle-recommend': []
     'auth-success': []
     'auth-logout': []
     'go-login': []
@@ -94,14 +91,11 @@ watch(
                 :section-total-time="sectionTotalTime"
                 :sigungu-options="sigunguOptions"
                 :dong-options="dongOptions"
-                :show-recommend="showRecommend"
-                :weather-recommend="weatherRecommend"
                 :current-user-id="currentUserId"
                 @route-select="emit('route-select', $event)"
                 @explore-select="emit('explore-select', $event)"
                 @explore-import="emit('explore-import', $event)"
                 @step-back="emit('step-back')"
-                @toggle-recommend="emit('toggle-recommend')"
             />
             <AuthTab
                 v-else-if="currentNav === NavKey.AUTH"
