@@ -2,14 +2,11 @@
 import { hasPermission } from '../../../shared/constants/permissions'
 import type { Permission } from '../../../shared/constants/permissions'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
-import type { SavedCurationCollection } from '../../../shared/types/curation'
 import AdminSeedCard from './_components/AdminSeedCard.vue'
 
 definePageMeta({ ssr: false })
 
 const { user } = useAuthStore()
-
-const { data: curations } = await useFetch<SavedCurationCollection[]>('/api/curation')
 
 interface AdminFeatureCard {
     key: string
@@ -22,17 +19,7 @@ interface AdminFeatureCard {
     permission?: Permission
 }
 
-const featureCards: AdminFeatureCard[] = [
-    {
-        key: 'curation',
-        icon: 'i-lucide-sparkles',
-        title: '큐레이션 관리',
-        description: '계절·시간대별 경로 큐레이션 컬렉션을 관리합니다.',
-        to: '/admin/curation',
-        badge: () => `${curations.value?.length ?? 0}개`,
-        badgeColor: 'info'
-    }
-]
+const featureCards: AdminFeatureCard[] = []
 
 const visibleCards = computed(() =>
     featureCards.filter(

@@ -41,11 +41,6 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => {
             icon: 'i-lucide-shield',
             to: '/admin'
         })
-        items.push({
-            label: '큐레이션',
-            icon: 'i-lucide-bookmark',
-            to: '/admin/curation'
-        })
     }
 
     items.push({
