@@ -4,6 +4,7 @@
  * 지도 위에 표시되는 모든 오버레이 UI를 조합하는 컴포넌트.
  * 부모로부터 facade 객체를 직접 받아 내부에서 바인딩한다.
  */
+import PluginSlot from '~/plugins-ext/PluginSlot.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
 import RouteElevationModal from '~/features/draw-route/ui/RouteElevationModal.vue'
@@ -38,6 +39,8 @@ const emit = defineEmits<{
 </script>
 
 <template>
+    <!-- 플러그인 확장 슬롯 (chip) -->
+    <PluginSlot slot-name="chip" />
     <FacilityOverlay
         :active-types="facility.activeTypes.value"
         :is-loading="facility.isLoading.value"
