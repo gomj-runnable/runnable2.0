@@ -43,6 +43,13 @@
             "when": 1779035731697,
             "tag": "0005_wide_thundra",
             "breakpoints": true
+        },
+        {
+            "idx": 6,
+            "version": "7",
+            "when": 1779900000000,
+            "tag": "0006_user_feature_prefs",
+            "breakpoints": true
         }
     ]
 }
