@@ -2,7 +2,6 @@ import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import type { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
 import type { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
-import type { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import type { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
 import type { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import type { useGradientStore } from '~/entities/gradient/model/useGradientStore'
@@ -11,7 +10,6 @@ import type { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore
 interface FabGroupsOptions {
     mapLayers: {
         facility: ReturnType<typeof useFacilityStore>
-        sidewalk: ReturnType<typeof useSidewalkStore>
         elevation: ReturnType<typeof useElevationLayerStore>
         boundary: ReturnType<typeof useBoundaryStore>
         gradient: ReturnType<typeof useGradientStore>
@@ -46,13 +44,12 @@ export const useFabGroups = (options: FabGroupsOptions) => {
         showRouteInfoChip
     } = options
 
-    const { facility, sidewalk, elevation, boundary, gradient } = mapLayers
+    const { facility, elevation, boundary, gradient } = mapLayers
 
     /** 모바일: 현재 위치 검색 버튼 노출 조건 */
     const fabNearbyVisible = computed(() =>
-        (['crosswalk', 'fountain', 'hospital', 'sidewalk'] as const).some(
-            (t) =>
-                facility.activeTypes.value.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
+        (['crosswalk', 'fountain', 'hospital'] as const).some((t) =>
+            facility.activeTypes.value.has(t)
         )
     )
 
@@ -67,17 +64,8 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                     label: layer.label,
                     icon: layer.icon,
                     dotColor: layer.color,
-                    active:
-                        layer.type === 'sidewalk'
-                            ? sidewalk.isActive.value
-                            : facility.activeTypes.value.has(layer.type),
-                    onClick: () => {
-                        if (layer.type === 'sidewalk') {
-                            sidewalk.toggleActive()
-                        } else {
-                            facility.toggleType(layer.type)
-                        }
-                    }
+                    active: facility.activeTypes.value.has(layer.type),
+                    onClick: () => facility.toggleType(layer.type)
                 }))
             ]
         },

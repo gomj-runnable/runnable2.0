@@ -5,7 +5,6 @@ import type { CesiumDrawHandler } from '#shared/types/cesium'
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
-import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import {
     useFacilityRenderer,
@@ -180,11 +179,6 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
                 if (activeTypes.value.has(type)) {
                     renderer.showLayer(type)
                 }
-            }
-
-            const sidewalk = useSidewalkStore()
-            if (sidewalk.isActive.value) {
-                sidewalk.setDistrictFromLocation(camera.locationLabel.value)
             }
         } finally {
             isSearching.value = false

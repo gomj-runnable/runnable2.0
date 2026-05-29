@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { FacilityType } from '#shared/types/facility'
 import { FACILITY_LAYERS } from '~/entities/facility/model/useFacilityStore'
-import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 
 /** POI 검색 대상 유형 (현재 위치 검색 버튼 표시 기준) */
-const SEARCHABLE_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital', 'sidewalk']
+const SEARCHABLE_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'hospital']
 
 const props = defineProps<{
     /** 현재 활성화된 시설 타입 집합 */
@@ -29,17 +28,12 @@ defineEmits<{
     searchNearby: []
 }>()
 
-const sidewalk = useSidewalkStore()
 const boundary = useBoundaryStore()
 const elevation = useElevationLayerStore()
 const routeInfoStore = useRouteInfoStore()
 
-/** crosswalk / fountain / hospital / sidewalk 중 하나라도 활성화되어 있으면 검색 버튼 표시 */
-const hasSearchableActive = computed(() =>
-    SEARCHABLE_TYPES.some(
-        (t) => props.activeTypes.has(t) || (t === 'sidewalk' && sidewalk.isActive.value)
-    )
-)
+/** crosswalk / fountain / hospital 중 하나라도 활성화되어 있으면 검색 버튼 표시 */
+const hasSearchableActive = computed(() => SEARCHABLE_TYPES.some((t) => props.activeTypes.has(t)))
 </script>
 
 <template>
@@ -64,34 +58,10 @@ const hasSearchableActive = computed(() =>
                 size="sm"
                 class="font-bold rounded-full"
                 :disabled="disabled"
-                :loading="
-                    layer.type === 'sidewalk'
-                        ? sidewalk.isLoading.value
-                        : isLoading && activeTypes.has(layer.type)
-                "
-                :variant="
-                    (
-                        layer.type === 'sidewalk'
-                            ? sidewalk.isActive.value
-                            : activeTypes.has(layer.type)
-                    )
-                        ? 'solid'
-                        : 'outline'
-                "
-                :color="
-                    (
-                        layer.type === 'sidewalk'
-                            ? sidewalk.isActive.value
-                            : activeTypes.has(layer.type)
-                    )
-                        ? 'primary'
-                        : 'neutral'
-                "
-                @click="
-                    layer.type === 'sidewalk'
-                        ? (sidewalk.isActive.value = !sidewalk.isActive.value)
-                        : $emit('toggle', layer.type)
-                "
+                :loading="isLoading && activeTypes.has(layer.type)"
+                :variant="activeTypes.has(layer.type) ? 'solid' : 'outline'"
+                :color="activeTypes.has(layer.type) ? 'primary' : 'neutral'"
+                @click="$emit('toggle', layer.type)"
             >
                 <template #leading>
                     <span
