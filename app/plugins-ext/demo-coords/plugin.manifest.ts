@@ -8,7 +8,8 @@ const manifest: PluginManifest = {
     description: '플러그인 확장 슬롯이 동작하는지 확인하는 데모 chip 입니다.',
     slot: 'chip',
     component: markRaw(DemoCoordsChip),
-    defaultEnabled: true
+    defaultEnabled: true,
+    position: 'top-center'
 }
 
 export default manifest
