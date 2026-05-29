@@ -3,6 +3,17 @@ import type { Component } from 'vue'
 /** 플러그인이 꽂히는 UI 확장 슬롯. */
 export type PluginSlot = 'chip' | 'sidepanel' | 'dashboard' | 'popup'
 
+/** chip 슬롯의 8방향 배치 위치. */
+export type ChipAnchor =
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'middle-left'
+    | 'middle-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right'
+
 export interface PluginManifest {
     /** 전역 고유 id. user feature prefs 의 키로도 쓰인다. */
     id: string
@@ -16,4 +27,6 @@ export interface PluginManifest {
     component: Component
     /** user prefs 가 없을 때의 기본 활성 여부. */
     defaultEnabled: boolean
+    /** chip 슬롯 배치 위치. 미지정 시 'top-center'. (chip 외 슬롯에선 무시) */
+    position?: ChipAnchor
 }
