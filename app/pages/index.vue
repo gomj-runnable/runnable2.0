@@ -22,6 +22,8 @@ import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSideeffect'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { useExploreRouteActions } from '~/features/explore/model/useExploreRouteActions'
+import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
+import { useMapActions } from '~/shared/lib/map/useMapActions'
 import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
 import { useFabGroups } from '~/widgets/map-shell/model/useFabGroups'
 import { useMapFeatureInit } from '~/widgets/map-shell/model/useMapFeatureInit'
@@ -70,11 +72,15 @@ const slideOver = useSlideOverNav(activeNav)
 const showDrawingHelpModal = ref(false)
 const compareEffect = useRouteCompareSideeffect()
 
+// 탐색은 사이드패널 플러그인으로 분리됐지만, 선택 경로 ID는 store(useState) 기반 전역 상태라
+// 코어도 동일 인스턴스를 통해 오버레이 컨텍스트(EXPLORE_SELECTED)를 판별한다.
+const explore = useExploreSearchSideeffect()
+
 const { overlayContext, showRouteInfoChip } = useOverlayContext({
     activeNav,
     sectionDraft: computed(() => drawing.sectionDraft),
     selectedRouteId: routeList.selectedRouteId,
-    exploreSelectedRouteId: computed(() => features.explore.selectedRouteId.value),
+    exploreSelectedRouteId: computed(() => explore.selectedRouteId.value),
     routeInfoStore,
     routeInfoEffect
 })
@@ -110,15 +116,20 @@ const { fabGroups, fabNearbyVisible } = useFabGroups({
     routeInfoStore,
     showRouteInfoChip
 })
-const { districtEffect, sigunguOptions, dongOptions, handleExploreSelect, handleExploreImport } =
-    useExploreRouteActions({
-        activeNav,
-        explore: features.explore,
-        exploreSelectRoute,
-        sectionInfo,
-        routeList,
-        notification
-    })
+const { districtEffect, handleExploreSelect, handleExploreImport } = useExploreRouteActions({
+    activeNav,
+    explore,
+    exploreSelectRoute,
+    sectionInfo,
+    routeList,
+    notification
+})
+
+// 탐색 사이드패널 플러그인이 코어 facade 액션을 호출할 수 있도록 전역 등록한다.
+useMapActions().registerExploreActions({
+    selectRoute: handleExploreSelect,
+    importRoute: handleExploreImport
+})
 
 onMounted(async () => {
     await districtEffect.init()
@@ -249,14 +260,9 @@ watch(
             :section-total-time="sectionTotalTime"
             :section-distances="sectionDistances"
             :drawing="drawing"
-            :explore="features.explore"
-            :sigungu-options="sigunguOptions"
-            :dong-options="dongOptions"
             @update:open="slideOver.isOpen.value = $event"
             @route-select="handleRouteSelect"
             @route-edit="handleRouteEdit"
-            @explore-select="handleExploreSelect"
-            @explore-import="handleExploreImport"
             @step-back="handleStepBack"
             @drawing-start="drawing.start()"
             @auth-success="

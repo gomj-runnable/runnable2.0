@@ -24,8 +24,8 @@ describe('useSlideOverNav', () => {
     let activeNav: Ref<string>
 
     beforeEach(() => {
-        // 진입 기본 탭은 EXPLORE (#260)
-        activeNav = ref<string>(NavKey.EXPLORE)
+        // 진입 기본 탭은 LIST (탐색은 사이드패널 플러그인으로 분리됨)
+        activeNav = ref<string>(NavKey.LIST)
     })
 
     describe('select() - Nav Rail 클릭 핸들러', () => {
@@ -38,8 +38,8 @@ describe('useSlideOverNav', () => {
 
         it('동일 항목을 다시 선택하면 패널을 닫는다 (current=null)', () => {
             const nav = useSlideOverNav(activeNav as any)
-            // 초기 current 가 EXPLORE 이므로 EXPLORE 한 번 더 선택 = 토글 닫힘
-            nav.select(NavKey.EXPLORE)
+            // 초기 current 가 LIST 이므로 LIST 한 번 더 선택 = 토글 닫힘
+            nav.select(NavKey.LIST)
             expect(nav.current.value).toBeNull()
         })
 
@@ -47,7 +47,7 @@ describe('useSlideOverNav', () => {
             const nav = useSlideOverNav(activeNav as any)
             nav.select(NavKey.AUTH)
             expect(nav.current.value).toBe(NavKey.AUTH)
-            expect(activeNav.value).toBe(NavKey.EXPLORE)
+            expect(activeNav.value).toBe(NavKey.LIST)
         })
     })
 
