@@ -2,8 +2,8 @@ import type { Facility, FacilityType, FacilityLayerConfig } from '#shared/types/
 import { EnumBase } from '#shared/types/enum-base'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 
-/** 시설물 칩 — FacilityTypeEnum에서 자동 도출 (hospital 임시 비활성) */
-const DISABLED_FACILITY_TYPES: FacilityType[] = ['hospital']
+/** 시설물 칩 — FacilityTypeEnum에서 자동 도출 (hospital 임시 비활성, sidewalk 는 플러그인으로 분리) */
+const DISABLED_FACILITY_TYPES: FacilityType[] = ['hospital', 'sidewalk']
 export const FACILITY_LAYERS: FacilityLayerConfig[] = EnumBase.values<FacilityTypeEnum>(
     FacilityTypeEnum
 )

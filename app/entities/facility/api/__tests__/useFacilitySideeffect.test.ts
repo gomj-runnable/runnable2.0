@@ -22,14 +22,6 @@ vi.mock('~/entities/facility/model/useFacilityStore', () => ({
     useFacilityStore: () => sharedFacilityStore
 }))
 
-const sharedSidewalk = vi.hoisted(() => ({
-    isActive: { value: false },
-    setDistrictFromLocation: vi.fn()
-}))
-vi.mock('~/entities/facility/model/useSidewalkStore', () => ({
-    useSidewalkStore: () => sharedSidewalk
-}))
-
 // useFacilityRenderer 도 mock — 내부 Cesium 의존을 우회
 const rendererMock = vi.hoisted(() => ({
     showLayer: vi.fn(),
@@ -78,8 +70,6 @@ describe('useFacilitySideeffect', () => {
         sharedCamera.centerLat.value = 37.5
         sharedCamera.centerLng.value = 127
         sharedFacilityStore.selectedFacility.value = null
-        sharedSidewalk.isActive.value = false
-        sharedSidewalk.setDistrictFromLocation.mockReset()
         $fetchMock.mockReset()
         rendererMock.showLayer.mockReset()
         rendererMock.removeLayer.mockReset()
@@ -137,15 +127,6 @@ describe('useFacilitySideeffect', () => {
         // 따라서 crosswalk 도 unchanged 에서 제외됨 → 새 데이터만 남음
         expect(facilities.value.find((f) => f.id === 'f1')).toBeDefined()
         expect(rendererMock.showLayer).toHaveBeenCalled()
-    })
-
-    it('searchNearby — sidewalk.isActive 시 setDistrictFromLocation 호출', async () => {
-        $fetchMock.mockResolvedValue([])
-        activeTypes.value = new Set(['toilet'])
-        sharedSidewalk.isActive.value = true
-        const sideeffect = create()
-        await sideeffect.searchNearby()
-        expect(sharedSidewalk.setDistrictFromLocation).toHaveBeenCalled()
     })
 
     it('searchNearby — 카메라 좌표 null 이면 skip', async () => {

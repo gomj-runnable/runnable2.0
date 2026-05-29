@@ -120,6 +120,11 @@ export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => 
         }
     })
 
+    /** 활성 상태에서 카메라 위치(locationLabel)가 바뀌면 인도 표시를 재검색한다. */
+    watch(camera.locationLabel, (label) => {
+        if (store.isActive.value) store.setDistrictFromLocation(label)
+    })
+
     /** selectedDistrict + selectedDong 변화 감지 → 렌더/제거 동기화 */
     watch(
         [store.selectedDistrict, store.selectedDong],

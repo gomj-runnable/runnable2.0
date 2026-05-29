@@ -1,6 +1,7 @@
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useMapInit } from '~/shared/lib/map/useMapInit'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import {
     isBuildingPick,
     findNearestGroundPosition
@@ -57,7 +58,6 @@ export function useMapFeatureInit({
     const { authStore, authEffect } = useAuthFacade()
     const {
         facility,
-        sidewalk,
         facilityEffect,
         boundary,
         boundaryEffect,
@@ -85,6 +85,7 @@ export function useMapFeatureInit({
     onMounted(async () => {
         await init()
         viewer.value = window.viewer
+        useMapViewer().setViewer(window.viewer)
         await Promise.all([
             authEffect.fetchSession(),
             cameraEffect.init(),
@@ -99,7 +100,6 @@ export function useMapFeatureInit({
         auth: { authStore, authEffect },
         mapLayers: {
             facility,
-            sidewalk,
             facilityEffect,
             boundary,
             boundaryEffect,

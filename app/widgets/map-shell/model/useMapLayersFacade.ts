@@ -4,8 +4,6 @@ import type { PoiDraftInput } from '#shared/types/facility'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
-import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
-import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
 import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
 import { useElevationLayerStore } from '~/features/elevation-layer/model/useElevationLayerStore'
@@ -45,7 +43,6 @@ export function useMapLayersFacade({
 }: UseMapLayersFacadeOptions) {
     // ─── 편의시설 ────────────────────────────────────────────────────
     const facility = useFacilityStore()
-    const sidewalk = useSidewalkStore()
     const facilityEffect = useFacilitySideeffect({
         viewer,
         ...facility,
@@ -92,7 +89,6 @@ export function useMapLayersFacade({
             drawing.addPoiToSection(result.sectionIndex, enrichedPoi)
         }
     })
-    useSidewalkSideeffect({ viewer })
 
     // ─── 행정경계 ────────────────────────────────────────────────────
     const boundary = useBoundaryStore()
@@ -119,7 +115,6 @@ export function useMapLayersFacade({
 
     return {
         facility,
-        sidewalk,
         facilityEffect,
         boundary,
         boundaryEffect,
