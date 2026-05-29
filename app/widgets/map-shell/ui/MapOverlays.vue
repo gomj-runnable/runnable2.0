@@ -5,6 +5,8 @@
  * 부모로부터 facade 객체를 직접 받아 내부에서 바인딩한다.
  */
 import PluginChipLayer from '~/plugins-ext/PluginChipLayer.vue'
+import PluginLauncher from '~/plugins-ext/PluginLauncher.vue'
+import PluginSurfaceHost from '~/plugins-ext/PluginSurfaceHost.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
 import GradientLegend from '~/entities/gradient/ui/GradientLegend.vue'
 import RouteElevationModal from '~/features/draw-route/ui/RouteElevationModal.vue'
@@ -39,8 +41,10 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <!-- 플러그인 확장 슬롯 (chip, 8방향 앵커) -->
+    <!-- 플러그인 확장 슬롯 -->
     <PluginChipLayer />
+    <PluginLauncher />
+    <PluginSurfaceHost />
     <FacilityOverlay
         :active-types="facility.activeTypes.value"
         :is-loading="facility.isLoading.value"
