@@ -27,11 +27,6 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => {
             label: NavKey.DRAW,
             icon: 'i-lucide-pencil',
             onSelect: () => emit('select', NavKey.DRAW)
-        },
-        {
-            label: NavKey.EXPLORE,
-            icon: 'i-lucide-search',
-            onSelect: () => emit('select', NavKey.EXPLORE)
         }
     ]
 

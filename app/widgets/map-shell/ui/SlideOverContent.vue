@@ -7,7 +7,6 @@
 import { NavKey } from '~/widgets/map-shell/model/nav-key'
 import ListTab from './slide-over/ListTab.vue'
 import DrawTab from './slide-over/DrawTab.vue'
-import ExploreTab from './slide-over/ExploreTab.vue'
 import AuthTab from './slide-over/AuthTab.vue'
 
 const props = defineProps<{
@@ -23,17 +22,12 @@ const props = defineProps<{
     sectionTotalTime: string
     sectionDistances: number[]
     drawing: any
-    explore: any
-    sigunguOptions: string[]
-    dongOptions: string[]
 }>()
 
 const emit = defineEmits<{
     'update:open': [value: boolean]
     'route-select': [routeId: string]
     'route-edit': [routeId: string]
-    'explore-select': [routeId: string]
-    'explore-import': [routeId: string]
     'step-back': []
     'drawing-start': []
     'auth-success': []
@@ -82,20 +76,6 @@ watch(
                 :drawing="drawing"
                 :section-distances="sectionDistances"
                 @drawing-start="emit('drawing-start')"
-            />
-            <ExploreTab
-                v-else-if="currentNav === NavKey.EXPLORE"
-                :explore="explore"
-                :section-info="sectionInfo"
-                :section-total-distance="sectionTotalDistance"
-                :section-total-time="sectionTotalTime"
-                :sigungu-options="sigunguOptions"
-                :dong-options="dongOptions"
-                :current-user-id="currentUserId"
-                @route-select="emit('route-select', $event)"
-                @explore-select="emit('explore-select', $event)"
-                @explore-import="emit('explore-import', $event)"
-                @step-back="emit('step-back')"
             />
             <AuthTab
                 v-else-if="currentNav === NavKey.AUTH"

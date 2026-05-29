@@ -11,7 +11,7 @@ describe('useRouteDrawStore', () => {
 
     it('초기값 — drawn/section/route 관련 모두 비어 있음', () => {
         expect(store.searchQuery.value).toBe('')
-        expect(store.activeNav.value).toBe('탐색')
+        expect(store.activeNav.value).toBe('목록')
         expect(store.drawnPositions.value).toBeNull()
         expect(store.drawMetrics.value).toBeNull()
         expect(store.sectionDraft.value).toBeNull()

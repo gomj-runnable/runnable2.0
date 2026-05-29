@@ -60,20 +60,14 @@ export function useRouteSelectionFlow({
 
     /** SlideOver 제목: 구간정보가 열려있으면 덮어쓴다 */
     const slideOverTitle = computed(() => {
-        if (
-            sectionInfo.isOpen.value &&
-            (slideOver.current.value === NavKey.LIST || slideOver.current.value === NavKey.EXPLORE)
-        ) {
+        if (sectionInfo.isOpen.value && slideOver.current.value === NavKey.LIST) {
             return sectionInfo.panelTitle.value
         }
         return slideOver.meta.value.title
     })
 
     const slideOverDescription = computed(() => {
-        if (
-            sectionInfo.isOpen.value &&
-            (slideOver.current.value === NavKey.LIST || slideOver.current.value === NavKey.EXPLORE)
-        ) {
+        if (sectionInfo.isOpen.value && slideOver.current.value === NavKey.LIST) {
             return '구간별 페이스·짐 무게·전략을 설정합니다'
         }
         return slideOver.meta.value.description

@@ -8,7 +8,6 @@ import {
 } from '~/features/camera/lib/useBuildingDetection'
 import { useCameraStore } from '~/shared/model/useCameraStore'
 import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
-import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
 import type { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import type { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import type { useRouteMapFacade } from './useRouteMapFacade'
@@ -78,9 +77,6 @@ export function useMapFeatureInit({
     const camera = useCameraStore()
     const cameraEffect = useCameraSideeffect({ viewer, ...camera })
 
-    // ─── 탐색 ────────────────────────────────────────────────────────
-    const explore = useExploreSearchSideeffect()
-
     // ─── 마운트: 지도 초기화 → 각 기능 병렬 로드 ─────────────────────
     onMounted(async () => {
         await init()
@@ -108,7 +104,6 @@ export function useMapFeatureInit({
             gradient,
             gradientEffect
         },
-        camera,
-        explore
+        camera
     }
 }

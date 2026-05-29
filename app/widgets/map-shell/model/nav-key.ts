@@ -2,7 +2,6 @@
 export const NavKey = {
     LIST: '목록',
     DRAW: '그리기',
-    EXPLORE: '탐색',
     AUTH: '로그인'
 } as const
 

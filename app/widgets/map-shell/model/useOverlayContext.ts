@@ -36,7 +36,9 @@ export const useOverlayContext = (options: OverlayContextOptions) => {
         if (activeNav.value === '목록' && resolvedRouteId) {
             return MapOverlayContextEnum.LIST_SELECTED
         }
-        if (activeNav.value === '탐색' && exploreSelectedRouteId.value) {
+        // 탐색은 sidepanel 플러그인으로 분리되어 activeNav 에 묶이지 않는다.
+        // 플러그인에서 경로를 선택하면(공유 useState) 미리보기 컨텍스트를 표출한다.
+        if (exploreSelectedRouteId.value) {
             return MapOverlayContextEnum.EXPLORE_SELECTED
         }
         return MapOverlayContextEnum.NONE
