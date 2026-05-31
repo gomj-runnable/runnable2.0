@@ -5,7 +5,7 @@ import pg from 'pg'
 import { readFileSync, readdirSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as schema from './schema'
-import { getDbMode, DATABASE_MODE } from '../config/dbMode'
+import { getDbMode, getDatabaseUrl, DATABASE_MODE } from '../config/dbMode'
 
 /**
  * DrizzleDB Type 선언
@@ -91,10 +91,7 @@ export async function getDb(): Promise<DrizzleDb> {
         await bootstrapPglite(pglite)
         database = drizzlePglite(pglite, { schema })
     } else {
-        if (!process.env.DATABASE_URL) {
-            throw new Error('DATABASE_URL is required in POSTGRES mode.')
-        }
-        const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+        const pool = new pg.Pool({ connectionString: getDatabaseUrl() })
         database = drizzlePg(pool, { schema })
     }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
-import { DATABASE_MODE, getDbMode } from '../../config/dbMode'
+import { DATABASE_MODE, getDbMode, getDatabaseUrl } from '../../config/dbMode'
 
 describe('config (getDbMode)', () => {
     afterEach(() => {
@@ -30,5 +30,21 @@ describe('config (getDbMode)', () => {
     it('알 수 없는 값이면 throw', () => {
         vi.stubEnv('DATABASE_MODE', 'SQLITE')
         expect(() => getDbMode()).toThrow(/DATABASE_MODE/)
+    })
+})
+
+describe('config (getDatabaseUrl)', () => {
+    afterEach(() => {
+        vi.unstubAllEnvs()
+    })
+
+    it('DATABASE_URL 값을 반환', () => {
+        vi.stubEnv('DATABASE_URL', 'postgres://localhost:5432/runnable')
+        expect(getDatabaseUrl()).toBe('postgres://localhost:5432/runnable')
+    })
+
+    it('미설정이면 throw', () => {
+        vi.stubEnv('DATABASE_URL', undefined)
+        expect(() => getDatabaseUrl()).toThrow(/DATABASE_URL/)
     })
 })

@@ -1,6 +1,6 @@
 // ALL /api/auth/* - better-auth 핸들러로 인증 요청을 위임
 import { fromWebHandler } from 'h3'
-import { getAuthInstance } from '#server/config/auth'
+import { getAuthMode } from '#server/config/authMode'
 import { internalError } from '#server/utils/error'
 import { getEnvMode, ENVIRONMENT_MODE } from '#server/config/envMode'
 
@@ -11,7 +11,7 @@ import { getEnvMode, ENVIRONMENT_MODE } from '#server/config/envMode'
  */
 export default defineEventHandler(async (event) => {
     try {
-        const auth = await getAuthInstance()
+        const auth = await getAuthMode()
         return await fromWebHandler(auth.handler)(event)
     } catch (error) {
         // H3 에러는 그대로 전파

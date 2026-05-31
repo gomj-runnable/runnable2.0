@@ -1,4 +1,4 @@
-// DATABASE_MODE(PGLITE/POSTGRES)를 환경 변수에서 읽어 검증하는 설정 모듈
+// DATABASE 관련 환경 변수(DATABASE_MODE, DATABASE_URL)를 읽어 검증하는 설정 모듈
 
 /** 지원하는 DATABASE 실행 모드 (POSTGRES: 운영, PGLITE: 개발) */
 export const DATABASE_MODE = {
@@ -21,4 +21,15 @@ export function getDbMode(): DbMode {
         )
 
     return dbMode as DbMode
+}
+
+/**
+ * DATABASE_URL 환경 변수를 읽어 반환한다 (POSTGRES 모드 연결 문자열).
+ * 미설정이면 throw.
+ */
+export function getDatabaseUrl(): string {
+    const databaseUrl = process.env.DATABASE_URL
+    if (!databaseUrl) throw new Error('DATABASE_URL is required in POSTGRES mode.')
+
+    return databaseUrl
 }
