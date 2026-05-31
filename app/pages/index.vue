@@ -265,12 +265,7 @@ watch(
             @route-edit="handleRouteEdit"
             @step-back="handleStepBack"
             @drawing-start="drawing.start()"
-            @auth-success="
-                () => {
-                    slideOver.close()
-                    fetchRoutes()
-                }
-            "
+            @auth-success="fetchRoutes()"
             @auth-logout="authEffect.logout()"
             @go-login="slideOver.select(NavKey.AUTH)"
         />

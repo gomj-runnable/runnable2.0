@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props, @typescript-eslint/no-explicit-any */
 import RouteListPanel from '~/features/draw-route/ui/RouteListPanel.vue'
-import SectionInfoSlideContent from '~/widgets/right-panel/ui/SectionInfoSlideContent.vue'
+import SectionInfoSlideContent from './SectionInfoSlideContent.vue'
 import AppEmptyState from '~/shared/ui/AppEmptyState.vue'
 
 defineProps<{
