@@ -1,7 +1,7 @@
 // 세션 조회/검증 로직을 추상화한 인증 서비스 (IAuthService 인터페이스 + 구현체)
 import type { H3Event } from 'h3'
 import { ROLES } from '#shared/constants/roles'
-import { getAuthInstance } from './auth'
+import { getAuthInstance } from '../config/auth'
 
 export interface SessionUser {
     userId: string

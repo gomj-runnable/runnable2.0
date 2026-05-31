@@ -3,7 +3,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { getDb } from '../database/client'
 import { users, userSessions, userAccounts, userVerifications } from '../database/schema/users'
-import { getEnvMode, ENVIRONMENT_MODE } from '../config/envMode'
+import { getEnvMode, ENVIRONMENT_MODE } from './envMode'
 
 export type AuthInstance = ReturnType<typeof betterAuth>
 

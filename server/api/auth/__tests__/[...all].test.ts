@@ -6,7 +6,7 @@ const { getAuthInstance, fromWebHandler } = vi.hoisted(() => ({
     getAuthInstance: vi.fn(),
     fromWebHandler: vi.fn()
 }))
-vi.mock('#server/utils/auth', () => ({ getAuthInstance }))
+vi.mock('#server/config/auth', () => ({ getAuthInstance }))
 vi.mock('h3', async (importOriginal) => {
     const actual = await importOriginal<typeof import('h3')>()
     return { ...actual, fromWebHandler }
