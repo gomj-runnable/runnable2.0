@@ -1,5 +1,6 @@
 import { authService } from '../utils/auth.service'
 import { hasPermission, Permission } from '#shared/constants/permissions'
+import { getEnvMode, ENVIRONMENT_MODE } from '../config/envMode'
 
 /**
  * /admin, /dev 페이지 경로에 대한 서버 측 권한 가드.
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event) => {
     if (!isAdminPage && !isDevPage) return
 
     // /dev 경로는 production 빌드에서 완전 차단
-    if (isDevPage && process.env.NODE_ENV === 'production') {
+    if (isDevPage && getEnvMode() === ENVIRONMENT_MODE.PRODUCT) {
         throw createError({ statusCode: 404, statusMessage: 'Not Found' })
     }
 

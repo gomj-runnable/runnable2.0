@@ -2,7 +2,13 @@
 import { fromWebHandler } from 'h3'
 import { getAuthInstance } from '#server/utils/auth'
 import { internalError } from '#server/utils/error'
+import { getEnvMode, ENVIRONMENT_MODE } from '#server/config/envMode'
 
+/**
+ * 범용 HTTP 핸들러 Wrapper
+ *
+ * 모든 HTTP 요청이 해당 Handler를 거친다.
+ */
 export default defineEventHandler(async (event) => {
     try {
         const auth = await getAuthInstance()
@@ -15,7 +21,7 @@ export default defineEventHandler(async (event) => {
         // better-auth 내부 에러 로깅 + 운영에서는 메시지 숨김
         console.error('[auth] better-auth handler error:', error)
         throw internalError(
-            process.env.NODE_ENV === 'production'
+            getEnvMode() === ENVIRONMENT_MODE.PRODUCT
                 ? '인증 처리 중 오류가 발생했습니다.'
                 : error instanceof Error
                   ? error.message

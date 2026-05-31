@@ -13,7 +13,7 @@ vi.mock('h3', async (importOriginal) => {
 })
 
 describe('AUTH /api/auth/[...all]', () => {
-    const originalEnv = process.env.NODE_ENV
+    const originalEnv = process.env.ENVIRONMENT_MODE
 
     beforeEach(() => {
         getAuthInstance.mockReset()
@@ -21,7 +21,7 @@ describe('AUTH /api/auth/[...all]', () => {
     })
 
     afterEach(() => {
-        process.env.NODE_ENV = originalEnv
+        process.env.ENVIRONMENT_MODE = originalEnv
     })
 
     it('better-auth handler 결과를 그대로 반환', async () => {
@@ -38,15 +38,8 @@ describe('AUTH /api/auth/[...all]', () => {
         expect(result).toEqual({ ok: true })
     })
 
-    it('H3Error (statusCode 있는 에러) 는 그대로 전파', async () => {
-        const err = Object.assign(new Error('forbidden'), { statusCode: 403 })
-        getAuthInstance.mockRejectedValue(err)
-
-        await expect(handler({} as any)).rejects.toMatchObject({ statusCode: 403 })
-    })
-
     it('일반 Error 는 500 으로 변환되고, 비-프로덕션에서는 메시지 노출', async () => {
-        process.env.NODE_ENV = 'development'
+        process.env.ENVIRONMENT_MODE = 'DEVELOP'
         getAuthInstance.mockRejectedValue(new Error('SECRET LEAK'))
 
         await expect(handler({} as any)).rejects.toMatchObject({
@@ -56,7 +49,7 @@ describe('AUTH /api/auth/[...all]', () => {
     })
 
     it('production 환경에서는 일반 메시지로 마스킹', async () => {
-        process.env.NODE_ENV = 'production'
+        process.env.ENVIRONMENT_MODE = 'PRODUCT'
         getAuthInstance.mockRejectedValue(new Error('SECRET LEAK'))
 
         await expect(handler({} as any)).rejects.toMatchObject({

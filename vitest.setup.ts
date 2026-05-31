@@ -1,6 +1,11 @@
 import { ref, computed as vueComputed, watch as vueWatch } from 'vue'
 import { vi } from 'vitest'
 
+// 테스트 환경에선 .env 가 로드되지 않으므로 DB 모드를 PGLITE 로 보강한다.
+// (getDbMode() 가 USE_DATABASE_MODE 미설정 시 throw 하므로)
+process.env.DATABASE_MODE ??= 'PGLITE'
+process.env.ENVIRONMENT_MODE ??= 'DEVELOP'
+
 // Nuxt auto-import인 useState를 Vue의 ref로 대체한다.
 // 각 테스트 파일에서 store composable을 직접 호출할 수 있게 해준다.
 // init 결과를 T 로 캐스팅해 호출부에서 Ref<T | undefined> 가 아닌 Ref<T> 가 되도록 함.

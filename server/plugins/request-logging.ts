@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import pino from 'pino'
+import { getEnvMode, ENVIRONMENT_MODE } from '../config/envMode'
 
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = getEnvMode() !== ENVIRONMENT_MODE.PRODUCT
 
 const log = pino({
     level: process.env.LOG_LEVEL ?? 'info',

@@ -1,5 +1,7 @@
+import { getEnvMode, ENVIRONMENT_MODE } from '../config/envMode'
+
 export default defineNitroPlugin(() => {
-    const isProduction = process.env.NODE_ENV === 'production'
+    const isProduction = getEnvMode() === ENVIRONMENT_MODE.PRODUCT
     if (!isProduction) return
 
     const secret = process.env.BETTER_AUTH_SECRET

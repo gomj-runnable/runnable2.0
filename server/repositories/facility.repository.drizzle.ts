@@ -5,7 +5,7 @@ import type { IFacilityRepository } from './facility.repository'
 import type { getDb } from '../database/client'
 import { facilities } from '../database/schema/facilities'
 import { haversineDistance } from '../utils/haversine'
-import { isPgliteMode } from '../utils/config'
+import { getDbMode, DATABASE_MODE } from '../config/dbMode'
 
 type Db = Awaited<ReturnType<typeof getDb>>
 
@@ -33,7 +33,7 @@ export class DrizzleFacilityRepository implements IFacilityRepository {
         radius: number,
         types: FacilityType[]
     ): Promise<Facility[]> {
-        if (isPgliteMode) {
+        if (getDbMode() === DATABASE_MODE.PGLITE) {
             return this.findNearbyPglite(lat, lng, radius, types)
         }
         return this.findNearbyPostgres(lat, lng, radius, types)

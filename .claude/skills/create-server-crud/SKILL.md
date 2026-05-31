@@ -194,7 +194,7 @@ export const {domain}Repository: I{Domain}Repository = createRepository(
 ### 레퍼런스
 - `server/repositories/factory.ts:11-13` — `createRepository<T>` 제네릭 팩토리
 - `server/repositories/index.ts:6-9` — 실제 팩토리 사용례
-- `server/utils/config.ts:1` — `isMemoryMode` 환경 분기 설정
+- `server/config/dbMode.ts:1` — `isMemoryMode` 환경 분기 설정
 
 ## Auth Service DI
 

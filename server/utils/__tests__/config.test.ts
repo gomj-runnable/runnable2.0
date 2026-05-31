@@ -1,43 +1,34 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
-describe('config (USE_DATABASE_MODE)', () => {
+import { DATABASE_MODE, getDbMode } from '../../config/dbMode'
+
+describe('config (getDbMode)', () => {
     afterEach(() => {
         vi.unstubAllEnvs()
-        vi.resetModules()
     })
 
-    it('기본값은 PGLITE', async () => {
-        const original = process.env.USE_DATABASE_MODE
-        delete process.env.USE_DATABASE_MODE
-        vi.stubEnv('NODE_ENV', 'test')
-        vi.resetModules()
+    it('DATABASE_MODE=PGLITE 면 PGLITE 반환', () => {
+        vi.stubEnv('DATABASE_MODE', 'PGLITE')
+        expect(getDbMode()).toBe(DATABASE_MODE.PGLITE)
+    })
+
+    it('DATABASE_MODE=POSTGRES 면 POSTGRES 반환', () => {
+        vi.stubEnv('DATABASE_MODE', 'POSTGRES')
+        expect(getDbMode()).toBe(DATABASE_MODE.POSTGRES)
+    })
+
+    it('미설정이면 throw', () => {
+        const original = process.env.DATABASE_MODE
+        delete process.env.DATABASE_MODE
         try {
-            const mod = await import('../config')
-            expect(mod.dbMode).toBe('PGLITE')
-            expect(mod.isPgliteMode).toBe(true)
+            expect(() => getDbMode()).toThrow(/DATABASE_MODE/)
         } finally {
-            if (original !== undefined) process.env.USE_DATABASE_MODE = original
+            if (original !== undefined) process.env.DATABASE_MODE = original
         }
     })
 
-    it('POSTGRES 로 설정 가능', async () => {
-        vi.stubEnv('USE_DATABASE_MODE', 'POSTGRES')
-        vi.resetModules()
-        const mod = await import('../config')
-        expect(mod.dbMode).toBe('POSTGRES')
-        expect(mod.isPgliteMode).toBe(false)
-    })
-
-    it('알 수 없는 값은 import 시 throw', async () => {
-        vi.stubEnv('USE_DATABASE_MODE', 'SQLITE')
-        vi.resetModules()
-        await expect(import('../config')).rejects.toThrow(/USE_DATABASE_MODE/)
-    })
-
-    it('production 에서 PGLITE 는 throw', async () => {
-        vi.stubEnv('USE_DATABASE_MODE', 'PGLITE')
-        vi.stubEnv('NODE_ENV', 'production')
-        vi.resetModules()
-        await expect(import('../config')).rejects.toThrow(/production/)
+    it('알 수 없는 값이면 throw', () => {
+        vi.stubEnv('DATABASE_MODE', 'SQLITE')
+        expect(() => getDbMode()).toThrow(/DATABASE_MODE/)
     })
 })

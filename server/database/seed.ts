@@ -2,12 +2,13 @@
 import 'dotenv/config'
 
 async function seed() {
-    if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PROD_SEED) {
+    const { getEnvMode, ENVIRONMENT_MODE } = await import('../config/envMode')
+    if (getEnvMode() === ENVIRONMENT_MODE.PRODUCT && !process.env.ALLOW_PROD_SEED) {
         console.error('운영 환경에서 seed가 차단되었습니다. ALLOW_PROD_SEED=1 로 명시적 허용 필요.')
         process.exit(0)
     }
 
-    const { dbMode } = await import('../utils/config')
+    const { getDbMode, DATABASE_MODE } = await import('../config/dbMode')
     const { getDb } = await import('./client')
     const { users, userAccounts } = await import('./schema/users')
     const { facilities } = await import('./schema/facilities')
@@ -15,7 +16,7 @@ async function seed() {
     const { sql } = await import('drizzle-orm')
     const { ROLES } = await import('../../shared/constants/roles')
 
-    console.log(`🌱 Seed 작업 시작... (모드: ${dbMode})`)
+    console.log(`🌱 Seed 작업 시작... (모드: ${getDbMode()})`)
 
     const adminPassword = process.env.ADMIN_SEED_PASSWORD
     if (!adminPassword) {
@@ -128,7 +129,7 @@ async function seed() {
         console.log('✅ developer 계정 설정 완료 (ID: ' + DEV_ID + ')')
 
         // 3. 시설물 데이터 적재 (POSTGRES 전용 — PGlite는 PostGIS 미지원)
-        if (dbMode === 'POSTGRES') {
+        if (getDbMode() === DATABASE_MODE.POSTGRES) {
             await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)
 
             const { readFileSync } = await import('node:fs')

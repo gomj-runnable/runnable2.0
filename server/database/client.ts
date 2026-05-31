@@ -5,13 +5,27 @@ import pg from 'pg'
 import { readFileSync, readdirSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as schema from './schema'
-import { dbMode } from '../utils/config'
+import { getDbMode, DATABASE_MODE } from '../config/dbMode'
 
+/**
+ * DrizzleDB Type 선언
+ *
+ * Runnable에서 사용하는 DB는 다음과 같다.
+ * - PostgreSQL: PRODUCT
+ * - PgLite: DEVELOP
+ */
 type DrizzleDb =
     | ReturnType<typeof drizzlePg<typeof schema>>
     | ReturnType<typeof drizzlePglite<typeof schema>>
 
-let _db: DrizzleDb | null = null
+/**
+ * Postgres DB 인스턴스.
+ *
+ * Drizzle로 관리한다.
+ *
+ * Singleton으로 이용하는 객체
+ */
+let database: DrizzleDb | null = null
 
 // PGlite: filter out PostGIS-dependent SQL statements before applying migrations.
 // PGlite has no PostGIS (requires native C lib), so we skip:
@@ -61,25 +75,30 @@ async function bootstrapPglite(pglite: PGlite): Promise<void> {
     }
 }
 
+/**
+ * 서버의 DataBase 정보를 얻는다.
+ */
 export async function getDb(): Promise<DrizzleDb> {
-    if (_db) return _db
+    // database가 할당되었다면,
+    if (database) return database
 
-    if (dbMode === 'PGLITE') {
+    // 환경 변수 기반으로 PGLITE/POSTGRES 분기
+    if (getDbMode() === DATABASE_MODE.PGLITE) {
         // File-based persistence in dev; tests pass new PGlite() externally via initPgliteDb()
         const dataPath = resolve(process.cwd(), '.data/pglite')
         mkdirSync(dataPath, { recursive: true })
         const pglite = new PGlite(dataPath)
         await bootstrapPglite(pglite)
-        _db = drizzlePglite(pglite, { schema })
+        database = drizzlePglite(pglite, { schema })
     } else {
         if (!process.env.DATABASE_URL) {
             throw new Error('DATABASE_URL is required in POSTGRES mode.')
         }
         const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
-        _db = drizzlePg(pool, { schema })
+        database = drizzlePg(pool, { schema })
     }
 
-    return _db
+    return database
 }
 
 /**
@@ -88,11 +107,11 @@ export async function getDb(): Promise<DrizzleDb> {
  */
 export async function initPgliteDb(pglite: PGlite): Promise<DrizzleDb> {
     await bootstrapPglite(pglite)
-    _db = drizzlePglite(pglite, { schema })
-    return _db
+    database = drizzlePglite(pglite, { schema })
+    return database
 }
 
 /** Reset singleton — only for tests. */
 export function resetDb(): void {
-    _db = null
+    database = null
 }
