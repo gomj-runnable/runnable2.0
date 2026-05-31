@@ -1,3 +1,4 @@
+// IUserFeaturePrefRepository의 Drizzle ORM 구현체 — 사용자 플러그인 활성 상태 upsert 담당
 import { eq } from 'drizzle-orm'
 import type { IUserFeaturePrefRepository, FeaturePref } from './userFeaturePref.repository'
 import type { getDb } from '../database/client'

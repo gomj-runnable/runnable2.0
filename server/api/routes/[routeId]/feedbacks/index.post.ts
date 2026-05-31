@@ -1,3 +1,4 @@
+// POST /api/routes/:routeId/feedbacks - 경로에 피드백(루트인포) 등록
 import { nanoid } from 'nanoid'
 import { createRouteInfoSchema } from '#shared/schemas/routeInfo.schema'
 import { getRouteInfoRepository } from '../../../../repositories'

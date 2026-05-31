@@ -1,3 +1,4 @@
+// 경로 정보 핀 생성 Zod 검증 스키마
 import { z } from 'zod'
 
 export const createRouteInfoSchema = z.object({

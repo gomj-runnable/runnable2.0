@@ -1,3 +1,4 @@
+// DELETE /api/routes/:routeId - 경로 삭제 (소유자 본인만 허용)
 import { routeService } from '../../../services/route.service'
 import { requireRouteOwnership } from '../../../utils/session'
 import { requireRouteIdParam } from '../../../utils/params'

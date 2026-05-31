@@ -1,3 +1,4 @@
+// 경로 좌표 배열로부터 거리-고도 프로필(누적 거리·고도 변화·눈금)을 계산하는 유틸리티 모음.
 import { distance, point } from '@turf/turf'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type {

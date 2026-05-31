@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 저장된 경로 목록을 카드 형태로 표시하고 선택·다운로드·수정·공유·좋아요·비교 액션을 제공하는 패널.
 import type { SavedRoute } from '#shared/types/route'
 import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 import { useRouteSocialActions } from '~/features/route-social/api/useRouteSocialActions'

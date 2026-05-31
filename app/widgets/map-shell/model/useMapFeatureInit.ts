@@ -1,3 +1,4 @@
+/** 지도 초기화 및 인증·레이어·카메라 등 핵심 기능을 onMounted 에서 병렬로 부트스트랩하는 composable. */
 import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useMapInit } from '~/shared/lib/map/useMapInit'

@@ -1,3 +1,4 @@
+// 경로 드로잉 구간 초안(SectionDraft)의 생성·분할·병합·수정 순수 함수 모음.
 import type { Cartesian3 } from 'cesium'
 import type { DrawActionData } from '~/shared/lib/useWindow'
 import type { CreateSectionSchema, SectionAttrSchema } from '#shared/schemas/route.schema'
@@ -313,6 +314,7 @@ export const splitSectionAtPoint = (
     return nextRanges
 }
 
+/** 구간 범위 배열에서 특정 인덱스의 구간을 앞 구간과 병합한다. */
 export const mergeSectionPointRanges = (ranges: SectionPointRange[], index: number) => {
     if (index <= 0 || index >= ranges.length) {
         return ranges

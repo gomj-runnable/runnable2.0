@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 목록/검색 결과가 없을 때 표시하는 공통 빈 상태 컴포넌트.
 defineProps<{
     icon: string
     title: string

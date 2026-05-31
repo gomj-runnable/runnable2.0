@@ -1,3 +1,4 @@
+// IRouteRepository의 Drizzle ORM 구현체 — 경로/구간/좋아요 CRUD 및 검색 포함
 import { randomUUID } from 'node:crypto'
 import { eq, and, ilike, or, desc, sql } from 'drizzle-orm'
 import type { RouteDraftInput, SectionAttr } from '#shared/types/route'

@@ -1,3 +1,4 @@
+// 시설물 엔티티를 POI 관련 타입(PoiDto, PoiDraftInput)으로 변환하는 유틸리티 모음.
 import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 import type { PoiDto } from '~/shared/lib/map/usePoiOverlay'

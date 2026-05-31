@@ -1,3 +1,4 @@
+// demo-coords 플러그인 매니페스트 — chip 슬롯 동작 검증용 데모.
 import { markRaw } from 'vue'
 import type { PluginManifest } from '../types'
 import DemoCoordsChip from './DemoCoordsChip.vue'

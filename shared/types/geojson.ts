@@ -1,3 +1,4 @@
+// GeoJSON 관련 공용 타입 정의 (Position, Point/LineString/Polygon, GeoFeature)
 import type { Point, LineString, Polygon, MultiPolygon } from 'geojson'
 
 export type GeoJsonPosition = [number, number, number]

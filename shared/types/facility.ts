@@ -1,10 +1,13 @@
+// 시설물(Facility) 및 POI 관련 타입 정의
 import type { GeoJsonPoint } from '#shared/types/geojson'
 
+/** 지도에 표시되는 시설물 종류 */
 export type FacilityType = 'crosswalk' | 'fountain' | 'locker' | 'hospital' | 'sidewalk' | 'toilet'
 
 /** POI 저장용 타입 (경로 구간에 연결되는 관심지점) */
 export type PoiType = 'HOSPITAL' | 'CROSSWALK' | 'WATER'
 
+/** POI 생성 입력 (DraftInput) */
 export interface PoiDraftInput {
     name: string
     description?: string
@@ -13,6 +16,7 @@ export interface PoiDraftInput {
     attribute?: Record<string, unknown>
 }
 
+/** 저장된 시설물 엔티티 (DB 조회 결과) */
 export interface Facility {
     id: string
     type: FacilityType
@@ -32,6 +36,7 @@ export interface Facility {
     polyline?: [number, number][]
 }
 
+/** 시설물 레이어 렌더링 설정 (아이콘·색상 포함) */
 export interface FacilityLayerConfig {
     type: FacilityType
     label: string

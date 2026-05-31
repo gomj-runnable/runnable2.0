@@ -1,3 +1,4 @@
+// IFacilityRepository의 Drizzle ORM 구현체 — POSTGRES/PGlite 모드 분기 처리 포함
 import { sql } from 'drizzle-orm'
 import type { Facility, FacilityType } from '#shared/types/facility'
 import type { IFacilityRepository } from './facility.repository'

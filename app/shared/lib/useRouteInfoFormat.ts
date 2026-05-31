@@ -1,3 +1,4 @@
+// 경로 정보 객체를 UI 렌더링용 key-value 배열로 변환하는 포맷 유틸.
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 interface RouteInfoLike {

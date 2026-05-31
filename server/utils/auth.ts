@@ -1,3 +1,4 @@
+// better-auth 인스턴스를 초기화하고 싱글턴으로 반환하는 모듈
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { getDb } from '../database/client'

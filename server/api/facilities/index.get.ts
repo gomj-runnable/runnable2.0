@@ -1,3 +1,4 @@
+// GET /api/facilities - 전체 시설물 목록 조회
 import { defineEventHandler } from 'h3'
 import { getFacilityRepository } from '../../repositories'
 

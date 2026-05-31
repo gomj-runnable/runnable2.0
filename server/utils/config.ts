@@ -1,3 +1,4 @@
+// DB 모드(PGLITE/POSTGRES) 환경 변수를 읽고 검증하는 설정 모듈
 export type DbMode = 'PGLITE' | 'POSTGRES'
 
 const raw = process.env.USE_DATABASE_MODE ?? 'PGLITE'

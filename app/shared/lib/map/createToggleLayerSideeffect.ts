@@ -1,3 +1,4 @@
+// 반응형 소스를 watch해 레이어를 켜고 끄는 sideeffect 팩토리.
 import type { WatchSource } from 'vue'
 
 interface ToggleLayerOptions<T = boolean> {
@@ -8,6 +9,7 @@ interface ToggleLayerOptions<T = boolean> {
     cleanup?: () => void
 }
 
+/** source 값 변경 시 condition에 따라 apply/remove를 호출하고, 언마운트 시 cleanup하는 sideeffect를 생성한다. */
 export const createToggleLayerSideeffect = <T = boolean>(options: ToggleLayerOptions<T>) => {
     const init = () => {
         const stopWatch = watch(

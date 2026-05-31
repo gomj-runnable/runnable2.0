@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 모바일 헤더(Runnable 로고 + 드롭다운 네비게이션)를 렌더링하는 사이드바 컴포넌트.
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { NavKey, type NavKeyValue } from '../model/nav-key'
 import { ROLES } from '#shared/constants/roles'

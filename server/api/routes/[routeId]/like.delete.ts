@@ -1,3 +1,4 @@
+// DELETE /api/routes/:routeId/like - 경로 좋아요 취소
 import { routeService } from '../../../services/route.service'
 import { requireSession } from '../../../utils/session'
 import { requireRouteIdParam } from '../../../utils/params'

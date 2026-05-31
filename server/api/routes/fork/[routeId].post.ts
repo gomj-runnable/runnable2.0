@@ -1,3 +1,4 @@
+// POST /api/routes/fork/:routeId - 공개 경로를 현재 사용자 소유로 복제(포크)
 import { routeService } from '../../../services/route.service'
 import { requireRouteIdParam } from '../../../utils/params'
 import { requireSession } from '../../../utils/session'

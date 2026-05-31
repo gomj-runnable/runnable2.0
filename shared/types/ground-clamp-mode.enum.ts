@@ -1,3 +1,4 @@
+// Cesium 지면 고정 모드 enum (CLAMP / RELATIVE / NONE)
 import { EnumBase } from './enum-base'
 
 export class GroundClampModeEnum extends EnumBase {

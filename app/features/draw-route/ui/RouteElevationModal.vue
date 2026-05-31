@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 경로의 고도 프로필을 SVG 차트로 시각화하는 모달 컴포넌트.
 import type { RouteElevationProfile } from '#shared/types/route'
 import { createDistanceTicks } from '~/entities/route/lib/useRouteElevationProfile'
 import { calcChartGeometry } from '~/features/elevation-layer/lib/useElevationChartAction'

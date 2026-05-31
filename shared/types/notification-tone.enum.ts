@@ -1,3 +1,4 @@
+// 알림 톤(성공/오류/정보/경고) enum — 색상·아이콘 포함
 import { EnumBase } from './enum-base'
 
 export class NotificationToneEnum extends EnumBase {

@@ -1,3 +1,4 @@
+// 러닝 경로 주변 시설물(화장실, 병원, 식수대 등) 테이블 스키마
 import { pgTable, text, varchar, numeric, boolean, jsonb, index } from 'drizzle-orm/pg-core'
 
 export const facilities = pgTable(

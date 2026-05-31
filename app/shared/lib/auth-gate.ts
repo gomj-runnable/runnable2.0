@@ -1,3 +1,4 @@
+// developer/admin 권한 게이트 함수를 등록·조회하는 모듈. 실제 등록은 client-only 플러그인에서 수행한다.
 // SSR 안전: 모듈 스코프 변수이므로 서버/클라이언트 각 컨텍스트에서 독립적으로 초기화된다.
 // 실제 gate 등록은 client-only plugin(app/plugins/developer-gate.client.ts)에서 수행한다.
 type Gate = () => Promise<boolean> | boolean

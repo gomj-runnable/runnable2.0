@@ -1,3 +1,4 @@
+// POI와 경로 구간 사이의 최근접 거리 계산 및 유효성 검증 유틸리티.
 import { nearestPointOnLine, point, lineString } from '@turf/turf'
 import type { GeoJsonPoint } from '#shared/types/geojson'
 

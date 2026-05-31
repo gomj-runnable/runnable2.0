@@ -1,3 +1,4 @@
+// Cesium ↔ GeoJSON 좌표 변환, 색상 변환, 경로 마커 추가 등 드로잉 지원 유틸리티 모음.
 import type { Cartesian3 } from 'cesium'
 import type { CesiumEntity, DrawActionData } from '~/shared/lib/useWindow'
 import type { RouteGeoJson } from '#shared/types/route'

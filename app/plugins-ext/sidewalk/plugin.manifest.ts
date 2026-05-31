@@ -1,3 +1,4 @@
+// 인도(sidewalk) 플러그인 매니페스트 — 선택 지역 보행로를 지도에 표시하는 chip 플러그인.
 import { markRaw } from 'vue'
 import type { PluginManifest } from '../types'
 import SidewalkChip from './SidewalkChip.vue'

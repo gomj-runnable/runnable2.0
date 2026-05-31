@@ -1,3 +1,4 @@
+// ALL /api/auth/* - better-auth 핸들러로 인증 요청을 위임
 import { fromWebHandler } from 'h3'
 import { getAuthInstance } from '#server/utils/auth'
 import { internalError } from '#server/utils/error'

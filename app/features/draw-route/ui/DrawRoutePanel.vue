@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 경로 그리기 패널 UI — 구간 목록, GPX 가져오기, 구간 나누기 안내 모달을 포함한다.
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
 import type { PoiDraftInput } from '#shared/types/facility'
 import { getSectionColor } from '~/entities/route/lib/useRouteDrawUtils'

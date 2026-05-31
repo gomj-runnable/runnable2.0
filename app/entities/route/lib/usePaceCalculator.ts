@@ -1,3 +1,4 @@
+// 구간·전체 경로의 거리·소요시간·페이스 포맷 계산 유틸리티 모음.
 import type { SavedSection } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { UserPace } from '#shared/types/user-route'

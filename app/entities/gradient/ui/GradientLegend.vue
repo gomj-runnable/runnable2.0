@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 경사도 구간별 색상 기준을 지도 좌측 하단에 표시하는 범례 컴포넌트.
 defineProps<{
     /** 다른 범례(날씨/고도)가 표시 중인지 여부 */
     hasOtherLegend?: boolean

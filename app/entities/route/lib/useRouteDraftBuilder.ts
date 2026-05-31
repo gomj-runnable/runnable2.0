@@ -1,3 +1,4 @@
+// 경로 초안 데이터를 단계적으로 조립하여 서버 저장용 페이로드를 생성하는 Builder 클래스 모음.
 import {
     createRouteSchema,
     type CreateRouteSchema,
@@ -16,6 +17,7 @@ export interface RouteDrawMetricsInput {
     loopCloseDistance?: number | null
 }
 
+/** 그리기 메트릭(거리·고도)에서 최종 경로 필드를 계산하는 Builder. */
 export class RouteDraftBuilder {
     constructor(private readonly drawMetrics?: RouteDrawMetricsInput | null) {}
 

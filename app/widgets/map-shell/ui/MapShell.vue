@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 사이드바·오버레이·푸터 슬롯을 조합하는 지도 페이지 레이아웃 shell 컴포넌트.
 const props = withDefaults(
     defineProps<{
         hideSidebar?: boolean

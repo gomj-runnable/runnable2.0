@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 두 경로의 거리·고도·시설 통계를 나란히 비교해 보여주는 모달 컴포넌트.
 import type { RouteCompareItem, RouteCompareResponse } from '#shared/types/route-compare'
 
 defineProps<{
@@ -10,12 +11,14 @@ defineProps<{
 
 defineEmits<{ 'update:open': [value: boolean] }>()
 
+/** 분 단위 숫자를 "N시간 M분" 형식으로 변환한다. */
 const formatDuration = (min: number) => {
     const h = Math.floor(min / 60)
     const m = Math.round(min % 60)
     return h > 0 ? `${h}시간 ${m}분` : `${m}분`
 }
 
+/** 경로 비교 항목의 시설 종류별 개수 합계를 계산한다. */
 const facilitiesTotal = (item: RouteCompareItem) =>
     Object.values(item.meta.facilityCounts ?? {}).reduce((acc, n) => acc + n, 0)
 </script>

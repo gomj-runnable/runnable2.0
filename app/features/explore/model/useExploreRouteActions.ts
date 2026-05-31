@@ -1,3 +1,4 @@
+// 탐색 탭에서 경로 선택·가져오기·자동 로드 액션을 조율하는 composable.
 import type { Ref } from 'vue'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'

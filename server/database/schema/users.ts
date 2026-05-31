@@ -1,3 +1,4 @@
+// 사용자 인증 관련 테이블 스키마 (users, sessions, accounts, verifications)
 import { pgTable, text, varchar, timestamp, boolean, integer, index } from 'drizzle-orm/pg-core'
 
 // users

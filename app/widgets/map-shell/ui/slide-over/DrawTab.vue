@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props, @typescript-eslint/no-explicit-any */
+// SlideOver 그리기 탭 — DrawRoutePanel을 래핑해 drawing facade와 구간 거리 배열을 연결한다.
 import DrawRoutePanel from '~/features/draw-route/ui/DrawRoutePanel.vue'
 
 defineProps<{

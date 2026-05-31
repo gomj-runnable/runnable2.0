@@ -1,3 +1,4 @@
+// 경로 닫기 모드 enum (도착지 연결 루프 / 왕복 코스)
 import { EnumBase } from './enum-base'
 
 export class RouteClosingModeEnum extends EnumBase {

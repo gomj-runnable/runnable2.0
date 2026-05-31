@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 경로 구간별 페이스·짐 무게·전략을 조회하고 수정하는 구간 상세 패널 컴포넌트.
 import type { SavedSection } from '#shared/types/route'
 import type { UserPace } from '#shared/types/user-route'
 import { formatPace, calculateSectionDistance } from '~/entities/route/lib/usePaceCalculator'

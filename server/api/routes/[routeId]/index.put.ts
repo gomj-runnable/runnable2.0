@@ -1,3 +1,4 @@
+// PUT /api/routes/:routeId - 경로 메타데이터 및 구간 수정 (소유자 본인만 허용)
 import { z } from 'zod'
 import { geoJsonLineStringSchema, sectionAttrSchema, poiSchema } from '#shared/schemas/route.schema'
 import { routeService } from '../../../services/route.service'

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 뒤로 가기 브레드크럼 + SecondPanel을 감싸는 구간정보 슬라이드 컨텐츠 컴포넌트.
 import type { SavedSection } from '#shared/types/route'
 import type { UserPace } from '#shared/types/user-route'
 import SecondPanel from './SecondPanel.vue'

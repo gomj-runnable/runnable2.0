@@ -1,3 +1,4 @@
+// GET /api/facilities/nearby - 좌표 기준 반경 내 시설물 조회 (lat, lng, radius, types)
 import { defineEventHandler, getQuery } from 'h3'
 import { z } from 'zod'
 import { getFacilityRepository } from '../../repositories'

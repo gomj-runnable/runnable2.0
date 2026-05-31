@@ -1,3 +1,4 @@
+// GPX XML 파일을 파싱하여 GeoJSON Position 배열로 변환하는 유틸리티.
 import type { GeoJsonPosition } from '#shared/types/geojson'
 
 const GPX_NS = 'http://www.topografix.com/GPX/1/1'

@@ -1,3 +1,4 @@
+// 그리기 상태(positions·sectionDraft·closingMode 등)를 서버 저장 페이로드로 변환하는 빌더 함수.
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { PoiDraftInput } from '#shared/types/facility'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'

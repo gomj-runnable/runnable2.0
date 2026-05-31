@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props, @typescript-eslint/no-explicit-any */
+// SlideOver 목록 탭 — 비로그인 안내·구간정보·경로목록을 조건에 따라 전환해 표시한다.
 import RouteListPanel from '~/features/draw-route/ui/RouteListPanel.vue'
 import SectionInfoSlideContent from './SectionInfoSlideContent.vue'
 import AppEmptyState from '~/shared/ui/AppEmptyState.vue'

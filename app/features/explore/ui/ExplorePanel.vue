@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 공개 경로 목록을 표시하고 선택·가져오기·공유·좋아요·비교 액션을 제공하는 탐색 탭 패널.
 import type { SavedRoute } from '#shared/types/route'
 import { getRouteInfoItems } from '~/shared/lib/useRouteInfoFormat'
 import { useRouteSocialActions } from '~/features/route-social/api/useRouteSocialActions'

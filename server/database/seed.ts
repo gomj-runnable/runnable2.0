@@ -1,3 +1,4 @@
+// 초기 데이터 적재 스크립트 — 관리자 계정 및 시설물 데이터를 DB에 삽입한다
 import 'dotenv/config'
 
 async function seed() {

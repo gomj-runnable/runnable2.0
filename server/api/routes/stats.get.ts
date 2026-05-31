@@ -1,3 +1,4 @@
+// GET /api/routes/stats - 로그인 사용자의 경로 통계 집계 (총 거리·고도·월별 현황)
 import { routeService } from '../../services/route.service'
 import { requireSession } from '../../utils/session'
 import type { RouteStats, MonthlyRouteStat } from '#shared/types/stats'

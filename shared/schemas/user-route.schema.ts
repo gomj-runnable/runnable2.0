@@ -1,3 +1,4 @@
+// 사용자 페이스(UserPace) Zod 검증 스키마
 import { z } from 'zod'
 
 export const userPaceSchema = z.object({

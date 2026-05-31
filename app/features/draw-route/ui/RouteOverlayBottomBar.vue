@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 지도 하단 중앙에 고정되는 오버레이 바 — 고도 칩, 경로 닫기 모드, 경사도 토글을 포함한다.
 import type { RouteClosingMode } from '~/entities/route/model/useRouteClosingStore'
 import type { RouteElevationProfile } from '#shared/types/route'
 import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'

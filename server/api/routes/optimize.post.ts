@@ -1,3 +1,4 @@
+// POST /api/routes/optimize - 경로 최적화 요청 (TMap 등 라우팅 서비스 위임, 실패 시 폴백 반환)
 import {
     RouteOptimizeRequestBody,
     RouteOptimizeResponseBody

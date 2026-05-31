@@ -1,3 +1,4 @@
+// 경로 난이도 등급 enum (초급~전문가) — 색상·순서 포함
 import { EnumBase } from './enum-base'
 
 export class DifficultyLevelEnum extends EnumBase {

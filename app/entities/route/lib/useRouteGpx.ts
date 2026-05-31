@@ -1,3 +1,4 @@
+// 경로와 구간 데이터를 GPX 1.1 XML 문자열로 직렬화하는 유틸리티.
 import type { RouteBase, RouteSectionBase } from '#shared/types/route'
 
 /** GPX XML 파일의 표준 선언 헤더 */

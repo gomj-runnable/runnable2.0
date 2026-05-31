@@ -1,3 +1,4 @@
+// POST /api/routes - 새 경로 및 구간 생성 (로그인 필수)
 import { z } from 'zod'
 import {
     createRouteSchema,

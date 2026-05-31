@@ -1,3 +1,4 @@
+// IRouteInfoRepository의 Drizzle ORM 구현체 — 경로 위치 정보 조회/생성 담당
 import { eq } from 'drizzle-orm'
 import type { IRouteInfoRepository, NewRouteInfo, SavedRouteInfo } from './routeInfo.repository'
 import type { getDb } from '../database/client'

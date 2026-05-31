@@ -1,3 +1,4 @@
+// Cesium 런타임 인터페이스 타입 정의 (CesiumRuntime, Viewer, Scene, DataSource 등)
 import type {
     CallbackProperty,
     Cartesian3,
@@ -8,6 +9,7 @@ import type {
     MaterialProperty
 } from 'cesium'
 
+/** Cesium ScreenSpaceEventHandler 래퍼 인터페이스 */
 export interface CesiumDrawHandler {
     destroy(): void
     isDestroyed(): boolean
@@ -19,6 +21,7 @@ export interface CesiumDrawHandler {
     removeInputAction(type: unknown): void
 }
 
+/** Cesium 전역 네임스페이스 런타임 인터페이스 (window.Cesium 대응) */
 export interface CesiumRuntime {
     Cartographic: {
         new (longitude?: number, latitude?: number, height?: number): Cartographic
@@ -147,12 +150,14 @@ export interface CesiumRuntime {
     ColorMaterialProperty: new (color: Color) => MaterialProperty
 }
 
+/** Cesium GeoJsonDataSource 로드 결과 인스턴스 */
 export interface GeoJsonDataSourceInstance {
     entities: {
         values: GeoJsonEntityInstance[]
     }
 }
 
+/** GeoJsonDataSource 내 단일 엔티티 */
 export interface GeoJsonEntityInstance {
     properties: Record<string, { getValue(): unknown }> | null | undefined
     polygon:
@@ -165,6 +170,7 @@ export interface GeoJsonEntityInstance {
         | undefined
 }
 
+/** Cesium GroundPolylinePrimitive 인스턴스 (show·색상 변경용) */
 export interface GroundPolylinePrimitiveInstance {
     ready: boolean
     show: boolean
@@ -175,6 +181,7 @@ export interface GroundPolylinePrimitiveInstance {
         | undefined
 }
 
+/** Cesium Scene 런타임 인터페이스 (pick·globe·primitives) */
 export interface CesiumSceneRuntime {
     pickPositionSupported?: boolean
     pickPosition(windowPosition: unknown): unknown
@@ -190,6 +197,7 @@ export interface CesiumSceneRuntime {
     }
 }
 
+/** Cesium Viewer 런타임 인터페이스 (camera·scene·dataSources) */
 export interface CesiumViewerRuntime {
     canvas: unknown
     scene: CesiumSceneRuntime

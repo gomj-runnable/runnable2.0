@@ -1,3 +1,4 @@
+// 구간 정보 사이드 패널의 열림 상태·선택 경로·구간 목록·사용자 페이스를 관리하는 store composable.
 import type { SavedSection } from '#shared/types/route'
 import type { UserPace } from '#shared/types/user-route'
 

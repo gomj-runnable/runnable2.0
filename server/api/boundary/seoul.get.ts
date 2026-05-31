@@ -1,7 +1,9 @@
+// GET /api/boundary/seoul - 서울 시군구(SGG) 경계 GeoJSON 반환, 실패 시 원형 폴리곤으로 폴백
 import { defineEventHandler } from 'h3'
 import { getSggBoundary } from '../../utils/district/boundary'
 import { SEOUL_GU_DATA } from '../../utils/district/seoul-gu-data'
 
+// 시군구 경계를 반환하며, 오류 시 구 중심점 기반 원형 폴리곤으로 대체
 export default defineEventHandler(async () => {
     try {
         return await getSggBoundary()
@@ -10,6 +12,7 @@ export default defineEventHandler(async () => {
     }
 })
 
+// 구 중심 좌표를 기반으로 원형 폴리곤 GeoJSON을 생성하는 폴백 함수
 function getFallbackSeoulGeojson() {
     return {
         type: 'FeatureCollection',

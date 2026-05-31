@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 경사도 레이어 ON/OFF 토글 버튼과 현재 경로 난이도 뱃지를 함께 표시하는 컴포넌트.
 import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
 
 const props = defineProps<{

@@ -1,3 +1,4 @@
+// 경로·구간·POI 생성 Zod 검증 스키마 모음
 import { z } from 'zod'
 import type { RouteSectionDraftInput } from '#shared/types/route'
 import type { PoiDraftInput } from '#shared/types/facility'

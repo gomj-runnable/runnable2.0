@@ -1,3 +1,4 @@
+// 시뮬레이션 카메라 시점 모드 enum (1인칭/3인칭)
 import { EnumBase } from './enum-base'
 
 export class CameraViewModeEnum extends EnumBase {

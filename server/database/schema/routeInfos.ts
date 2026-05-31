@@ -1,3 +1,4 @@
+// 경로 위치 정보(포인트 마커) 테이블 스키마
 import { pgTable, text, varchar, numeric, timestamp, index } from 'drizzle-orm/pg-core'
 import { routes } from './routes'
 import { users } from './users'

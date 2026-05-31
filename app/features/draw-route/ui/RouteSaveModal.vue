@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 경로 제목·설명·거리·행정구역을 입력하고 저장하는 모달 컴포넌트 (신규 저장 및 수정 겸용).
 import { formatDistance } from '~/shared/lib/useFormatUtils'
 
 defineProps<{

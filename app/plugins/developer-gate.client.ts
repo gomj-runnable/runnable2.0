@@ -1,3 +1,4 @@
+// 클라이언트 전용 플러그인 — developer/admin 권한 게이트를 better-auth 세션 기반으로 등록한다.
 import { createAuthClient } from 'better-auth/vue'
 import { defineDeveloperGate, defineAdminGate } from '~/shared/lib/auth-gate'
 import { hasPermission, Permission } from '../../shared/constants/permissions'

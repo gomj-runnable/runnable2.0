@@ -1,3 +1,4 @@
+// 경사도 폴리라인 레이어를 Cesium 지도에 렌더링·제거하고 난이도를 계산하는 sideeffect composable.
 import type { Ref, ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
