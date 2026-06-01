@@ -10,7 +10,7 @@ const { searchPublicRoutes, isLikedByUser, getSessionUser } = vi.hoisted(() => (
 vi.mock('../../../services/route.service', () => ({
     routeService: { searchPublicRoutes, isLikedByUser }
 }))
-vi.mock('../../../utils/session', () => ({ getSessionUser }))
+vi.mock('../../../http/session', () => ({ getSessionUser }))
 
 const makeEvent = (query: Record<string, string> = {}) =>
     ({ method: 'GET', path: '/api/routes/discover', query }) as any

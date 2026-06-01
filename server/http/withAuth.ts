@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { authService, type SessionUser } from './auth.service'
+import { authService, type SessionUser } from '../utils/auth.service'
 
 /**
  * 인증이 필요한 핸들러 래퍼.

@@ -7,8 +7,8 @@ import {
     poiSchema
 } from '#shared/schemas/route.schema'
 import { routeService } from '../../services/route.service'
-import { withAuth } from '../../utils/withAuth'
-import { withExceptionHandler } from '../../utils/error'
+import { withAuth } from '../../http/withAuth'
+import { withExceptionHandler } from '../../exceptions/error'
 
 const requestSchema = z.object({
     route: createRouteSchema,

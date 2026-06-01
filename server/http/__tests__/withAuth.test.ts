@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { withAuth } from '../withAuth'
-import { authService } from '../auth.service'
+import { authService } from '../../utils/auth.service'
 
-vi.mock('../auth.service', () => ({
+vi.mock('../../utils/auth.service', () => ({
     authService: {
         getSession: vi.fn(),
         requireSession: vi.fn()

@@ -1,6 +1,6 @@
 // GET /api/me/feature-prefs - 로그인 사용자의 플러그인 기능 활성화 설정 조회
-import { requireSession } from '../../utils/session'
-import { withExceptionHandler } from '../../utils/error'
+import { requireSession } from '../../http/session'
+import { withExceptionHandler } from '../../exceptions/error'
 import { getUserFeaturePrefRepository } from '../../repositories'
 
 export default defineEventHandler(

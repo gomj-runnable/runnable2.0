@@ -1,8 +1,8 @@
 // GET /api/routes/:routeId/sections - 경로의 구간(section) 목록 조회
 import { routeService } from '../../../services/route.service'
-import { requireRouteIdParam } from '../../../utils/params'
-import { withAuth } from '../../../utils/withAuth'
-import { forbidden, notFound } from '../../../utils/error'
+import { requireRouteIdParam } from '../../../http/params'
+import { withAuth } from '../../../http/withAuth'
+import { forbidden, notFound } from '../../../exceptions/error'
 
 export default defineEventHandler(
     withAuth(async (event, user) => {

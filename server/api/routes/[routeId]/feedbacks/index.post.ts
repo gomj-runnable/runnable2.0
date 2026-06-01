@@ -3,9 +3,9 @@ import { nanoid } from 'nanoid'
 import { createRouteInfoSchema } from '#shared/schemas/routeInfo.schema'
 import { getRouteInfoRepository } from '../../../../repositories'
 import { routeService } from '../../../../services/route.service'
-import { requireRouteIdParam } from '../../../../utils/params'
-import { requireSession } from '../../../../utils/session'
-import { withExceptionHandler } from '../../../../utils/error'
+import { requireRouteIdParam } from '../../../../http/params'
+import { requireSession } from '../../../../http/session'
+import { withExceptionHandler } from '../../../../exceptions/error'
 
 export default defineEventHandler(
     withExceptionHandler(async (event) => {

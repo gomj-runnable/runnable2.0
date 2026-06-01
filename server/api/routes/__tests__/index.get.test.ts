@@ -10,7 +10,7 @@ const { listRoutesByUser, searchPublicRoutes, getSessionUser } = vi.hoisted(() =
 vi.mock('../../../services/route.service', () => ({
     routeService: { listRoutesByUser, searchPublicRoutes }
 }))
-vi.mock('../../../utils/session', () => ({ getSessionUser }))
+vi.mock('../../../http/session', () => ({ getSessionUser }))
 
 describe('GET /api/routes', () => {
     beforeEach(() => {

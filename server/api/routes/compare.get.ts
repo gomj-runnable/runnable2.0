@@ -4,8 +4,8 @@ import type { RouteCompareItem, RouteCompareResponse } from '#shared/types/route
 import { routeCompareQuerySchema } from '#shared/schemas/route-compare.schema'
 import { routeService } from '../../services/route.service'
 import { routeCompareService } from '../../services/route-compare.service'
-import { withAuth } from '../../utils/withAuth'
-import { badRequest, forbidden, notFound, withExceptionHandler } from '../../utils/error'
+import { withAuth } from '../../http/withAuth'
+import { badRequest, forbidden, notFound, withExceptionHandler } from '../../exceptions/error'
 import type { SessionUser } from '../../utils/auth.service'
 
 const loadRouteCompareItem = async (

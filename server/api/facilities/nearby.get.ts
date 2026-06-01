@@ -2,7 +2,7 @@
 import { defineEventHandler, getQuery } from 'h3'
 import { z } from 'zod'
 import { getFacilityRepository } from '../../repositories'
-import { withExceptionHandler } from '../../utils/error'
+import { withExceptionHandler } from '../../exceptions/error'
 import type { FacilityType } from '#shared/types/facility'
 
 const VALID_TYPES = ['crosswalk', 'fountain', 'hospital', 'toilet', 'locker'] as const

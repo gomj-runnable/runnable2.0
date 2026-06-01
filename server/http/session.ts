@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { authService } from './auth.service'
+import { authService } from '../utils/auth.service'
 import type { SavedRoute } from '../repositories/route.repository'
 
 /** 현재 요청의 인증 세션에서 userId를 추출한다. 미인증이면 null을 반환한다. */

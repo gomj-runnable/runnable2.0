@@ -10,7 +10,7 @@ const { getRouteById, forkRoute, requireSession } = vi.hoisted(() => ({
 vi.mock('../../../../services/route.service', () => ({
     routeService: { getRouteById, forkRoute }
 }))
-vi.mock('../../../../utils/session', () => ({
+vi.mock('../../../../http/session', () => ({
     requireSession
 }))
 

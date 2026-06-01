@@ -13,7 +13,7 @@ vi.mock('../../../../../services/route.service', () => ({
 vi.mock('../../../../../repositories', () => ({
     getRouteInfoRepository: vi.fn(async () => ({ findByRouteId }))
 }))
-vi.mock('../../../../../utils/session', () => ({ getSessionUser }))
+vi.mock('../../../../../http/session', () => ({ getSessionUser }))
 
 const makeEvent = (routeId?: string) => ({ context: { params: { routeId } } }) as any
 

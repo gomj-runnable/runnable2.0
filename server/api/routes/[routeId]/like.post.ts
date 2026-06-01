@@ -1,8 +1,8 @@
 // POST /api/routes/:routeId/like - 경로 좋아요 등록
 import { routeService } from '../../../services/route.service'
-import { requireSession } from '../../../utils/session'
-import { requireRouteIdParam } from '../../../utils/params'
-import { conflict, withExceptionHandler } from '../../../utils/error'
+import { requireSession } from '../../../http/session'
+import { requireRouteIdParam } from '../../../http/params'
+import { conflict, withExceptionHandler } from '../../../exceptions/error'
 
 export default defineEventHandler(
     withExceptionHandler(async (event) => {

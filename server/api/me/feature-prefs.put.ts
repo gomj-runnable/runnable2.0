@@ -1,7 +1,7 @@
 // PUT /api/me/feature-prefs - 로그인 사용자의 플러그인 기능 활성화 상태 업서트
 import { z } from 'zod'
-import { requireSession } from '../../utils/session'
-import { withExceptionHandler, badRequest } from '../../utils/error'
+import { requireSession } from '../../http/session'
+import { withExceptionHandler, badRequest } from '../../exceptions/error'
 import { getUserFeaturePrefRepository } from '../../repositories'
 
 const bodySchema = z.object({

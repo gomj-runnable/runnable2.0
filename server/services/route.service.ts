@@ -1,6 +1,6 @@
 import { getRouteRepository } from '../repositories'
 import { lookupDistricts } from '../utils/district-lookup'
-import { conflict, notFound } from '../utils/error'
+import { conflict, notFound } from '../exceptions/error'
 import type { RouteDraftInput } from '#shared/types/route'
 import type { SavedRoute, SavedSection, CreateSectionInput } from '../repositories/route.repository'
 

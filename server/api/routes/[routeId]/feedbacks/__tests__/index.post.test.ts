@@ -15,7 +15,7 @@ vi.mock('../../../../../services/route.service', () => ({
 vi.mock('../../../../../repositories', () => ({
     getRouteInfoRepository: vi.fn(async () => ({ create }))
 }))
-vi.mock('../../../../../utils/session', () => ({ requireSession }))
+vi.mock('../../../../../http/session', () => ({ requireSession }))
 
 const validInput = {
     name: '음수대',

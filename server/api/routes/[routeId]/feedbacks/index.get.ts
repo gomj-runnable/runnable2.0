@@ -1,9 +1,9 @@
 // GET /api/routes/:routeId/feedbacks - 경로에 달린 피드백(루트인포) 목록 조회
 import { getRouteInfoRepository } from '../../../../repositories'
 import { routeService } from '../../../../services/route.service'
-import { requireRouteIdParam } from '../../../../utils/params'
-import { getSessionUser } from '../../../../utils/session'
-import { withExceptionHandler } from '../../../../utils/error'
+import { requireRouteIdParam } from '../../../../http/params'
+import { getSessionUser } from '../../../../http/session'
+import { withExceptionHandler } from '../../../../exceptions/error'
 
 export default defineEventHandler(
     withExceptionHandler(async (event) => {

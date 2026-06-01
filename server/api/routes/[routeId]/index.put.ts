@@ -2,9 +2,9 @@
 import { z } from 'zod'
 import { geoJsonLineStringSchema, sectionAttrSchema, poiSchema } from '#shared/schemas/route.schema'
 import { routeService } from '../../../services/route.service'
-import { requireRouteOwnership } from '../../../utils/session'
-import { requireRouteIdParam } from '../../../utils/params'
-import { withExceptionHandler } from '../../../utils/error'
+import { requireRouteOwnership } from '../../../http/session'
+import { requireRouteIdParam } from '../../../http/params'
+import { withExceptionHandler } from '../../../exceptions/error'
 
 const updateSchema = z.object({
     route: z
