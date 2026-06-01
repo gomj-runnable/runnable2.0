@@ -5,7 +5,7 @@ const boundaryMock = vi.hoisted(() => ({
     getEmdBoundary: vi.fn()
 }))
 
-vi.mock('../district/boundary', () => boundaryMock)
+vi.mock('../boundary', () => boundaryMock)
 
 // 강남구 코드 11680 — seoul-gu-data 와 일치해야 EMD 그룹화 캐시가 매핑된다.
 function makeSquare(lngMin: number, latMin: number, lngMax: number, latMax: number) {

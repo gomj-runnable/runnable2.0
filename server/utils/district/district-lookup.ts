@@ -1,7 +1,7 @@
 import { booleanPointInPolygon, point } from '@turf/turf'
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson'
-import { getSggBoundary, getEmdBoundary } from './district/boundary'
-import { GU_BY_CODE } from './district/seoul-gu-data'
+import { getSggBoundary, getEmdBoundary } from './boundary'
+import { GU_BY_CODE } from './seoul-gu-data'
 
 type PolygonFeature = Feature<Polygon | MultiPolygon>
 

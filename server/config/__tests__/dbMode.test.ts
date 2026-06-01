@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
-import { DATABASE_MODE, getDbMode, getDatabaseUrl } from '../../config/dbMode'
+import { DATABASE_MODE, getDbMode, getDatabaseUrl } from '../dbMode'
 
 describe('config (getDbMode)', () => {
     afterEach(() => {

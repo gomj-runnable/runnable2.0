@@ -23,7 +23,7 @@ const { lookupDistricts } = vi.hoisted(() => ({ lookupDistricts: vi.fn() }))
 vi.mock('../../repositories', () => ({
     getRouteRepository: vi.fn(async () => repo)
 }))
-vi.mock('../../utils/district-lookup', () => ({ lookupDistricts }))
+vi.mock('../../utils/district/district-lookup', () => ({ lookupDistricts }))
 
 describe('routeService', () => {
     beforeEach(() => {
