@@ -46,11 +46,10 @@ public/crosswalk/
 .claude/*.png
 .claude/scheduled_tasks.lock
 
-# Oh My ClaudeCode (omc) 플러그인 런타임 state — 루트/서브디렉터리 모두 무시
-.omc/
-
 # TODO
 *.TODO.md
 
 # docker-compose 운영 시크릿 (compose 패키지)
 compose/.env.prod
+
+.local
