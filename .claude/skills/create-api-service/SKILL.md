@@ -167,7 +167,7 @@ import './osm.service'
 | 기존 패턴 | 위치 | 설명 |
 |-----------|------|------|
 | Weather adapter (functional) | `server/utils/weather/*.adapter.ts` | 함수형 adapter 패턴 |
-| Auth Service (interface DI) | `server/utils/auth.service.ts` | `IAuthService` + Factory |
+| Auth Service (interface DI) | `server/security/auth/service.ts` | `IAuthService` + Factory |
 | Routing (Strategy + Registry) | `server/utils/routing/` | 다수 provider 자기등록 |
 
 기존 코드를 **즉시 전환할 필요 없음**. 새 API 연동부터 이 규칙을 적용한다.

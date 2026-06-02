@@ -201,7 +201,7 @@ export const {domain}Repository: I{Domain}Repository = createRepository(
 인증은 `IAuthService` 인터페이스를 통해 DI된다:
 
 ```typescript
-// server/utils/auth.service.ts
+// server/security/auth/service.ts
 export interface IAuthService {
     getSessionUser(event: H3Event): Promise<User | null>
     requireSession(event: H3Event): Promise<User>
@@ -211,7 +211,7 @@ export interface IAuthService {
 // createAuthService() 팩토리로 전환
 ```
 
-`requireSession`과 `require{Domain}Ownership`은 내부적으로 `authService`에 위임한다.
+`requireSession`과 `require{Domain}Ownership`은 내부적으로 `auth`에 위임한다.
 
 ### 소유권 검증 — DI 패턴
 

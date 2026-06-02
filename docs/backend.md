@@ -52,8 +52,7 @@ server/
 │   └── rate-limit.ts       # IP별 속도 제한 (경로별 차등)
 │
 └── utils/
-    ├── auth.ts             # better-auth 설정
-    ├── auth.service.ts     # better-auth 위 도메인 wrapper
+    ├── (auth 모듈은 server/security/auth/ 로 이동 — instance.ts·service.ts·env.ts)
     ├── error.ts            # 에러 헬퍼 (badRequest, notFound 등) + withExceptionHandler
     ├── session.ts          # requireSession / getSessionUser
     ├── dbMode.ts           # USE_DATABASE_MODE (PGLITE|POSTGRES) 플래그
