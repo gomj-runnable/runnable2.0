@@ -14,8 +14,8 @@ vi.mock('../../../services/route.service', () => ({
 vi.mock('../../../services/route-compare.service', () => ({
     routeCompareService: { computeMeta }
 }))
-vi.mock('../../../utils/auth.service', () => ({
-    authService: { requireSession }
+vi.mock('../../../security/auth/service', () => ({
+    auth: { requireSession }
 }))
 
 const makeEvent = (query: Record<string, string> = {}) =>

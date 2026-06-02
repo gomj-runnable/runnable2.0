@@ -1,7 +1,7 @@
 // 세션 조회/검증 로직을 추상화한 인증 서비스 (IAuthService 인터페이스 + 구현체)
 import type { H3Event } from 'h3'
 import { ROLES } from '#shared/constants/roles'
-import { getAuthMode } from '../config/authMode'
+import { getAuthMode } from './instance'
 
 export interface SessionUser {
     userId: string
@@ -15,10 +15,10 @@ export interface IAuthService {
     requireSession(event: H3Event): Promise<SessionUser>
 }
 
-export const authService: IAuthService = {
+export const auth: IAuthService = {
     async getSession(event) {
-        const auth = await getAuthMode()
-        const session = await auth.api.getSession({ headers: event.headers })
+        const instance = await getAuthMode()
+        const session = await instance.api.getSession({ headers: event.headers })
         if (!session?.user?.id) return null
         const rawRole = (session.user as { role?: unknown }).role
         return {

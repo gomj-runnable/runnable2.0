@@ -10,8 +10,8 @@ const { getRouteById, getSectionsByRouteId, requireSession } = vi.hoisted(() => 
 vi.mock('../../../../services/route.service', () => ({
     routeService: { getRouteById, getSectionsByRouteId }
 }))
-vi.mock('../../../../utils/auth.service', () => ({
-    authService: { requireSession }
+vi.mock('../../../../security/auth/service', () => ({
+    auth: { requireSession }
 }))
 
 const makeEvent = (routeId?: string) => ({ context: { params: { routeId } } }) as any

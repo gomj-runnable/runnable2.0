@@ -1,10 +1,10 @@
 // better-auth 인스턴스를 초기화하고 싱글턴으로 반환하는 모듈
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { getDb } from '../database/client'
-import { users, userSessions, userAccounts, userVerifications } from '../database/schema/users'
-import { getEnvMode, ENVIRONMENT_MODE } from './envMode'
-import { getAuthSecret, getAuthBaseURL, getAuthTrustedOrigins } from './authEnv'
+import { getDb } from '../../database/client'
+import { users, userSessions, userAccounts, userVerifications } from '../../database/schema/users'
+import { getEnvMode, ENVIRONMENT_MODE } from '../../config/envMode'
+import { getAuthSecret, getAuthBaseURL, getAuthTrustedOrigins } from './env'
 
 export type AuthInstance = ReturnType<typeof betterAuth>
 

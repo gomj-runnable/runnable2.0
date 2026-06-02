@@ -6,7 +6,7 @@ const { getAuthMode, fromWebHandler } = vi.hoisted(() => ({
     getAuthMode: vi.fn(),
     fromWebHandler: vi.fn()
 }))
-vi.mock('#server/config/authMode', () => ({ getAuthMode }))
+vi.mock('#server/security/auth/instance', () => ({ getAuthMode }))
 vi.mock('h3', async (importOriginal) => {
     const actual = await importOriginal<typeof import('h3')>()
     return { ...actual, fromWebHandler }

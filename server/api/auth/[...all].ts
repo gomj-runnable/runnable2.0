@@ -1,6 +1,6 @@
 // ALL /api/auth/* - better-auth 핸들러로 인증 요청을 위임
 import { fromWebHandler } from 'h3'
-import { getAuthMode } from '#server/config/authMode'
+import { getAuthMode } from '#server/security/auth/instance'
 import { internalError } from '#server/exceptions/error'
 import { getEnvMode, ENVIRONMENT_MODE } from '#server/config/envMode'
 

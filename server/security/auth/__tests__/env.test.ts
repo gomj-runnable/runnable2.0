@@ -5,7 +5,7 @@ import {
     getAuthBaseURL,
     getAuthTrustedOrigins,
     assertProductionAuthEnv
-} from '../authEnv'
+} from '../env'
 
 describe('authEnv (getAuthSecret)', () => {
     afterEach(() => {

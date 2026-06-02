@@ -6,7 +6,7 @@ import { routeService } from '../../services/route.service'
 import { routeCompareService } from '../../services/route-compare.service'
 import { withAuth } from '../../http/withAuth'
 import { badRequest, forbidden, notFound, withExceptionHandler } from '../../exceptions/error'
-import type { SessionUser } from '../../utils/auth.service'
+import type { SessionUser } from '../../security/auth/service'
 
 const loadRouteCompareItem = async (
     routeId: string,

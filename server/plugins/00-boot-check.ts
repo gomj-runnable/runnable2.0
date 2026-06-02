@@ -1,5 +1,5 @@
 import { getEnvMode, ENVIRONMENT_MODE } from '../config/envMode'
-import { assertProductionAuthEnv } from '../config/authEnv'
+import { assertProductionAuthEnv } from '../security/auth/env'
 
 export default defineNitroPlugin(() => {
     // runtimeConfig 필수 환경 변수 검증 — 미설정(빈 값)이면 부팅 실패

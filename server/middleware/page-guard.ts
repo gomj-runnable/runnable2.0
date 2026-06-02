@@ -1,4 +1,4 @@
-import { authService } from '../utils/auth.service'
+import { auth } from '../security/auth/service'
 import { hasPermission, Permission } from '#shared/constants/permissions'
 import { getEnvMode, ENVIRONMENT_MODE } from '../config/envMode'
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 404, statusMessage: 'Not Found' })
     }
 
-    const session = await authService.getSession(event)
+    const session = await auth.getSession(event)
     if (!session) {
         throw createError({ statusCode: 403, message: '접근 권한이 없습니다.' })
     }

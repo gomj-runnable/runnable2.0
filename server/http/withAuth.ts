@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { authService, type SessionUser } from '../utils/auth.service'
+import { auth, type SessionUser } from '../security/auth/service'
 
 /**
  * 인증이 필요한 핸들러 래퍼.
@@ -19,7 +19,7 @@ export function withAuth<T>(
     handler: (event: H3Event, user: SessionUser) => Promise<T>
 ): (event: H3Event) => Promise<T> {
     return async (event: H3Event) => {
-        const user = await authService.requireSession(event)
+        const user = await auth.requireSession(event)
         event.context.user = user
         return handler(event, user)
     }

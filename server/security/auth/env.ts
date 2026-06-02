@@ -1,5 +1,5 @@
 // BETTER_AUTH 관련 환경 변수를 읽어 검증하는 설정 모듈
-// (authMode.ts 의 better-auth 인스턴스 생성과 00-boot-check.ts 의 부팅 검증이 공유)
+// (instance.ts 의 better-auth 인스턴스 생성과 00-boot-check.ts 의 부팅 검증이 공유)
 
 /** 운영 환경에서 BETTER_AUTH_SECRET 에 요구되는 최소 길이 */
 const MIN_SECRET_LENGTH = 32

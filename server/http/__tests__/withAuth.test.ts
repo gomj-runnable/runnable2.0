@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { withAuth } from '../withAuth'
-import { authService } from '../../utils/auth.service'
+import { auth } from '../../security/auth/service'
 
-vi.mock('../../utils/auth.service', () => ({
-    authService: {
+vi.mock('../../security/auth/service', () => ({
+    auth: {
         getSession: vi.fn(),
         requireSession: vi.fn()
     }
@@ -17,7 +17,7 @@ describe('withAuth', () => {
     beforeEach(() => vi.clearAllMocks())
 
     it('인증 성공 시 user 를 콜백과 event.context 에 주입', async () => {
-        vi.mocked(authService.requireSession).mockResolvedValue(fakeUser)
+        vi.mocked(auth.requireSession).mockResolvedValue(fakeUser)
         const handler = vi.fn().mockResolvedValue('ok')
         const wrapped = withAuth(handler)
         await expect(wrapped(event)).resolves.toBe('ok')
@@ -27,7 +27,7 @@ describe('withAuth', () => {
 
     it('requireSession 이 throw 하면 핸들러 미호출', async () => {
         const err = new Error('401')
-        vi.mocked(authService.requireSession).mockRejectedValue(err)
+        vi.mocked(auth.requireSession).mockRejectedValue(err)
         const handler = vi.fn()
         const wrapped = withAuth(handler)
         await expect(wrapped(event)).rejects.toBe(err)

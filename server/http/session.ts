@@ -1,12 +1,12 @@
 import type { H3Event } from 'h3'
-import { authService } from '../utils/auth.service'
+import { auth } from '../security/auth/service'
 import type { SavedRoute } from '../repositories/route.repository'
 
 /** 현재 요청의 인증 세션에서 userId를 추출한다. 미인증이면 null을 반환한다. */
-export const getSessionUser = (event: H3Event) => authService.getSession(event)
+export const getSessionUser = (event: H3Event) => auth.getSession(event)
 
 /** 인증이 필요한 엔드포인트에서 사용. 미인증이면 401 에러를 던진다. */
-export const requireSession = (event: H3Event) => authService.requireSession(event)
+export const requireSession = (event: H3Event) => auth.requireSession(event)
 
 /**
  * 경로 소유권 확인이 필요한 엔드포인트에서 사용.
@@ -19,7 +19,7 @@ export const requireRouteOwnership = async (
     routeId: string,
     getRoute: (id: string) => Promise<SavedRoute | null>
 ): Promise<SavedRoute> => {
-    const user = await authService.requireSession(event)
+    const user = await auth.requireSession(event)
     const route = await getRoute(routeId)
     if (!route) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
     if (route.userId !== user.userId) {

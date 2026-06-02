@@ -7,8 +7,8 @@ const { getRoutingService, requireSession } = vi.hoisted(() => ({
     requireSession: vi.fn()
 }))
 vi.mock('../../../utils/routing/registry', () => ({ getRoutingService }))
-vi.mock('../../../utils/auth.service', () => ({
-    authService: { requireSession }
+vi.mock('../../../security/auth/service', () => ({
+    auth: { requireSession }
 }))
 
 const makeEvent = (body: unknown) => ({ context: {}, body }) as any
