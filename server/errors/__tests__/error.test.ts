@@ -6,7 +6,7 @@ import {
     notFound,
     conflict,
     internalError,
-    withExceptionHandler
+    withErrorHandler
 } from '../error'
 
 describe('error factory functions', () => {
@@ -51,18 +51,18 @@ vi.mock('h3', async (orig) => {
     }
 })
 
-describe('withExceptionHandler', () => {
+describe('withErrorHandler', () => {
     const makeEvent = (overrides: Record<string, unknown> = {}) =>
         ({ method: 'GET', path: '/x', url: 'http://localhost/x', ...overrides }) as any
 
     it('정상 결과를 그대로 전달', async () => {
-        const wrapped = withExceptionHandler(async () => ({ ok: true }))
+        const wrapped = withErrorHandler(async () => ({ ok: true }))
         await expect(wrapped(makeEvent())).resolves.toEqual({ ok: true })
     })
 
     it('statusCode 를 가진 H3 에러는 그대로 전파', async () => {
         const e = badRequest('bad')
-        const wrapped = withExceptionHandler(async () => {
+        const wrapped = withErrorHandler(async () => {
             throw e
         })
         await expect(wrapped(makeEvent())).rejects.toBe(e)
@@ -72,7 +72,7 @@ describe('withExceptionHandler', () => {
         const zodErr = new Error('schema fail')
         zodErr.name = 'ZodError'
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-        const wrapped = withExceptionHandler(async () => {
+        const wrapped = withErrorHandler(async () => {
             throw zodErr
         })
         try {
@@ -84,7 +84,7 @@ describe('withExceptionHandler', () => {
 
     it('알 수 없는 에러는 500 으로 변환', async () => {
         const err = vi.spyOn(console, 'error').mockImplementation(() => {})
-        const wrapped = withExceptionHandler(async () => {
+        const wrapped = withErrorHandler(async () => {
             throw new Error('boom')
         })
         try {

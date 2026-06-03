@@ -56,7 +56,7 @@ describe('PUT /api/routes/[routeId]', () => {
         expect(result).toBe(updated)
     })
 
-    it('zod 위반 (title 빈 문자열) → withExceptionHandler 가 400', async () => {
+    it('zod 위반 (title 빈 문자열) → withErrorHandler 가 400', async () => {
         getRouteById.mockResolvedValue({ routeId: 'r-1', userId: 'me' })
 
         await expect(handler(makeEvent('r-1', { route: { title: '' } }))).rejects.toMatchObject({

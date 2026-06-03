@@ -2,7 +2,7 @@
 import { routeService } from '../../../services/route.service'
 import { requireRouteIdParam } from '../../../http/params'
 import { withAuth } from '../../../http/withAuth'
-import { forbidden, notFound } from '../../../exceptions/error'
+import { forbidden, notFound } from '../../../errors/error'
 
 export default defineEventHandler(
     withAuth(async (event, user) => {

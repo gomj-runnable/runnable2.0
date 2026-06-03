@@ -58,7 +58,7 @@ describe('POST /api/routes', () => {
         expect(result).toBe(created)
     })
 
-    it('zod 스키마 위반은 withExceptionHandler 가 400 으로 변환한다', async () => {
+    it('zod 스키마 위반은 withErrorHandler 가 400 으로 변환한다', async () => {
         requireSession.mockResolvedValue({ userId: 'u-1' })
 
         await expect(handler(makeEvent({ route: {}, sections: [] }))).rejects.toMatchObject({

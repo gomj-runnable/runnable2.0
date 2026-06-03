@@ -2,10 +2,10 @@
 import { routeService } from '../../../services/route.service'
 import { requireRouteIdParam } from '../../../http/params'
 import { requireSession } from '../../../http/session'
-import { withExceptionHandler } from '../../../exceptions/error'
+import { withErrorHandler } from '../../../errors/error'
 
 export default defineEventHandler(
-    withExceptionHandler(async (event) => {
+    withErrorHandler(async (event) => {
         const routeId = requireRouteIdParam(event)
         const user = await requireSession(event)
 

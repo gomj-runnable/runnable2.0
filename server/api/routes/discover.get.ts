@@ -1,7 +1,7 @@
 // GET /api/routes/discover - 공개 경로 탐색 (구/동 필터, 정렬, 좋아요 여부 포함)
 import { routeService } from '../../services/route.service'
 import { routeDiscoverFilterSchema } from '#shared/schemas/discover.schema'
-import { badRequest } from '../../exceptions/error'
+import { badRequest } from '../../errors/error'
 import { getSessionUser } from '../../http/session'
 import type { RouteDiscoverCard } from '#shared/types/discover'
 

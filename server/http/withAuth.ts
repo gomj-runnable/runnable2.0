@@ -6,7 +6,7 @@ import { auth, type SessionUser } from '../security/auth/service'
  *
  * 사용 예:
  *   export default defineEventHandler(
- *       withExceptionHandler(
+ *       withErrorHandler(
  *           withAuth(async (event, user) => {
  *               return doSomething(user.userId)
  *           })

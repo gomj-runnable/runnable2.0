@@ -1,7 +1,7 @@
 // PUT /api/me/feature-prefs - 로그인 사용자의 플러그인 기능 활성화 상태 업서트
 import { z } from 'zod'
 import { requireSession } from '../../http/session'
-import { withExceptionHandler, badRequest } from '../../exceptions/error'
+import { withErrorHandler, badRequest } from '../../errors/error'
 import { getUserFeaturePrefRepository } from '../../repositories'
 
 const bodySchema = z.object({
@@ -10,7 +10,7 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(
-    withExceptionHandler(async (event) => {
+    withErrorHandler(async (event) => {
         const user = await requireSession(event)
         const parsed = bodySchema.safeParse(await readBody(event))
         if (!parsed.success) {

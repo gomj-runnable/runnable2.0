@@ -47,7 +47,7 @@ describe('GET /api/facilities/nearby', () => {
         expect(findNearby).toHaveBeenCalledWith(37, 127, 2500, expect.any(Array))
     })
 
-    it('lat/lng 누락 시 400 으로 변환된다 (withExceptionHandler + ZodError)', async () => {
+    it('lat/lng 누락 시 400 으로 변환된다 (withErrorHandler + ZodError)', async () => {
         await expect(handler(makeEvent({}))).rejects.toMatchObject({ statusCode: 400 })
         expect(findNearby).not.toHaveBeenCalled()
     })

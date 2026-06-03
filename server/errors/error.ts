@@ -45,12 +45,12 @@ export function internalError(message = '서버 오류가 발생했습니다.') 
  * 예상치 못한 에러를 500으로 변환하고 로깅한다.
  *
  * 사용 예:
- *   export default defineEventHandler(withExceptionHandler(async (event) => {
+ *   export default defineEventHandler(withErrorHandler(async (event) => {
  *       const body = await readBody(event)
  *       return await routeRepository.createRoute(body)
  *   }))
  */
-export function withExceptionHandler<T>(
+export function withErrorHandler<T>(
     handler: (event: H3Event) => Promise<T>
 ): (event: H3Event) => Promise<T> {
     return async (event: H3Event) => {

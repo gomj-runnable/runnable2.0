@@ -1,14 +1,14 @@
 import type { H3Event } from 'h3'
 import { auth, type SessionUser } from '../security/auth/service'
 import { hasPermission, Permission } from '#shared/constants/permissions'
-import { forbidden } from '../exceptions/error'
+import { forbidden } from '../errors/error'
 
 /**
  * 관리자 권한이 필요한 핸들러 래퍼.
  *
  * 사용 예:
  *   export default defineEventHandler(
- *       withExceptionHandler(
+ *       withErrorHandler(
  *           withAdmin(async (event, user) => {
  *               return adminService.doSomething(user.userId)
  *           })

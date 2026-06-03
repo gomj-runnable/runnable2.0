@@ -5,7 +5,7 @@ import { routeCompareQuerySchema } from '#shared/schemas/route-compare.schema'
 import { routeService } from '../../services/route.service'
 import { routeCompareService } from '../../services/route-compare.service'
 import { withAuth } from '../../http/withAuth'
-import { badRequest, forbidden, notFound, withExceptionHandler } from '../../exceptions/error'
+import { badRequest, forbidden, notFound, withErrorHandler } from '../../errors/error'
 import type { SessionUser } from '../../security/auth/service'
 
 const loadRouteCompareItem = async (
@@ -30,7 +30,7 @@ const loadRouteCompareItem = async (
  * 권한: 각 경로가 공개이거나 요청자 본인 소유여야 한다.
  */
 export default defineEventHandler(
-    withExceptionHandler(
+    withErrorHandler(
         withAuth(async (event, user): Promise<RouteCompareResponse> => {
             const parsed = routeCompareQuerySchema.safeParse(getQuery(event))
             if (!parsed.success) throw badRequest('routeA, routeB 쿼리 파라미터가 필요합니다.')

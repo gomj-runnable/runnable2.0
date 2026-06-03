@@ -4,7 +4,7 @@ import { geoJsonLineStringSchema, sectionAttrSchema, poiSchema } from '#shared/s
 import { routeService } from '../../../services/route.service'
 import { requireRouteOwnership } from '../../../http/session'
 import { requireRouteIdParam } from '../../../http/params'
-import { withExceptionHandler } from '../../../exceptions/error'
+import { withErrorHandler } from '../../../errors/error'
 
 const updateSchema = z.object({
     route: z
@@ -26,7 +26,7 @@ const updateSchema = z.object({
 })
 
 export default defineEventHandler(
-    withExceptionHandler(async (event) => {
+    withErrorHandler(async (event) => {
         const routeId = requireRouteIdParam(event)
         await requireRouteOwnership(event, routeId, routeService.getRouteById)
 

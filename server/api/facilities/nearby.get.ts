@@ -2,7 +2,7 @@
 import { defineEventHandler, getQuery } from 'h3'
 import { z } from 'zod'
 import { getFacilityRepository } from '../../repositories'
-import { withExceptionHandler } from '../../exceptions/error'
+import { withErrorHandler } from '../../errors/error'
 import type { FacilityType } from '#shared/types/facility'
 
 const VALID_TYPES = ['crosswalk', 'fountain', 'hospital', 'toilet', 'locker'] as const
@@ -15,7 +15,7 @@ const nearbySchema = z.object({
 })
 
 export default defineEventHandler(
-    withExceptionHandler(async (event) => {
+    withErrorHandler(async (event) => {
         const { lat, lng, radius, types } = nearbySchema.parse(getQuery(event))
 
         const requestedTypes = types
