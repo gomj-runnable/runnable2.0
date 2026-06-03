@@ -236,6 +236,8 @@ Runnable/
 │   │   ├── route.repository.drizzle.ts     #   Drizzle 구현체
 │   │   └── route.repository.memory.ts      #   인메모리 구현체
 │   │
+│   ├── errors/                              # 에러 팩토리 + 예외 래퍼
+│   │
 │   └── utils/
 │       ├── weather/                        # 날씨 파이프라인
 │       │   ├── weather.service.ts          #   메인 서비스
@@ -251,8 +253,7 @@ Runnable/
 │       │   └── common.ts                   #   공통 인터페이스
 │       ├── district/                       # 서울 구별 유틸
 │       ├── auth.ts                         # 인증 설정
-│       ├── db.ts                           # DB 연결
-│       └── error-handler.ts                        # 에러 처리
+│       └── db.ts                           # DB 연결
 │
 ├── shared/                                 # Frontend + Backend 공용
 │   ├── types/                              # 도메인 타입 + enum

@@ -98,7 +98,7 @@
 ### SEC-005: ZodError 상세 정보 클라이언트 노출 [MEDIUM]
 
 - **OWASP**: A05:2021 Security Misconfiguration
-- **파일**: `server/utils/error-handler.ts:66`
+- **파일**: `server/errors/error-handler.ts:66`
 - **설명**: Zod 검증 오류 시 내부 스키마 구조가 클라이언트에 노출
 - **수정**: 제네릭 에러 메시지 반환, 상세 로그는 서버측만
 
