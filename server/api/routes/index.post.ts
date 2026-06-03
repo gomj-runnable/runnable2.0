@@ -8,7 +8,7 @@ import {
 } from '#shared/schemas/route.schema'
 import { routeService } from '../../services/route.service'
 import { withAuth } from '../../http/withAuth'
-import { withErrorHandler } from '../../errors/error'
+import { commonApiHandler } from '#server/http/commonApiHandler'
 
 const requestSchema = z.object({
     route: createRouteSchema,
@@ -21,13 +21,11 @@ const requestSchema = z.object({
     )
 })
 
-export default defineEventHandler(
-    withErrorHandler(
-        withAuth(async (event, user) => {
-            const body = await readBody(event)
-            const { route: routeInput, sections: sectionInputs } = requestSchema.parse(body)
+export default commonApiHandler(
+    withAuth(async (event, user) => {
+        const body = await readBody(event)
+        const { route: routeInput, sections: sectionInputs } = requestSchema.parse(body)
 
-            return routeService.createRouteWithSections(routeInput, sectionInputs, user.userId)
-        })
-    )
+        return routeService.createRouteWithSections(routeInput, sectionInputs, user.userId)
+    })
 )

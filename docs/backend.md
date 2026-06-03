@@ -53,7 +53,7 @@ server/
 │
 └── utils/
     ├── (auth 모듈은 server/security/auth/ 로 이동 — instance.ts·service.ts·env.ts)
-    ├── (error.ts 는 server/errors/ 로 이동 — 에러 헬퍼 + withErrorHandler)
+    ├── (error-handler.ts 는 server/errors/ 로 이동 — 에러 헬퍼 + withErrorHandler)
     ├── session.ts          # requireSession / getSessionUser
     ├── dbMode.ts           # USE_DATABASE_MODE (PGLITE|POSTGRES) 플래그
     ├── district/           # 행정구역 경계 데이터 + 역지오코딩
@@ -85,7 +85,7 @@ server/
 | Strategy         | `server/utils/routing/` — TMap/OSRM 교체 가능 (AbstractRoutingService 상속)    |
 | Registry         | `server/utils/routing/registry.ts` — 전략 등록·조회                            |
 | Adapter          | `server/utils/weather/` — 외부 API 응답 정규화                                 |
-| Decorator        | `server/errors/error.ts` — withErrorHandler 래퍼                               |
+| Decorator        | `server/errors/error-handler.ts` — withErrorHandler 래퍼                       |
 
 ---
 

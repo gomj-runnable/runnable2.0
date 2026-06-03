@@ -41,7 +41,7 @@ vi.stubGlobal(
 )
 vi.stubGlobal('useRuntimeConfig', () => ({ public: {} }))
 
-// h3 모듈을 직접 import 하는 server/errors/error.ts 등에 동일 stub 적용.
+// h3 모듈을 직접 import 하는 server/errors/error-handler.ts 등에 동일 stub 적용.
 vi.mock('h3', async (importOriginal) => {
     const actual = await importOriginal<typeof import('h3')>()
     return {

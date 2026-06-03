@@ -1,7 +1,7 @@
 // GET /api/routes/share/:routeId - 공개 경로 공유 페이지용 상세 데이터 조회 (조회수 증가 포함)
 import { routeService } from '../../../services/route.service'
 import { getRouteInfoRepository } from '../../../repositories'
-import { badRequest, notFound, forbidden } from '../../../errors/error'
+import { badRequest, notFound, forbidden } from '#server/errors'
 
 export default defineEventHandler(async (event) => {
     const routeId = getRouterParam(event, 'routeId')

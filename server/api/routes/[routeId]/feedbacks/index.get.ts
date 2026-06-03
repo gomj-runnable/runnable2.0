@@ -3,22 +3,20 @@ import { getRouteInfoRepository } from '../../../../repositories'
 import { routeService } from '../../../../services/route.service'
 import { requireRouteIdParam } from '../../../../http/params'
 import { getSessionUser } from '../../../../http/session'
-import { withErrorHandler } from '../../../../errors/error'
+import { commonApiHandler } from '#server/http/commonApiHandler'
 
-export default defineEventHandler(
-    withErrorHandler(async (event) => {
-        const routeId = requireRouteIdParam(event)
+export default commonApiHandler(async (event) => {
+    const routeId = requireRouteIdParam(event)
 
-        const route = await routeService.getRouteById(routeId)
-        if (!route) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
+    const route = await routeService.getRouteById(routeId)
+    if (!route) throw createError({ statusCode: 404, message: '경로를 찾을 수 없습니다.' })
 
-        if (!route.isPublic) {
-            const session = await getSessionUser(event)
-            if (!session || route.userId !== session.userId) {
-                throw createError({ statusCode: 403, message: '비공개 경로입니다.' })
-            }
+    if (!route.isPublic) {
+        const session = await getSessionUser(event)
+        if (!session || route.userId !== session.userId) {
+            throw createError({ statusCode: 403, message: '비공개 경로입니다.' })
         }
+    }
 
-        return (await getRouteInfoRepository()).findByRouteId(routeId)
-    })
-)
+    return (await getRouteInfoRepository()).findByRouteId(routeId)
+})

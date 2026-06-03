@@ -7,7 +7,7 @@ import {
     conflict,
     internalError,
     withErrorHandler
-} from '../error'
+} from '#server/errors'
 
 describe('error factory functions', () => {
     it('badRequest 는 400 statusCode 를 가진 에러를 반환', () => {

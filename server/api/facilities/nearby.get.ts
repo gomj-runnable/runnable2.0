@@ -2,7 +2,7 @@
 import { defineEventHandler, getQuery } from 'h3'
 import { z } from 'zod'
 import { getFacilityRepository } from '../../repositories'
-import { withErrorHandler } from '../../errors/error'
+import { commonApiHandler } from '#server/http/commonApiHandler'
 import type { FacilityType } from '#shared/types/facility'
 
 const VALID_TYPES = ['crosswalk', 'fountain', 'hospital', 'toilet', 'locker'] as const
@@ -14,14 +14,12 @@ const nearbySchema = z.object({
     types: z.string().optional()
 })
 
-export default defineEventHandler(
-    withErrorHandler(async (event) => {
-        const { lat, lng, radius, types } = nearbySchema.parse(getQuery(event))
+export default commonApiHandler(async (event) => {
+    const { lat, lng, radius, types } = nearbySchema.parse(getQuery(event))
 
-        const requestedTypes = types
-            ? (types.split(',').filter((t) => VALID_TYPES.includes(t as any)) as FacilityType[])
-            : ([...VALID_TYPES] as FacilityType[])
+    const requestedTypes = types
+        ? (types.split(',').filter((t) => VALID_TYPES.includes(t as any)) as FacilityType[])
+        : ([...VALID_TYPES] as FacilityType[])
 
-        return (await getFacilityRepository()).findNearby(lat, lng, radius, requestedTypes)
-    })
-)
+    return (await getFacilityRepository()).findNearby(lat, lng, radius, requestedTypes)
+})

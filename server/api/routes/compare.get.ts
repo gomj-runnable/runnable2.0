@@ -5,7 +5,8 @@ import { routeCompareQuerySchema } from '#shared/schemas/route-compare.schema'
 import { routeService } from '../../services/route.service'
 import { routeCompareService } from '../../services/route-compare.service'
 import { withAuth } from '../../http/withAuth'
-import { badRequest, forbidden, notFound, withErrorHandler } from '../../errors/error'
+import { badRequest, forbidden, notFound } from '#server/errors'
+import { commonApiHandler } from '#server/http/commonApiHandler'
 import type { SessionUser } from '../../security/auth/service'
 
 const loadRouteCompareItem = async (
@@ -29,20 +30,18 @@ const loadRouteCompareItem = async (
  * `GET /api/routes/compare?routeA={id}&routeB={id}` — 두 경로의 메타데이터·구간·집계 메트릭을 함께 반환한다.
  * 권한: 각 경로가 공개이거나 요청자 본인 소유여야 한다.
  */
-export default defineEventHandler(
-    withErrorHandler(
-        withAuth(async (event, user): Promise<RouteCompareResponse> => {
-            const parsed = routeCompareQuerySchema.safeParse(getQuery(event))
-            if (!parsed.success) throw badRequest('routeA, routeB 쿼리 파라미터가 필요합니다.')
+export default commonApiHandler(
+    withAuth(async (event, user): Promise<RouteCompareResponse> => {
+        const parsed = routeCompareQuerySchema.safeParse(getQuery(event))
+        if (!parsed.success) throw badRequest('routeA, routeB 쿼리 파라미터가 필요합니다.')
 
-            const { routeA, routeB } = parsed.data
+        const { routeA, routeB } = parsed.data
 
-            const [itemA, itemB] = await Promise.all([
-                loadRouteCompareItem(routeA, user),
-                loadRouteCompareItem(routeB, user)
-            ])
+        const [itemA, itemB] = await Promise.all([
+            loadRouteCompareItem(routeA, user),
+            loadRouteCompareItem(routeB, user)
+        ])
 
-            return { routeA: itemA, routeB: itemB }
-        })
-    )
+        return { routeA: itemA, routeB: itemB }
+    })
 )

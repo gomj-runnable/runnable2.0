@@ -252,7 +252,7 @@ Runnable/
 │       ├── district/                       # 서울 구별 유틸
 │       ├── auth.ts                         # 인증 설정
 │       ├── db.ts                           # DB 연결
-│       └── error.ts                        # 에러 처리
+│       └── error-handler.ts                        # 에러 처리
 │
 ├── shared/                                 # Frontend + Backend 공용
 │   ├── types/                              # 도메인 타입 + enum
