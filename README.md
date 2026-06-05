@@ -418,6 +418,26 @@ GitHub Actions로 자동화된 파이프라인이 구성되어 있다.
 ```
 MIT License
 Copyright (c) 2025 Nuxt UI Templates
+Copyright (c) 2025-2026 gomj-repo
 ```
 
 자세한 내용은 [LICENSE](./LICENSE) 파일을 참조한다.
+
+---
+
+## 출처 (Credits)
+
+이 프로젝트는 다음 오픈소스 프로젝트와 공개 데이터셋을 사용한다.
+
+### 코드 / 라이브러리
+
+- **[Nuxt UI Templates](https://github.com/nuxt/ui)** — 초기 프로젝트 골격. MIT License.
+- **[CesiumJS](https://github.com/CesiumGS/cesium)** — 3D 지도 엔진 (`lib/cesium/`). Apache License 2.0.
+
+### 데이터
+
+- **[southkorea/seoul-maps](https://github.com/southkorea/seoul-maps)** — 서울 시군구 / 법정동 행정구역 GeoJSON 경계 데이터. 런타임에 fetch 한다 (`server/utils/district/boundary.ts`).
+- **서울특별시 / 공공데이터포털** — 공중화장실, 병원, 분수대, 보관함, 횡단보도 등 편의시설 위치 데이터 (`server/data/facilities/`). 공공누리 제1유형(출처표시).
+- **[기상청 API Hub](https://apihub.kma.go.kr/)** — 관측 / 동네예보 데이터.
+- **[에어코리아 / 공공데이터포털](https://www.data.go.kr/)** — 실시간 미세먼지(PM10) 데이터.
+- **[SK텔레콤 TMAP API](https://openapi.sk.com/)** — 보행자 경로 라우팅.
