@@ -63,4 +63,4 @@ pnpm test:e2e:update  # E2E 스냅샷 갱신
 - Vue 컴포넌트 자체 테스트는 미적용 (composable / model 위주로 단위 분리)
 - E2E 테스트 디렉터리(`tests/e2e/`)는 비어 있어 단계적으로 추가 필요
 
-다음 → [6-3-Test-Writing-Guide](6-3-Test-Writing-Guide.md)
+다음 → [6-3-Test-Writing-Guide](6-3-Test-Writing-Guide)

@@ -79,4 +79,4 @@ flowchart TD
 - 2.3 server/ 레이어 (Nitro 핸들러·서비스·리포)
 - 2.4 shared/ 레이어 (타입·스키마·상수 규약)
 
-다음 → [3-Domain-Model](3-Domain-Model.md)
+다음 → [3-Domain-Model](3-Domain-Model)

@@ -4,13 +4,13 @@
 
 ## 빠른 안내
 
-- 처음 보는 분 → [1-Overview](1-Overview.md) → [2-Architecture](2-Architecture.md)
-- 도메인 객체 한눈에 보기 → [3-Domain-Model](3-Domain-Model.md)
-- 백엔드 만들기 → [4-Server](4-Server.md)
-- 프론트엔드 만들기 → [5-Frontend](5-Frontend.md)
-- TDD·테스트 → [6-Testing-and-TDD](6-Testing-and-TDD.md)
-- 배포 → [7-Operations](7-Operations.md)
-- 컨트리뷰션 → [8-Contribution](8-Contribution.md)
+- 처음 보는 분 → [1-Overview](1-Overview) → [2-Architecture](2-Architecture)
+- 도메인 객체 한눈에 보기 → [3-Domain-Model](3-Domain-Model)
+- 백엔드 만들기 → [4-Server](4-Server)
+- 프론트엔드 만들기 → [5-Frontend](5-Frontend)
+- TDD·테스트 → [6-Testing-and-TDD](6-Testing-and-TDD)
+- 배포 → [7-Operations](7-Operations)
+- 컨트리뷰션 → [8-Contribution](8-Contribution)
 
 ## 기술 스택 요약
 

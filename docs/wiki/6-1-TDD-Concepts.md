@@ -94,4 +94,4 @@ test('빈 배열은 0km 를 반환한다', ...)
 - UI 인터랙션 → 가능한 한 model · composable로 추출해 단위 테스트, 시각 회귀는 E2E로
 - 시간 · 난수 의존 → fake clock · seed 주입
 
-다음 → [6-2-Test-Infrastructure](6-2-Test-Infrastructure.md)
+다음 → [6-2-Test-Infrastructure](6-2-Test-Infrastructure)

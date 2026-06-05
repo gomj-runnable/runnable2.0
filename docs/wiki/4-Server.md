@@ -25,11 +25,11 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 `server/services/` — 비즈니스 로직. **순수 함수 우선**.
 
-| Service                    | 책임                                                            |
-| -------------------------- | --------------------------------------------------------------- |
-| `route.service.ts`         | 경로 관련 비즈니스 로직                                         |
-| `route-compare.service.ts` | 경로 비교 지표 계산 ([3-5-Route-Compare](3-5-Route-Compare.md)) |
-| `safety/normalize.ts`      | 안전 점수 정규화 ([3-4-Safety](3-4-Safety.md))                  |
+| Service                    | 책임                                                         |
+| -------------------------- | ------------------------------------------------------------ |
+| `route.service.ts`         | 경로 관련 비즈니스 로직                                      |
+| `route-compare.service.ts` | 경로 비교 지표 계산 ([3-5-Route-Compare](3-5-Route-Compare)) |
+| `safety/normalize.ts`      | 안전 점수 정규화 ([3-4-Safety](3-4-Safety))                  |
 
 **패턴**:
 
@@ -49,7 +49,7 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 `index.ts` 가 환경에 따라 구현체를 선택 (팩토리 패턴).
 
-**테스트** — `__tests__/*.pglite.test.ts` 패턴으로 PGlite 인메모리 PostgreSQL 사용 ([6-3-Test-Writing-Guide](6-3-Test-Writing-Guide.md) 2번 참고).
+**테스트** — `__tests__/*.pglite.test.ts` 패턴으로 PGlite 인메모리 PostgreSQL 사용 ([6-3-Test-Writing-Guide](6-3-Test-Writing-Guide) 2번 참고).
 
 ## 4.4 Database
 

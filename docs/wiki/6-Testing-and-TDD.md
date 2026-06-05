@@ -2,12 +2,12 @@
 
 이 섹션은 Runnable 2.0의 **테스트 전략과 TDD 작업 규칙** 을 다룹니다.
 
-| 페이지                                                | 내용                                                              |
-| ----------------------------------------------------- | ----------------------------------------------------------------- |
-| [6-1-TDD-Concepts](6-1-TDD-Concepts.md)               | TDD 개념과 기본 규칙 (Red-Green-Refactor, FIRST, 프로젝트 컨벤션) |
-| [6-2-Test-Infrastructure](6-2-Test-Infrastructure.md) | 현재 테스트 인프라 (Vitest, Playwright, setup)                    |
-| [6-3-Test-Writing-Guide](6-3-Test-Writing-Guide.md)   | 테스트 작성 패턴과 실전 예시                                      |
-| [6-4-CI-Gate](6-4-CI-Gate.md)                         | CI 파이프라인의 테스트 게이트                                     |
+| 페이지                                             | 내용                                                              |
+| -------------------------------------------------- | ----------------------------------------------------------------- |
+| [6-1-TDD-Concepts](6-1-TDD-Concepts)               | TDD 개념과 기본 규칙 (Red-Green-Refactor, FIRST, 프로젝트 컨벤션) |
+| [6-2-Test-Infrastructure](6-2-Test-Infrastructure) | 현재 테스트 인프라 (Vitest, Playwright, setup)                    |
+| [6-3-Test-Writing-Guide](6-3-Test-Writing-Guide)   | 테스트 작성 패턴과 실전 예시                                      |
+| [6-4-CI-Gate](6-4-CI-Gate)                         | CI 파이프라인의 테스트 게이트                                     |
 
 ## 빠른 요약
 

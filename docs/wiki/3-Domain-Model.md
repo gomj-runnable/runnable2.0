@@ -83,4 +83,4 @@ classDiagram
 
 > 각 도메인의 상세(필드, 관련 API, 사용처) 는 3.2 이후 페이지에서 mermaid 클래스 다이어그램 + API 라우트 + 호출 흐름으로 정리됩니다.
 
-다음 → [6-Testing-and-TDD](6-Testing-and-TDD.md) (TDD 섹션이 먼저 채워졌습니다)
+다음 → [6-Testing-and-TDD](6-Testing-and-TDD) (TDD 섹션이 먼저 채워졌습니다)

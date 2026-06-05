@@ -39,4 +39,4 @@ pnpm seed               # DB 시드 (개발)
 
 상세 환경(포트·minikube·Tailscale)은 7. Operations 페이지 참고.
 
-다음 → [2-Architecture](2-Architecture.md)
+다음 → [2-Architecture](2-Architecture)
