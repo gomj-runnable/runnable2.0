@@ -49,13 +49,15 @@ const facility = (overrides: Partial<Facility> = {}): Facility =>
         id: 'f1',
         type: 'crosswalk',
         name: '횡단보도',
-        lng: 127,
-        lat: 37,
-        polyline: [
-            [127, 37],
-            [127.001, 37.001]
-        ],
-        hasSignal: true,
+        geometry: {
+            type: 'LineString',
+            coordinates: [
+                [127, 37],
+                [127.001, 37.001]
+            ]
+        },
+        attributes: [{ name: 'hasSignal', type: 'boolean', value: 'true' }],
+        references: [],
         ...overrides
     }) as Facility
 
@@ -90,12 +92,16 @@ describe('useFacilityRenderer', () => {
             facilities.value = [
                 facility({
                     id: 'c1',
-                    polyline: [
-                        [127, 37],
-                        [127.001, 37.001]
-                    ]
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: [
+                            [127, 37],
+                            [127.001, 37.001]
+                        ]
+                    }
                 }),
-                facility({ id: 'c2', polyline: [[127, 37]] }) // polyline < 2 — 스킵
+                // LineString 좌표 < 2 — 스킵
+                facility({ id: 'c2', geometry: { type: 'LineString', coordinates: [[127, 37]] } })
             ]
             const renderer = create()
             renderer.showLayer('crosswalk')
@@ -157,7 +163,12 @@ describe('useFacilityRenderer', () => {
         })
 
         it('crosswalk — hasSignal=false 도 추가 (다른 색상)', () => {
-            facilities.value = [facility({ id: 'c1', hasSignal: false })]
+            facilities.value = [
+                facility({
+                    id: 'c1',
+                    attributes: [{ name: 'hasSignal', type: 'boolean', value: 'false' }]
+                })
+            ]
             const renderer = create()
             renderer.showLayer('crosswalk')
             expect(viewer.value.entities.list.length).toBe(1)

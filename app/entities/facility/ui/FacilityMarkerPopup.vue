@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Facility } from '#shared/types/facility'
+import { facilityAttr } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 
 /** 시설물 마커 클릭 시 표시되는 오버레이 팝업 */
@@ -12,6 +13,8 @@ defineEmits<{
 }>()
 
 const enumInstance = computed(() => FacilityTypeEnum.from(props.facility.type))
+const hours = computed(() => facilityAttr(props.facility, 'hours'))
+const tel = computed(() => facilityAttr(props.facility, 'tel'))
 </script>
 
 <template>
@@ -49,13 +52,13 @@ const enumInstance = computed(() => FacilityTypeEnum.from(props.facility.type))
                     {{ facility.description }}
                 </dd>
             </div>
-            <div v-if="facility.hours" class="flex gap-2">
+            <div v-if="hours" class="flex gap-2">
                 <dt class="text-[var(--ui-text-dimmed)] shrink-0">시간</dt>
-                <dd class="m-0 text-[var(--ui-text-muted)]">{{ facility.hours }}</dd>
+                <dd class="m-0 text-[var(--ui-text-muted)]">{{ hours }}</dd>
             </div>
-            <div v-if="facility.tel" class="flex gap-2">
+            <div v-if="tel" class="flex gap-2">
                 <dt class="text-[var(--ui-text-dimmed)] shrink-0">전화</dt>
-                <dd class="m-0 text-[var(--ui-text-muted)]">{{ facility.tel }}</dd>
+                <dd class="m-0 text-[var(--ui-text-muted)]">{{ tel }}</dd>
             </div>
         </dl>
     </UCard>
