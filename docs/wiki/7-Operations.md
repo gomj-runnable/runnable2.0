@@ -25,7 +25,7 @@ flowchart LR
 | **minikube**   | 로컬 Kubernetes — 매니페스트는 `minikube/` 디렉터리                          |
 | **Jenkins**    | CI/CD — `Jenkinsfile` (Install → Lint → Typecheck → Test → Build)            |
 | **Tailscale**  | 외부 노출 — 로컬 포트를 HTTPS 로 인터넷 공개 (관련 스킬: `tailscale-funnel`) |
-| **PostgreSQL** | 운영 DB (개발은 PGlite 인메모리도 가능)                                      |
+| **PostgreSQL** | 운영 DB (개발·테스트 모두 Postgres 단일 모드)                                |
 
 ## 7.3 Docker / 빌드 정책
 

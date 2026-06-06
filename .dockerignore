@@ -5,7 +5,6 @@ node_modules
 compose
 .env
 .env.*
-!.env.prod.example
 !.env.example
 *.log
 coverage

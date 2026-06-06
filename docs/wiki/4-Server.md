@@ -49,17 +49,17 @@ Nitro 기반 백엔드. `server/` 디렉터리.
 
 `index.ts` 가 환경에 따라 구현체를 선택 (팩토리 패턴).
 
-**테스트** — `__tests__/*.pglite.test.ts` 패턴으로 PGlite 인메모리 PostgreSQL 사용 ([6-3-Test-Writing-Guide](6-3-Test-Writing-Guide) 2번 참고).
+**테스트** — `__tests__/*.test.ts` 패턴으로 Testcontainers 기반 실제 PostGIS 컨테이너 사용 ([6-3-Test-Writing-Guide](6-3-Test-Writing-Guide) 2번 참고).
 
 ## 4.4 Database
 
-`server/database/` — Drizzle ORM + PostgreSQL / PGlite.
+`server/database/` — Drizzle ORM + PostgreSQL.
 
 | 디렉터리      | 역할                                                                                     |
 | ------------- | ---------------------------------------------------------------------------------------- |
 | `schema/`     | 도메인별 Drizzle 테이블 정의 (`routes.ts`, `routeInfos.ts`, `facilities.ts`, `users.ts`) |
 | `migrations/` | 생성된 마이그레이션 SQL (현재 6개) + 메타 스냅샷                                         |
-| `client.ts`   | DB 클라이언트 (PG / PGlite 분기)                                                         |
+| `client.ts`   | DB 클라이언트 (Postgres 연결)                                                            |
 | `seed.ts`     | `pnpm seed` 진입점                                                                       |
 
 ## 의존 흐름

@@ -1,24 +1,31 @@
-import { describe, it, expect, afterEach, beforeEach } from 'vitest'
-import { PGlite } from '@electric-sql/pglite'
-import type { drizzle } from 'drizzle-orm/pglite'
-import { initPgliteDb, resetDb } from '../../database/client'
-import { DrizzleUserFeaturePrefRepository } from '../userFeaturePref.repository.drizzle'
+import { describe, it, expect, beforeAll, afterAll, inject } from 'vitest'
+import { initTestDb, resetDb } from '../../database/client'
+import { truncateAll } from '../../test/pgContainer'
+import { DrizzleUserFeaturePrefRepository } from '../userFeaturePref.repository'
 import { users } from '../../database/schema'
-import type * as schema from '../../database/schema'
+import type { getDb } from '../../database/client'
 
-type PgliteDb = ReturnType<typeof drizzle<typeof schema>>
+type Db = Awaited<ReturnType<typeof getDb>>
+
+let db: Db
+
+beforeAll(async () => {
+    db = await initTestDb(inject('databaseUrl'))
+})
+
+afterAll(() => {
+    resetDb()
+})
 
 async function createFreshRepository(): Promise<{
     repo: DrizzleUserFeaturePrefRepository
-    db: PgliteDb
+    db: Db
 }> {
-    resetDb()
-    const pglite = new PGlite()
-    const db = (await initPgliteDb(pglite)) as PgliteDb
+    await truncateAll(db)
     return { repo: new DrizzleUserFeaturePrefRepository(db), db }
 }
 
-async function seedUser(db: PgliteDb, userId: string): Promise<void> {
+async function seedUser(db: Db, userId: string): Promise<void> {
     await db.insert(users).values({
         id: userId,
         name: userId,
@@ -27,14 +34,7 @@ async function seedUser(db: PgliteDb, userId: string): Promise<void> {
     })
 }
 
-describe('DrizzleUserFeaturePrefRepository (PGlite in-memory)', () => {
-    beforeEach(() => {
-        resetDb()
-    })
-    afterEach(() => {
-        resetDb()
-    })
-
+describe('DrizzleUserFeaturePrefRepository (PostGIS)', () => {
     describe('upsert', () => {
         it('새 pref 를 생성하고 반환한다', async () => {
             const { repo, db } = await createFreshRepository()

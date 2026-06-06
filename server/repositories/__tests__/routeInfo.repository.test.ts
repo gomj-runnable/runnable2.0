@@ -1,24 +1,31 @@
-import { describe, it, expect, afterEach, beforeEach } from 'vitest'
-import { PGlite } from '@electric-sql/pglite'
-import type { drizzle } from 'drizzle-orm/pglite'
-import { initPgliteDb, resetDb } from '../../database/client'
-import { DrizzleRouteInfoRepository } from '../routeInfo.repository.drizzle'
+import { describe, it, expect, beforeAll, afterAll, inject } from 'vitest'
+import { initTestDb, resetDb } from '../../database/client'
+import { truncateAll } from '../../test/pgContainer'
+import { DrizzleRouteInfoRepository } from '../routeInfo.repository'
 import { users, routes } from '../../database/schema'
-import type * as schema from '../../database/schema'
+import type { getDb } from '../../database/client'
 
-type PgliteDb = ReturnType<typeof drizzle<typeof schema>>
+type Db = Awaited<ReturnType<typeof getDb>>
+
+let db: Db
+
+beforeAll(async () => {
+    db = await initTestDb(inject('databaseUrl'))
+})
+
+afterAll(() => {
+    resetDb()
+})
 
 async function createFreshRepository(): Promise<{
     repo: DrizzleRouteInfoRepository
-    db: PgliteDb
+    db: Db
 }> {
-    resetDb()
-    const pglite = new PGlite()
-    const db = (await initPgliteDb(pglite)) as PgliteDb
+    await truncateAll(db)
     return { repo: new DrizzleRouteInfoRepository(db), db }
 }
 
-async function seedUserAndRoute(db: PgliteDb, userId: string, routeId: string): Promise<void> {
+async function seedUserAndRoute(db: Db, userId: string, routeId: string): Promise<void> {
     await db.insert(users).values({
         id: userId,
         name: userId,
@@ -34,14 +41,7 @@ async function seedUserAndRoute(db: PgliteDb, userId: string, routeId: string): 
     })
 }
 
-describe('DrizzleRouteInfoRepository (PGlite in-memory)', () => {
-    beforeEach(() => {
-        resetDb()
-    })
-    afterEach(() => {
-        resetDb()
-    })
-
+describe('DrizzleRouteInfoRepository (PostGIS)', () => {
     describe('create', () => {
         it('routeInfo 를 생성하고 반환한다', async () => {
             const { repo, db } = await createFreshRepository()

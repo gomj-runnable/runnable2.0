@@ -8,7 +8,6 @@ async function seed() {
         process.exit(0)
     }
 
-    const { getDbMode, DATABASE_MODE } = await import('../config/dbMode')
     const { getDb } = await import('./client')
     const { users, userAccounts } = await import('./schema/users')
     const { facilities } = await import('./schema/facilities')
@@ -16,7 +15,7 @@ async function seed() {
     const { sql } = await import('drizzle-orm')
     const { ROLES } = await import('../../shared/constants/roles')
 
-    console.log(`🌱 Seed 작업 시작... (모드: ${getDbMode()})`)
+    console.log('🌱 Seed 작업 시작...')
 
     const adminPassword = process.env.ADMIN_SEED_PASSWORD
     if (!adminPassword) {
@@ -128,98 +127,94 @@ async function seed() {
         })
         console.log('✅ developer 계정 설정 완료 (ID: ' + DEV_ID + ')')
 
-        // 3. 시설물 데이터 적재 (POSTGRES 전용 — PGlite는 PostGIS 미지원)
-        if (getDbMode() === DATABASE_MODE.POSTGRES) {
-            await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)
+        // 3. 시설물 데이터 적재 (PostGIS)
+        await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)
 
-            const { readFileSync } = await import('node:fs')
-            const { resolve } = await import('node:path')
+        const { readFileSync } = await import('node:fs')
+        const { resolve } = await import('node:path')
 
-            const dataDir = resolve(import.meta.dirname, '../data/facilities')
-            const files = [
-                'hospitals.json',
-                'toilets.json',
-                'fountains.json',
-                'lockers.json',
-                'crosswalks.json'
-            ]
+        const dataDir = resolve(import.meta.dirname, '../data/facilities')
+        const files = [
+            'hospitals.json',
+            'toilets.json',
+            'fountains.json',
+            'lockers.json',
+            'crosswalks.json'
+        ]
 
-            let totalInserted = 0
-            for (const file of files) {
-                const raw = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8'))
-                if (!raw.length) continue
-                // 배치 내 중복 ID 제거 (마지막 항목 우선)
-                const seen = new Map<string, number>()
-                for (let i = 0; i < raw.length; i++) seen.set(raw[i].id, i)
-                const data = [...seen.values()].map((i) => raw[i])
+        let totalInserted = 0
+        for (const file of files) {
+            const raw = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8'))
+            if (!raw.length) continue
+            // 배치 내 중복 ID 제거 (마지막 항목 우선)
+            const seen = new Map<string, number>()
+            for (let i = 0; i < raw.length; i++) seen.set(raw[i].id, i)
+            const data = [...seen.values()].map((i) => raw[i])
 
-                const BATCH_SIZE = 500
-                for (let i = 0; i < data.length; i += BATCH_SIZE) {
-                    const batch = data.slice(i, i + BATCH_SIZE)
-                    await db
-                        .insert(facilities)
-                        .values(
-                            batch.map(
-                                (f: {
-                                    id: string
-                                    type: string
-                                    name: string
-                                    description?: string
-                                    lng: number
-                                    lat: number
-                                    hours?: string
-                                    tel?: string
-                                    hasSignal?: boolean
-                                    polyline?: [number, number][]
-                                }) => ({
-                                    id: f.id,
-                                    type: f.type,
-                                    name: f.name,
-                                    description: f.description ?? null,
-                                    lng: f.lng.toString(),
-                                    lat: f.lat.toString(),
-                                    hours: f.hours ?? null,
-                                    tel: f.tel ?? null,
-                                    hasSignal: f.hasSignal ?? null,
-                                    polyline: f.polyline ?? null
-                                })
-                            )
+            const BATCH_SIZE = 500
+            for (let i = 0; i < data.length; i += BATCH_SIZE) {
+                const batch = data.slice(i, i + BATCH_SIZE)
+                await db
+                    .insert(facilities)
+                    .values(
+                        batch.map(
+                            (f: {
+                                id: string
+                                type: string
+                                name: string
+                                description?: string
+                                lng: number
+                                lat: number
+                                hours?: string
+                                tel?: string
+                                hasSignal?: boolean
+                                polyline?: [number, number][]
+                            }) => ({
+                                id: f.id,
+                                type: f.type,
+                                name: f.name,
+                                description: f.description ?? null,
+                                lng: f.lng.toString(),
+                                lat: f.lat.toString(),
+                                hours: f.hours ?? null,
+                                tel: f.tel ?? null,
+                                hasSignal: f.hasSignal ?? null,
+                                polyline: f.polyline ?? null
+                            })
                         )
-                        .onConflictDoUpdate({
-                            target: facilities.id,
-                            set: {
-                                type: sql`excluded.type`,
-                                name: sql`excluded.name`,
-                                description: sql`excluded.description`,
-                                lng: sql`excluded.lng`,
-                                lat: sql`excluded.lat`,
-                                hours: sql`excluded.hours`,
-                                tel: sql`excluded.tel`,
-                                hasSignal: sql`excluded.has_signal`,
-                                polyline: sql`excluded.polyline`
-                            }
-                        })
-                }
-                totalInserted += data.length
-                console.log(`  📦 ${file}: ${data.length}건`)
+                    )
+                    .onConflictDoUpdate({
+                        target: facilities.id,
+                        set: {
+                            type: sql`excluded.type`,
+                            name: sql`excluded.name`,
+                            description: sql`excluded.description`,
+                            lng: sql`excluded.lng`,
+                            lat: sql`excluded.lat`,
+                            hours: sql`excluded.hours`,
+                            tel: sql`excluded.tel`,
+                            hasSignal: sql`excluded.has_signal`,
+                            polyline: sql`excluded.polyline`
+                        }
+                    })
             }
-
-            await db.execute(sql`
-                ALTER TABLE facilities ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326)
-            `)
-            await db.execute(sql`
-                UPDATE facilities
-                SET geom = ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)
-                WHERE geom IS NULL
-            `)
-            await db.execute(sql`
-                CREATE INDEX IF NOT EXISTS facility_geom_idx ON facilities USING GIST (geom)
-            `)
-
-            console.log(`✅ 시설물 데이터 적재 완료 (총 ${totalInserted}건)`)
-        } else {
-            console.log('ℹ️  PGLITE 모드: 시설물 데이터 적재 건너뜀 (PostGIS 미지원)')
+            totalInserted += data.length
+            console.log(`  📦 ${file}: ${data.length}건`)
         }
+
+        await db.execute(sql`
+            ALTER TABLE facilities ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326)
+        `)
+        await db.execute(sql`
+            UPDATE facilities
+            SET geom = ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)
+            WHERE geom IS NULL
+        `)
+        await db.execute(sql`
+            CREATE INDEX IF NOT EXISTS facility_geom_idx ON facilities USING GIST (geom)
+        `)
+
+        console.log(`✅ 시설물 데이터 적재 완료 (총 ${totalInserted}건)`)
     } catch (error) {
         console.error('❌ Seed 작업 중 예외 발생:', error)
         process.exit(1)

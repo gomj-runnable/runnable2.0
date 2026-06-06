@@ -75,11 +75,11 @@ test('빈 배열은 0km 를 반환한다', ...)
 
 ### 7. 통합 테스트는 별도 표시
 
-| 종류      | 패턴               | 예시                                                            |
-| --------- | ------------------ | --------------------------------------------------------------- |
-| 유닛      | `*.test.ts`        | `server/services/__tests__/route-compare.service.test.ts`       |
-| 통합 (DB) | `*.pglite.test.ts` | `server/repositories/__tests__/route.repository.pglite.test.ts` |
-| E2E       | `*.spec.ts`        | `tests/e2e/*.spec.ts`                                           |
+| 종류      | 패턴        | 예시                                                      |
+| --------- | ----------- | --------------------------------------------------------- |
+| 유닛      | `*.test.ts` | `server/services/__tests__/route-compare.service.test.ts` |
+| 통합 (DB) | `*.test.ts` | `server/repositories/__tests__/route.repository.test.ts`  |
+| E2E       | `*.spec.ts` | `tests/e2e/*.spec.ts`                                     |
 
 ## TDD가 잘 작동하는 시그널
 
