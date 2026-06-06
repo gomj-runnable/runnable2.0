@@ -71,10 +71,11 @@ describe('useFacilityRenderer', () => {
         poiOverlayMock.clear.mockReset()
     })
 
+    type RendererOpts = Parameters<typeof useFacilityRenderer>[0]
     const create = () =>
         useFacilityRenderer({
             viewer: viewer as any,
-            facilities,
+            facilities: facilities as RendererOpts['facilities'],
             onFacilitySelect: vi.fn()
         })
 
