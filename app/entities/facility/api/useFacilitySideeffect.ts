@@ -106,11 +106,14 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
             clickHandler = handler
 
             if (activeTypes.value.size > 0) {
-                const unwatchCamera = watch(
+                // immediate watch 는 등록과 동시에 콜백을 동기 실행하므로, watch() 반환 전에
+                // 핸들을 참조하면 TDZ 가 발생한다. 객체에 담아 안전하게 자기 자신을 해제한다.
+                const cameraWatch: { stop?: () => void } = {}
+                cameraWatch.stop = watch(
                     [camera.centerLat, camera.centerLng],
                     async ([lat, lng]) => {
                         if (lat === null || lng === null) return
-                        unwatchCamera()
+                        cameraWatch.stop?.()
                         await fetchFacilities()
                         for (const type of activeTypes.value) {
                             renderer.showLayer(type)
@@ -137,11 +140,14 @@ export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => 
 
     watch(activeTypesKey, async () => {
         if (camera.centerLat.value === null || camera.centerLng.value === null) {
-            const unwatchCamera = watch(
+            // immediate watch 의 동기 첫 실행에서 핸들을 참조하면 TDZ 가 발생하므로
+            // 객체에 담아 안전하게 자기 자신을 해제한다.
+            const cameraWatch: { stop?: () => void } = {}
+            cameraWatch.stop = watch(
                 [camera.centerLat, camera.centerLng],
                 async ([lat, lng]) => {
                     if (lat === null || lng === null) return
-                    unwatchCamera()
+                    cameraWatch.stop?.()
                     await syncLayers()
                 },
                 { immediate: true }

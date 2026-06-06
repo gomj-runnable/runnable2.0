@@ -52,15 +52,16 @@ describe('useGradientSideeffect', () => {
         showRoutePolylines = vi.fn()
     })
 
+    type GradientOpts = Parameters<typeof useGradientSideeffect>[0]
     const create = () =>
         useGradientSideeffect({
             viewer: viewer as any,
-            isGradientVisible,
-            drawnPositions,
-            setSegments,
-            setDifficulty,
-            hideRoutePolylines,
-            showRoutePolylines
+            isGradientVisible: isGradientVisible as GradientOpts['isGradientVisible'],
+            drawnPositions: drawnPositions as GradientOpts['drawnPositions'],
+            setSegments: setSegments as GradientOpts['setSegments'],
+            setDifficulty: setDifficulty as GradientOpts['setDifficulty'],
+            hideRoutePolylines: hideRoutePolylines as GradientOpts['hideRoutePolylines'],
+            showRoutePolylines: showRoutePolylines as GradientOpts['showRoutePolylines']
         })
 
     it('isGradientVisible=true + positions < 2 — apply 호출되어도 그릴 것 없음 (entity 0)', async () => {
