@@ -1,21 +1,37 @@
-import { describe, it, expect, afterEach, beforeEach } from 'vitest'
-import { PGlite } from '@electric-sql/pglite'
-import type { drizzle } from 'drizzle-orm/pglite'
-import { initPgliteDb, resetDb } from '../../database/client'
+import { describe, it, expect, beforeAll, afterAll, inject } from 'vitest'
+import { sql } from 'drizzle-orm'
+import { initTestDb, resetDb } from '../../database/client'
+import { truncateAll } from '../../test/pgContainer'
 import { DrizzleFacilityRepository } from '../facility.repository.drizzle'
 import { facilities } from '../../database/schema/facilities'
-import type * as schema from '../../database/schema'
+import type { getDb } from '../../database/client'
 import type { FacilityType } from '#shared/types/facility'
 
-type PgliteDb = ReturnType<typeof drizzle<typeof schema>>
+type Db = Awaited<ReturnType<typeof getDb>>
+
+let db: Db
+
+beforeAll(async () => {
+    db = await initTestDb(inject('databaseUrl'))
+    // 마이그레이션에는 PostGIS/geom 이 없다 — seed.ts 와 동일하게 런타임에 셋업한다.
+    await db.execute(sql`CREATE EXTENSION IF NOT EXISTS postgis`)
+    await db.execute(
+        sql`ALTER TABLE facilities ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326)`
+    )
+    await db.execute(
+        sql`CREATE INDEX IF NOT EXISTS facility_geom_idx ON facilities USING GIST (geom)`
+    )
+})
+
+afterAll(() => {
+    resetDb()
+})
 
 async function createFreshRepository(): Promise<{
     repo: DrizzleFacilityRepository
-    db: PgliteDb
+    db: Db
 }> {
-    resetDb()
-    const pglite = new PGlite()
-    const db = (await initPgliteDb(pglite)) as PgliteDb
+    await truncateAll(db)
     return { repo: new DrizzleFacilityRepository(db), db }
 }
 
@@ -27,7 +43,7 @@ interface SeedFacility {
     lng: number
 }
 
-async function seedFacilities(db: PgliteDb, items: SeedFacility[]): Promise<void> {
+async function seedFacilities(db: Db, items: SeedFacility[]): Promise<void> {
     for (const f of items) {
         await db.insert(facilities).values({
             id: f.id,
@@ -37,19 +53,18 @@ async function seedFacilities(db: PgliteDb, items: SeedFacility[]): Promise<void
             lng: f.lng.toString()
         })
     }
+    // findNearby 는 geom 컬럼으로 PostGIS 쿼리하므로 lat/lng 로부터 geom 을 채운다.
+    await db.execute(sql`
+        UPDATE facilities
+        SET geom = ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)
+        WHERE geom IS NULL
+    `)
 }
 
 // 서울 시청 (37.5665, 126.9780) 기준 좌표 묶음
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 }
 
-describe('DrizzleFacilityRepository (PGlite in-memory)', () => {
-    beforeEach(() => {
-        resetDb()
-    })
-    afterEach(() => {
-        resetDb()
-    })
-
+describe('DrizzleFacilityRepository (PostGIS)', () => {
     describe('findAll', () => {
         it('빈 테이블에서 빈 배열을 반환한다', async () => {
             const { repo } = await createFreshRepository()
@@ -75,7 +90,7 @@ describe('DrizzleFacilityRepository (PGlite in-memory)', () => {
         })
     })
 
-    describe('findNearby — bounding box + haversine', () => {
+    describe('findNearby — ST_DWithin', () => {
         it('반경 내 시설물만 반환한다', async () => {
             const { repo, db } = await createFreshRepository()
             await seedFacilities(db, [
@@ -127,13 +142,12 @@ describe('DrizzleFacilityRepository (PGlite in-memory)', () => {
             expect(result).toEqual([])
         })
 
-        it('극지방 좌표 — cos(lat)≈0 가드로 무한대 발생 안 함', async () => {
+        it('극지방 좌표에서도 정상 동작한다', async () => {
             const { repo, db } = await createFreshRepository()
             await seedFacilities(db, [
                 { id: 'pole', type: 'toilet', name: '북극', lat: 89.999, lng: 0 }
             ])
-            // lat = 90 → cos(lat) → 0. 가드 없으면 lngDelta = Infinity → SQL 비교 깨짐.
-            // 가드 적용 시 정상 쿼리 + JS haversine 으로 정확한 거리 필터링.
+            // geography 기반 ST_DWithin 은 극지방에서도 정확한 거리를 계산한다.
             const result = await repo.findNearby(89.999, 0, 1000, ['toilet'])
             expect(result.map((f) => f.id)).toEqual(['pole'])
         })

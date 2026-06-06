@@ -1,25 +1,30 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import { PGlite } from '@electric-sql/pglite'
-import type { drizzle } from 'drizzle-orm/pglite'
-import { initPgliteDb, resetDb } from '../../database/client'
+import { describe, it, expect, beforeAll, afterAll, inject } from 'vitest'
+import { initTestDb, resetDb } from '../../database/client'
+import { truncateAll } from '../../test/pgContainer'
 import type { IRouteRepository } from '../route.repository'
 import { DrizzleRouteRepository } from '../route.repository.drizzle'
 import type { RouteDraftInput } from '#shared/types/route'
 import { users } from '../../database/schema'
-import type * as schema from '../../database/schema'
+import type { getDb } from '../../database/client'
 
-// Each test gets a fresh in-memory PGlite instance — no shared state between tests.
+type Db = Awaited<ReturnType<typeof getDb>>
 
-type PgliteDb = ReturnType<typeof drizzle<typeof schema>>
+let db: Db
 
-async function createFreshRepository(): Promise<{ repo: IRouteRepository; db: PgliteDb }> {
+beforeAll(async () => {
+    db = await initTestDb(inject('databaseUrl'))
+})
+
+afterAll(() => {
     resetDb()
-    const pglite = new PGlite()
-    const db = (await initPgliteDb(pglite)) as PgliteDb
+})
+
+async function createFreshRepository(): Promise<{ repo: IRouteRepository; db: Db }> {
+    await truncateAll(db)
     return { repo: new DrizzleRouteRepository(db), db }
 }
 
-async function insertTestUser(db: PgliteDb, id: string): Promise<void> {
+async function insertTestUser(db: Db, id: string): Promise<void> {
     await db.insert(users).values({
         id,
         name: id,
@@ -35,11 +40,7 @@ const sampleInput = (overrides: Partial<RouteDraftInput> = {}): RouteDraftInput 
     ...overrides
 })
 
-describe('DrizzleRouteRepository (PGlite in-memory)', () => {
-    afterEach(() => {
-        resetDb()
-    })
-
+describe('DrizzleRouteRepository (PostGIS)', () => {
     describe('createRoute / getRoute', () => {
         it('경로를 생성하고 ID로 조회할 수 있다', async () => {
             const { repo, db } = await createFreshRepository()

@@ -20,7 +20,6 @@
         "test:e2e:update": "playwright test --update-snapshots"
     },
     "dependencies": {
-        "@electric-sql/pglite": "^0.4.5",
         "@iconify-json/lucide": "^1.2.87",
         "@iconify-json/simple-icons": "^1.2.68",
         "@nuxt/ui": "^4.7.1",
@@ -48,6 +47,7 @@
         "@nuxt/test-utils": "^4.0.3",
         "@playwright/test": "^1.60.0",
         "@tailwindcss/vite": "^4.1.18",
+        "@testcontainers/postgresql": "^12.0.1",
         "@types/node": "^25.2.0",
         "@types/papaparse": "^5.5.2",
         "@types/pg": "^8.16.0",

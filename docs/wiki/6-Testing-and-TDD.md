@@ -12,7 +12,7 @@
 ## 빠른 요약
 
 - **유닛 테스트** — `*.test.ts`, `__tests__/` 옆 디렉터리 패턴 (이미 20+ 디렉터리)
-- **DB 통합 테스트** — `*.pglite.test.ts`, PGlite 임베디드 PostgreSQL
+- **DB 통합 테스트** — `*.test.ts`, Testcontainers 기반 실제 PostGIS 컨테이너
 - **E2E** — `tests/e2e/*.spec.ts`, Playwright + dev 서버 자동 기동
 - **사이클** — Red → Green → Refactor, 한 사이클 5분 이내 권장
 - **순수 함수 우선** — 비즈니스 로직은 services 안에 순수 함수로 (의존성 주입)

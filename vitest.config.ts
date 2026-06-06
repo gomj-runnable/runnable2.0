@@ -12,7 +12,10 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        setupFiles: ['./vitest.setup.ts'],
+        setupFiles: ['./server/test/setup.ts'],
+        // repository 테스트가 단일 PostGIS 컨테이너를 공유하므로 파일 간 순차 실행으로 격리한다.
+        globalSetup: ['./server/test/globalSetup.ts'],
+        fileParallelism: false,
         include: [
             'app/**/__tests__/**/*.test.ts',
             'server/**/__tests__/**/*.test.ts',
@@ -40,6 +43,7 @@ export default defineConfig({
                 'app/shared/lib/map/cesium*/**',
                 'app/shared/lib/map/**/cesium*.ts',
                 'server/data/**',
+                'server/test/**',
                 'shared/types/**/*.ts'
             ],
             // Phase E (epic #267): 75% 라인 커버리지 달성 후 임계값 잠금.

@@ -2,8 +2,6 @@
 .output
 .data
 .nuxt
-# PGlite local DB files
-.data/pglite/
 .nitro
 .cache
 coverage

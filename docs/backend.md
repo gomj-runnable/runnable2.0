@@ -40,7 +40,7 @@ server/
 │
 ├── repositories/           # 데이터 접근 계층
 │   ├── route.repository.ts         # 인터페이스 (IRouteRepository)
-│   ├── route.repository.drizzle.ts # Drizzle 구현체 (PGlite·Postgres 공용)
+│   ├── route.repository.drizzle.ts # Drizzle 구현체 (Postgres)
 │   └── index.ts                    # lazy 싱글턴 export
 
 ├── services/               # 도메인 서비스 Facade
@@ -55,7 +55,7 @@ server/
     ├── (auth 모듈은 server/security/auth/ 로 이동 — instance.ts·service.ts·env.ts)
     ├── (error-handler.ts 는 server/errors/ 로 이동 — 에러 헬퍼 + withErrorHandler)
     ├── session.ts          # requireSession / getSessionUser
-    ├── dbMode.ts           # USE_DATABASE_MODE (PGLITE|POSTGRES) 플래그
+    ├── dbMode.ts           # getDatabaseUrl() — DB 연결 URI 반환
     ├── district/           # 행정구역 경계 데이터 + 역지오코딩
     ├── routing/            # 경로 최적화
     │   ├── registry.ts     # 라우팅 서비스 레지스트리 (Strategy + Registry 패턴)
@@ -78,8 +78,8 @@ server/
 
 | 패턴             | 적용 위치                                                                      |
 | ---------------- | ------------------------------------------------------------------------------ |
-| Repository       | `server/repositories/` — 인터페이스 + Drizzle 구현체 (PGlite·Postgres 공용)    |
-| Facade (DB)      | `server/database/client.ts` — `getDb()` 단일 진입점 (PGLITE/POSTGRES 분기)     |
+| Repository       | `server/repositories/` — 인터페이스 + Drizzle 구현체 (Postgres)                |
+| Facade (DB)      | `server/database/client.ts` — `getDb()` 단일 진입점 (Postgres 연결)            |
 | Facade (Service) | `server/services/*.service.ts` — Repository 위 도메인 응집 계층                |
 | Template Method  | `server/utils/routing/common.ts` — AbstractRoutingService (검증→API→파싱→보간) |
 | Strategy         | `server/utils/routing/` — TMap/OSRM 교체 가능 (AbstractRoutingService 상속)    |
@@ -103,13 +103,17 @@ server/
 
 ---
 
-## 환경별 구현 교체
+## 데이터베이스 설정
 
-`DATABASE_MODE` 환경 변수로 제어:
+`DATABASE_URL` 환경 변수로 제어:
 
-| 모드       | DB 클라이언트                                                                   | 용도          |
-| ---------- | ------------------------------------------------------------------------------- | ------------- |
-| `PGLITE`   | PGlite (`@electric-sql/pglite`) — 파일 기반 임베디드 Postgres (`.data/pglite/`) | 개발 (기본값) |
-| `POSTGRES` | `pg.Pool` + `drizzle-orm/node-postgres`                                         | 프로덕션      |
+| 환경            | DB 클라이언트                           | 비고                                               |
+| --------------- | --------------------------------------- | -------------------------------------------------- |
+| 개발 / 프로덕션 | `pg.Pool` + `drizzle-orm/node-postgres` | PostgreSQL 13+ 또는 PostGIS 활성화된 Postgres 필수 |
 
-PGLITE 모드는 부팅 시 마이그레이션 자동 적용 + users 비어있으면 seed 자동 실행. PostGIS 의존 라인은 sanitizer 가 스킵하고 facility 의 거리 쿼리는 lat/lng + JS haversine 으로 폴백한다.
+부팅 시 자동 동작:
+
+1. `DATABASE_URL`로 Postgres 연결 시도
+2. 연결 실패 시 `'{DATABASE_URL} DB 접속 실패'` 예외 발생
+3. 연결 성공, 테이블 없음 → Drizzle migrator로 자동 마이그레이션
+4. 마이그레이션 완료 후 seed 실행 (users 비어있으면)

@@ -28,19 +28,20 @@ describe('zScore', () => {
 
 ## 2) Repository (DB 통합 테스트)
 
-PGlite 로 실제 PostgreSQL 을 인메모리 구동.
+Testcontainers 기반 실제 PostGIS 컨테이너 사용.
 
 ```ts
-// server/repositories/__tests__/route.repository.pglite.test.ts
-import { describe, expect, it, beforeEach } from 'vitest'
-import { createPgliteClient } from '...'
+// server/repositories/__tests__/route.repository.test.ts
+import { describe, expect, it, beforeEach, inject } from 'vitest'
+import { initTestDb, truncateAll } from '../pgContainer'
 import { createRouteRepositoryDrizzle } from '../route.repository.drizzle'
 
-describe('RouteRepository (drizzle + pglite)', () => {
-  let repo
+describe('RouteRepository (drizzle + postgres)', () => {
+  let db, repo
   beforeEach(async () => {
-    const db = await createPgliteClient()
+    db = await initTestDb(inject('databaseUrl'))
     repo = createRouteRepositoryDrizzle(db)
+    await truncateAll(db)
   })
 
   it('upsert 후 같은 id 로 조회 가능', async () => {
@@ -50,13 +51,14 @@ describe('RouteRepository (drizzle + pglite)', () => {
 })
 ```
 
-- 파일명에 `.pglite.test.ts` 표시
-- `beforeEach` 마다 새 DB 인스턴스 — 격리 보장
-- migration 적용 · seed 는 헬퍼로 통일
+- 파일명은 `.test.ts` 패턴을 따른다
+- `inject('databaseUrl')` 로 전역 PostGIS 컨테이너 URI 획득
+- `beforeEach` 마다 `truncateAll(db)` 로 테스트 간 격리 보장
+- migration 은 `initTestDb()` 에서 자동 적용
 
 ## 3) Composable (Vue / Nuxt)
 
-`vitest.setup.ts` 의 `useState` 스텁 덕에 Nuxt 런타임 없이도 컴포저블을 호출할 수 있습니다.
+`server/test/setup.ts` 의 `useState` 스텁 덕에 Nuxt 런타임 없이도 컴포저블을 호출할 수 있습니다.
 
 ```ts
 // app/shared/lib/__tests__/useFormatUtils.test.ts
@@ -117,11 +119,11 @@ E2E 또는 통합 테스트로 검증 (Playwright). 핸들러 자체는 **얇게
 
 ## 흔한 함정과 해결
 
-| 함정                           | 해결                                                    |
-| ------------------------------ | ------------------------------------------------------- |
-| 테스트가 너무 느림             | DB 의존이라면 PGlite 사용, 외부 API 라면 adapter 분리   |
-| 테스트가 깨지기 쉬움           | 구현 디테일 (private 메서드 / 내부 구조) 검증하지 말 것 |
-| 테스트가 길고 복잡함           | 단위가 너무 크다 — 더 작은 함수로 분리                  |
-| 한 테스트가 다른 테스트에 영향 | 전역 상태 / 모듈 import-time 부수효과 제거              |
+| 함정                           | 해결                                                          |
+| ------------------------------ | ------------------------------------------------------------- |
+| 테스트가 너무 느림             | DB 의존이라면 Testcontainers 사용, 외부 API 라면 adapter 분리 |
+| 테스트가 깨지기 쉬움           | 구현 디테일 (private 메서드 / 내부 구조) 검증하지 말 것       |
+| 테스트가 길고 복잡함           | 단위가 너무 크다 — 더 작은 함수로 분리                        |
+| 한 테스트가 다른 테스트에 영향 | 전역 상태 / 모듈 import-time 부수효과 제거                    |
 
 다음 → [6-4-CI-Gate](6-4-CI-Gate)
