@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, inject } from 'vitest'
 import { initTestDb, resetDb } from '../../database/client'
 import { truncateAll } from '../../test/pgContainer'
-import { DrizzleRouteInfoRepository } from '../routeInfo.repository.drizzle'
+import { DrizzleRouteInfoRepository } from '../routeInfo.repository'
 import { users, routes } from '../../database/schema'
 import type { getDb } from '../../database/client'
 

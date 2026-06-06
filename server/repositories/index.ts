@@ -1,13 +1,12 @@
 // 각 Repository 싱글턴을 초기화하고 반환하는 팩토리 함수 모음
 import { getDb } from '../database/client'
-import type { IRouteRepository } from './route.repository'
-import type { IRouteInfoRepository } from './routeInfo.repository'
-import type { IFacilityRepository } from './facility.repository'
-import type { IUserFeaturePrefRepository } from './userFeaturePref.repository'
-import { DrizzleRouteRepository } from './route.repository.drizzle'
-import { DrizzleRouteInfoRepository } from './routeInfo.repository.drizzle'
-import { DrizzleFacilityRepository } from './facility.repository.drizzle'
-import { DrizzleUserFeaturePrefRepository } from './userFeaturePref.repository.drizzle'
+import { DrizzleRouteRepository, type IRouteRepository } from './route.repository'
+import { DrizzleRouteInfoRepository, type IRouteInfoRepository } from './routeInfo.repository'
+import { DrizzleFacilityRepository, type IFacilityRepository } from './facility.repository'
+import {
+    DrizzleUserFeaturePrefRepository,
+    type IUserFeaturePrefRepository
+} from './userFeaturePref.repository'
 
 let _routeRepo: IRouteRepository | null = null
 let _routeInfoRepo: IRouteInfoRepository | null = null

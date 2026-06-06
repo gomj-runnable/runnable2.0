@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, inject } from 'vitest'
 import { initTestDb, resetDb } from '../../database/client'
 import { truncateAll } from '../../test/pgContainer'
-import { DrizzleUserFeaturePrefRepository } from '../userFeaturePref.repository.drizzle'
+import { DrizzleUserFeaturePrefRepository } from '../userFeaturePref.repository'
 import { users } from '../../database/schema'
 import type { getDb } from '../../database/client'
 
