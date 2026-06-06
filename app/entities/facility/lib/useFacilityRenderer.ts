@@ -3,6 +3,7 @@ import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { Facility, FacilityType } from '#shared/types/facility'
+import { facilityPolyline, facilityAttrBool } from '#shared/types/facility'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
@@ -61,11 +62,12 @@ export const useFacilityRenderer = (options: UseFacilityRendererOptions) => {
     })
 
     const addCrosswalkEntity = (v: CesiumViewer, facility: Facility) => {
-        if (facility.polyline && facility.polyline.length >= 2) {
-            const color = facility.hasSignal ? CROSSWALK_SIGNAL_COLOR : CROSSWALK_NO_SIGNAL_COLOR
-            const positions = facility.polyline.map(
-                ([lng, lat]) => [lng, lat, 0] as GeoJsonPosition
-            )
+        const polyline = facilityPolyline(facility)
+        if (polyline && polyline.length >= 2) {
+            const color = facilityAttrBool(facility, 'hasSignal')
+                ? CROSSWALK_SIGNAL_COLOR
+                : CROSSWALK_NO_SIGNAL_COLOR
+            const positions = polyline.map(([lng, lat]) => [lng, lat, 0] as GeoJsonPosition)
 
             const C = getCesiumRuntime()
             return v.entities.add({

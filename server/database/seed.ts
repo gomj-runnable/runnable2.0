@@ -11,6 +11,8 @@ async function seed() {
     const { getDb } = await import('./client')
     const { users, userAccounts } = await import('./schema/users')
     const { facilities } = await import('./schema/facilities')
+    const { crosswalkAttribute, toiletAttribute, hospitalAttribute } =
+        await import('./schema/facilityAttributes')
     const { hashPassword } = await import('better-auth/crypto')
     const { sql } = await import('drizzle-orm')
     const { ROLES } = await import('../../shared/constants/roles')
@@ -142,77 +144,116 @@ async function seed() {
             'crosswalks.json'
         ]
 
+        // geom 컬럼/인덱스 보장 (마이그레이션 0008 과 동일 — 미적용 환경 대비 방어적).
+        await db.execute(
+            sql`ALTER TABLE facilities ADD COLUMN IF NOT EXISTS geom geometry(Geometry, 4326)`
+        )
+        await db.execute(
+            sql`CREATE INDEX IF NOT EXISTS facility_geom_idx ON facilities USING GIST (geom)`
+        )
+
+        interface FacilityJson {
+            id: string
+            type: string
+            name: string
+            description?: string
+            lng: number
+            lat: number
+            hours?: string
+            tel?: string
+            hasSignal?: boolean
+            polyline?: [number, number][]
+        }
+
         let totalInserted = 0
         for (const file of files) {
-            const raw = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8'))
+            const raw = JSON.parse(readFileSync(resolve(dataDir, file), 'utf-8')) as FacilityJson[]
             if (!raw.length) continue
             // 배치 내 중복 ID 제거 (마지막 항목 우선)
             const seen = new Map<string, number>()
-            for (let i = 0; i < raw.length; i++) seen.set(raw[i].id, i)
-            const data = [...seen.values()].map((i) => raw[i])
+            for (let i = 0; i < raw.length; i++) seen.set(raw[i]!.id, i)
+            const data = [...seen.values()].map((i) => raw[i]!)
 
             const BATCH_SIZE = 500
             for (let i = 0; i < data.length; i += BATCH_SIZE) {
                 const batch = data.slice(i, i + BATCH_SIZE)
+
+                // 1) 기본 시설 행 (id/type/name/description)
                 await db
                     .insert(facilities)
                     .values(
-                        batch.map(
-                            (f: {
-                                id: string
-                                type: string
-                                name: string
-                                description?: string
-                                lng: number
-                                lat: number
-                                hours?: string
-                                tel?: string
-                                hasSignal?: boolean
-                                polyline?: [number, number][]
-                            }) => ({
-                                id: f.id,
-                                type: f.type,
-                                name: f.name,
-                                description: f.description ?? null,
-                                lng: f.lng.toString(),
-                                lat: f.lat.toString(),
-                                hours: f.hours ?? null,
-                                tel: f.tel ?? null,
-                                hasSignal: f.hasSignal ?? null,
-                                polyline: f.polyline ?? null
-                            })
-                        )
+                        batch.map((f) => ({
+                            id: f.id,
+                            type: f.type,
+                            name: f.name,
+                            description: f.description ?? null
+                        }))
                     )
                     .onConflictDoUpdate({
                         target: facilities.id,
                         set: {
                             type: sql`excluded.type`,
                             name: sql`excluded.name`,
-                            description: sql`excluded.description`,
-                            lng: sql`excluded.lng`,
-                            lat: sql`excluded.lat`,
-                            hours: sql`excluded.hours`,
-                            tel: sql`excluded.tel`,
-                            hasSignal: sql`excluded.has_signal`,
-                            polyline: sql`excluded.polyline`
+                            description: sql`excluded.description`
                         }
                     })
+
+                // 2) 종류별 속성 — crosswalk(has_signal) / toilet·hospital(hours, tel)
+                const crosswalkRows = batch
+                    .filter((f) => f.type === 'crosswalk')
+                    .map((f) => ({ facilityId: f.id, hasSignal: f.hasSignal ?? null }))
+                if (crosswalkRows.length) {
+                    await db
+                        .insert(crosswalkAttribute)
+                        .values(crosswalkRows)
+                        .onConflictDoUpdate({
+                            target: crosswalkAttribute.facilityId,
+                            set: { hasSignal: sql`excluded.has_signal` }
+                        })
+                }
+
+                const toiletRows = batch
+                    .filter((f) => f.type === 'toilet')
+                    .map((f) => ({ facilityId: f.id, hours: f.hours ?? null, tel: f.tel ?? null }))
+                if (toiletRows.length) {
+                    await db
+                        .insert(toiletAttribute)
+                        .values(toiletRows)
+                        .onConflictDoUpdate({
+                            target: toiletAttribute.facilityId,
+                            set: { hours: sql`excluded.hours`, tel: sql`excluded.tel` }
+                        })
+                }
+
+                const hospitalRows = batch
+                    .filter((f) => f.type === 'hospital')
+                    .map((f) => ({ facilityId: f.id, hours: f.hours ?? null, tel: f.tel ?? null }))
+                if (hospitalRows.length) {
+                    await db
+                        .insert(hospitalAttribute)
+                        .values(hospitalRows)
+                        .onConflictDoUpdate({
+                            target: hospitalAttribute.facilityId,
+                            set: { hours: sql`excluded.hours`, tel: sql`excluded.tel` }
+                        })
+                }
+
+                // 3) geom — polyline(횡단보도)은 LineString, 그 외는 Point
+                for (const f of batch) {
+                    const geomExpr =
+                        f.polyline && f.polyline.length >= 2
+                            ? sql`ST_SetSRID(ST_GeomFromText(${`LINESTRING(${f.polyline
+                                  .map(([x, y]) => `${x} ${y}`)
+                                  .join(', ')})`}), 4326)`
+                            : sql`ST_SetSRID(ST_MakePoint(${f.lng}, ${f.lat}), 4326)`
+                    await db.execute(
+                        sql`UPDATE facilities SET geom = ${geomExpr} WHERE id = ${f.id}`
+                    )
+                }
             }
             totalInserted += data.length
             console.log(`  📦 ${file}: ${data.length}건`)
         }
-
-        await db.execute(sql`
-            ALTER TABLE facilities ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326)
-        `)
-        await db.execute(sql`
-            UPDATE facilities
-            SET geom = ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)
-            WHERE geom IS NULL
-        `)
-        await db.execute(sql`
-            CREATE INDEX IF NOT EXISTS facility_geom_idx ON facilities USING GIST (geom)
-        `)
 
         console.log(`✅ 시설물 데이터 적재 완료 (총 ${totalInserted}건)`)
     } catch (error) {

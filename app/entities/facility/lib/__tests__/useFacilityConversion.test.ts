@@ -12,8 +12,9 @@ const facility = (overrides: Partial<Facility> = {}): Facility =>
         type: 'toilet',
         name: '약수터',
         description: '맑은 물',
-        lng: 127.001,
-        lat: 37.5,
+        geometry: { type: 'Point', coordinates: [127.001, 37.5] },
+        attributes: [],
+        references: [],
         ...overrides
     }) as Facility
 
