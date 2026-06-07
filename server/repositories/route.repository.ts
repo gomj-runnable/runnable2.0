@@ -8,10 +8,11 @@ import type {
     SavedSection,
     SectionAttr
 } from '#shared/types/route'
-import type { GeoJsonLineString } from '#shared/types/geojson'
-import type { PoiDraftInput } from '#shared/types/facility'
+import type { GeoJsonLineString, GeoJsonPoint } from '#shared/types/geojson'
+import type { PoiDraftInput, PoiType } from '#shared/types/facility'
 import type { getDb } from '../database/client'
 import { routes, routeSections, routeLikes } from '../database/schema/routes'
+import { routeSectionPois } from '../database/schema/routeSectionPois'
 import { users } from '../database/schema/users'
 
 export type { SavedRoute, SavedSection }
@@ -81,13 +82,49 @@ const toSavedRoute = (row: typeof routes.$inferSelect, authorName?: string): Sav
     authorName
 })
 
-const toSavedSection = (row: typeof routeSections.$inferSelect): SavedSection => ({
-    sectionId: row.sectionId,
-    routeId: row.routeId,
-    geom: safeParseJson<GeoJsonLineString | undefined>(row.geom, undefined, 'geom'),
-    attrs: safeParseJson<SectionAttr[] | undefined>(row.attrs, undefined, 'attrs'),
-    pois: safeParseJson<PoiDraftInput[] | undefined>(row.pois, undefined, 'pois')
-})
+/** 트랜잭션 핸들 타입 (db.transaction 콜백 인자) */
+type DbTx = Parameters<Parameters<Db['transaction']>[0]>[0]
+
+/** route_sections raw 행 (+ ST_AsGeoJSON(geom)) */
+interface SectionRow {
+    section_id: string
+    route_id: string
+    attrs: string | null
+    geom: string | null
+}
+
+/** route_section_pois raw 행 (+ ST_AsGeoJSON(geom)) */
+interface PoiRow {
+    section_id: string
+    type: string
+    name: string
+    description: string | null
+    attribute: Record<string, unknown> | null
+    geom: string | null
+}
+
+const parseLineGeom = (raw: string | null): GeoJsonLineString | undefined => {
+    if (!raw) return undefined
+    try {
+        const parsed = JSON.parse(raw)
+        if (parsed?.type === 'LineString') return parsed as GeoJsonLineString
+    } catch {
+        console.warn('[route.repository] LineString geom parse failed')
+    }
+    return undefined
+}
+
+const parsePointGeom = (raw: string | null): GeoJsonPoint => {
+    if (raw) {
+        try {
+            const parsed = JSON.parse(raw)
+            if (parsed?.type === 'Point') return parsed as GeoJsonPoint
+        } catch {
+            console.warn('[route.repository] Point geom parse failed')
+        }
+    }
+    return { type: 'Point', coordinates: [0, 0] }
+}
 
 export class DrizzleRouteRepository implements IRouteRepository {
     constructor(private readonly db: Db) {}
@@ -183,46 +220,102 @@ export class DrizzleRouteRepository implements IRouteRepository {
         return result.length > 0
     }
 
+    /** 구간 1건 + geom + POI 들을 한 트랜잭션으로 저장한다(facilities 패턴: 비공간 컬럼 Drizzle + geom raw). */
+    private async insertSection(
+        tx: DbTx,
+        sectionId: string,
+        routeId: string,
+        input: CreateSectionInput
+    ): Promise<void> {
+        await tx.insert(routeSections).values({
+            sectionId,
+            routeId,
+            attrs: input.attrs ? JSON.stringify(input.attrs) : null
+        })
+        if (input.geom) {
+            await tx.execute(sql`
+                UPDATE route_sections
+                SET geom = ST_Force3D(ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(input.geom)}), 4326))
+                WHERE section_id = ${sectionId}
+            `)
+        }
+        for (const poi of input.pois ?? []) {
+            const poiId = randomUUID()
+            await tx.insert(routeSectionPois).values({
+                poiId,
+                sectionId,
+                type: poi.type,
+                name: poi.name,
+                description: poi.description ?? null,
+                attribute: poi.attribute ?? null
+            })
+            await tx.execute(sql`
+                UPDATE route_section_pois
+                SET geom = ST_Force3D(ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(poi.geom)}), 4326))
+                WHERE poi_id = ${poiId}
+            `)
+        }
+    }
+
     async createSection(routeId: string, input: CreateSectionInput): Promise<SavedSection> {
         const sectionId = randomUUID()
-        const [row] = await this.db
-            .insert(routeSections)
-            .values({
-                sectionId,
-                routeId,
-                geom: input.geom ? JSON.stringify(input.geom) : null,
-                attrs: input.attrs ? JSON.stringify(input.attrs) : null,
-                pois: input.pois ? JSON.stringify(input.pois) : null
-            })
-            .returning()
-
-        if (!row) throw new Error('Failed to create section')
-        return toSavedSection(row)
+        await this.db.transaction((tx) => this.insertSection(tx, sectionId, routeId, input))
+        return { sectionId, routeId, geom: input.geom, attrs: input.attrs, pois: input.pois }
     }
 
     async createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]> {
         if (inputs.length === 0) return []
-        const rows = await this.db
-            .insert(routeSections)
-            .values(
-                inputs.map((input) => ({
-                    sectionId: randomUUID(),
-                    routeId,
-                    geom: input.geom ? JSON.stringify(input.geom) : null,
-                    attrs: input.attrs ? JSON.stringify(input.attrs) : null,
-                    pois: input.pois ? JSON.stringify(input.pois) : null
-                }))
-            )
-            .returning()
-        return rows.map(toSavedSection)
+        const sectionIds = inputs.map(() => randomUUID())
+        await this.db.transaction(async (tx) => {
+            for (let i = 0; i < inputs.length; i++) {
+                await this.insertSection(tx, sectionIds[i]!, routeId, inputs[i]!)
+            }
+        })
+        return inputs.map((input, i) => ({
+            sectionId: sectionIds[i]!,
+            routeId,
+            geom: input.geom,
+            attrs: input.attrs,
+            pois: input.pois
+        }))
     }
 
     async getSectionsByRouteId(routeId: string): Promise<SavedSection[]> {
-        const rows = await this.db
-            .select()
-            .from(routeSections)
-            .where(eq(routeSections.routeId, routeId))
-        return rows.map(toSavedSection)
+        const sectionResult = await this.db.execute(sql`
+            SELECT section_id, route_id, attrs, ST_AsGeoJSON(geom) AS geom
+            FROM route_sections
+            WHERE route_id = ${routeId}
+        `)
+        const sectionRows = sectionResult.rows as unknown as SectionRow[]
+        if (sectionRows.length === 0) return []
+
+        // 구간들에 연결된 POI 를 한 번에 조회해 sectionId 별로 묶는다
+        const idsArray = `{${sectionRows.map((r) => r.section_id).join(',')}}`
+        const poiResult = await this.db.execute(sql`
+            SELECT section_id, type, name, description, attribute, ST_AsGeoJSON(geom) AS geom
+            FROM route_section_pois
+            WHERE section_id = ANY(${idsArray}::text[])
+        `)
+        const poiMap = new Map<string, PoiDraftInput[]>()
+        for (const p of poiResult.rows as unknown as PoiRow[]) {
+            const list = poiMap.get(p.section_id) ?? []
+            list.push({
+                name: p.name,
+                description: p.description ?? undefined,
+                type: p.type as PoiType,
+                geom: parsePointGeom(p.geom),
+                attribute: p.attribute ?? undefined
+            })
+            poiMap.set(p.section_id, list)
+        }
+
+        return sectionRows.map((r) => ({
+            sectionId: r.section_id,
+            routeId: r.route_id,
+            geom: parseLineGeom(r.geom),
+            attrs: safeParseJson<SectionAttr[] | undefined>(r.attrs, undefined, 'attrs'),
+            pois: poiMap.get(r.section_id)
+        }))
     }
 
     async deleteSectionsByRouteId(routeId: string): Promise<void> {

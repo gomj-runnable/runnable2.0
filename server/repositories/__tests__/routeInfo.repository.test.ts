@@ -17,6 +17,12 @@ afterAll(() => {
     resetDb()
 })
 
+/** GeoJSON Point 생성 헬퍼 (elev 생략 시 2D) */
+const pointGeom = (lng: number, lat: number, elev?: number) => ({
+    type: 'Point' as const,
+    coordinates: elev != null ? [lng, lat, elev] : [lng, lat]
+})
+
 async function createFreshRepository(): Promise<{
     repo: DrizzleRouteInfoRepository
     db: Db
@@ -43,7 +49,7 @@ async function seedUserAndRoute(db: Db, userId: string, routeId: string): Promis
 
 describe('DrizzleRouteInfoRepository (PostGIS)', () => {
     describe('create', () => {
-        it('routeInfo 를 생성하고 반환한다', async () => {
+        it('routeInfo 를 생성하고 geom 으로 반환한다', async () => {
             const { repo, db } = await createFreshRepository()
             await seedUserAndRoute(db, 'u1', 'r1')
 
@@ -53,9 +59,7 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
                 userId: 'u1',
                 name: '한강 입구',
                 description: '경로 시작점',
-                lng: '126.978',
-                lat: '37.5665',
-                elevation: '50',
+                geom: pointGeom(126.978, 37.5665, 50),
                 authorName: '테스터'
             })
 
@@ -63,14 +67,15 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
             expect(created.routeId).toBe('r1')
             expect(created.userId).toBe('u1')
             expect(created.name).toBe('한강 입구')
-            expect(created.lng).toBe(126.978)
-            expect(created.lat).toBe(37.5665)
-            expect(created.elevation).toBe(50)
+            expect(created.geom.type).toBe('Point')
+            expect(created.geom.coordinates[0]).toBeCloseTo(126.978, 4)
+            expect(created.geom.coordinates[1]).toBeCloseTo(37.5665, 4)
+            expect(created.geom.coordinates[2]).toBeCloseTo(50, 4)
             expect(created.authorName).toBe('테스터')
             expect(created.createdAt).toBeTruthy()
         })
 
-        it('elevation null 도 정상 처리한다', async () => {
+        it('고도 없는 2D 입력은 Z=0 으로 저장된다', async () => {
             const { repo, db } = await createFreshRepository()
             await seedUserAndRoute(db, 'u1', 'r1')
 
@@ -80,13 +85,13 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
                 userId: 'u1',
                 name: 'X',
                 description: 'Y',
-                lng: '126',
-                lat: '37',
-                elevation: null,
+                geom: pointGeom(126, 37),
                 authorName: 'tester'
             })
 
-            expect(created.elevation).toBeUndefined()
+            expect(created.geom.coordinates[0]).toBeCloseTo(126, 4)
+            expect(created.geom.coordinates[1]).toBeCloseTo(37, 4)
+            expect(created.geom.coordinates[2]).toBe(0)
         })
     })
 
@@ -101,9 +106,7 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
                 userId: 'u1',
                 name: '첫번째',
                 description: 'd1',
-                lng: '126',
-                lat: '37',
-                elevation: null,
+                geom: pointGeom(126, 37),
                 authorName: 'a'
             })
             // 약간 시차를 두어 createdAt 순서가 명확하도록
@@ -114,9 +117,7 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
                 userId: 'u1',
                 name: '두번째',
                 description: 'd2',
-                lng: '126',
-                lat: '37',
-                elevation: null,
+                geom: pointGeom(126, 37),
                 authorName: 'a'
             })
 
@@ -137,9 +138,7 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
                 userId: 'u1',
                 name: 'r1 것',
                 description: '',
-                lng: '0',
-                lat: '0',
-                elevation: null,
+                geom: pointGeom(0, 0),
                 authorName: 'a'
             })
             await repo.create({
@@ -148,9 +147,7 @@ describe('DrizzleRouteInfoRepository (PostGIS)', () => {
                 userId: 'u2',
                 name: 'r2 것',
                 description: '',
-                lng: '0',
-                lat: '0',
-                elevation: null,
+                geom: pointGeom(0, 0),
                 authorName: 'b'
             })
 
