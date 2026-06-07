@@ -1,10 +1,13 @@
 // Cesium 런타임 인터페이스 타입 정의 (CesiumRuntime, Viewer, Scene, DataSource 등)
 import type {
+    BoundingSphere,
     CallbackProperty,
+    Cartesian2,
     Cartesian3,
     Cartographic,
     Color,
     EllipsoidGeodesic,
+    HeadingPitchRange,
     Material,
     MaterialProperty
 } from 'cesium'
@@ -79,7 +82,7 @@ export interface CesiumRuntime {
         CESIUM_3D_TILE: unknown
         BOTH: unknown
     }
-    Cartesian2: new (x?: number, y?: number) => { x: number; y: number }
+    Cartesian2: new (x?: number, y?: number) => Cartesian2
     CesiumTerrainProvider: {
         fromUrl?: (url: string) => Promise<unknown>
         new (options?: { url?: string }): unknown
@@ -93,7 +96,11 @@ export interface CesiumRuntime {
     Cartesian3: {
         fromDegrees(longitude: number, latitude: number, height?: number): Cartesian3
         fromDegreesArray(coordinates: number[]): Cartesian3[]
+        clone(cartesian: Cartesian3, result?: Cartesian3): Cartesian3
+        distance(left: Cartesian3, right: Cartesian3): number
     }
+    BoundingSphere: new (center: Cartesian3, radius?: number) => BoundingSphere
+    HeadingPitchRange: new (heading?: number, pitch?: number, range?: number) => HeadingPitchRange
     HorizontalOrigin: {
         CENTER: unknown
         LEFT: unknown
