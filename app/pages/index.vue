@@ -152,7 +152,14 @@ defineShortcuts({
 const handleRouteInfoSubmit = async (payload: { name: string; description: string }) => {
     const pos = routeInfoEffect.clickedPosition.value
     if (!pos) return
-    const input = { ...payload, lng: pos.lng, lat: pos.lat, elevation: pos.elevation }
+    const input = {
+        ...payload,
+        geom: {
+            type: 'Point' as const,
+            coordinates:
+                pos.elevation != null ? [pos.lng, pos.lat, pos.elevation] : [pos.lng, pos.lat]
+        }
+    }
     if (routeList.selectedRouteId) {
         try {
             await routeInfoEffect.submitRouteInfo(routeList.selectedRouteId, input)

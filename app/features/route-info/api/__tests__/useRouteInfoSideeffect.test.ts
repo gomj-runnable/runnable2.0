@@ -96,7 +96,9 @@ describe('useRouteInfoSideeffect', () => {
 
     describe('fetchRouteInfos', () => {
         it('성공 — store.routeInfos 갱신', async () => {
-            $fetchMock.mockResolvedValue([{ name: 'info1' }])
+            $fetchMock.mockResolvedValue([
+                { name: 'info1', geom: { type: 'Point', coordinates: [127, 37] } }
+            ])
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             await sideeffect.fetchRouteInfos('r-1')
             expect($fetchMock).toHaveBeenCalledWith('/api/routes/r-1/feedbacks')
@@ -115,7 +117,10 @@ describe('useRouteInfoSideeffect', () => {
 
     describe('submitRouteInfo', () => {
         it('성공 — routeInfos 추가 + isAddingRouteInfo=false', async () => {
-            $fetchMock.mockResolvedValue({ name: 'new' })
+            $fetchMock.mockResolvedValue({
+                name: 'new',
+                geom: { type: 'Point', coordinates: [127, 37] }
+            })
             sharedStore.store.isAddingRouteInfo.value = true
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             await sideeffect.submitRouteInfo('r-1', { name: 'new' } as any)
@@ -138,8 +143,14 @@ describe('useRouteInfoSideeffect', () => {
         })
 
         it('각 local 항목에 대해 POST 후 clearLocalRouteInfos', async () => {
-            sharedStore.store.localRouteInfos.value = [{ name: 'a' }, { name: 'b' }] as any
-            $fetchMock.mockResolvedValue({ name: 'saved' })
+            sharedStore.store.localRouteInfos.value = [
+                { name: 'a', geom: { type: 'Point', coordinates: [127, 37] } },
+                { name: 'b', geom: { type: 'Point', coordinates: [127, 37] } }
+            ] as any
+            $fetchMock.mockResolvedValue({
+                name: 'saved',
+                geom: { type: 'Point', coordinates: [127, 37] }
+            })
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             await sideeffect.saveLocalRouteInfos('r-1')
             expect($fetchMock).toHaveBeenCalledTimes(2)
@@ -147,8 +158,14 @@ describe('useRouteInfoSideeffect', () => {
         })
 
         it('일부 실패해도 다음 항목 진행', async () => {
-            sharedStore.store.localRouteInfos.value = [{ name: 'a' }, { name: 'b' }] as any
-            $fetchMock.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce({ name: 'b' })
+            sharedStore.store.localRouteInfos.value = [
+                { name: 'a', geom: { type: 'Point', coordinates: [127, 37] } },
+                { name: 'b', geom: { type: 'Point', coordinates: [127, 37] } }
+            ] as any
+            $fetchMock.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce({
+                name: 'b',
+                geom: { type: 'Point', coordinates: [127, 37] }
+            })
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             await sideeffect.saveLocalRouteInfos('r-1')
             expect(sharedStore.store.routeInfos.value).toHaveLength(1)
@@ -159,10 +176,10 @@ describe('useRouteInfoSideeffect', () => {
     describe('renderRouteInfoMarkers / clearMarkers', () => {
         it('routeInfos + localRouteInfos 모두 entity 로 렌더링', () => {
             sharedStore.store.routeInfos.value = [
-                { name: '서버', lng: 127, lat: 37, elevation: 50 }
+                { name: '서버', geom: { type: 'Point', coordinates: [127, 37, 50] } }
             ] as any
             sharedStore.store.localRouteInfos.value = [
-                { name: '로컬', lng: 127.001, lat: 37.001 }
+                { name: '로컬', geom: { type: 'Point', coordinates: [127.001, 37.001] } }
             ] as any
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             sideeffect.renderRouteInfoMarkers()
@@ -171,14 +188,18 @@ describe('useRouteInfoSideeffect', () => {
 
         it('viewer null 이면 entity 추가 안 함', () => {
             viewer.value = null
-            sharedStore.store.routeInfos.value = [{ name: 'x', lng: 127, lat: 37 }] as any
+            sharedStore.store.routeInfos.value = [
+                { name: 'x', geom: { type: 'Point', coordinates: [127, 37] } }
+            ] as any
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             sideeffect.renderRouteInfoMarkers()
             // throw 없음
         })
 
         it('clearMarkers — entity 모두 제거', () => {
-            sharedStore.store.routeInfos.value = [{ name: 'x', lng: 127, lat: 37 }] as any
+            sharedStore.store.routeInfos.value = [
+                { name: 'x', geom: { type: 'Point', coordinates: [127, 37] } }
+            ] as any
             const sideeffect = useRouteInfoSideeffect(viewer as any)
             sideeffect.renderRouteInfoMarkers()
             expect(viewer.value.entities.list.length).toBe(1)

@@ -20,9 +20,7 @@ vi.mock('../../../../../http/session', () => ({ requireSession }))
 const validInput = {
     name: '음수대',
     description: '시원한 물',
-    lng: 127.0,
-    lat: 37.5,
-    elevation: 30
+    geom: { type: 'Point', coordinates: [127.0, 37.5, 30] }
 }
 
 const makeEvent = (routeId: string | undefined, body: any) =>
@@ -69,23 +67,19 @@ describe('POST /api/routes/[routeId]/feedbacks', () => {
             userId: 'me',
             name: '음수대',
             description: '시원한 물',
-            lng: '127',
-            lat: '37.5',
-            elevation: '30',
+            geom: { type: 'Point', coordinates: [127.0, 37.5, 30] },
             authorName: '나'
         })
         expect(result.routeInfoId).toBe('fixed-id')
     })
 
-    it('elevation 미지정 시 null 저장 + user.name 없으면 "익명"', async () => {
+    it('user.name 없으면 "익명" 으로 저장', async () => {
         getRouteById.mockResolvedValue({ routeId: 'r-1', userId: 'me', isPublic: false })
         requireSession.mockResolvedValueOnce({ userId: 'me' })
         create.mockImplementation(async (data) => data)
 
-        const { elevation: _, ...withoutElevation } = validInput
-        const result = await handler(makeEvent('r-1', withoutElevation))
+        const result = await handler(makeEvent('r-1', validInput))
 
-        expect(result.elevation).toBeNull()
         expect(result.authorName).toBe('익명')
     })
 

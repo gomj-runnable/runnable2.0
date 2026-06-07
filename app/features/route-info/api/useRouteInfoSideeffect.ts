@@ -182,10 +182,14 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
         ]
 
         for (const item of allItems) {
+            const coords = item.geom.coordinates
+            const lng = coords[0] ?? 0
+            const lat = coords[1] ?? 0
+            const elevation = coords[2]
             const position = C.Cartesian3.fromDegrees(
-                Number(item.lng),
-                Number(item.lat),
-                item.elevation != null ? Number(item.elevation) + 2 : undefined
+                lng,
+                lat,
+                elevation != null ? elevation + 2 : undefined
             )
 
             const entity = entityGroup.add({

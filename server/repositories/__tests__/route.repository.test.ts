@@ -208,6 +208,41 @@ describe('DrizzleRouteRepository (PostGIS)', () => {
             expect(sections[0]!.sectionId).toBe(section.sectionId)
         })
 
+        it('geom·attrs·pois 를 저장하고 조회 시 복원한다 (pois 는 별도 테이블)', async () => {
+            const { repo, db } = await createFreshRepository()
+            await insertTestUser(db, 'user-1')
+            const route = await repo.createRoute(sampleInput(), 'user-1')
+
+            await repo.createSection(route.routeId, {
+                geom: {
+                    type: 'LineString' as const,
+                    coordinates: [
+                        [127, 37, 10],
+                        [127.001, 37.001, 12]
+                    ]
+                },
+                attrs: [{ seq: 0, name: '구간1' }],
+                pois: [
+                    {
+                        name: '병원',
+                        type: 'HOSPITAL',
+                        geom: { type: 'Point' as const, coordinates: [127.0005, 37.0005] }
+                    }
+                ]
+            })
+
+            const sections = await repo.getSectionsByRouteId(route.routeId)
+            expect(sections).toHaveLength(1)
+            const s = sections[0]!
+            expect(s.geom?.type).toBe('LineString')
+            expect(s.geom?.coordinates).toHaveLength(2)
+            expect(s.attrs?.[0]?.name).toBe('구간1')
+            expect(s.pois).toHaveLength(1)
+            expect(s.pois?.[0]?.name).toBe('병원')
+            expect(s.pois?.[0]?.type).toBe('HOSPITAL')
+            expect(s.pois?.[0]?.geom.coordinates[0]).toBeCloseTo(127.0005, 4)
+        })
+
         it('다른 routeId의 구간은 조회되지 않는다', async () => {
             const { repo, db } = await createFreshRepository()
             await insertTestUser(db, 'user-1')

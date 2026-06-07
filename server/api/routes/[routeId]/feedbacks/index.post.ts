@@ -26,9 +26,7 @@ export default commonApiHandler(async (event) => {
         userId: user.userId,
         name: input.name,
         description: input.description,
-        lng: String(input.lng),
-        lat: String(input.lat),
-        elevation: input.elevation != null ? String(input.elevation) : null,
+        geom: input.geom,
         authorName: user.name ?? '익명'
     })
 })
