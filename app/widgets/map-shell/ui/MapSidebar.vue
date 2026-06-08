@@ -3,6 +3,9 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { NavKey, type NavKeyValue } from '../model/nav-key'
 import { ROLES } from '#shared/constants/roles'
+import ViewModeButton from '~/features/view-mode/ui/ViewModeButton.vue'
+import GraphicQualityButton from '~/features/graphic-quality/ui/GraphicQualityButton.vue'
+import BaseMapButton from '~/features/base-map/ui/BaseMapButton.vue'
 
 const props = defineProps<{
     activeNav: NavKeyValue | null
@@ -59,6 +62,9 @@ const dropdownItems = computed<DropdownMenuItem[]>(() => {
         </template>
 
         <template #right>
+            <BaseMapButton />
+            <ViewModeButton />
+            <GraphicQualityButton />
             <UColorModeButton />
             <UDropdownMenu :items="dropdownItems" :modal="false">
                 <UButton

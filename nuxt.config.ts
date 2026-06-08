@@ -65,7 +65,9 @@ export default defineNuxtConfig({
         tmapApi: process.env.TMAP_API ?? '', // T맵 경로 API 키 (서버 전용)
         // 클라이언트(브라우저)에 노출되는 값
         public: {
-            routeMode: process.env.ROUTE_MODE ?? '' // 경로 엔진 모드 (클라이언트 표시용)
+            routeMode: process.env.ROUTE_MODE ?? '', // 경로 엔진 모드 (클라이언트 표시용)
+            // V-World WMTS 키. 브라우저가 직접 타일을 호출하므로 public 노출 (도메인 화이트리스트 기반)
+            vworldKey: process.env.V_WORLD ?? ''
         }
     },
 
@@ -113,7 +115,7 @@ export default defineNuxtConfig({
                     'Content-Security-Policy': [
                         "default-src 'self'",
                         "img-src 'self' data: blob: https:",
-                        "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com https://mapprime.synology.me:15289 https://server.arcgisonline.com https://cdn.jsdelivr.net https://api.iconify.design",
+                        "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com https://mapprime.synology.me:15289 https://server.arcgisonline.com https://api.vworld.kr https://cdn.jsdelivr.net https://api.iconify.design",
                         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob:",
                         "worker-src 'self' blob:",
