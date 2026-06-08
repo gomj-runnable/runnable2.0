@@ -1,0 +1,38 @@
+# =============================================================================
+# Jenkins Configuration as Code — 보안 재현 (#181)
+#
+# 이 파일이 컨테이너 재생성 시 보안 설정 유실을 막는다.
+# 값 보간(${...})은 compose env 에서 주입 — 평문 비밀번호를 여기 두지 않는다.
+#   JENKINS_ADMIN_ID       : 관리자 계정 ID
+#   JENKINS_ADMIN_PASSWORD : 관리자 비밀번호 (.env.prod, gitignored)
+# =============================================================================
+jenkins:
+    systemMessage: 'Runnable CI — JCasC managed (#181)'
+    numExecutors: 2
+
+    # ── 보안 realm: 로컬 사용자 DB, 가입 차단 ──
+    securityRealm:
+        local:
+            allowsSignup: false
+            users:
+                - id: '${JENKINS_ADMIN_ID}'
+                  password: '${JENKINS_ADMIN_PASSWORD}'
+
+    # ── 권한: 로그인 사용자만 전체 권한, 익명 읽기 차단 ──
+    authorizationStrategy:
+        loggedInUsersCanDoAnything:
+            allowAnonymousRead: false
+
+    # ── CSRF(CRUMB) 보호 활성화 ──
+    crumbIssuer:
+        standard:
+            excludeClientIPFromCrumb: false
+
+# 스크립트 보안 유지
+security:
+    globalJobDslSecurityConfiguration:
+        useScriptSecurity: true
+
+unclassified:
+    location:
+        url: 'http://localhost:8080/'

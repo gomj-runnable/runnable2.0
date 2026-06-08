@@ -1,0 +1,25 @@
+# Jenkins 플러그인 목록 — JCasC 로 보안/파이프라인 재현 (#181)
+# 적용: jenkins-plugin-cli --plugin-file plugins.txt (compose/jenkins/Dockerfile)
+
+# JCasC 코어
+configuration-as-code
+
+# 보안 — 권한 매트릭스
+matrix-auth
+
+# 파이프라인 (Jenkinsfile)
+workflow-aggregator
+pipeline-stage-view
+
+# SCM / GitHub webhook
+git
+github
+github-branch-source
+
+# 자격증명 (github-pat 등)
+credentials
+plain-credentials
+
+# Jenkinsfile 에서 쓰는 유틸
+timestamper
+ws-cleanup
