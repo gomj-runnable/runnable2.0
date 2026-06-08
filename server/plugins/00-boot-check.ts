@@ -9,7 +9,7 @@ export default defineNitroPlugin(() => {
         OPEN_DATA: config.openData,
         AIR_KOREA_KEY: config.airKoreaKey,
         ROUTE_MODE: config.routeMode,
-        TMAP_API: config.tmapApi
+        TMAP_API_ACCESS_TOCKEN: config.tmapApi
     }
     for (const [name, value] of Object.entries(requiredEnv)) {
         if (!value) throw new Error(`${name} 환경 변수가 설정되지 않았습니다`)

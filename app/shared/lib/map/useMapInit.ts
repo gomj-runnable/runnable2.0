@@ -1,6 +1,6 @@
 import type { Cartesian3 } from 'cesium'
 import type { CommonResponse } from '#shared/types/common'
-import type { CesiumDrawHandler, CesiumRuntime, CesiumViewerRuntime } from '#shared/types/cesium'
+import type { CesiumDrawHandler, CesiumViewerRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { DrawActionData, DrawActionResult, CesiumViewer } from '~/shared/lib/useWindow'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
@@ -45,6 +45,9 @@ interface MapInitOptions {
  * SSR 비활성화(`ssr: false`) 페이지의 `onMounted`에서 `init()`을 호출해야 한다.
  */
 export const useMapInit = (options?: MapInitOptions) => {
+    /** 3D 타일셋·지형 URL (runtimeConfig.public). 미설정 시 빈 문자열 → 해당 레이어 생략. */
+    const { tilesetUrl, terrainUrl } = useRuntimeConfig().public
+
     /** 현재 진행 중인 드로잉 세션 상태. 드로잉이 없으면 `null`. */
     let activeDrawState: CesiumDrawState | null = null
     let lastPickWasCorrected = false
@@ -402,8 +405,6 @@ export const useMapInit = (options?: MapInitOptions) => {
     const applyViewerScene = async (viewer: CesiumViewer) => {
         const CesiumLib = getCesiumRuntime()
         const rawViewer = viewer as unknown as CesiumViewerRuntime
-        const terrainUrl = 'https://mapprime.synology.me:15289/seoul/data/terrain/1m_v1.1/'
-        const tilesetUrl = 'https://mapprime.synology.me:15289/seoul/data/all_ktx2/tileset.json'
 
         if (rawViewer.screenSpaceCameraController) {
             rawViewer.screenSpaceCameraController.rotateEventTypes = [
@@ -421,36 +422,38 @@ export const useMapInit = (options?: MapInitOptions) => {
             rawViewer.scene.globe.depthTestAgainstTerrain = true
         }
 
-        if (rawViewer.imageryLayers?.removeAll) {
-            rawViewer.imageryLayers.removeAll()
+        // 베이스맵(imagery)은 useBaseMapSideeffect가 V-World 레이어로 전담 적용한다.
+
+        if (terrainUrl) {
+            try {
+                rawViewer.terrainProvider = CesiumLib.CesiumTerrainProvider.fromUrl
+                    ? await CesiumLib.CesiumTerrainProvider.fromUrl(terrainUrl)
+                    : new CesiumLib.CesiumTerrainProvider({ url: terrainUrl })
+            } catch (error) {
+                rawViewer.terrainProvider = new CesiumLib.EllipsoidTerrainProvider()
+                console.warn(
+                    'Cesium terrain load failed. Falling back to ellipsoid terrain.',
+                    error
+                )
+            }
         }
 
-        rawViewer.imageryLayers?.addImageryProvider?.(
-            new CesiumLib.UrlTemplateImageryProvider({
-                url: 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                maximumLevel: 18
-            })
-        )
+        if (tilesetUrl) {
+            try {
+                const tileset = CesiumLib.Cesium3DTileset.fromUrl
+                    ? await CesiumLib.Cesium3DTileset.fromUrl(tilesetUrl, {
+                          maximumScreenSpaceError: 0
+                      })
+                    : new CesiumLib.Cesium3DTileset({
+                          url: tilesetUrl,
+                          maximumScreenSpaceError: 0
+                      })
 
-        try {
-            rawViewer.terrainProvider = CesiumLib.CesiumTerrainProvider.fromUrl
-                ? await CesiumLib.CesiumTerrainProvider.fromUrl(terrainUrl)
-                : new CesiumLib.CesiumTerrainProvider({ url: terrainUrl })
-        } catch (error) {
-            rawViewer.terrainProvider = new CesiumLib.EllipsoidTerrainProvider()
-            console.warn('Cesium terrain load failed. Falling back to ellipsoid terrain.', error)
+                rawViewer.scene.primitives.add(tileset)
+            } catch (error) {
+                console.warn('Cesium 3D tileset load failed.', error)
+            }
         }
-
-        const tileset = CesiumLib.Cesium3DTileset.fromUrl
-            ? await CesiumLib.Cesium3DTileset.fromUrl(tilesetUrl, {
-                  maximumScreenSpaceError: 0
-              })
-            : new CesiumLib.Cesium3DTileset({
-                  url: tilesetUrl,
-                  maximumScreenSpaceError: 0
-              })
-
-        rawViewer.scene.primitives.add(tileset)
 
         rawViewer.camera.setView({
             destination: CesiumLib.Cartesian3.fromDegrees(127.035, 37.519, 400),
