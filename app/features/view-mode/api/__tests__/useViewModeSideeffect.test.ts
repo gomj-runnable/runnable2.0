@@ -56,13 +56,16 @@ vi.mock('~/shared/lib/map/useCesiumRuntime', () => ({
     })
 }))
 
-const makeViewer = () => ({
+const makeTileset = () => ({ maximumScreenSpaceError: 0, show: true })
+
+const makeViewer = (tileset = makeTileset()) => ({
     scene: {
         canvas: { clientWidth: 800, clientHeight: 600 },
         pickPositionSupported: true,
         pickPosition: vi.fn(() => ({ x: 1, y: 2, z: 3 })),
         globe: { pick: vi.fn() },
-        preRender: { addEventListener: vi.fn(), removeEventListener: vi.fn() }
+        preRender: { addEventListener: vi.fn(), removeEventListener: vi.fn() },
+        primitives: { length: 1, get: () => tileset }
     },
     camera: {
         heading: 1.2,
@@ -178,6 +181,9 @@ describe('useViewModeSideeffect', () => {
 
         const guard = viewer.value.scene.preRender.addEventListener.mock.calls[0]![0] as () => void
 
+        // 초기 진입(mount)·전환 과정의 setView 호출을 제외하고 가드 동작만 검증한다
+        viewer.value.camera.setView.mockClear()
+
         // 사용자가 시점을 기울인 상황
         viewer.value.camera.pitch = -0.5
         viewer.value.camera.heading = 0.4
@@ -217,5 +223,46 @@ describe('useViewModeSideeffect', () => {
         scope!.stop()
         scope = null
         expect(viewer.value.scene.preRender.removeEventListener).toHaveBeenCalled()
+    })
+
+    it('2D 전환 — 3D 타일셋 숨김', async () => {
+        const tileset = makeTileset()
+        const viewer = shallowRef(makeViewer(tileset))
+        mount(viewer)
+
+        store.setMode(ScreenModeEnum.MODE2D)
+        await flush()
+
+        expect(tileset.show).toBe(false)
+    })
+
+    it('3D 복귀 — 3D 타일셋 다시 표시', async () => {
+        const tileset = makeTileset()
+        const viewer = shallowRef(makeViewer(tileset))
+        mount(viewer)
+
+        store.setMode(ScreenModeEnum.MODE2D)
+        await flush()
+        expect(tileset.show).toBe(false)
+
+        store.setMode(ScreenModeEnum.MODE3D)
+        await flush()
+        expect(tileset.show).toBe(true)
+    })
+
+    it('viewer 준비 시 — 현재 모드를 애니메이션 없이 즉시 적용(2D면 타일 숨김+setView)', async () => {
+        store.setMode(ScreenModeEnum.MODE2D)
+        await nextTick()
+
+        const tileset = makeTileset()
+        const viewer = shallowRef(makeViewer(tileset))
+        mount(viewer)
+        await flush()
+
+        // flyTo(애니메이션) 대신 setView로 즉시 적용
+        expect(viewer.value.camera.setView).toHaveBeenCalled()
+        expect(viewer.value.camera.flyToBoundingSphere).not.toHaveBeenCalled()
+        expect(tileset.show).toBe(false)
+        expect(viewer.value.scene.preRender.addEventListener).toHaveBeenCalledTimes(1)
     })
 })

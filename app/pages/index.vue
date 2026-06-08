@@ -14,6 +14,7 @@ import RouteCompareModal from '~/features/route-compare/ui/RouteCompareModal.vue
 import { useRouteCompareSideeffect } from '~/features/route-compare/api/useRouteCompareSideeffect'
 import { useViewModeSideeffect } from '~/features/view-mode/api/useViewModeSideeffect'
 import { useGraphicQualitySideeffect } from '~/features/graphic-quality/api/useGraphicQualitySideeffect'
+import { useBaseMapSideeffect } from '~/features/base-map/api/useBaseMapSideeffect'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
 import { NavKey } from '~/widgets/map-shell/model/nav-key'
 import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
@@ -74,9 +75,11 @@ const slideOver = useSlideOverNav(activeNav)
 const showDrawingHelpModal = ref(false)
 const compareEffect = useRouteCompareSideeffect()
 
-// 헤더 버튼(2D/3D 토글·그래픽 품질)이 변경하는 store 상태를 viewer에 반영하는 공통 컨텍스트 sideeffect
+// 헤더 버튼(베이스맵·2D/3D 토글·그래픽 품질)이 변경하는 store 상태를 viewer에 반영하는 공통 컨텍스트 sideeffect
+const runtimeConfig = useRuntimeConfig()
 useViewModeSideeffect({ viewer })
 useGraphicQualitySideeffect({ viewer })
+useBaseMapSideeffect({ viewer, vworldKey: runtimeConfig.public.vworldKey })
 
 // 탐색은 사이드패널 플러그인으로 분리됐지만, 선택 경로 ID는 store(useState) 기반 전역 상태라
 // 코어도 동일 인스턴스를 통해 오버레이 컨텍스트(EXPLORE_SELECTED)를 판별한다.

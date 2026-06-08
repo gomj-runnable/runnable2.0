@@ -5,8 +5,8 @@ import { ScreenModeEnum } from '#shared/types/screen-mode.enum'
  * 실제 카메라 전환(시점 이동·틸트 잠금·가드)은 `useViewModeSideeffect`에 위임한다.
  */
 export const useViewModeStore = () => {
-    /** 현재 화면 모드 */
-    const screenMode = useState<ScreenModeEnum>('viewMode.screenMode', () => ScreenModeEnum.MODE3D)
+    /** 현재 화면 모드. 기본은 2D(평면 지도). */
+    const screenMode = useState<ScreenModeEnum>('viewMode.screenMode', () => ScreenModeEnum.MODE2D)
 
     /** 카메라 전환(flyTo) 진행 중 여부. 전환 중 재토글을 막는다. */
     const isTransitioning = useState<boolean>('viewMode.isTransitioning', () => false)

@@ -84,6 +84,23 @@ export const useViewModeSideeffect = (options: UseViewModeSideeffectOptions) => 
     }
 
     /**
+     * scene.primitives의 3D 타일셋(duck-typing) 가시성을 일괄 토글한다.
+     * 2D 모드에선 3D 건물 타일을 숨겨 평면 지도처럼 보이게 한다.
+     */
+    const setTilesetVisible = (v: CesiumViewer, visible: boolean) => {
+        const primitives = v.scene.primitives
+        for (let i = 0; i < primitives.length; i++) {
+            const primitive = primitives.get(i) as {
+                maximumScreenSpaceError?: number
+                show?: boolean
+            }
+            if (typeof primitive?.maximumScreenSpaceError === 'number') {
+                primitive.show = visible
+            }
+        }
+    }
+
+    /**
      * 캔버스 중앙 픽셀에서 지표면 월드좌표와 카메라-타겟 거리를 구한다.
      * 깊이 버퍼 픽 → 지형 교차점 → 타원체 교차점 순의 3단계 폴백.
      */
@@ -147,25 +164,52 @@ export const useViewModeSideeffect = (options: UseViewModeSideeffectOptions) => 
             })
         })
 
-    /** 2D 전환 — 틸트 잠금 후 수직 하향 비행, 완료 시 수직 시점 유지 가드 활성. */
-    const switchTo2d = async () => {
+    /** 화면 중심 타겟을 유지한 채 지정 pitch로 즉시 시점을 설정한다 (애니메이션 없음, 초기 진입용). */
+    const setViewPitch = (v: CesiumViewer, pitchDeg: number, headingRad: number) => {
+        const CesiumLib = getCesiumRuntime()
+        v.camera.setView({
+            destination: CesiumLib.Cartesian3.clone(v.camera.positionWC),
+            orientation: { heading: headingRad, pitch: CesiumLib.Math.toRadians(pitchDeg), roll: 0 }
+        })
+    }
+
+    /** 2D 전환 — 3D 타일 숨김 + 틸트 잠금 후 수직 하향, 완료 시 수직 시점 유지 가드 활성. */
+    const switchTo2d = async (animate: boolean) => {
         const v = viewer.value
         if (!v) return
 
+        setTilesetVisible(v, false)
         lockToTopDown(v)
-        await flyToPitch(v, PITCH_2D_DEG, 0)
+        if (animate) await flyToPitch(v, PITCH_2D_DEG, 0)
+        else setViewPitch(v, PITCH_2D_DEG, 0)
         enableTopDownGuard(v)
     }
 
-    /** 3D 전환 — 가드 해제 후 조감 시점 비행, 완료 시 카메라 컨트롤 복원. */
-    const switchTo3d = async () => {
+    /** 3D 전환 — 가드 해제 후 조감 시점으로 이동, 완료 시 3D 타일 표시 + 카메라 컨트롤 복원. */
+    const switchTo3d = async (animate: boolean) => {
         const v = viewer.value
         if (!v) return
 
         disableTopDownGuard()
-        await flyToPitch(v, PITCH_3D_DEG, v.camera.heading)
+        if (animate) await flyToPitch(v, PITCH_3D_DEG, v.camera.heading)
+        else setViewPitch(v, PITCH_3D_DEG, v.camera.heading)
+        setTilesetVisible(v, true)
         unlockCamera(v)
     }
+
+    const applyMode = async (mode: typeof store.screenMode.value, animate: boolean) => {
+        if (mode.is2D) await switchTo2d(animate)
+        else await switchTo3d(animate)
+    }
+
+    // viewer 준비 시 현재 모드를 즉시 적용한다 (기본 2D — 애니메이션 없이 초기 시점 고정)
+    watch(
+        viewer,
+        (v) => {
+            if (v) applyMode(store.screenMode.value, false)
+        },
+        { immediate: true }
+    )
 
     // 공통 컨텍스트(store) 기반 전환 — 버튼은 store만 변경하고, 카메라 제어는 여기서 반응한다
     watch(
@@ -175,11 +219,7 @@ export const useViewModeSideeffect = (options: UseViewModeSideeffectOptions) => 
 
             store.setTransitioning(true)
             try {
-                if (mode.is2D) {
-                    await switchTo2d()
-                } else {
-                    await switchTo3d()
-                }
+                await applyMode(mode, true)
             } finally {
                 store.setTransitioning(false)
             }

@@ -65,7 +65,9 @@ export default defineNuxtConfig({
         tmapApi: process.env.TMAP_API ?? '', // T맵 경로 API 키 (서버 전용)
         // 클라이언트(브라우저)에 노출되는 값
         public: {
-            routeMode: process.env.ROUTE_MODE ?? '' // 경로 엔진 모드 (클라이언트 표시용)
+            routeMode: process.env.ROUTE_MODE ?? '', // 경로 엔진 모드 (클라이언트 표시용)
+            // V-World WMTS 키. 브라우저가 직접 타일을 호출하므로 public 노출 (도메인 화이트리스트 기반)
+            vworldKey: process.env.V_WORLD ?? ''
         }
     },
 
