@@ -5,6 +5,29 @@ import { dirname, resolve } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+// 지도 타일 서버 origin 을 env URL 에서 추출 — CSP connect-src 화이트리스트 동적 구성 (#368)
+// 개인 인프라 도메인을 코드에 하드코딩하지 않고 .env(TERRAIN_URL/TILESET_URL) 에서 가져온다.
+const toOrigin = (raw?: string): string => {
+    if (!raw) return ''
+    try {
+        return new URL(raw).origin
+    } catch {
+        return ''
+    }
+}
+const MAP_TILE_ORIGINS = Array.from(
+    new Set([toOrigin(process.env.TERRAIN_URL), toOrigin(process.env.TILESET_URL)].filter(Boolean))
+)
+const CSP_CONNECT_SRC = [
+    "connect-src 'self'",
+    'https://*.cesium.com',
+    'https://assets.ion.cesium.com',
+    'https://api.vworld.kr',
+    'https://cdn.jsdelivr.net',
+    'https://api.iconify.design',
+    ...MAP_TILE_ORIGINS
+].join(' ')
+
 export default defineNuxtConfig({
     // SPA 모드 — 서버사이드 렌더링 비활성 (클라이언트에서만 렌더)
     ssr: false,
@@ -62,12 +85,15 @@ export default defineNuxtConfig({
         openData: process.env.OPEN_DATA ?? '', // 공공데이터포털 키 (서버 전용)
         airKoreaKey: process.env.AIR_KOREA_KEY ?? '', // 에어코리아 대기질 키 (서버 전용)
         routeMode: process.env.ROUTE_MODE ?? '', // 경로 엔진 모드 (서버 전용, 부팅 시 필수 검증)
-        tmapApi: process.env.TMAP_API ?? '', // T맵 경로 API 키 (서버 전용)
+        tmapApi: process.env.TMAP_API_ACCESS_TOCKEN ?? '', // T맵 경로 API 키 (서버 전용)
         // 클라이언트(브라우저)에 노출되는 값
         public: {
             routeMode: process.env.ROUTE_MODE ?? '', // 경로 엔진 모드 (클라이언트 표시용)
             // V-World WMTS 키. 브라우저가 직접 타일을 호출하므로 public 노출 (도메인 화이트리스트 기반)
-            vworldKey: process.env.V_WORLD ?? ''
+            vworldKey: process.env.V_WORLD_ACCESS_TOCKEN ?? '',
+            // 3D 타일셋·지형 URL. 브라우저 Cesium 뷰어가 직접 로드하므로 public 노출
+            tilesetUrl: process.env.TILESET_URL ?? '',
+            terrainUrl: process.env.TERRAIN_URL ?? ''
         }
     },
 
@@ -115,7 +141,7 @@ export default defineNuxtConfig({
                     'Content-Security-Policy': [
                         "default-src 'self'",
                         "img-src 'self' data: blob: https:",
-                        "connect-src 'self' https://*.cesium.com https://assets.ion.cesium.com https://mapprime.synology.me:15289 https://server.arcgisonline.com https://api.vworld.kr https://cdn.jsdelivr.net https://api.iconify.design",
+                        CSP_CONNECT_SRC,
                         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob:",
                         "worker-src 'self' blob:",
