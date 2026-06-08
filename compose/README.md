@@ -44,12 +44,12 @@ docker compose --env-file .env.prod up -d
 
 ## 서비스
 
-| 서비스    | 이미지 / 빌드                        | 포트                | 비고                         |
-| --------- | ------------------------------------ | ------------------- | ---------------------------- |
-| `db`      | imresamu/postgis:17-3.5-alpine       | 127.0.0.1:5433→5432 | 볼륨 `runnable_db_prod_data` |
-| `app`     | build: ../compose/Dockerfile         | **3333→3000**       | Tailscale Funnel 진입점      |
-| `migrate` | build: ../compose/Dockerfile.migrate | —                   | profile=migrate, 일회성      |
-| `jenkins` | jenkins/jenkins:lts                  | 8080, 50000         | docker.sock 마운트           |
+| 서비스    | 이미지 / 빌드                        | 포트                | 비고                           |
+| --------- | ------------------------------------ | ------------------- | ------------------------------ |
+| `db`      | imresamu/postgis:17-3.5-alpine       | 127.0.0.1:5433→5432 | 볼륨 `runnable_db_prod_data`   |
+| `app`     | build: ../compose/Dockerfile         | **3333→3000**       | Tailscale Funnel 진입점        |
+| `migrate` | build: ../compose/Dockerfile.migrate | —                   | profile=migrate, 일회성        |
+| `jenkins` | build: ./jenkins (JCasC)             | 8080, 50000         | docker.sock 마운트 + 보안 재현 |
 
 ## 외부 노출 (Tailscale Funnel)
 
@@ -90,6 +90,32 @@ docker compose -f compose/docker-compose.yml exec -T db \
 7. `Migrate` — `compose --profile migrate run --rm migrate`
 8. `Deploy` — `compose build app` → `compose up -d --no-deps app`
 9. `Smoke` — runnable_app_prod healthcheck + `curl localhost:3333` 200 확인
+
+## Jenkins 보안 (JCasC) — #181
+
+컨테이너 재생성 시 보안 설정 유실을 막기 위해 `compose/jenkins/` 의 JCasC 로
+보안 realm·권한·CSRF 를 이미지에 박는다.
+
+- `compose/jenkins/Dockerfile` — lts + plugins + casc 설정
+- `compose/jenkins/plugins.txt` — configuration-as-code 등 필수 플러그인
+- `compose/jenkins/jenkins.casc.yaml` — 로컬 사용자 realm + 익명읽기 차단 + CRUMB
+
+적용에 필요한 `.env.prod` 변수:
+
+```bash
+JENKINS_ADMIN_ID=admin
+JENKINS_ADMIN_PASSWORD=<강력한 비밀번호>
+```
+
+적용 (기존 `jenkins_home` 볼륨 유지된 채 보안만 재구성):
+
+```bash
+docker compose -f compose/docker-compose.yml --env-file compose/.env.prod \
+  up -d --build jenkins
+```
+
+> 이후 `http://localhost:8080` 은 로그인 필수가 되고 익명 접근이 차단된다.
+> 관리자 비밀번호 변경은 `.env.prod` 수정 후 `up -d --build jenkins` 재실행.
 
 ## 트러블슈팅
 
