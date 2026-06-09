@@ -8,7 +8,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY drizzle.config.ts ./
 COPY server/database/ ./server/database/
 COPY server/data/facilities/ ./server/data/facilities/
-COPY server/config/dbMode.ts ./server/config/dbMode.ts
+COPY server/config/ ./server/config/
 COPY shared/constants/ ./shared/constants/
 
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
