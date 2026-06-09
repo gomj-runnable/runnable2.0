@@ -65,25 +65,6 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. One Issue Per Branch · PR-Only Close
-
-**머지 누락 사고 방지 규칙.**
-
-브랜치/세션은 **이슈 1개**(또는 명시적 epic)만 다룬다.
-
-- 여러 이슈를 한 브랜치에 누적하지 않는다. 충돌 머지 시 한 이슈의 변경 파일이 통째로 누락돼도 사람이 추적 못 함.
-- 별도 이슈가 발견되면 새 브랜치를 파거나 사용자에게 분리를 제안한다.
-
-이슈는 **PR 머지로만 close** 한다 (수동 close 금지).
-
-- PR 본문에 `Closes #N` 키워드를 반드시 명시 — 머지 시 자동 close 되도록.
-- "구현 완료" 코멘트를 단 뒤 사용자가 수동 close 하는 흐름은 금지. "이슈 closed = master 에 코드 반영됨" 이 보장돼야 한다.
-
-PR 머지 후 셀프 검증:
-
-- 이슈 본문/코멘트에 명시된 "변경 파일 목록" 이 PR diff 에 실제로 있는지 grep 확인.
-- 없으면 머지 충돌 해결 시 누락된 것 — 즉시 후속 PR 로 보완.
-
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
