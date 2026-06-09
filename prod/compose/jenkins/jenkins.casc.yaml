@@ -30,3 +30,36 @@ jenkins:
 unclassified:
     location:
         url: 'http://localhost:8080/'
+
+# ── Job-DSL 스크립트 보안: JCasC 가 주입하는 커밋된 스크립트만 실행하므로 sandbox 불필요 ──
+security:
+    globalJobDslSecurityConfiguration:
+        useScriptSecurity: false
+
+# ── 파이프라인 Job 선언 (재현 가능, 컨테이너 재생성 시 자동 재생성) ──
+# public 레포라 credentials 불필요. githubPush 로 master push 자동 트리거.
+jobs:
+    - script: |
+          pipelineJob('runnable-deploy') {
+              description('Runnable CI/CD — master push 자동 배포 (JCasC managed #181)')
+              properties {
+                  githubProjectUrl('https://github.com/gomj-runnable/runnable2.0/')
+              }
+              triggers {
+                  githubPush()
+              }
+              definition {
+                  cpsScm {
+                      scm {
+                          git {
+                              remote {
+                                  url('https://github.com/gomj-runnable/runnable2.0.git')
+                              }
+                              branch('*/master')
+                          }
+                      }
+                      scriptPath('Jenkinsfile')
+                      lightweight(true)
+                  }
+              }
+          }

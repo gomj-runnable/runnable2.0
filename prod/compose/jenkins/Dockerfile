@@ -9,6 +9,24 @@
 # =============================================================================
 FROM jenkins/jenkins:lts
 
+# ── 빌드 툴체인 설치 (Jenkinsfile 이 컨테이너 안에서 실행) ──
+# bare lts 는 Java 만 있어 node/pnpm 부재, 호스트 docker 바이너리는 macOS 라 Linux 컨테이너에서
+# Exec format error. node20 + corepack(pnpm) + Linux docker-ce-cli 를 이미지에 굽는다.
+# docker 는 마운트된 docker.sock 으로 호스트 데몬을 제어한다.
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && corepack enable \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/*
+
 # 플러그인 사전 설치 (JCasC 적용에 configuration-as-code 필수)
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt

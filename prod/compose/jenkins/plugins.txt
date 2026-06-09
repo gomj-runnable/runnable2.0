@@ -11,6 +11,9 @@ matrix-auth
 workflow-aggregator
 pipeline-stage-view
 
+# JCasC 로 Job 선언 (jobs 블록)
+job-dsl
+
 # SCM / GitHub webhook
 git
 github

@@ -121,9 +121,8 @@ services:
             - '50000:50000'
         volumes:
             - jenkins_home:/var/jenkins_home
+            # docker CLI 는 이미지에 설치됨(Linux docker-ce-cli) — 이 socket 으로 호스트 데몬 제어
             - /var/run/docker.sock:/var/run/docker.sock
-            # 호스트 docker CLI 재사용 — Jenkinsfile 의 `docker compose` 호출 가능하게
-            - /opt/homebrew/bin/docker:/usr/local/bin/docker:ro
         networks:
             - runnable_net
 
