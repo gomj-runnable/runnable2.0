@@ -65,6 +65,11 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. 브랜치 전략 — 병렬은 분기·PR, 단일은 master
+
+- **여러 변경점이 병렬로 개발될 때**: 변경별로 브랜치를 나누고 PR 로 머지한다 (충돌·머지 누락 방지).
+- **단일 변경 상황**: 별도 브랜치 없이 master 에서 바로 진행한다.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
