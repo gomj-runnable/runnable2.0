@@ -1,5 +1,5 @@
 # Jenkins 플러그인 목록 — JCasC 로 보안/파이프라인 재현 (#181)
-# 적용: jenkins-plugin-cli --plugin-file plugins.txt (compose/jenkins/Dockerfile)
+# 적용: jenkins-plugin-cli --plugin-file plugins.txt (prod/compose/jenkins/Dockerfile)
 
 # JCasC 코어
 configuration-as-code

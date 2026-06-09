@@ -1,5 +1,5 @@
 # ── 런타임 전용 (빌드는 호스트/Jenkins 에서 수행) ──
-# 빌드 컨텍스트: 프로젝트 루트 (compose/docker-compose.yml 의 build.context: ..)
+# 빌드 컨텍스트: 프로젝트 루트 (prod/compose/docker-compose.yml 의 build.context: ../..)
 FROM node:20-slim
 
 RUN groupadd -r app && useradd -r -g app app

@@ -5,7 +5,7 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import { sql } from 'drizzle-orm'
 import type { getDb } from '../database/client'
 
-// 운영(compose/docker-compose.yml)과 동일한 PostGIS 이미지를 사용한다.
+// 운영(prod/compose/docker-compose.yml)과 동일한 PostGIS 이미지를 사용한다.
 const POSTGIS_IMAGE = 'imresamu/postgis:17-3.5-alpine'
 
 let container: StartedPostgreSqlContainer | null = null

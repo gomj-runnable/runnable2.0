@@ -1,13 +1,13 @@
 # ============================================================
 # Runnable — docker-compose 운영 형상 (compose 패키지)
 #
-# 위치: compose/docker-compose.yml
-# 빌드 컨텍스트: 프로젝트 루트 (..)
+# 위치: prod/compose/docker-compose.yml
+# 빌드 컨텍스트: 프로젝트 루트 (../..)
 #
 # 실행 (프로젝트 루트에서):
-#   docker compose -f compose/docker-compose.yml --env-file .env.prod up -d
+#   docker compose -f prod/compose/docker-compose.yml --env-file .env.prod up -d
 # 또는 compose 디렉토리에서:
-#   cd compose && docker compose --env-file ../.env.prod up -d
+#   cd prod/compose && docker compose --env-file ../../.env.prod up -d
 #
 # Services:
 #   - db        : PostGIS 17 (named volume 영속)
@@ -49,8 +49,8 @@ services:
 
     app:
         build:
-            context: ..
-            dockerfile: compose/Dockerfile
+            context: ../..
+            dockerfile: prod/compose/Dockerfile
         image: runnable-app:latest
         container_name: runnable_app_prod
         restart: unless-stopped
@@ -58,7 +58,7 @@ services:
             db:
                 condition: service_healthy
         env_file:
-            - ../.env.prod
+            - ../../.env.prod
         environment:
             DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
             HOST: 0.0.0.0
@@ -82,14 +82,14 @@ services:
     migrate:
         profiles: ['migrate']
         build:
-            context: ..
-            dockerfile: compose/Dockerfile.migrate
+            context: ../..
+            dockerfile: prod/compose/Dockerfile.migrate
         image: runnable-migrate:latest
         depends_on:
             db:
                 condition: service_healthy
         env_file:
-            - ../.env.prod
+            - ../../.env.prod
         environment:
             DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
         networks:
