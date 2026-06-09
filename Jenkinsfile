@@ -87,7 +87,7 @@ pipeline {
 
         // ── 7. Smoke ──
         stage('Smoke') {
-            steps { sh 'bash prod/deploy/smoke.sh' }
+            steps { sh 'SMOKE_URL=http://runnable_app_prod:3000 bash prod/deploy/smoke.sh' }
         }
     }
 

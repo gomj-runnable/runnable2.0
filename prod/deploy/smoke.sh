@@ -11,8 +11,10 @@ for i in $(seq 1 12); do
     sleep 5
 done
 
-echo "==> HTTP 200 확인 (외부 3333)"
-HTTP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3333 --max-time 10 || echo "000")
+# 호스트 수동 실행은 호스트 포트(:3333), CI(jenkins 컨테이너)는 같은 docker 네트워크의 app(:3000)
+SMOKE_URL="${SMOKE_URL:-http://localhost:3333}"
+echo "==> HTTP 200 확인 ($SMOKE_URL)"
+HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$SMOKE_URL" --max-time 10 || echo "000")
 if [ "$HTTP" != "200" ]; then
     echo "ERROR: smoke 실패 (HTTP $HTTP)"
     compose logs --tail=50 app
