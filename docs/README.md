@@ -41,10 +41,11 @@
 
 ## Infrastructure (인프라)
 
-| 문서                               | 설명                                                   |
-| ---------------------------------- | ------------------------------------------------------ |
-| [Minikube 배포](infra/minikube.md) | Minikube K8s 로컬 배포 가이드, Image Watcher 자동 배포 |
-| [로컬 개발 설정](local-setup.md)   | Docker 실행, 개발 서버, AI 팀 운영 가이드              |
+| 문서                                           | 설명                                            |
+| ---------------------------------------------- | ----------------------------------------------- |
+| [CI/CD 흐름](ci-cd-flow.md)                    | Jenkins 파이프라인 + docker compose 배포 흐름   |
+| [prod compose 형상](../prod/compose/README.md) | 운영 docker-compose 서비스·배포 스크립트 가이드 |
+| [로컬 개발 설정](local-setup.md)               | Docker 실행, 개발 서버, AI 팀 운영 가이드       |
 
 ---
 

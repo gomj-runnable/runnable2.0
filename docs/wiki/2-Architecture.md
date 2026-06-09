@@ -26,7 +26,7 @@ runnable2.0/
 │  └─ constants/         # roles, permissions
 ├─ tests/                # E2E (Playwright)
 ├─ docs/                 # 가이드 문서
-└─ minikube/             # 로컬 K8s 매니페스트
+└─ prod/                 # 운영 docker compose 형상 + 배포 스크립트
 ```
 
 ## 2.2 레이어 책임

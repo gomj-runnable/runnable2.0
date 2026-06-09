@@ -13,19 +13,19 @@
 
 ```mermaid
 flowchart LR
-    Dev["로컬 호스트<br/>(pnpm build · preview)"] -. Tailscale .-> User
-    Dev --> Mini[minikube]
-    Jen[Jenkins CI/CD] --> Mini
-    Mini --> Pod[Nuxt Pod<br/>:3000]
-    Pod --> PG[(PostgreSQL)]
+    Jen[Jenkins CI/CD] --> Build["pnpm build (호스트)"]
+    Build --> Compose[docker compose<br/>prod/compose]
+    Compose --> App[app :3333→:3000]
+    Compose --> PG[(PostGIS db)]
+    App -. Tailscale Funnel .-> User
 ```
 
-| 컴포넌트       | 역할                                                                         |
-| -------------- | ---------------------------------------------------------------------------- |
-| **minikube**   | 로컬 Kubernetes — 매니페스트는 `minikube/` 디렉터리                          |
-| **Jenkins**    | CI/CD — `Jenkinsfile` (Install → Lint → Typecheck → Test → Build)            |
-| **Tailscale**  | 외부 노출 — 로컬 포트를 HTTPS 로 인터넷 공개 (관련 스킬: `tailscale-funnel`) |
-| **PostgreSQL** | 운영 DB (개발·테스트 모두 Postgres 단일 모드)                                |
+| 컴포넌트           | 역할                                                                          |
+| ------------------ | ----------------------------------------------------------------------------- |
+| **Jenkins**        | CI/CD — `Jenkinsfile` (Install → Lint → Typecheck → Test → Build → Deploy)    |
+| **docker compose** | 운영 형상 — `prod/compose/docker-compose.yml` (db / app / migrate / jenkins)  |
+| **Tailscale**      | 외부 노출 — `localhost:3333` 을 HTTPS 로 공개 (관련 스킬: `tailscale-funnel`) |
+| **PostgreSQL**     | 운영 DB — compose 내 PostGIS (개발·테스트 모두 Postgres 단일 모드)            |
 
 ## 7.3 Docker / 빌드 정책
 
@@ -48,5 +48,5 @@ flowchart LR
 
 - `docs/ci-cd-flow.md` — CI/CD 상세 흐름
 - `docs/local-setup.md` — 로컬 셋업
-- `docs/infra/` — 인프라 디테일
+- `prod/compose/README.md` — 운영 compose 형상·배포 스크립트
 - 스킬 `tailscale-funnel` — 외부 노출 설정

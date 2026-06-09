@@ -1,110 +1,122 @@
 # CI/CD Pipeline Flow
 
+> 운영 형상은 `prod/compose/` 패키지, 배포 단계 스크립트는 `prod/deploy/*.sh`.
+> 상세 구조·실행 명령은 [`prod/compose/README.md`](../prod/compose/README.md) 참조. **minikube/k8s 의존성 없음 — docker compose 운영.**
+
 ## 트리거
-- GitHub `master` 브랜치 push → Jenkins Webhook 자동 트리거
+
+- GitHub `master` 브랜치 push → Jenkins `githubPush` 자동 트리거
 - 수동 빌드 가능
 
 ## 파이프라인 흐름
 
 ```mermaid
 flowchart TD
-    A[GitHub Push to master] --> B[Jenkins Webhook 트리거]
+    A[GitHub Push to master] --> B[Jenkins githubPush 트리거]
 
     subgraph QA ["1. 품질 검사"]
-        B --> C[pnpm install]
-        C --> D[pnpm lint]
-        D --> E[nuxt typecheck]
-        E --> F[vitest run]
+        B --> C[pnpm install --frozen-lockfile]
+        C --> D[pnpm lint --fix && lint]
+        D --> E[pnpm typecheck]
     end
 
-    subgraph BUILD ["2. 호스트 빌드"]
-        F --> G[pnpm build → .output/]
+    subgraph GATE ["2. TDD 게이트"]
+        E --> F[pnpm test]
+        F -->|실패| FAIL[배포 중단 abort]
     end
 
-    subgraph INFRA ["3. 인프라 확인"]
-        G --> H{Docker 데몬?}
-        H -->|연결 실패| I[Colima 재시작]
-        H -->|OK| J{minikube?}
-        I --> J
-        J -->|중지됨| K[minikube start]
-        J -->|Running| L[PostGIS 이미지 준비]
-        K --> L
+    subgraph BUILD ["3. 호스트 빌드"]
+        F -->|성공| G["pnpm exec nuxt build --dotenv .env.prod<br/>(.env.prod 값 .output 에 baking)"]
     end
 
-    subgraph PUSH ["4. Docker Hub Push"]
-        L --> M[docker build → runnable:latest + :BUILD_TAG]
-        M --> N[docker push to Docker Hub]
+    subgraph INFRA ["4. Docker 확인"]
+        G --> H{docker info / compose v2?}
+        H -->|실패| FAIL
     end
 
-    subgraph MIGRATE ["5. K8s + DB 마이그레이션"]
-        N --> O[시크릿/설정 파일 복사<br/>~/.jenkins/secrets/runnable/ → workspace]
-        O --> P[kubectl apply namespace, secret, configmap, postgres]
-        P --> Q[Postgres Ready 대기]
-        Q --> R[Migration Job 빌드 + 실행]
-        R --> S[DB 마이그레이션 완료 대기]
+    subgraph MIGRATE ["5. DB 보장 + 마이그레이션"]
+        H -->|OK| I["bash prod/deploy/migrate.sh<br/>db up + drizzle push + seed"]
     end
 
-    subgraph DEPLOY ["6. App 배포"]
-        S --> T[docker build runnable-app:latest<br/>minikube Docker 내부]
-        T --> U[kubectl apply app.yaml]
-        U --> V[rollout restart + 상태 대기]
+    subgraph DEPLOY ["6. App 무중단 교체"]
+        I --> J["bash prod/deploy/deploy.sh<br/>app 이미지 재빌드 + 컨테이너 교체 + prune"]
     end
 
-    subgraph EXPOSE ["7. 외부 공개"]
-        V --> W[portforward.sh start<br/>PID 파일 기반, 빌드 종료 후 지속]
-        W --> X[헬스체크 HTTP 200 확인<br/>최대 5회 재시도]
-        X -->|실패| Y[ERROR 로그 출력 + 빌드 실패]
-        X -->|성공| Z[Tailscale Funnel 연결<br/>https://<INTERNAL_HOST>]
+    subgraph SMOKE ["7. Smoke"]
+        J --> K["bash prod/deploy/smoke.sh<br/>healthcheck + HTTP 200 확인"]
+        K -->|실패| FAIL
     end
 
-    Z --> AA[Pipeline SUCCESS]
-    Y --> AB[Pipeline FAILED]
+    K -->|성공| OK[Pipeline SUCCESS]
 
     style QA fill:#1a1a2e,stroke:#16213e
+    style GATE fill:#1a1a2e,stroke:#16213e
     style BUILD fill:#1a1a2e,stroke:#16213e
     style INFRA fill:#1a1a2e,stroke:#16213e
-    style PUSH fill:#1a1a2e,stroke:#16213e
     style MIGRATE fill:#1a1a2e,stroke:#16213e
     style DEPLOY fill:#1a1a2e,stroke:#16213e
-    style EXPOSE fill:#1a1a2e,stroke:#16213e
+    style SMOKE fill:#1a1a2e,stroke:#16213e
 ```
 
 ## 아키텍처 요약
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  macOS (Mac mini)                                       │
-│                                                         │
-│  ┌──────────┐    ┌───────────┐    ┌──────────────────┐ │
-│  │ Jenkins  │───▶│ Colima    │───▶│ minikube         │ │
-│  │ (:8080)  │    │ (Docker)  │    │                  │ │
-│  └──────────┘    └───────────┘    │  ┌────────────┐  │ │
-│       │                           │  │ runnable   │  │ │
-│       │ pnpm build                │  │ -app:3000  │  │ │
-│       │ (호스트에서 빌드)          │  └────────────┘  │ │
-│       ▼                           │  ┌────────────┐  │ │
-│  ┌──────────┐                     │  │ postgres   │  │ │
-│  │ .output/ │──docker build──────▶│  │ :5432      │  │ │
-│  └──────────┘                     │  └────────────┘  │ │
-│                                   └──────────────────┘ │
-│                                          │             │
-│  kubectl port-forward (:3333 → :3000)    │             │
-│       │                                               │
-│       ▼                                               │
-│  ┌────────────────┐                                    │
-│  │ Tailscale      │                                    │
-│  │ Funnel (:443)  │──── https://<INTERNAL_HOST>
-│  └────────────────┘                                    │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  macOS (Mac mini)                                              │
+│                                                                │
+│  ┌──────────┐    pnpm build (호스트, .env.prod baking)         │
+│  │ Jenkins  │─────────────┐                                    │
+│  │ (:8080)  │             ▼                                     │
+│  └────┬─────┘        ┌──────────┐                              │
+│       │ docker.sock  │ .output/ │                              │
+│       ▼              └────┬─────┘                              │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ docker compose (prod/compose/docker-compose.yml)       │    │
+│  │                                                        │    │
+│  │  ┌──────────────┐   ┌──────────────┐  ┌────────────┐ │    │
+│  │  │ app          │──▶│ db (PostGIS) │  │ migrate    │ │    │
+│  │  │ :3333→:3000  │   │ 5433→5432    │  │ (profile)  │ │    │
+│  │  └──────┬───────┘   └──────────────┘  └────────────┘ │    │
+│  └─────────┼──────────────────────────────────────────────┘  │
+│            │                                                   │
+│  ┌─────────▼──────┐                                            │
+│  │ Tailscale      │                                            │
+│  │ Funnel (:443)  │──── https://<INTERNAL_HOST> → :3333        │
+│  └────────────────┘                                            │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## 파이프라인 스테이지 (`Jenkinsfile`)
+
+| #   | 스테이지      | 동작                                                        |
+| --- | ------------- | ----------------------------------------------------------- |
+| 1   | `Install`     | `corepack` + `pnpm install --frozen-lockfile`               |
+| 2   | `Lint`        | `pnpm lint --fix` → `pnpm lint`                             |
+| 3   | `Typecheck`   | `pnpm typecheck` (비차단)                                   |
+| 4   | `Test`        | `pnpm test` — **TDD 게이트, 실패 시 abort**                 |
+| 5   | `Build`       | `nuxt build --dotenv .env.prod` → `.output` (값 baking)     |
+| 6   | `DockerCheck` | docker 데몬 + compose v2 가용 확인                          |
+| 7   | `Migrate`     | `bash prod/deploy/migrate.sh` (db up + drizzle push + seed) |
+| 8   | `Deploy`      | `bash prod/deploy/deploy.sh` (app 재빌드 + 무중단 교체)     |
+| 9   | `Smoke`       | `bash prod/deploy/smoke.sh` (`runnable_app_prod:3000` 200)  |
+
+배포 로직은 `prod/deploy/*.sh` 에 분리돼 Jenkins 외부에서도 동일하게 수동 실행 가능:
+
+```bash
+bash prod/deploy/migrate.sh
+bash prod/deploy/deploy.sh
+bash prod/deploy/smoke.sh
 ```
 
 ## 주요 설계 결정
 
-| 항목 | 결정 | 이유 |
-|------|------|------|
-| 빌드 위치 | 호스트 (macOS) | Docker 내부 Nuxt 빌드 시 Vue 번들 깨짐 |
-| 시크릿 관리 | `~/.jenkins/secrets/runnable/` | Git에 민감 정보 포함 방지 |
-| 포트포워드 | PID 파일 기반 detach | Jenkins `cleanWs()` 후에도 지속 |
-| 외부 공개 | Tailscale Funnel | 별도 도메인/인증서 불필요 |
-| DB | minikube 내 PostGIS | 단일 서버 운영에 적합 |
-| 운영 포트 | 3333 (localhost) | Colima/minikube 기본 포트와 충돌 방지 |
+| 항목        | 결정                             | 이유                                          |
+| ----------- | -------------------------------- | --------------------------------------------- |
+| 빌드 위치   | 호스트 (macOS)                   | Docker 내부 Nuxt 빌드 시 Vue 번들 깨짐        |
+| 런타임 설정 | 빌드 시 `.env.prod` baking       | 런타임 `NUXT_*` 오버라이드 잉여 제거          |
+| 운영 형상   | docker compose (`prod/compose/`) | minikube/k8s 운영 비용 제거, 단일 서버에 적합 |
+| 시크릿 관리 | 루트 `.env.prod` (gitignored)    | Jenkins 컨테이너에 read-only 마운트로 주입    |
+| 무중단 교체 | `deploy.sh` app 재빌드 후 교체   | 테스트 통과 이미지만 컨테이너 교체            |
+| 외부 공개   | Tailscale Funnel                 | 별도 도메인/인증서 불필요                     |
+| 운영 포트   | 3333 (localhost) → app :3000     | Funnel 진입점, 기존 dev 포트와 충돌 회피      |
+| DB          | compose 내 PostGIS (5433→5432)   | 기존 dev `runnable_db` 와 포트 분리           |
