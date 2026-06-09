@@ -14,6 +14,8 @@ COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
 # JCasC 설정 위치 지정 + 설정 마법사 비활성화
-COPY jenkins.casc.yaml /var/jenkins_home/casc.yaml
-ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
+# 주의: /var/jenkins_home 은 named volume 마운트 지점이라, 그 아래에 COPY 하면
+# 런타임에 볼륨이 파일을 가려 JCasC 가 설정을 못 읽는다. 볼륨 밖 경로에 둔다.
+COPY jenkins.casc.yaml /var/jenkins_conf/jenkins.yaml
+ENV CASC_JENKINS_CONFIG=/var/jenkins_conf/jenkins.yaml
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"

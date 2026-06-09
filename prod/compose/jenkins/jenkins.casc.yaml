@@ -25,13 +25,7 @@ jenkins:
 
     # ── CSRF(CRUMB) 보호 활성화 ──
     crumbIssuer:
-        standard:
-            excludeClientIPFromCrumb: false
-
-# 스크립트 보안 유지
-security:
-    globalJobDslSecurityConfiguration:
-        useScriptSecurity: true
+        standard: {}
 
 unclassified:
     location:
