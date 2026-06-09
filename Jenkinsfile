@@ -13,7 +13,7 @@ pipeline {
     environment {
         BUILD_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
         PATH      = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
-        COMPOSE   = "docker compose -f compose/docker-compose.yml --env-file compose/.env.prod"
+        COMPOSE   = "docker compose -f compose/docker-compose.yml --env-file .env.prod"
     }
 
     options {
