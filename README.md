@@ -119,8 +119,8 @@ cp .env.example .env
 # 의존성 설치
 pnpm install
 
-# PostgreSQL 실행
-docker-compose up -d db
+# PostgreSQL(PostGIS) 실행 — 루트 docker-compose.yml (개발 DB, localhost:6432)
+docker compose up -d db
 
 # DB 스키마 반영
 npx drizzle-kit push

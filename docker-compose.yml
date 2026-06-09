@@ -1,0 +1,37 @@
+# ============================================================
+# Runnable — 로컬 개발용 DB (dev only)
+#
+# 운영 형상은 prod/compose/ 참조. 이 파일은 개발 DB(PostGIS)만 띄운다.
+#   docker compose up -d db
+#
+# 앱은 호스트에서 직접 실행한다 (pnpm dev). DATABASE_URL 은 dbMode.ts 가
+# POSTGRES_* (.env) 로 조립하며, 기본 host=localhost / port=POSTGRES_PORT(기본 6432).
+# 운영 db(runnable_db_prod:5433) 와 컨테이너·포트·볼륨을 분리한다.
+# ============================================================
+
+services:
+    db:
+        image: imresamu/postgis:17-3.5-alpine
+        container_name: runnable_db
+        restart: unless-stopped
+        command: ['postgres', '-c', 'timezone=Asia/Seoul']
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+            TZ: Asia/Seoul
+        ports:
+            # 운영 db(5433) 와 분리. 호스트 접속 포트는 .env 의 POSTGRES_PORT(기본 6432).
+            - '127.0.0.1:${POSTGRES_PORT:-6432}:5432'
+        volumes:
+            - runnable_db_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+
+volumes:
+    runnable_db_data:
+        name: runnable_db_data

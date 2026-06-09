@@ -12,10 +12,13 @@ pnpm test:e2e:update
 
 > **참고**: spec 파일은 `tests/e2e/` 디렉터리에 위치한다. 현재는 기반 인프라만 구축된 상태이며, diagram-studio spec은 #126 완료 후 추가될 예정이다. 스냅샷 파일은 git에 포함시키고, 변경 시 PR 리뷰에서 확인한다.
 
-## 도커 실행
+## 도커 실행 (개발 DB)
+
+루트 `docker-compose.yml` 이 개발용 PostGIS DB(`runnable_db`, `localhost:6432`)만 띄운다.
+운영 형상은 `prod/compose/` 참조.
 
 ```bash
-docker-compose up -d db
+docker compose up -d db
 ```
 
 ## 개발 서버
@@ -91,12 +94,12 @@ worker-1에게 "sections.get.ts 수정 완료 후 알려줘" 전달해줘
 
 여러 독립 작업을 동시에 하려면 iTerm2 패널을 분할한다.
 
-| 단축키 | 동작 |
-|--------|------|
-| `Cmd+D` | 세로 분할 |
-| `Cmd+Shift+D` | 가로 분할 |
+| 단축키            | 동작      |
+| ----------------- | --------- |
+| `Cmd+D`           | 세로 분할 |
+| `Cmd+Shift+D`     | 가로 분할 |
 | `Cmd+[` / `Cmd+]` | 패널 전환 |
-| `Cmd+T` | 새 탭 |
+| `Cmd+T`           | 새 탭     |
 
 각 패널에서 `claude`를 실행하면 독립 세션으로 작업할 수 있다.
 
