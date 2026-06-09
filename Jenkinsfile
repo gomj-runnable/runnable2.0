@@ -4,7 +4,7 @@
 // 트리거: master push / 수동
 // 흐름: 품질검사 → TDD 게이트(테스트 실패 시 abort) → 빌드 → 이미지 → compose up
 //
-// 운영 형상은 compose/ 패키지 참조. minikube/k8s 의존성 없음.
+// 운영 형상은 prod/compose/ 패키지, 배포 단계는 prod/deploy/*.sh 참조. minikube/k8s 의존성 없음.
 // =============================================================================
 
 pipeline {
@@ -13,7 +13,6 @@ pipeline {
     environment {
         BUILD_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'manual'}"
         PATH      = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
-        COMPOSE   = "docker compose -f compose/docker-compose.yml --env-file .env.prod"
     }
 
     options {
@@ -78,57 +77,17 @@ pipeline {
 
         // ── 5. DB 보장 + 마이그레이션 ──
         stage('Migrate') {
-            steps {
-                sh '''#!/bin/bash
-                    set -euo pipefail
-                    echo "==> db 서비스 기동 (이미 떠있으면 noop)"
-                    ${COMPOSE} up -d db
-
-                    echo "==> migrate 일회성 실행 (drizzle push + seed)"
-                    ${COMPOSE} --profile migrate run --rm --build migrate
-                '''
-            }
+            steps { sh 'bash prod/deploy/migrate.sh' }
         }
 
-        // ── 6. App 이미지 빌드 + 컨테이너 교체 ──
+        // ── 6. App 이미지 빌드 + 컨테이너 무중단 교체 ──
         stage('Deploy') {
-            steps {
-                sh '''#!/bin/bash
-                    set -euo pipefail
-                    echo "==> app 이미지 재빌드 + 컨테이너 교체"
-                    ${COMPOSE} build app
-                    ${COMPOSE} up -d --no-deps app
-
-                    echo "==> dangling 이미지 정리"
-                    docker image prune -f
-                '''
-            }
+            steps { sh 'bash prod/deploy/deploy.sh' }
         }
 
         // ── 7. Smoke ──
         stage('Smoke') {
-            steps {
-                sh '''#!/bin/bash
-                    set -euo pipefail
-
-                    echo "==> 헬스체크 대기 (최대 60초)"
-                    for i in $(seq 1 12); do
-                        STATUS=$(docker inspect -f '{{.State.Health.Status}}' runnable_app_prod 2>/dev/null || echo "starting")
-                        echo "    [$i/12] app health: $STATUS"
-                        if [ "$STATUS" = "healthy" ]; then break; fi
-                        sleep 5
-                    done
-
-                    echo "==> HTTP 200 확인 (외부 3333)"
-                    HTTP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3333 --max-time 10 || echo "000")
-                    if [ "$HTTP" != "200" ]; then
-                        echo "ERROR: smoke 실패 (HTTP $HTTP)"
-                        ${COMPOSE} logs --tail=50 app
-                        exit 1
-                    fi
-                    echo "    OK (HTTP $HTTP)"
-                '''
-            }
+            steps { sh 'bash prod/deploy/smoke.sh' }
         }
     }
 
