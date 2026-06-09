@@ -85,7 +85,7 @@ export default defineNuxtConfig({
         openData: process.env.OPEN_DATA ?? '', // 공공데이터포털 키 (서버 전용)
         airKoreaKey: process.env.AIR_KOREA_KEY ?? '', // 에어코리아 대기질 키 (서버 전용)
         routeMode: process.env.ROUTE_MODE ?? '', // 경로 엔진 모드 (서버 전용, 부팅 시 필수 검증)
-        tmapApi: process.env.TMAP_API_ACCESS_TOCKEN ?? '', // T맵 경로 API 키 (서버 전용)
+        tmapApi: process.env.TMAP_ACCESS_TOCKEN ?? '', // T맵 경로 API 키 (서버 전용)
         // 클라이언트(브라우저)에 노출되는 값
         public: {
             routeMode: process.env.ROUTE_MODE ?? '', // 경로 엔진 모드 (클라이언트 표시용)

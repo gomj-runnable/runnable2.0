@@ -9,12 +9,15 @@ compose/
 ├── docker-compose.yml   # 서비스 정의 (db / app / migrate / jenkins)
 ├── Dockerfile           # app 런타임 (Nuxt .output)
 ├── Dockerfile.migrate   # drizzle-kit push + seed (일회성)
-├── .env.prod            # 운영 시크릿 (gitignored)
-├── .env.prod.example    # 시크릿 템플릿
 └── README.md
+
+(프로젝트 루트)
+├── .env.prod            # 운영 시크릿 (gitignored)
+└── .env.prod.example    # 시크릿 템플릿
 ```
 
 빌드 컨텍스트는 항상 **프로젝트 루트** (`..`).
+운영 env(`.env.prod`)도 **프로젝트 루트**에서 읽는다 (`--env-file .env.prod`, compose 정의의 `env_file: ../.env.prod`).
 
 ## 실행
 
@@ -22,10 +25,10 @@ compose/
 
 ```bash
 # 기동
-docker compose -f compose/docker-compose.yml --env-file compose/.env.prod up -d
+docker compose -f compose/docker-compose.yml --env-file .env.prod up -d
 
 # 마이그레이션 (필요 시)
-docker compose -f compose/docker-compose.yml --env-file compose/.env.prod --profile migrate run --rm migrate
+docker compose -f compose/docker-compose.yml --env-file .env.prod --profile migrate run --rm migrate
 
 # 상태/로그
 docker compose -f compose/docker-compose.yml ps
@@ -39,7 +42,7 @@ docker compose -f compose/docker-compose.yml down
 
 ```bash
 cd compose
-docker compose --env-file .env.prod up -d
+docker compose --env-file ../.env.prod up -d
 ```
 
 ## 서비스
@@ -110,7 +113,7 @@ JENKINS_ADMIN_PASSWORD=<강력한 비밀번호>
 적용 (기존 `jenkins_home` 볼륨 유지된 채 보안만 재구성):
 
 ```bash
-docker compose -f compose/docker-compose.yml --env-file compose/.env.prod \
+docker compose -f compose/docker-compose.yml --env-file .env.prod \
   up -d --build jenkins
 ```
 

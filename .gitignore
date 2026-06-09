@@ -47,7 +47,4 @@ public/crosswalk/
 # TODO
 *.TODO.md
 
-# docker-compose 운영 시크릿 (compose 패키지)
-compose/.env.prod
-
 .local

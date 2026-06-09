@@ -5,9 +5,9 @@
 # 빌드 컨텍스트: 프로젝트 루트 (..)
 #
 # 실행 (프로젝트 루트에서):
-#   docker compose -f compose/docker-compose.yml --env-file compose/.env.prod up -d
+#   docker compose -f compose/docker-compose.yml --env-file .env.prod up -d
 # 또는 compose 디렉토리에서:
-#   cd compose && docker compose --env-file .env.prod up -d
+#   cd compose && docker compose --env-file ../.env.prod up -d
 #
 # Services:
 #   - db        : PostGIS 17 (named volume 영속)
@@ -58,12 +58,12 @@ services:
             db:
                 condition: service_healthy
         env_file:
-            - .env.prod
+            - ../.env.prod
         environment:
             DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
             # Nuxt runtimeConfig 런타임 오버라이드 (NUXT_ 접두사 필요)
             NUXT_PUBLIC_ROUTE_MODE: ${ROUTE_MODE}
-            NUXT_TMAP_API: ${TMAP_API}
+            NUXT_TMAP_API: ${TMAP_ACCESS_TOCKEN}
             HOST: 0.0.0.0
             PORT: '3000'
         ports:
@@ -92,7 +92,7 @@ services:
             db:
                 condition: service_healthy
         env_file:
-            - .env.prod
+            - ../.env.prod
         environment:
             DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
         networks:
