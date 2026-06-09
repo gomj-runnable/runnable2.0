@@ -58,8 +58,9 @@ pipeline {
         }
 
         // ── 3. 호스트 빌드 (.output 산출) ──
+        // .env.prod 를 로드해 runtimeConfig 값을 .output 에 baking (런타임 NUXT_ 주입 대체)
         stage('Build') {
-            steps { sh 'pnpm build' }
+            steps { sh 'pnpm exec nuxt build --dotenv .env.prod' }
         }
 
         // ── 4. Docker 데몬 확인 ──
