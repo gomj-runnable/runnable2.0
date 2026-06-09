@@ -4,7 +4,9 @@
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 COMPOSE_FILE="$ROOT/prod/compose/docker-compose.yml"
-ENV_FILE="$ROOT/.env.prod"
+# .env.prod 는 gitignored 라 Jenkins 워크스페이스(clone)에는 없다.
+# CI 에서는 호스트 마운트 경로를 ENV_FILE 로 주입한다 (compose jenkins 서비스 참조).
+ENV_FILE="${ENV_FILE:-$ROOT/.env.prod}"
 
 compose() {
     docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"

@@ -116,6 +116,8 @@ services:
             # JCasC 관리자 계정 주입 (.env.prod, gitignored)
             JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID}
             JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD}
+            # 파이프라인이 compose 호출 시 쓸 env 파일 — 워크스페이스엔 없으므로 마운트 경로 주입
+            ENV_FILE: /var/jenkins_conf/.env.prod
         ports:
             - '8080:8080'
             - '50000:50000'
@@ -123,6 +125,8 @@ services:
             - jenkins_home:/var/jenkins_home
             # docker CLI 는 이미지에 설치됨(Linux docker-ce-cli) — 이 socket 으로 호스트 데몬 제어
             - /var/run/docker.sock:/var/run/docker.sock
+            # .env.prod(gitignored) read-only 마운트 — git/Jenkins 자격증명에 secret 복제 없이 주입
+            - ../../.env.prod:/var/jenkins_conf/.env.prod:ro
         networks:
             - runnable_net
 
