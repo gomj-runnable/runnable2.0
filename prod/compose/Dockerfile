@@ -8,9 +8,6 @@ WORKDIR /app
 
 COPY .output ./.output
 COPY lib ./lib
-# /admin/uml 사이드바용 prebuilt 캐시. 컨테이너에는 소스 트리가 없으므로
-# 호스트에서 `pnpm build` 시 생성된 features.json 을 동봉한다.
-COPY .cache/uml ./.cache/uml
 
 RUN chown -R app:app /app
 
