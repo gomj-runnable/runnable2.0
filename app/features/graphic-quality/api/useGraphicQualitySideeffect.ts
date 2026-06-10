@@ -10,7 +10,7 @@ interface UseGraphicQualitySideeffectOptions {
 }
 
 /** 품질 레벨별 Cesium 렌더링 부하 조절 값 */
-export interface QualityPreset {
+interface QualityPreset {
     /** 화면 변화가 있을 때만 렌더링(온디맨드). 가장 큰 성능 향상 요소 */
     requestRenderMode: boolean
     /** requestRenderMode와 짝. Infinity면 시간 경과만으로는 재렌더하지 않는다 */
@@ -27,7 +27,7 @@ export interface QualityPreset {
     tilesetMaximumScreenSpaceError: number
 }
 
-export const QUALITY_PRESETS: Record<FixedQualityKey, QualityPreset> = {
+const QUALITY_PRESETS: Record<FixedQualityKey, QualityPreset> = {
     low: {
         requestRenderMode: true,
         maximumRenderTimeChange: Infinity,

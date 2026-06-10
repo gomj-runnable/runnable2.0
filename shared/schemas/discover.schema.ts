@@ -7,5 +7,3 @@ export const routeDiscoverFilterSchema: z.ZodType<RouteDiscoverFilter> = z.objec
     sortBy: z.enum(['distance', 'elevation', 'recent', 'popular']).optional(),
     limit: z.coerce.number().int().positive().max(100).optional()
 })
-
-export type RouteDiscoverFilterSchema = z.infer<typeof routeDiscoverFilterSchema>

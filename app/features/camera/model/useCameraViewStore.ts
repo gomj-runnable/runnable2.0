@@ -1,7 +1,5 @@
 import { CameraViewModeEnum } from '#shared/types/camera-view-mode.enum'
 
-export type CameraViewMode = CameraViewModeEnum
-
 /**
  * 카메라 시점 모드 상태를 관리하는 store composable.
  * 1인칭(first-person)과 3인칭(third-person) 전환 상태를 보유한다.

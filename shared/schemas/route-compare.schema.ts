@@ -7,5 +7,3 @@ export const routeCompareQuerySchema = z.object({
     routeA: z.string().min(1),
     routeB: z.string().min(1)
 })
-
-export type RouteCompareQuery = z.infer<typeof routeCompareQuerySchema>

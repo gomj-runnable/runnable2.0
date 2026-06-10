@@ -4,7 +4,7 @@
  *
  * 지도 위의 칩 버튼들을 모바일에서 하나의 플로팅 버튼 + popover로 통합한다.
  */
-export interface FloatingMenuItem {
+interface FloatingMenuItem {
     key: string
     label: string
     icon: string
@@ -14,7 +14,7 @@ export interface FloatingMenuItem {
     onClick: () => void
 }
 
-export interface FloatingMenuGroup {
+interface FloatingMenuGroup {
     key: string
     label: string
     icon: string

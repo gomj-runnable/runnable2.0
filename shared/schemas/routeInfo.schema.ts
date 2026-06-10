@@ -11,5 +11,3 @@ export const createRouteInfoSchema = z.object({
     // 위치 — GeoJSON Point. coordinates = [lng, lat] 또는 [lng, lat, elevation]
     geom: geoJsonPointSchema
 })
-
-export type CreateRouteInfoSchema = z.infer<typeof createRouteInfoSchema>

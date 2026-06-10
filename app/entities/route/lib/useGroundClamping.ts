@@ -3,8 +3,6 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { CesiumRuntime } from '#shared/types/cesium'
 import { GroundClampModeEnum } from '#shared/types/ground-clamp-mode.enum'
 
-export type GroundClampMode = GroundClampModeEnum
-
 // ─── Polyline ────────────────────────────────────────────────────
 
 export interface ClampedPolylineParams {

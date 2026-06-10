@@ -7,11 +7,6 @@
  */
 export type SafetyDataSource = 'accident' | 'crime' | 'lighting' | 'ugc'
 
-export interface SafetySample {
-    source: SafetyDataSource
-    value: number
-}
-
 export interface SafetyStats {
     mean: number
     stdDev: number

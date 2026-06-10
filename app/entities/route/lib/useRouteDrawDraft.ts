@@ -142,7 +142,7 @@ const sliceLineStringByRange = (
     coordinates: geom.coordinates.slice(range.start, range.end + 1)
 })
 
-export const toSectionGeom = (
+const toSectionGeom = (
     positions: Array<Cartesian3 | GeoJsonPosition>,
     wgs84Array?: GeoJsonPosition[]
 ): GeoJsonLineString => ({

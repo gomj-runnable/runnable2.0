@@ -10,8 +10,8 @@ export interface ChartDimensions {
     padding: { top: number; right: number; bottom: number; left: number }
 }
 
-export type RenderedPoint = RouteElevationPoint & { x: number; y: number }
-export type RenderedSectionSegment = RouteElevationProfile['sections'][number] & { path: string }
+type RenderedPoint = RouteElevationPoint & { x: number; y: number }
+type RenderedSectionSegment = RouteElevationProfile['sections'][number] & { path: string }
 
 export interface ChartGeometry {
     baselineY: number

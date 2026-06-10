@@ -4,8 +4,6 @@ import type { RouteSectionDraftInput } from '#shared/types/route'
 import type { PoiDraftInput } from '#shared/types/facility'
 import { geoJsonPositionSchema } from './geojson.schema'
 
-export { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
-
 export const geoJsonPointSchema = z.object({
     type: z.literal('Point'),
     coordinates: z.array(z.number()).min(2).max(3)
@@ -19,7 +17,7 @@ export const poiSchema = z.object({
     attribute: z.record(z.string(), z.unknown()).optional()
 }) satisfies z.ZodType<PoiDraftInput>
 
-export const geoJsonLineStringPositionSchema = geoJsonPositionSchema
+const geoJsonLineStringPositionSchema = geoJsonPositionSchema
 export const geoJsonLineStringSchema = z.object({
     type: z.literal('LineString'),
     coordinates: z.array(geoJsonLineStringPositionSchema)
@@ -52,8 +50,6 @@ export const createRouteSchema = z.object({
     emd: z.array(z.string()).optional(),
     isPublic: z.boolean().optional().default(true)
 })
-
-export type RouteClosingMode = 'loop-close' | 'round-trip' | null
 
 export type SectionAttrSchema = z.infer<typeof sectionAttrSchema>
 export type CreateSectionSchema = z.infer<typeof createSectionSchema>

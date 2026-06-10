@@ -9,7 +9,7 @@ import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
  * 클릭 위치가 건물(3DTileset) 위인지 판별하고, 그렇다면 인근 비건물 지면 좌표를 찾는 헬퍼 인터페이스.
  * shared 레이어가 features/camera에 직접 의존하지 않도록 DI로 주입한다.
  */
-export interface BuildingPickHelpers {
+interface BuildingPickHelpers {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     isBuildingPick: (pickResult: any) => boolean
     findNearestGroundPosition: (

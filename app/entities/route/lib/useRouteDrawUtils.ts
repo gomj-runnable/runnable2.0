@@ -99,7 +99,7 @@ export const toCesiumColor = (cesium: CesiumRuntime, color: string, alpha = 1) =
  * @param position - Cesium 내부 3D 좌표
  * @returns `[longitude, latitude, 0]` 형태의 WGS84 좌표 배열
  */
-export const cartesianToWgs84Coordinate = (
+const cartesianToWgs84Coordinate = (
     cesium: CesiumRuntime,
     position: Cartesian3
 ): GeoJsonPosition => {

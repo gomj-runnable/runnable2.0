@@ -14,7 +14,7 @@ import { computeStats, normalize, zScoreToSafetyScore } from './normalize'
 import type { NormalizedSafetyScore, SafetyDataSource } from './types'
 
 /** PoC 기본 세그먼트 분할 길이 (m). */
-export const DEFAULT_SEGMENT_LENGTH_M = 100
+const DEFAULT_SEGMENT_LENGTH_M = 100
 
 /** PoC 기본 균등 가중치 (4 소스 × 0.25). */
 export const DEFAULT_SAFETY_WEIGHTS: Record<SafetyDataSource, number> = {

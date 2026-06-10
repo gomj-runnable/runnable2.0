@@ -17,16 +17,6 @@ export const routeOptimizeRequestSchema = z.object({
     mode: routeOptimizationModeSchema
 })
 
-export const routeOptimizeResponseSchema = z.object({
-    positions: z.array(geoJsonPositionSchema),
-    mode: routeOptimizationModeSchema,
-    optimized: z.boolean(),
-    message: z.string().optional()
-})
-
-export type RouteOptimizeRequestSchema = z.infer<typeof routeOptimizeRequestSchema>
-export type RouteOptimizeResponseSchema = z.infer<typeof routeOptimizeResponseSchema>
-
 /** 경로 최적화 요청 캡슐화 */
 export class RouteOptimizeRequestBody {
     readonly positions: GeoJsonPosition[]

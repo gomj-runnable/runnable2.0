@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 
 /** 플러그인이 꽂히는 UI 확장 슬롯. */
-export type PluginSlot = 'chip' | 'sidepanel' | 'dashboard' | 'popup'
+type PluginSlot = 'chip' | 'sidepanel' | 'dashboard' | 'popup'
 
 /** chip 슬롯의 8방향 배치 위치. */
 export type ChipAnchor =

@@ -3,7 +3,7 @@
  * 사용자가 선택한 동의 인도 데이터만 로드·렌더링하도록 `useSidewalkSideeffect`와 연동한다.
  */
 
-export interface SidewalkDong {
+interface SidewalkDong {
     /** 동 이름 (예: '역삼동') */
     name: string
     /** 해당 동의 인도 피처 수 */
