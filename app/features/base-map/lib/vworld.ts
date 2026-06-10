@@ -7,8 +7,11 @@ const VWORLD_LAYER_CONFIG: Record<BaseMapKey, { layer: string; ext: string }> = 
     base: { layer: 'Base', ext: 'png' }
 }
 
+/** V-World 타일 최소 줌 레벨 (이하 줌은 빈 타일만 반환) */
+export const VWORLD_MIN_LEVEL = 6
+
 /** V-World 타일 최대 줌 레벨 */
-export const VWORLD_MAX_LEVEL = 18
+export const VWORLD_MAX_LEVEL = 19
 
 /**
  * V-World WMTS 타일 URL 템플릿을 만든다. ({z}/{y}/{x}는 Cesium이 치환)

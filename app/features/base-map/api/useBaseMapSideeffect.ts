@@ -5,7 +5,7 @@ import type { CesiumViewerRuntime } from '#shared/types/cesium'
 import type { BaseMapEnum } from '#shared/types/base-map.enum'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { useBaseMapStore } from '~/features/base-map/model/useBaseMapStore'
-import { buildVworldUrl, VWORLD_MAX_LEVEL } from '~/features/base-map/lib/vworld'
+import { buildVworldUrl, VWORLD_MIN_LEVEL, VWORLD_MAX_LEVEL } from '~/features/base-map/lib/vworld'
 
 interface UseBaseMapSideeffectOptions {
     viewer: ShallowRef<CesiumViewer | null>
@@ -42,6 +42,7 @@ export const useBaseMapSideeffect = (options: UseBaseMapSideeffectOptions) => {
         layers.addImageryProvider(
             new CesiumLib.UrlTemplateImageryProvider({
                 url: buildVworldUrl(kind.key, vworldKey),
+                minimumLevel: VWORLD_MIN_LEVEL,
                 maximumLevel: VWORLD_MAX_LEVEL
             })
         )
