@@ -9,8 +9,6 @@ import type {
 import type { SectionPointRange } from '~/entities/route/lib/useRouteDrawDraft'
 import { geomToRouteDrawPositions, getSectionColor } from '~/entities/route/lib/useRouteDrawUtils'
 
-export { densifyPositions } from '~/entities/route/lib/usePositionDensify'
-
 /** 고도 프로필 생성 시 구간 하나를 표현하는 입력 데이터 */
 export interface RouteElevationSectionInput {
     /** 구간 레이블 (사이드바 구간명 또는 기본값 `'구간 N'`) */
