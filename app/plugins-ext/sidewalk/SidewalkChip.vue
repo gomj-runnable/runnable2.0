@@ -2,7 +2,7 @@
 /**
  * 선택 지역의 인도(보행로)를 지도에 표시하는 chip 플러그인.
  * facility 기능에서 분리되어 독립 플러그인으로 동작한다.
- * 위치는 PluginChipLayer 가 manifest.position 기준으로 관리한다.
+ * 위치는 MapOverlayAnchors 가 manifest.position 기준으로 관리한다.
  */
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'

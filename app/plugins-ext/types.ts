@@ -29,4 +29,6 @@ export interface PluginManifest {
     defaultEnabled: boolean
     /** chip 슬롯 배치 위치. 미지정 시 'top-center'. (chip 외 슬롯에선 무시) */
     position?: ChipAnchor
+    /** 같은 앵커 내 정렬 순서(오름차순). 미지정 시 0. (chip 외 슬롯에선 무시) */
+    order?: number
 }

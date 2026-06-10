@@ -4,7 +4,7 @@
  * 지도 위에 표시되는 모든 오버레이 UI를 조합하는 컴포넌트.
  * 부모로부터 facade 객체를 직접 받아 내부에서 바인딩한다.
  */
-import PluginChipLayer from '~/plugins-ext/PluginChipLayer.vue'
+import MapOverlayAnchors from '~/plugins-ext/MapOverlayAnchors.vue'
 import PluginLauncher from '~/plugins-ext/PluginLauncher.vue'
 import PluginSurfaceHost from '~/plugins-ext/PluginSurfaceHost.vue'
 import FacilityOverlay from '~/widgets/facility-overlay/ui/FacilityOverlay.vue'
@@ -41,40 +41,53 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <!-- 플러그인 확장 슬롯 -->
-    <PluginChipLayer />
-    <PluginLauncher />
+    <!--
+        모든 모서리 오버레이(기존 버튼 + 플러그인 chip)를 공유 앵커 호스트에 배치한다.
+        같은 앵커에 놓인 요소는 flex 로 순차 정렬되어 서로 겹치지 않는다.
+        chip 플러그인은 MapOverlayAnchors 가 manifest.position 기준으로 자동 주입한다.
+    -->
+    <MapOverlayAnchors>
+        <template #top-right>
+            <FacilityOverlay
+                :active-types="facility.activeTypes.value"
+                :is-loading="facility.isLoading.value"
+                :is-searching="facility.isSearching.value"
+                :disabled="!viewerReady"
+                :show-route-info="showRouteInfoChip"
+                @toggle="facility.toggleType($event)"
+                @search-nearby="facilityEffect.searchNearby()"
+            />
+        </template>
+        <template #bottom-center>
+            <RouteOverlayBottomBar
+                v-if="
+                    overlayContext.showDrawingTools ||
+                    (overlayContext.hasActiveRoute && elevationChart.profile)
+                "
+                :elevation-chip-label="elevationChart.title"
+                :elevation-chip-active="elevationChart.open"
+                :elevation-profile="elevationChart.profile"
+                :closing-mode="closing.mode"
+                :closing-disabled="!drawing.sectionDraft"
+                :show-closing="activeNav === '그리기'"
+                :gradient-active="gradient.isGradientVisible.value"
+                :gradient-difficulty="gradient.currentDifficulty.value"
+                @toggle-elevation="emit('toggle-elevation-chart')"
+                @update:closing-mode="closing.setMode($event)"
+                @toggle-gradient="gradient.toggleGradient()"
+            />
+        </template>
+        <template #bottom-left>
+            <GradientLegend
+                v-if="gradient.isGradientVisible.value"
+                :has-other-legend="elevation.isElevationVisible.value"
+            />
+        </template>
+        <template #bottom-right>
+            <PluginLauncher />
+        </template>
+    </MapOverlayAnchors>
     <PluginSurfaceHost />
-    <FacilityOverlay
-        :active-types="facility.activeTypes.value"
-        :is-loading="facility.isLoading.value"
-        :is-searching="facility.isSearching.value"
-        :disabled="!viewerReady"
-        :show-route-info="showRouteInfoChip"
-        @toggle="facility.toggleType($event)"
-        @search-nearby="facilityEffect.searchNearby()"
-    />
-    <RouteOverlayBottomBar
-        v-if="
-            overlayContext.showDrawingTools ||
-            (overlayContext.hasActiveRoute && elevationChart.profile)
-        "
-        :elevation-chip-label="elevationChart.title"
-        :elevation-chip-active="elevationChart.open"
-        :elevation-profile="elevationChart.profile"
-        :closing-mode="closing.mode"
-        :closing-disabled="!drawing.sectionDraft"
-        :show-closing="activeNav === '그리기'"
-        :gradient-active="gradient.isGradientVisible.value"
-        :gradient-difficulty="gradient.currentDifficulty.value"
-        @toggle-elevation="emit('toggle-elevation-chart')"
-        @update:closing-mode="closing.setMode($event)"
-        @toggle-gradient="gradient.toggleGradient()"
-    />
-    <GradientLegend
-        v-if="gradient.isGradientVisible.value"
-        :has-other-legend="elevation.isElevationVisible.value"
-    />
     <RouteElevationModal
         :open="elevationChart.open"
         :title="elevationChart.title"

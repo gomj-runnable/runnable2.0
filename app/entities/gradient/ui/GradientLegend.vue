@@ -8,10 +8,8 @@ defineProps<{
 
 <template>
     <div
-        class="absolute bottom-4 left-4 bg-surface-darker border border-border-accent rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-[0_8px_24px_rgba(0,0,0,0.16)] min-w-[140px] pointer-events-auto z-0 max-md:bottom-1.5 max-md:left-1.5 max-md:min-w-0 max-md:px-1.5 max-md:py-1"
-        :class="
-            hasOtherLegend ? 'bottom-[calc(1rem+48px)] max-md:bottom-[calc(0.375rem+40px)]' : ''
-        "
+        class="bg-surface-darker border border-border-accent rounded-2xl px-2.5 py-1.5 backdrop-blur-sm shadow-[0_8px_24px_rgba(0,0,0,0.16)] min-w-[140px] pointer-events-auto max-md:min-w-0 max-md:px-1.5 max-md:py-1"
+        :class="hasOtherLegend ? 'mb-12 max-md:mb-10' : ''"
     >
         <p class="text-xs text-meta mb-1.5 font-semibold tracking-[0.04em] uppercase">경사도</p>
         <div class="flex flex-col gap-1">

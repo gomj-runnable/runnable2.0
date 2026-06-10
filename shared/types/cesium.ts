@@ -88,7 +88,11 @@ export interface CesiumRuntime {
         new (options?: { url?: string }): unknown
     }
     EllipsoidTerrainProvider: new () => unknown
-    UrlTemplateImageryProvider: new (options: { url: string; maximumLevel?: number }) => unknown
+    UrlTemplateImageryProvider: new (options: {
+        url: string
+        minimumLevel?: number
+        maximumLevel?: number
+    }) => unknown
     Cesium3DTileset: {
         fromUrl?: (url: string, options: { maximumScreenSpaceError: number }) => Promise<unknown>
         new (options: { url: string; maximumScreenSpaceError: number }): unknown
