@@ -23,18 +23,8 @@ export const useAuthStore = () => {
     const isLoggedIn = computed(() => !!user.value)
     /** 인증 모달(로그인/회원가입)의 열림 상태 */
     const isAuthModalOpen = useState('auth-modal-open', () => false)
-    /** 인증 모달의 현재 표시 모드 (`'login'` | `'signup'`) */
-    const authModalMode = useState<'login' | 'signup'>('auth-modal-mode', () => 'login')
-
-    /** 로그인 모달을 연다. */
+    /** 인증 슬라이드오버를 연다. (useSlideOverNav 가 이 신호를 감지해 인증 탭으로 리다이렉트) */
     const openLoginModal = () => {
-        authModalMode.value = 'login'
-        isAuthModalOpen.value = true
-    }
-
-    /** 회원가입 모달을 연다. */
-    const openSignupModal = () => {
-        authModalMode.value = 'signup'
         isAuthModalOpen.value = true
     }
 
@@ -47,9 +37,7 @@ export const useAuthStore = () => {
         user,
         isLoggedIn,
         isAuthModalOpen,
-        authModalMode,
         openLoginModal,
-        openSignupModal,
         closeAuthModal
     }
 }

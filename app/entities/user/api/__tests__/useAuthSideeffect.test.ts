@@ -26,9 +26,7 @@ const sharedStore = vi.hoisted(() => ({
     user: { value: null as any },
     isLoggedIn: { value: false },
     isAuthModalOpen: { value: false },
-    authModalMode: { value: 'login' as 'login' | 'signup' },
     openLoginModal: vi.fn(),
-    openSignupModal: vi.fn(),
     closeAuthModal: vi.fn(function () {
         sharedStore.isAuthModalOpen.value = false
     })

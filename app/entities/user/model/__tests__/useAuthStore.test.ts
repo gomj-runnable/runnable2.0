@@ -7,17 +7,12 @@ describe('useAuthStore', () => {
         expect(s.user.value).toBeNull()
         expect(s.isLoggedIn.value).toBe(false)
         expect(s.isAuthModalOpen.value).toBe(false)
-        expect(s.authModalMode.value).toBe('login')
     })
 
-    it('openLoginModal / openSignupModal / closeAuthModal', () => {
+    it('openLoginModal / closeAuthModal', () => {
         const s = useAuthStore()
         s.openLoginModal()
         expect(s.isAuthModalOpen.value).toBe(true)
-        expect(s.authModalMode.value).toBe('login')
-
-        s.openSignupModal()
-        expect(s.authModalMode.value).toBe('signup')
 
         s.closeAuthModal()
         expect(s.isAuthModalOpen.value).toBe(false)
