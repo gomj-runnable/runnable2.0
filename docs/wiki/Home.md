@@ -11,6 +11,8 @@
 - TDD·테스트 → [6-Testing-and-TDD](6-Testing-and-TDD)
 - 배포 → [7-Operations](7-Operations)
 - 컨트리뷰션 → [8-Contribution](8-Contribution)
+- Claude Code 가이드 → [11-Claude-Code-Guide](11-Claude-Code-Guide)
+- 🎨 디자이너용 위키 → `../design-wiki/Home`
 
 ## 기술 스택 요약
 
@@ -62,6 +64,10 @@ flowchart TB
 - **Layers** — 4-Server, 5-Frontend
 - **Testing & TDD** — 6-Testing-and-TDD + 4 세부 페이지 (Concepts, Infrastructure, Writing Guide, CI Gate)
 - **Operations / Contribution** — 7-Operations, 8-Contribution
+- **Feature Matrix / Screens** — 9-Feature-Matrix, 10-Screens (+ Map/Settings/Admin/Share)
+- **Claude-Code Guide** — 11-Claude-Code-Guide
+
+> 🎨 디자이너용 위키는 별도 저장소(`docs/design-wiki/`)에서 관리됩니다 → `../design-wiki/Home`
 
 ## 진행 상황
 

@@ -54,3 +54,13 @@
 - [10-2-Screen-Settings](10-2-Screen-Settings)
 - [10-3-Screen-Admin](10-3-Screen-Admin)
 - [10-4-Screen-Share](10-4-Screen-Share)
+
+**11. Claude-Code Guide**
+
+- [11-Claude-Code-Guide](11-Claude-Code-Guide)
+
+---
+
+**🎨 Design Wiki**
+
+- 디자이너용 위키는 별도 저장소(`docs/design-wiki/`)에 있습니다 → `../design-wiki/Home`
