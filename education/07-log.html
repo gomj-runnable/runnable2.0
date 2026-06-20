@@ -70,6 +70,9 @@
       .meter .fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--l1), var(--accent)); border-radius: 999px; }
       .meter .pct { font-family: var(--mono); font-weight: 800; color: var(--accent); font-size: 1.1rem; white-space: nowrap; }
       .meter .pct small { color: var(--text-faint); font-weight: 400; font-size: 0.7rem; display: block; text-align: right; }
+      .track-label { font-family: var(--mono); font-size: 0.82rem; letter-spacing: 0.05em; color: var(--text-dim); margin: 0 0 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+      .track-label::before { content: ""; width: 11px; height: 11px; border-radius: 3px; background: var(--tc, var(--accent)); }
+      .track-label.server { margin-top: 2.4rem; }
 
       /* gates ladder */
       .gates { display: flex; flex-direction: column; gap: 0.7rem; }
@@ -144,9 +147,10 @@
         <div class="sec-head">
           <span class="sec-num">01 / PROGRESS</span>
           <h2>성장 사다리 진척</h2>
-          <p class="sec-sub">④ 로드맵의 L1~L4 gate. 통과하면 box에 <code style="font-family:var(--mono)">done</code> 을 붙이고, 진척 막대(%)도 손으로 갱신하세요.</p>
+          <p class="sec-sub">두 트랙을 나란히 추적합니다 — ④ 프론트엔드 <b>L1~L4</b> + ⑧ 서버 <b>S1~S4</b>. 통과하면 box에 <code style="font-family:var(--mono)">done</code> 을 붙이고, 진척 막대(%)도 손으로 갱신하세요.</p>
         </div>
 
+        <p class="track-label" style="--tc: var(--l1)">프론트엔드 트랙 · L1~L4 (Runnable plugins-ext)</p>
         <div class="meter">
           <span class="pct">0%<small>0 / 4 gate</small></span>
           <div class="track"><div class="fill"></div></div>
@@ -175,6 +179,39 @@
             <span class="box"></span>
             <span class="lv">L4</span>
             <span class="g-desc"><b>격리 PoC</b> — 서드파티를 안전하게 받는다면 필요한 격리·권한·배포를 설계하고, 핵심 하나를 PoC로 증명한다.</span>
+            <span class="status todo">미통과</span>
+          </div>
+        </div>
+
+        <p class="track-label server" style="--tc: oklch(78% 0.16 315)">서버 트랙 · S1~S4 (MapPrime GisServer)</p>
+        <div class="meter">
+          <span class="pct">0%<small>0 / 4 gate</small></span>
+          <div class="track"><div class="fill"></div></div>
+        </div>
+
+        <div class="gates">
+          <div class="gate" style="--lv: oklch(76% 0.15 200)">
+            <span class="box"></span>
+            <span class="lv">S1</span>
+            <span class="g-desc"><b>한 확장 읽기</b> — 기존 DataStore/output format 하나를 요청 진입→응답까지 추적하고, 어떻게 발견·등록되는지 그림으로 설명한다.</span>
+            <span class="status todo">미통과</span>
+          </div>
+          <div class="gate" style="--lv: oklch(76% 0.15 235)">
+            <span class="box"></span>
+            <span class="lv">S2</span>
+            <span class="g-desc"><b>새 확장 꽂기</b> — 코어를 수정하지 않고 확장점만으로 새 포맷/소스/오퍼레이션 하나를 서버에 추가한다.</span>
+            <span class="status todo">미통과</span>
+          </div>
+          <div class="gate" style="--lv: oklch(78% 0.15 275)">
+            <span class="box"></span>
+            <span class="lv">S3</span>
+            <span class="g-desc"><b>확장점 설계</b> — 다른 개발자가 코어 내부를 몰라도, 네가 만든 SPI/계약만 보고 모듈을 작성할 수 있게 한다.</span>
+            <span class="status todo">미통과</span>
+          </div>
+          <div class="gate" style="--lv: oklch(78% 0.16 315)">
+            <span class="box"></span>
+            <span class="lv">S4</span>
+            <span class="g-desc"><b>격리·신뢰·배포</b> — 외부 모듈을 안전하게 받는다면 필요한 격리·권한·배포를 설계하고, 핵심 하나를 PoC로 증명한다.</span>
             <span class="status todo">미통과</span>
           </div>
         </div>
