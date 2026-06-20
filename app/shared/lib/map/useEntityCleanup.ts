@@ -1,19 +1,21 @@
 import { shallowRef } from 'vue'
 import type { ShallowRef } from 'vue'
 import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
+import { useCesiumController } from '~/shared/lib/map/CesiumController'
 
 /**
  * Cesium 엔티티 배열의 생명주기를 관리하는 헬퍼를 생성한다.
  * 지도에 추가된 엔티티를 추적하고, 일괄 제거 기능을 제공한다.
+ * 엔티티 add/remove 는 `CesiumController` 의 entity capability 로 위임한다.
  */
 export const createEntityGroup = (viewer: ShallowRef<CesiumViewer | null>) => {
+    const controller = useCesiumController()
     const entities = shallowRef<CesiumEntity[]>([])
 
     /** 엔티티 옵션을 받아 viewer에 추가하고 그룹에 등록한다. 추가된 엔티티를 반환한다. */
     const add = (options: Record<string, unknown>): CesiumEntity | null => {
-        const v = viewer.value
-        if (!v) return null
-        const entity = v.entities.add(options)
+        const entity = controller.addEntity(options, viewer)
+        if (!entity) return null
         entities.value = [...entities.value, entity]
         return entity
     }
@@ -21,7 +23,7 @@ export const createEntityGroup = (viewer: ShallowRef<CesiumViewer | null>) => {
     /** 엔티티 배열을 지도에서 일괄 제거하고 내부 목록을 초기화한다. */
     const clear = () => {
         if (!viewer.value) return
-        entities.value.forEach((entity) => viewer.value?.entities.remove(entity))
+        entities.value.forEach((entity) => controller.removeEntity(entity, viewer))
         entities.value = []
     }
 
