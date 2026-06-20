@@ -1,14 +1,16 @@
 <script setup lang="ts">
 /**
- * 러닝 경로 제작 서비스의 메인 페이지.
- * 레이아웃 배치, 네비게이션, 키보드 단축키만 담당한다.
+ * 러닝 경로 제작 서비스의 메인 페이지(부모 layout).
+ * 지도·facade·오버레이·모달·FAB 를 소유하고, 탭 panel(목록·그리기·탐색)은
+ * nested route(`pages/index/*`)로 분리해 `<NuxtPage>`로 렌더한다.
+ * 자식 panel 은 `provide`한 컨텍스트로 facade·flow·auth 에 접근한다.
  */
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import MapShell from '~/widgets/map-shell/ui/MapShell.vue'
 import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
 import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
 import MapOverlays from '~/widgets/map-shell/ui/MapOverlays.vue'
-import SlideOverContent from '~/widgets/map-shell/ui/SlideOverContent.vue'
+import AuthTab from '~/widgets/map-shell/ui/slide-over/AuthTab.vue'
 import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
 import RouteCompareModal from '~/features/route-compare/ui/RouteCompareModal.vue'
 import { useRouteCompareSideeffect } from '~/features/route-compare/api/useRouteCompareSideeffect'
@@ -16,9 +18,11 @@ import { useViewModeSideeffect } from '~/features/view-mode/api/useViewModeSidee
 import { useGraphicQualitySideeffect } from '~/features/graphic-quality/api/useGraphicQualitySideeffect'
 import { useBaseMapSideeffect } from '~/features/base-map/api/useBaseMapSideeffect'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
-import { NavKey } from '~/widgets/map-shell/model/nav-key'
+import { NavKey, type NavKeyValue } from '~/widgets/map-shell/model/nav-key'
 import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
+import { useTabRoute } from '~/widgets/map-shell/model/useTabRoute'
 import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
+import { MAP_PAGE_CONTEXT } from '~/widgets/map-shell/model/useMapPageContext'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
@@ -35,12 +39,17 @@ import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelecti
 definePageMeta({ ssr: false })
 useHead({ link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }] })
 
-const notification = useNotificationStore()
 const viewer = shallowRef<CesiumViewer | null>(null)
-const routeInfoStore = useRouteInfoStore()
-const routeInfoEffect = useRouteInfoSideeffect(viewer)
-const routeDrawStore = useRouteDrawStore()
 
+// NOTE 1. Store 선언
+const notification = useNotificationStore() // 알림
+const routeInfoStore = useRouteInfoStore() // 경로 정보
+const routeDrawStore = useRouteDrawStore() // 그리기
+
+// NOTE 2. Sideeffect 선언
+const routeInfoEffect = useRouteInfoSideeffect(viewer)
+
+// 경로 퍼싸드
 const facade = useRouteMapFacade(viewer, {
     onAfterSave: async (routeId) => {
         await routeInfoEffect.saveLocalRouteInfos(routeId)
@@ -72,6 +81,17 @@ const { authStore, authEffect } = features.auth
 const { facility, facilityEffect, elevation, gradient } = features.mapLayers
 
 const slideOver = useSlideOverNav(activeNav)
+
+// nested route path(`/`·`/draw`·`/explore`)를 탭 mode·상태값의 단일 진실 소스로 삼는다.
+const { setTab } = useTabRoute({ activeNav, slideOver })
+
+/** Nav Rail 선택 → 목록·그리기는 path 이동으로, 로그인 등은 기존 SlideOver 토글로 처리한다. */
+const handleNavSelect = (nav: NavKeyValue) => {
+    if (nav === NavKey.LIST) return setTab('list')
+    if (nav === NavKey.DRAW) return setTab('draw')
+    slideOver.select(nav)
+}
+
 const showDrawingHelpModal = ref(false)
 const compareEffect = useRouteCompareSideeffect()
 
@@ -102,19 +122,8 @@ const flow = useRouteSelectionFlow({
     routeInfoStore,
     routeInfoEffect
 })
-const {
-    sectionInfo,
-    sectionDistances,
-    sectionTotalDistance,
-    sectionTotalTime,
-    showStepBackConfirm,
-    slideOverTitle,
-    slideOverDescription,
-    handleStepBack,
-    confirmStepBack,
-    handleRouteSelect,
-    handleRouteEdit
-} = flow
+const { sectionInfo, showStepBackConfirm, slideOverTitle, slideOverDescription, confirmStepBack } =
+    flow
 
 const { fabGroups, fabNearbyVisible } = useFabGroups({
     mapLayers: features.mapLayers,
@@ -139,6 +148,25 @@ useMapActions().registerExploreActions({
     selectRoute: handleExploreSelect,
     importRoute: handleExploreImport
 })
+
+// nested route 자식 panel(목록·그리기·탐색)에 facade·flow·auth·네비게이션 핸들을 내려준다.
+provide(MAP_PAGE_CONTEXT, {
+    facade,
+    flow,
+    slideOver,
+    authStore,
+    selectNav: handleNavSelect,
+    fetchRoutes
+})
+
+// 로그인 탭(AuthTab)은 path가 아닌 좌측 SlideOver 토글로 노출한다. 진입 시 폼을 초기화한다.
+const authTabRef = ref<InstanceType<typeof AuthTab> | null>(null)
+watch(
+    () => slideOver.current.value,
+    (nav) => {
+        if (nav === NavKey.AUTH) authTabRef.value?.reset()
+    }
+)
 
 onMounted(async () => {
     await districtEffect.init()
@@ -180,7 +208,7 @@ const handleRouteInfoSubmit = async (payload: { name: string; description: strin
             })
         }
     } else {
-        routeInfoStore.addLocalRouteInfo(input)
+        routeInfoStore.addDraftRouteInfo(input)
         routeInfoEffect.cancelAdding()
     }
 }
@@ -201,7 +229,7 @@ watch(
                     :active-nav="slideOver.lastActive.value"
                     :is-logged-in="authStore.isLoggedIn.value"
                     :user-role="authStore.user.value?.role"
-                    @select="slideOver.select"
+                    @select="handleNavSelect"
                 />
             </template>
             <template #default><div id="map" class="map-view" /></template>
@@ -263,28 +291,27 @@ watch(
             </template>
         </MapShell>
 
-        <SlideOverContent
-            :is-open="slideOver.isOpen.value"
-            :current-nav="slideOver.current.value ?? ''"
+        <USlideover
+            :open="slideOver.isOpen.value"
             :title="slideOverTitle"
             :description="slideOverDescription"
-            :is-logged-in="authStore.isLoggedIn.value"
-            :route-list="routeList"
-            :current-user-id="authStore.user.value?.id"
-            :section-info="sectionInfo"
-            :section-total-distance="sectionTotalDistance"
-            :section-total-time="sectionTotalTime"
-            :section-distances="sectionDistances"
-            :drawing="drawing"
+            side="left"
+            :overlay="false"
+            :modal="false"
+            :dismissible="false"
+            :ui="{ content: 'top-(--ui-header-height)! max-w-[75vw] lg:max-w-sm', header: 'flex!' }"
             @update:open="slideOver.isOpen.value = $event"
-            @route-select="handleRouteSelect"
-            @route-edit="handleRouteEdit"
-            @step-back="handleStepBack"
-            @drawing-start="drawing.start()"
-            @auth-success="fetchRoutes()"
-            @auth-logout="authEffect.logout()"
-            @go-login="slideOver.select(NavKey.AUTH)"
-        />
+        >
+            <template #body>
+                <AuthTab
+                    v-if="slideOver.current.value === NavKey.AUTH"
+                    ref="authTabRef"
+                    @success="fetchRoutes()"
+                    @logout="authEffect.logout()"
+                />
+                <NuxtPage v-else />
+            </template>
+        </USlideover>
 
         <UModal v-model:open="showStepBackConfirm" title="구간정보 닫기">
             <template #body
@@ -321,7 +348,7 @@ watch(
                 variant="solid"
                 class="rounded-l-none rounded-r-lg shadow-lg opacity-70"
                 aria-label="사이드바 다시 열기"
-                @click="slideOver.select(slideOver.lastActive.value)"
+                @click="handleNavSelect(slideOver.lastActive.value)"
             />
         </div>
 
