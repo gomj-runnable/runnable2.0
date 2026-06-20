@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GIS 서버 트랙 · 실무를 플랫폼 역량으로</title>
+    <style>
+      :root {
+        --bg: oklch(15% 0.02 255);
+        --bg-grid: oklch(20% 0.024 255);
+        --surface: oklch(22% 0.03 258);
+        --surface-2: oklch(26% 0.035 258);
+        --line: oklch(37% 0.04 258);
+        --text: oklch(95% 0.01 255);
+        --text-dim: oklch(73% 0.02 258);
+        --text-faint: oklch(57% 0.02 258);
+
+        --accent: oklch(76% 0.15 255);
+        --front: oklch(74% 0.17 320);
+        --good: oklch(78% 0.16 150);
+        --warn: oklch(80% 0.15 85);
+
+        --s1: oklch(76% 0.15 200);
+        --s2: oklch(76% 0.15 235);
+        --s3: oklch(78% 0.15 275);
+        --s4: oklch(78% 0.16 315);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1060px;
+        --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 85% -6%, oklch(30% 0.08 255 / 0.5), transparent 60%),
+          radial-gradient(800px 460px at 0% 4%, oklch(26% 0.06 320 / 0.35), transparent 55%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.62;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+      .backbtn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 999px; padding: 0.45rem 0.95rem; background: var(--surface); transition: color var(--ease) 0.2s, border-color var(--ease) 0.2s; }
+      .backbtn:hover { color: var(--text); border-color: var(--text-faint); }
+
+      header.hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3rem); border-bottom: 1px solid var(--line); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0 0 1rem; }
+      h1 { font-size: clamp(2.1rem, 1.1rem + 4.6vw, 3.9rem); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800; }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--front)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 66ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .lede code { font-family: var(--mono); font-size: 0.9em; color: var(--text-dim); }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 66ch; margin: 0; }
+      .sec-sub code { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 0.05rem 0.35rem; border-radius: 4px; color: var(--text); }
+
+      /* two grounds */
+      .grounds { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: stretch; }
+      .ground { border: 1px solid var(--line); border-top: 3px solid var(--gc); border-radius: var(--radius); background: var(--surface); padding: 1.5rem; }
+      .ground .g-tag { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gc); margin: 0 0 0.6rem; }
+      .ground h3 { margin: 0 0 0.8rem; font-size: 1.15rem; }
+      .ground ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+      .ground li { font-size: 0.88rem; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
+      .ground li::before { content: "▸"; position: absolute; left: 0; color: var(--gc); }
+      .ground li b { color: var(--text); }
+      .merge { align-self: center; font-family: var(--mono); color: var(--text-faint); font-size: 1.4rem; }
+      .identity { margin-top: 1rem; border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: var(--radius-sm); background: linear-gradient(100deg, color-mix(in oklch, var(--good) 9%, var(--surface)), var(--surface) 55%); padding: 1.1rem 1.4rem; color: var(--text-dim); font-size: 0.96rem; }
+      .identity b { color: var(--text); }
+
+      /* feature vs arch */
+      .fa { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .fa .col { border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; background: var(--surface); }
+      .fa .col.feat { border-top: 3px solid var(--text-faint); }
+      .fa .col.arch { border-top: 3px solid var(--accent); }
+      .fa .col .label { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 0.7rem; }
+      .fa .col.feat .label { color: var(--text-faint); }
+      .fa .col.arch .label { color: var(--accent); }
+      .fa .col h3 { margin: 0 0 0.9rem; font-size: 1.12rem; }
+      .fa ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .fa li { font-size: 0.89rem; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
+      .fa li::before { content: "▸"; position: absolute; left: 0; opacity: 0.6; }
+      .fa .col.arch li b { color: var(--text); }
+
+      .pull { border-left: 3px solid var(--warn); background: var(--surface-2); padding: 1.1rem 1.3rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 1.6rem 0 0; color: var(--text-dim); font-size: 0.96rem; }
+      .pull b { color: var(--text); }
+      .pull.big { font-size: 1.04rem; line-height: 1.55; }
+
+      /* ladder */
+      .ladder { display: flex; flex-direction: column; gap: 1rem; }
+      .stage { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--accent2) 9%, var(--surface)), var(--surface) 55%); overflow: hidden; }
+      .stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--line); }
+      .stage-lv { font-family: var(--mono); font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; color: var(--bg); background: var(--accent2); padding: 0.25rem 0.6rem; border-radius: 6px; }
+      .stage-name { font-size: 1.15rem; font-weight: 700; }
+      .stage-twin { font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); margin-left: auto; }
+      .stage-body { padding: 1.2rem 1.4rem; }
+      .stage-body ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+      .stage-body li { font-size: 0.9rem; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
+      .stage-body li::before { content: "▸"; position: absolute; left: 0; color: var(--accent2); }
+      .stage-body li b { color: var(--text); }
+      .stage-body li code { font-family: var(--mono); font-size: 0.82rem; background: var(--surface-2); padding: 0.05rem 0.35rem; border-radius: 4px; color: var(--text); }
+      .gate { margin: 0 1.4rem 1.3rem; padding: 0.85rem 1rem; border-left: 3px solid var(--warn); background: var(--surface-2); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.88rem; color: var(--text-dim); }
+      .gate b { color: var(--warn); font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+      /* bridge table */
+      .bridge { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+      .bridge th, .bridge td { text-align: left; padding: 0.8rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+      .bridge thead th { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
+      .bridge tbody td:first-child { font-weight: 600; color: var(--text); }
+      .bridge td code { font-family: var(--mono); font-size: 0.82rem; color: var(--text-dim); }
+      .bridge .colf { color: var(--front); }
+      .bridge .cols { color: var(--accent); }
+      .bridge-wrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+      .bridge tbody tr:last-child td { border-bottom: none; }
+
+      /* habits */
+      .habits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+      .habits li { display: grid; grid-template-columns: 24px 1fr; gap: 0.7rem; align-items: start; font-size: 0.92rem; color: var(--text-dim); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); padding: 0.9rem 1.1rem; }
+      .habits li .qm { font-family: var(--mono); font-weight: 800; color: var(--accent); }
+      .habits li b { color: var(--text); }
+
+      /* pitfalls */
+      .pit { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.9rem; }
+      .pit-card { border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1.1rem 1.2rem; background: var(--surface); }
+      .pit-card .x { font-family: var(--mono); color: var(--warn); font-size: 0.8rem; font-weight: 700; }
+      .pit-card p { margin: 0.4rem 0 0; font-size: 0.88rem; color: var(--text-dim); }
+      .pit-card p b { color: var(--text); }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      footer a { color: var(--accent); }
+
+      @media (max-width: 640px) {
+        .grounds { grid-template-columns: 1fr; }
+        .merge { transform: rotate(90deg); }
+        .fa { grid-template-columns: 1fr; }
+        .stage-twin { margin-left: 0; }
+        .bridge thead { display: none; }
+        .bridge, .bridge tbody, .bridge tr, .bridge td { display: block; width: 100%; }
+        .bridge td { border-bottom: none; padding: 0.3rem 1rem; }
+        .bridge tr { border-bottom: 1px solid var(--line); padding: 0.6rem 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;"><a class="backbtn" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Server Platform Track · 실무 연결</p>
+        <h1>낮에 만드는 GIS 서버가<br /><em>두 번째 훈련장</em>이다</h1>
+        <p class="lede">
+          GeoServer 같은 GIS 서버는 업계에서 <b>가장 확장 구조가 잘 짜인 소프트웨어</b> 중 하나입니다.
+          데이터 소스·출력 포맷·서비스가 전부 플러그인으로 꽂히죠. 즉 ④에서 본 프론트엔드 <code>plugins-ext</code> 사다리를
+          <b>서버 쪽에서 똑같이 오를 수 있다</b>는 뜻입니다. 이 문서는 네 실무를 "GIS 기능 개발"에서 멈추지 않고
+          <b>플랫폼 역량</b>으로 전환하는 가이드입니다.
+        </p>
+      </div>
+    </header>
+
+    <!-- 01 두 훈련장 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / TWO TRAINING GROUNDS</span>
+          <h2>같은 근육, 두 무대</h2>
+          <p class="sec-sub">프론트와 서버는 표면이 다르지만, 기르는 역량은 하나입니다 — <b>확장 가능한 판을 설계하는 능력</b>.</p>
+        </div>
+
+        <div class="grounds">
+          <div class="ground" style="--gc: var(--front)">
+            <p class="g-tag">무대 A · 프론트엔드</p>
+            <h3>Runnable · plugins-ext</h3>
+            <ul>
+              <li>슬롯에 <b>UI 모듈</b>을 꽂는 호스트</li>
+              <li>매니페스트 · registry · prefs</li>
+              <li>브라우저 런타임 · 동적 로딩</li>
+              <li>사용자가 보는 확장</li>
+            </ul>
+          </div>
+          <div class="merge">+</div>
+          <div class="ground" style="--gc: var(--accent)">
+            <p class="g-tag">무대 B · 서버</p>
+            <h3>MapPrime GisServer</h3>
+            <ul>
+              <li>확장점에 <b>데이터·포맷·서비스</b>를 꽂는 호스트</li>
+              <li>SPI · 모듈 로딩 · 서비스 레지스트리</li>
+              <li>JVM/서버 런타임 · OGC 프로토콜</li>
+              <li>개발자가 쓰는 확장</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="identity">
+          두 무대가 합쳐지면 → <b>"서버와 프론트 양쪽의 확장 모델을 다 아는 플랫폼 엔지니어".</b>
+          한국에서 매우 희소하고, ⑥ 한계 문서에서 말한 "벽이 무너질 때 가장 먼저 준비된 사람"의 정확한 정의입니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 기능 vs 구조 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / FEATURE vs ARCHITECTURE</span>
+          <h2>둘 다 한다면, 의식적으로 '구조'를 만져라</h2>
+          <p class="sec-sub">네가 기능도 확장 구조도 둘 다 맡을 수 있다고 했죠. 같은 일이라도 <b>어느 모자를 쓰느냐</b>가 직군을 가릅니다.</p>
+        </div>
+
+        <div class="fa">
+          <div class="col feat">
+            <p class="label">기능 모자 · GIS 개발자</p>
+            <h3>기능 작업이 주는 것</h3>
+            <ul>
+              <li>지리공간 <b>도메인 깊이</b> (투영·타일·공간쿼리)</li>
+              <li>OGC 표준(WMS/WFS/WMTS) 숙련</li>
+              <li>성능·정확도 감각</li>
+              <li>→ 깊지만, 여기 머물면 <b>대체 가능한 기능 개발자</b></li>
+            </ul>
+          </div>
+          <div class="col arch">
+            <p class="label">구조 모자 · 플랫폼 개발자</p>
+            <h3>구조 작업이 주는 것</h3>
+            <ul>
+              <li><b>경계 설계</b> — 무엇을 SPI로 열고 무엇을 숨길지</li>
+              <li>확장점·계약·버저닝 — 남이 꽂을 판을 만든다</li>
+              <li>격리·신뢰·배포 사고</li>
+              <li>→ 희소하고, <b>플랫폼 엔지니어로 자라는 길</b></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="pull big">
+          핵심 — <b>기능을 짜더라도 매번 "이걸 어떻게 확장 가능하게 만들까?"를 한 번 더 묻는 습관.</b>
+          그 한 질문이 같은 코드를 "기능 구현"에서 "플랫폼 설계"로 바꿉니다. (단, 남발은 과설계 — 05/§5의 YAGNI 균형)
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 서버 사다리 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / SERVER LADDER</span>
+          <h2>서버판 성장 사다리 (S1~S4)</h2>
+          <p class="sec-sub">④ 프론트 로드맵의 L1~L4와 정확히 짝지어집니다. 각 단계의 gate를 통과하면 ⑦ 학습 로그에 기록하세요.</p>
+        </div>
+
+        <div class="ladder">
+          <div class="stage" style="--accent2: var(--s1)">
+            <div class="stage-head">
+              <span class="stage-lv">S1</span>
+              <span class="stage-name">소비자 → 한 확장 끝까지 읽기</span>
+              <span class="stage-twin">↔ L1 · 첫 chip</span>
+            </div>
+            <div class="stage-body">
+              <ul>
+                <li>기존 확장 하나(예: 한 <code>DataStore</code> 또는 <code>output format</code>)를 <b>요청 진입 → 응답까지</b> 추적</li>
+                <li>호스트가 모듈을 어떻게 <b>발견·등록</b>하는지 (SPI / 서비스 로더) 파악</li>
+                <li>OGC 요청 한 종류(GetMap 등)의 전체 경로를 그려보기</li>
+              </ul>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;새 요청이 들어와 응답이 나가기까지, 한 확장이 어디서 어떻게 꽂히는지 그림으로 설명할 수 있다.</div>
+          </div>
+
+          <div class="stage" style="--accent2: var(--s2)">
+            <div class="stage-head">
+              <span class="stage-lv">S2</span>
+              <span class="stage-name">새 확장 하나를 꽂는다</span>
+              <span class="stage-twin">↔ L2 · 상태 반응 패널</span>
+            </div>
+            <div class="stage-body">
+              <ul>
+                <li><b>코어를 건드리지 않고</b> 새 출력 포맷 / 새 데이터 소스 / 새 오퍼레이션을 추가</li>
+                <li>기존 확장점(인터페이스)을 구현해 레지스트리에 등록</li>
+                <li>설정·토글로 켜고 끄는 경로 이해</li>
+              </ul>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;코어 코드를 수정하지 않고 확장점만으로 새 기능 하나를 서버에 추가한다.</div>
+          </div>
+
+          <div class="stage" style="--accent2: var(--s3)">
+            <div class="stage-head">
+              <span class="stage-lv">S3</span>
+              <span class="stage-name">확장점 자체를 설계한다</span>
+              <span class="stage-twin">↔ L3 · 계약 설계</span>
+            </div>
+            <div class="stage-body">
+              <ul>
+                <li>새 <b>SPI / 플러그인 인터페이스</b>를 정의 — 남이 꽂을 자리를 연다</li>
+                <li>무엇을 공개(public contract)하고 무엇을 내부로 숨길지 결정</li>
+                <li><b>버저닝·하위호환·deprecation</b> 전략 (계약을 깨지 않고 진화)</li>
+                <li>타입/인터페이스로 계약 강제, 예제 모듈로 검증</li>
+              </ul>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;다른 개발자가 네 코어 내부를 몰라도, 네가 만든 계약만 보고 모듈을 작성할 수 있다.</div>
+          </div>
+
+          <div class="stage" style="--accent2: var(--s4)">
+            <div class="stage-head">
+              <span class="stage-lv">S4</span>
+              <span class="stage-name">격리 · 신뢰 · 배포</span>
+              <span class="stage-twin">↔ L4 · 격리 PoC</span>
+            </div>
+            <div class="stage-body">
+              <ul>
+                <li><b>신뢰 불가 모듈</b> 가정 — 리소스 제한·타임아웃·샌드박스(클래스로더 격리 등)</li>
+                <li>권한 모델 — 모듈이 접근 가능한 능력을 명시적으로 제한</li>
+                <li><b>배포·버전</b> — 모듈 독립 배포, 서명·검수, semver 계약</li>
+                <li>"언제 도입할지" 판단 — 사내 1st-party뿐이면 과설계(YAGNI)</li>
+              </ul>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;외부 모듈을 안전하게 받는다면 필요한 격리·권한·배포를 설계하고, 핵심 한 가지를 PoC로 증명한다.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 개념 다리 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / THE BRIDGE</span>
+          <h2>전이되는 개념 — 서버 ↔ 프론트</h2>
+          <p class="sec-sub">무대가 달라도 같은 패턴입니다. 이 표가 "왜 두 일이 같은 근육인지"의 증거입니다.</p>
+        </div>
+
+        <div class="bridge-wrap">
+          <table class="bridge">
+            <thead>
+              <tr><th>보편 역량</th><th class="cols">GIS 서버</th><th class="colf">프론트 · plugins-ext</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>host ↔ plugin 계약</td><td>DataStore / Service <code>SPI</code></td><td><code>PluginManifest</code></td></tr>
+              <tr><td>확장점(자리 열기)</td><td>output format · operation 확장</td><td>슬롯 (chip·panel·dashboard)</td></tr>
+              <tr><td>레지스트리·발견</td><td>SPI / ServiceLoader 모듈 로딩</td><td><code>registry.ts</code></td></tr>
+              <tr><td>공개 API 버저닝</td><td>SPI / REST 계약 안정성</td><td><code>PluginContext</code> (④ L3)</td></tr>
+              <tr><td>격리·권한</td><td>클래스로더 격리·리소스 제한</td><td>iframe · Worker 격리</td></tr>
+              <tr><td>표준 준수</td><td>OGC 프로토콜 (WMS/WFS…)</td><td>웹 표준 · 접근성</td></tr>
+              <tr><td>지연·성능</td><td>모듈 lazy 로딩·캐시·타일</td><td>동적 import (⑤ 온디맨드)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pull">
+          <b>경계 설계·계약·버저닝·격리</b>는 직군이 아니라 <b>사고방식</b>입니다. 그래서 서버에서 길러도 프론트로,
+          프론트에서 길러도 서버로 그대로 따라옵니다 — 네가 양쪽을 다 하므로 <b>전이가 두 배로 빨라집니다</b>.
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 일하는 습관 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / HABITS</span>
+          <h2>플랫폼 개발자로 자라는 일습관</h2>
+          <p class="sec-sub">거창한 프로젝트가 아니라, <b>매일의 작업에 끼워 넣는 질문</b>들이 직군을 바꿉니다.</p>
+        </div>
+
+        <ul class="habits">
+          <li><span class="qm">?</span><div>기능 요청을 받으면 먼저 묻기 — <b>"이건 일회성 기능인가, 반복될 패턴(확장점)인가?"</b> 패턴이면 확장점으로 빼고, 일회성이면 그냥 짠다(YAGNI).</div></li>
+          <li><span class="qm">1</span><div>구현보다 <b>인터페이스(SPI)를 먼저</b> 그린다 — 계약 우선. "이 모듈이 받아야 할 입력/출력 모양"부터 확정.</div></li>
+          <li><span class="qm">2</span><div>무엇을 <b>공개/은폐</b>할지 의식적으로 결정. 내부 구현 클래스를 공개 API로 새어 나가게 두지 않는다 (그러면 버저닝 불가).</div></li>
+          <li><span class="qm">3</span><div>변경 전 묻기 — <b>"이 변경이 기존 모듈을 깨나?"</b> 깨면 semver·deprecation 경로를 둔다.</div></li>
+          <li><span class="qm">4</span><div><b>"남이 이걸 어떻게 작성하지?"</b> — 예제 모듈·문서·스캐폴딩을 남긴다. DX 없으면 아무도(미래의 나 포함) 못 쓴다.</div></li>
+          <li><span class="qm">5</span><div>격리 가정 — <b>모듈 하나가 서버 전체를 멈추지 않게</b> 타임아웃·리소스 경계를 의식. (필요 시점에만 — 과설계 금지)</div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 06 함정 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">06 / PITFALLS</span>
+          <h2>GIS 서버에서 자주 빠지는 함정</h2>
+          <p class="sec-sub">대부분 "기능만 보고 구조를 안 봐서" 또는 "구조를 너무 일찍 봐서" 생깁니다.</p>
+        </div>
+
+        <div class="pit">
+          <div class="pit-card"><span class="x">✗ 표준 준수에만 매몰</span><p>OGC 스펙 맞추기에만 집중하고 <b>확장 구조</b>를 안 본다. → 기능 개발자에 머묾. 스펙은 토대, 구조가 성장축.</p></div>
+          <div class="pit-card"><span class="x">✗ 코어에 하드코딩</span><p>새 포맷·소스를 <b>코어에 직접 분기</b>로 추가. 다음 요청마다 코어를 또 수정. → 확장점으로 빼라.</p></div>
+          <div class="pit-card"><span class="x">✗ 확장점 과설계</span><p>구현은 1개뿐인데 추상 레이어를 5겹 쌓음. <b>YAGNI</b> — 두 번째 구현이 보일 때 추상화하라.</p></div>
+          <div class="pit-card"><span class="x">✗ 내부 구현 누출</span><p>내부 클래스·필드를 공개 API로 노출. 다음 리팩터링에서 모든 모듈이 깨짐. → 좁고 안정적인 표면만.</p></div>
+          <div class="pit-card"><span class="x">✗ 격리 무시</span><p>무겁거나 실패하는 모듈 하나가 <b>서버 전체를 다운</b>. → 경계·타임아웃·리소스 제한(필요 시점에).</p></div>
+          <div class="pit-card"><span class="x">✗ DX 방치</span><p>확장 작성법이 머릿속에만. 예제·문서 없으면 팀의 다른 개발자가 확장을 못 만듦 = 판이 죽음.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        프론트엔드 쌍둥이 사다리는 <a href="04-roadmap.html">④ 로드맵</a>, 직군의 본질은 <a href="00-vision.html">⓪ 비전</a>,
+        범웹 한계는 <a href="06-limits.html">⑥ 한계</a>, 진척 기록은 <a href="07-log.html">⑦ 학습 로그</a>(S1~S4도 함께 기록).
+        GeoServer류 확장 모델(SPI·extension·GeoTools)은 일반 공개 아키텍처 지식 기준이며, 세부는 MapPrime GisServer 실제 코드로 확인하세요.
+      </div>
+    </footer>
+  </body>
+</html>
