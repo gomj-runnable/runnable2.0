@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>사전 지식 · 이 문서들을 읽기 위한 토대</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 200);
+        --bg-grid: oklch(21% 0.024 200);
+        --surface: oklch(22% 0.028 205);
+        --surface-2: oklch(26% 0.032 205);
+        --line: oklch(37% 0.04 205);
+        --text: oklch(94% 0.01 200);
+        --text-dim: oklch(72% 0.02 205);
+        --text-faint: oklch(57% 0.02 205);
+
+        --a: oklch(78% 0.14 190);
+        --b: oklch(78% 0.15 150);
+        --c: oklch(80% 0.14 90);
+        --d: oklch(76% 0.15 300);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1040px;
+        --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1000px 520px at 12% -6%, oklch(28% 0.06 190 / 0.4), transparent 58%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.62;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+      .backbtn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 999px; padding: 0.45rem 0.95rem; background: var(--surface); transition: color var(--ease) 0.2s, border-color var(--ease) 0.2s; }
+      .backbtn:hover { color: var(--text); border-color: var(--text-faint); }
+
+      header.hero { padding: clamp(2rem, 5vw, 4rem) 0 clamp(2rem, 4vw, 3rem); border-bottom: 1px solid var(--line); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--a); margin: 0 0 1rem; }
+      h1 { font-size: clamp(2.1rem, 1.1rem + 4.5vw, 3.7rem); line-height: 1.06; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800; }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 64ch; font-size: clamp(1.02rem, 0.95rem + 0.4vw, 1.2rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.1rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 66ch; margin: 0; }
+
+      .cluster { margin-bottom: 2.4rem; }
+      .cluster-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.7rem; margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--line); }
+      .cluster-tag { font-family: var(--mono); font-weight: 800; font-size: 0.8rem; color: var(--bg); background: var(--accent); padding: 0.2rem 0.55rem; border-radius: 6px; }
+      .cluster-name { font-size: 1.2rem; font-weight: 700; }
+      .cluster-unlocks { font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); margin-left: auto; }
+
+      .terms { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.8rem; }
+      .term { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1rem 1.1rem; background: var(--surface); }
+      .term .tn { font-weight: 700; font-size: 0.96rem; display: flex; align-items: baseline; gap: 0.45rem; flex-wrap: wrap; }
+      .term .tn code { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); font-weight: 400; }
+      .term p { margin: 0.4rem 0 0; font-size: 0.86rem; color: var(--text-dim); }
+      .term p b { color: var(--text); }
+
+      .order { display: flex; flex-direction: column; gap: 0.7rem; }
+      .ostep { display: grid; grid-template-columns: 30px 1fr; gap: 0.9rem; align-items: baseline; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.9rem 1.1rem; background: var(--surface); }
+      .ostep .on { font-family: var(--mono); font-weight: 800; color: var(--a); }
+      .ostep .ot b { color: var(--text); }
+      .ostep .ot { color: var(--text-dim); font-size: 0.92rem; }
+      .ostep .ot .lk { font-family: var(--mono); font-size: 0.78rem; color: var(--b); text-decoration: none; }
+      .ostep .ot .lk:hover { text-decoration: underline; }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;"><a class="backbtn" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Prerequisites · 사전 지식</p>
+        <h1>이 문서들을 읽기 위한<br /><em>최소한의 토대</em></h1>
+        <p class="lede">
+          ①~④를 이해하려면 몇 가지 개념을 먼저 알아야 합니다. 깊이 파고들 필요는 없고,
+          <b>"이 단어가 무슨 뜻이고, 왜 거기서 쓰이는지"</b> 정도면 충분합니다. 각 묶음 끝에 그 지식이
+          <b>어느 문서를 여는 열쇠인지</b> 표시해 두었습니다. 모르는 묶음만 골라 읽으세요.
+        </p>
+      </div>
+    </header>
+
+    <!-- 추천 순서 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">00 / READING ORDER</span>
+          <h2>어떻게 읽을까</h2>
+          <p class="sec-sub">아래 묶음 A~G 중 낯선 것만 본 뒤, 문서를 순서대로 읽으면 막힘이 없습니다.</p>
+        </div>
+        <div class="order">
+          <div class="ostep"><span class="on">0</span><span class="ot"><b>이 문서(사전 지식)</b> 에서 낯선 묶음만 훑기 — 용어 감 잡기</span></div>
+          <div class="ostep"><span class="on">1</span><span class="ot">묶음 F·G(아키텍처·플러그인 어휘) → <a class="lk" href="02-architecture.html">① app/ 구조</a> 가 읽힘</span></div>
+          <div class="ostep"><span class="on">2</span><span class="ot">묶음 G(플러그인 어휘) → <a class="lk" href="03-evolution.html">② 진화</a>, <a class="lk" href="04-roadmap.html">③ 로드맵</a></span></div>
+          <div class="ostep"><span class="on">3</span><span class="ot">묶음 A·B·C·D(런타임·모듈·Vue·Nuxt) → <a class="lk" href="05-on-demand.html">④ 온디맨드 설치</a> 의 코드가 이해됨</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 지식 묶음 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / KNOWLEDGE CLUSTERS</span>
+          <h2>7개 지식 묶음</h2>
+          <p class="sec-sub">각 카드는 용어 한 줄 정의입니다. 외우지 말고, 문서를 읽다 막히면 돌아와 찾아보세요.</p>
+        </div>
+
+        <!-- A 브라우저 런타임 -->
+        <div class="cluster" style="--accent: var(--a)">
+          <div class="cluster-top">
+            <span class="cluster-tag">A</span>
+            <span class="cluster-name">브라우저 런타임 &amp; 성능</span>
+            <span class="cluster-unlocks">→ ④ 이해의 핵심</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--a)"><div class="tn">메인 스레드</div><p>브라우저가 JS 실행·렌더를 처리하는 단일 흐름. 여기서 무거운 일을 하면 <b>화면이 멈춤</b>(버벅임).</p></div>
+            <div class="term" style="--accent: var(--a)"><div class="tn">로드 4단계</div><p><b>다운로드 → 파싱 → 컴파일/실행 → 메모리 적재</b>. "성능 비용"은 이 4가지의 합. 안 받으면 4개 다 0.</p></div>
+            <div class="term" style="--accent: var(--a)"><div class="tn">힙(heap) 메모리</div><p>실행 중 객체가 올라가는 공간. 컴포넌트 인스턴스·구독이 여기 쌓임. "메모리에 올라온다"의 그곳.</p></div>
+            <div class="term" style="--accent: var(--a)"><div class="tn">DevTools</div><p>Network 탭(무엇을 받았나)·Performance 탭(어디서 시간 썼나). ④의 효과를 <b>측정</b>하는 도구.</p></div>
+          </div>
+        </div>
+
+        <!-- B 모듈 & 번들 -->
+        <div class="cluster" style="--accent: var(--b)">
+          <div class="cluster-top">
+            <span class="cluster-tag">B</span>
+            <span class="cluster-name">모듈 &amp; 번들</span>
+            <span class="cluster-unlocks">→ ④</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--b)"><div class="tn">ES Module <code>import</code></div><p>파일을 다른 파일에서 가져오는 표준. 최상단 <b>정적 import</b> 는 항상 함께 로드됨.</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">동적 <code>import()</code></div><p>함수처럼 호출하는 import. <b>호출하는 순간에만</b> 로드. ④ "설치"의 기술적 정체.</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">번들러 / Vite</div><p>여러 파일을 브라우저용으로 묶는 도구. 정적은 합치고, 동적 import 는 <b>쪼갬</b>.</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">청크 / 코드 스플리팅</div><p>쪼개진 JS 조각이 청크. 동적 import 마다 별도 청크 → 필요할 때만 받음.</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">모듈 캐시</div><p>한 번 받은 모듈은 메모리에 남음. 그래서 "제거해도 코드는 완전히 안 내려감"(④의 함정).</p></div>
+          </div>
+        </div>
+
+        <!-- C Vue 3 -->
+        <div class="cluster" style="--accent: var(--c)">
+          <div class="cluster-top">
+            <span class="cluster-tag">C</span>
+            <span class="cluster-name">Vue 3 (Composition API)</span>
+            <span class="cluster-unlocks">→ ①④</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--c)"><div class="tn">컴포넌트 <code>.vue</code></div><p>화면 한 조각(템플릿+로직+스타일). 플러그인은 결국 이 컴포넌트.</p></div>
+            <div class="term" style="--accent: var(--c)"><div class="tn">반응성 <code>ref/computed</code></div><p>값이 바뀌면 화면이 자동 갱신. <code>computed</code> 는 다른 값에서 <b>파생</b>된 값.</p></div>
+            <div class="term" style="--accent: var(--c)"><div class="tn">컴포저블 <code>use*</code></div><p>로직을 함수로 묶어 재사용. store·sideeffect·facade 가 전부 이 형태.</p></div>
+            <div class="term" style="--accent: var(--c)"><div class="tn"><code>defineAsyncComponent</code></div><p>로더 함수를 받아 <b>렌더 시점에 로드</b>하는 컴포넌트. ④의 핵심 도구.</p></div>
+            <div class="term" style="--accent: var(--c)"><div class="tn"><code>&lt;component :is&gt;</code></div><p>어떤 컴포넌트를 그릴지 동적으로 정함. 호스트가 슬롯에 플러그인을 꽂는 방법.</p></div>
+          </div>
+        </div>
+
+        <!-- D Nuxt 4 -->
+        <div class="cluster" style="--accent: var(--d)">
+          <div class="cluster-top">
+            <span class="cluster-tag">D</span>
+            <span class="cluster-name">Nuxt 4</span>
+            <span class="cluster-unlocks">→ ①④</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--d)"><div class="tn">파일 기반 라우팅</div><p><code>pages/</code> 의 파일이 곧 URL. 페이지는 자동으로 <b>라우트 단위 코드 분리</b>됨(=페이지 이동 시 로드).</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn">자동 import</div><p><code>ref</code>·<code>useState</code> 등을 import 없이 사용. 그래서 코드에 import 줄이 적게 보임.</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn"><code>useState</code></div><p>SSR-안전한 전역 공유 상태. store 가 이 위에 세워짐(<code>plugin-prefs</code> 등).</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn"><code>$fetch</code></div><p>서버 API 호출 헬퍼. <code>/api/me/feature-prefs</code> 같은 설치 상태 저장에 쓰임.</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn"><code>&lt;ClientOnly&gt;</code></div><p>클라이언트에서만 렌더. 설치형처럼 브라우저 전용 동작의 하이드레이션 문제를 피함.</p></div>
+          </div>
+        </div>
+
+        <!-- E TypeScript -->
+        <div class="cluster" style="--accent: var(--a)">
+          <div class="cluster-top">
+            <span class="cluster-tag">E</span>
+            <span class="cluster-name">TypeScript 기초</span>
+            <span class="cluster-unlocks">→ 전부</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--a)"><div class="tn"><code>interface</code> / <code>type</code></div><p>객체의 모양(필드·타입)을 정의. <code>PluginManifest</code> 가 대표 예시.</p></div>
+            <div class="term" style="--accent: var(--a)"><div class="tn">제네릭 <code>&lt;T&gt;</code></div><p>타입을 매개변수로 받음. <code>Promise&lt;{ default: Component }&gt;</code> 처럼.</p></div>
+            <div class="term" style="--accent: var(--a)"><div class="tn"><code>Promise</code> / async</div><p>나중에 끝나는 작업의 결과 그릇. 동적 import 는 Promise 를 돌려줌 → <code>await</code> 로 기다림.</p></div>
+          </div>
+        </div>
+
+        <!-- F 아키텍처 -->
+        <div class="cluster" style="--accent: var(--b)">
+          <div class="cluster-top">
+            <span class="cluster-tag">F</span>
+            <span class="cluster-name">아키텍처 어휘 (FSD)</span>
+            <span class="cluster-unlocks">→ ①</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--b)"><div class="tn">FSD 레이어</div><p>pages → widgets → features → entities → shared 5층. 위가 아래만 의존(단방향).</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">슬라이스 / 세그먼트</div><p>레이어 안의 도메인 폴더(슬라이스)와 그 안의 <code>api/model/lib/ui</code>(세그먼트).</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">의존 방향</div><p>"누가 누구를 import 하는가"의 규칙. 역방향·교차 의존 금지가 핵심.</p></div>
+            <div class="term" style="--accent: var(--b)"><div class="tn">Facade</div><p>여러 조각을 단일 창구로 묶어 호출부를 단순화. <code>useRouteMapFacade</code>.</p></div>
+          </div>
+        </div>
+
+        <!-- G 플러그인 어휘 -->
+        <div class="cluster" style="--accent: var(--d)">
+          <div class="cluster-top">
+            <span class="cluster-tag">G</span>
+            <span class="cluster-name">플러그인 시스템 어휘</span>
+            <span class="cluster-unlocks">→ ②③④</span>
+          </div>
+          <div class="terms">
+            <div class="term" style="--accent: var(--d)"><div class="tn">호스트 / 플러그인</div><p>확장을 받아주는 본체(host)와, 거기 끼워지는 기능(plugin).</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn">매니페스트</div><p>플러그인의 자기소개 메타데이터(id·슬롯·위치·기본값). <code>PluginManifest</code>.</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn">슬롯 / 확장점</div><p>호스트가 열어둔 자리(chip·sidepanel·dashboard·popup). 플러그인이 여기에 꽂힘.</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn">레지스트리</div><p>플러그인 목록을 모아둔 곳(<code>registry.ts</code>). 호스트가 여기서 읽어 렌더.</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn">생명주기 / lazy</div><p>등록 → (지연)로드 → 마운트 → 해제. lazy = 필요할 때만 로드.</p></div>
+            <div class="term" style="--accent: var(--d)"><div class="tn">샌드박스 / 권한</div><p>신뢰 못 할 코드를 격리(iframe·Worker)하고 능력만 허가. ②③의 상위 개념.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        이 문서는 ①~④를 읽기 위한 최소 토대만 다룹니다. 더 깊은 내용은 각 공식 문서(Vue·Nuxt·Vite·TypeScript)와
+        프로젝트 위키(<code>docs/wiki/2-Architecture.md</code>)를 참고하세요. 막히면 언제든 여기로 돌아와 용어를 찾으세요.
+      </div>
+    </footer>
+  </body>
+</html>

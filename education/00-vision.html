@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>왜 — 개인화 웹과 네가 훈련하는 것</title>
+    <style>
+      :root {
+        --bg: oklch(15% 0.02 320);
+        --bg-grid: oklch(20% 0.025 320);
+        --surface: oklch(22% 0.03 320);
+        --surface-2: oklch(26% 0.035 320);
+        --line: oklch(37% 0.04 320);
+        --text: oklch(95% 0.01 320);
+        --text-dim: oklch(73% 0.02 320);
+        --text-faint: oklch(58% 0.02 320);
+
+        --accent: oklch(74% 0.17 320);
+        --a2: oklch(78% 0.15 215);
+        --a3: oklch(78% 0.15 150);
+        --hot: oklch(80% 0.15 85);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1040px;
+        --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 85% -6%, oklch(30% 0.09 320 / 0.5), transparent 60%),
+          radial-gradient(800px 460px at 0% 4%, oklch(26% 0.06 215 / 0.4), transparent 55%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.62;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+      .backbtn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 999px; padding: 0.45rem 0.95rem; background: var(--surface); transition: color var(--ease) 0.2s, border-color var(--ease) 0.2s; }
+      .backbtn:hover { color: var(--text); border-color: var(--text-faint); }
+
+      header.hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--line); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0 0 1rem; }
+      h1 { font-size: clamp(2.2rem, 1.1rem + 5vw, 4.2rem); line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800; }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--a2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 64ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+
+      /* claims */
+      .claims { display: flex; flex-direction: column; gap: 1rem; }
+      .claim { display: grid; grid-template-columns: 54px 1fr; gap: 1.2rem; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius-sm); background: linear-gradient(100deg, color-mix(in oklch, var(--accent) 9%, var(--surface)), var(--surface) 55%); padding: 1.3rem 1.5rem; align-items: start; }
+      .claim .n { font-family: var(--mono); font-weight: 850; font-size: 1.6rem; color: var(--accent); line-height: 1; }
+      .claim .c-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem; }
+      .claim p { margin: 0; color: var(--text-dim); font-size: 0.95rem; }
+      .claim p b { color: var(--text); font-weight: 600; }
+
+      /* shift two-col */
+      .shift { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .shift .col { border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; background: var(--surface); }
+      .shift .col.from { border-top: 3px solid var(--text-faint); }
+      .shift .col.to { border-top: 3px solid var(--accent); }
+      .shift .col .label { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 0.8rem; }
+      .shift .col.from .label { color: var(--text-faint); }
+      .shift .col.to .label { color: var(--accent); }
+      .shift .col h3 { margin: 0 0 0.9rem; font-size: 1.2rem; }
+      .shift ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+      .shift li { font-size: 0.9rem; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
+      .shift li::before { content: "▸"; position: absolute; left: 0; color: currentColor; opacity: 0.6; }
+      .shift .col.to li b { color: var(--text); font-weight: 600; }
+
+      /* mapping */
+      .map-block { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(160deg, var(--surface-2), var(--surface)); padding: clamp(1.4rem, 3vw, 2.2rem); }
+      .map-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+      .mc { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.2rem; background: var(--surface); }
+      .mc .mc-future { font-weight: 700; font-size: 0.98rem; margin-bottom: 0.25rem; }
+      .mc .mc-now { font-family: var(--mono); font-size: 0.76rem; color: var(--a3); margin-bottom: 0.6rem; }
+      .mc p { margin: 0; color: var(--text-dim); font-size: 0.86rem; }
+      .mc p code { font-family: var(--mono); font-size: 0.8rem; color: var(--text); background: var(--surface-2); padding: 0.05rem 0.35rem; border-radius: 4px; }
+
+      /* doc map */
+      .docmap { display: flex; flex-direction: column; gap: 0.6rem; }
+      .dm { display: grid; grid-template-columns: 46px 1fr; gap: 0.9rem; align-items: baseline; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.9rem 1.1rem; background: var(--surface); text-decoration: none; color: inherit; transition: border-color var(--ease) 0.2s, transform var(--ease) 0.2s; }
+      .dm:hover { border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); transform: translateX(4px); }
+      .dm .dm-n { font-family: var(--mono); font-weight: 800; color: var(--accent); }
+      .dm .dm-t b { color: var(--text); }
+      .dm .dm-t { color: var(--text-dim); font-size: 0.92rem; }
+
+      .pull { border-left: 3px solid var(--hot); background: var(--surface-2); padding: 1rem 1.2rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 1.6rem 0 0; color: var(--text-dim); font-size: 0.95rem; }
+      .pull b { color: var(--text); }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      footer a { color: var(--a2); }
+
+      @media (max-width: 600px) { .shift { grid-template-columns: 1fr; } .claim { grid-template-columns: 1fr; gap: 0.4rem; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;"><a class="backbtn" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Vision · 이 문서들이 향하는 곳</p>
+        <h1>웹의 다음은<br /><em>서비스의 개인화</em>다</h1>
+        <p class="lede">
+          나머지 문서(①~⑥)는 전부 <b>이 한 장의 미래</b>를 향합니다. 코드를 보기 전에,
+          우리가 무엇을 믿고 무엇을 훈련하는지부터 좌표를 찍습니다 — 그래야 <code style="font-family:var(--mono)">plugins-ext</code> 의
+          작은 chip 하나를 만드는 일이 <b>왜 큰 그림의 첫 벽돌인지</b> 보입니다.
+        </p>
+      </div>
+    </header>
+
+    <!-- 01 미래 명제 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / THE FUTURE</span>
+          <h2>개인화 웹 — 4개의 명제</h2>
+          <p class="sec-sub">"모두가 자기 메인 페이지를 갖고, 기능을 가져다 쓰거나 직접 구현한다"를 풀어쓰면 이렇게 됩니다.</p>
+        </div>
+
+        <div class="claims">
+          <div class="claim">
+            <span class="n">1</span>
+            <div>
+              <div class="c-title">메인 페이지는 한 회사의 산출물이 아니라, 내가 조립한 결과다</div>
+              <p>지금 우리는 회사가 정해준 화면을 소비합니다. 개인화 웹에서는 <b>각자가 자기 화면을 구성</b>합니다 — 필요한 기능을 골라 꽂고, 안 쓰는 건 뺍니다.</p>
+            </div>
+          </div>
+          <div class="claim">
+            <span class="n">2</span>
+            <div>
+              <div class="c-title">기능은 페이지가 아니라 모듈이다</div>
+              <p>"날씨", "지도 경로", "할 일"이 각각 독립적으로 가져다 쓸 수 있는 <b>플러그인 단위</b>가 됩니다. 앱과 앱의 경계가 흐려지고, 기능과 기능의 조합이 전면에 옵니다.</p>
+            </div>
+          </div>
+          <div class="claim">
+            <span class="n">3</span>
+            <div>
+              <div class="c-title">쓰거나, 직접 구현하거나 — 둘 다 1급 시민이다</div>
+              <p>남이 만든 모듈을 설치해 쓰는 길과, 내가 만든 모듈을 같은 자리에 꽂는 길이 <b>같은 계약 위에</b> 있습니다. 소비자와 제작자의 거리가 가까워집니다.</p>
+            </div>
+          </div>
+          <div class="claim">
+            <span class="n">4</span>
+            <div>
+              <div class="c-title">이 모든 것을 떠받치는 건 '판(host)'이다</div>
+              <p>모듈이 꽂힐 <b>슬롯·계약·생명주기·권한</b>을 정의하는 그릇이 있어야 조립이 성립합니다. 이 판을 설계하는 사람이 개인화 웹의 핵심 직군입니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 역할 전환 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / THE SHIFT</span>
+          <h2>네가 되려는 사람</h2>
+          <p class="sec-sub">플러그인을 <b>쓰는</b> 개발자는 많습니다. 드문 건 플러그인을 <b>받아주는 판을 설계하는</b> 개발자입니다.</p>
+        </div>
+
+        <div class="shift">
+          <div class="col from">
+            <p class="label">흔한 쪽 · 소비자</p>
+            <h3>기능을 만드는 개발자</h3>
+            <ul>
+              <li>주어진 프레임워크 안에서 화면·기능을 구현</li>
+              <li>"이 버튼을 누르면 무엇이 되는가"에 집중</li>
+              <li>호스트가 정해준 규칙을 따른다</li>
+              <li>대체 가능성이 높고 경쟁이 치열</li>
+            </ul>
+          </div>
+          <div class="col to">
+            <p class="label">드문 쪽 · 플랫폼</p>
+            <h3>판을 만드는 개발자</h3>
+            <ul>
+              <li><b>경계를 긋는다</b> — 무엇을 노출하고 무엇을 숨길지</li>
+              <li>"남이 무엇을 꽂을 수 있게 할 것인가"에 집중</li>
+              <li>호스트의 <b>규칙 자체를 설계</b>한다 (슬롯·계약·권한)</li>
+              <li>희소하고, 개인화 웹이 정확히 요구하는 역량</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="pull">
+          ④ 로드맵의 L1~L4 사다리는 결국 이 화살표 하나를 건너는 과정입니다 —
+          <b>왼쪽(소비자)에서 오른쪽(판 설계자)으로</b>. 각 레벨의 gate가 그 이동의 눈금입니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 왜 Runnable -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / WHY RUNNABLE</span>
+          <h2>왜 이 프로젝트가 훈련장인가</h2>
+          <p class="sec-sub">
+            개인화 웹의 큰 개념들은 추상적입니다. Runnable의 <code style="font-family:var(--mono)">plugins-ext</code> 는 그 개념들을
+            <b>지금 손으로 만질 수 있는 최소 형태</b>로 이미 갖고 있습니다. 미래의 큰 단어 ↔ 지금의 작은 코드 매핑입니다.
+          </p>
+        </div>
+
+        <div class="map-block">
+          <div class="map-grid">
+            <div class="mc">
+              <div class="mc-future">모듈 단위 기능</div>
+              <div class="mc-now">→ 지금 있는 것</div>
+              <p>plugin 폴더 + <code>plugin.manifest.ts</code> 가 곧 한 개의 모듈. 지도 위 chip/패널이 그 산출물.</p>
+            </div>
+            <div class="mc">
+              <div class="mc-future">조립되는 판(host)</div>
+              <div class="mc-now">→ 지금 있는 것</div>
+              <p><code>registry.ts</code> + <code>PluginSurfaceHost.vue</code> 가 슬롯에 모듈을 자동 주입하는 호스트.</p>
+            </div>
+            <div class="mc">
+              <div class="mc-future">꽂는 자리(슬롯)</div>
+              <div class="mc-now">→ 지금 있는 것</div>
+              <p>chip · sidepanel · dashboard · popup 4종 슬롯 + chip의 8방향 앵커.</p>
+            </div>
+            <div class="mc">
+              <div class="mc-future">설치/제거</div>
+              <div class="mc-now">→ ⑤에서 만든다</div>
+              <p><code>usePluginPrefs</code> 의 on/off 를 '설치'로 확장, 동적 import 로 0비용 미설치.</p>
+            </div>
+            <div class="mc">
+              <div class="mc-future">안정적 계약(SDK)</div>
+              <div class="mc-now">→ ④ L3에서 만든다</div>
+              <p>플러그인이 내부를 몰라도 동작하는 PluginContext. 아직 없음 — 네가 설계할 것.</p>
+            </div>
+            <div class="mc">
+              <div class="mc-future">격리·권한·원격</div>
+              <div class="mc-now">→ ④ L4 · ⑥ 한계</div>
+              <p>서드파티를 받을 때 필요. 1st-party뿐이면 과설계(YAGNI). ⑥에서 왜 아직 어려운지.</p>
+            </div>
+          </div>
+          <div class="pull">
+            핵심: <b>큰 미래를 한 번에 짓지 않는다.</b> Runnable에서 "모듈 → 호스트 → 슬롯 → 설치 → 계약 → 격리"를
+            작게 한 칸씩 만들어 보는 것 — 그게 개인화 웹을 짓는 근육을 기르는 가장 빠른 길입니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 문서 지도 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / THE MAP</span>
+          <h2>여기서 어디로</h2>
+          <p class="sec-sub">이 비전을 코드로 옮기는 순서입니다. 낯선 용어가 나오면 ①로 돌아가세요.</p>
+        </div>
+
+        <div class="docmap">
+          <a class="dm" href="01-prerequisites.html"><span class="dm-n">01</span><span class="dm-t"><b>사전 지식</b> — 런타임·모듈·Vue·Nuxt·플러그인 어휘. 막히면 찾아보는 용어집.</span></a>
+          <a class="dm" href="02-architecture.html"><span class="dm-n">02</span><span class="dm-t"><b>app/ 구조</b> — 판이 올라앉은 FSD 5층 구조와 의존 방향.</span></a>
+          <a class="dm" href="03-evolution.html"><span class="dm-n">03</span><span class="dm-t"><b>플러그인 진화</b> — 업계가 같은 미래를 향해 어떻게 움직여 왔나(4세대).</span></a>
+          <a class="dm" href="04-roadmap.html"><span class="dm-n">04</span><span class="dm-t"><b>개발자 로드맵</b> — 소비자 → 판 설계자로 가는 L1~L4 사다리.</span></a>
+          <a class="dm" href="05-on-demand.html"><span class="dm-n">05</span><span class="dm-t"><b>온디맨드 설치</b> — '설치' 버튼의 실체. 첫 실전 기능.</span></a>
+          <a class="dm" href="06-limits.html"><span class="dm-n">06</span><span class="dm-t"><b>한계와 미래</b> — 이 꿈이 웹 전체 규모로는 왜 아직 불가능한가.</span></a>
+          <a class="dm" href="07-log.html"><span class="dm-n">07</span><span class="dm-t"><b>학습 로그</b> — 네가 실제로 통과한 gate와 만든 것을 기록하는 곳.</span></a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        이 문서는 방향(왜)만 다룹니다. 구체적 코드·절차는 <a href="04-roadmap.html">④ 로드맵</a>·<a href="05-on-demand.html">⑤ 온디맨드</a>,
+        현실적 제약은 <a href="06-limits.html">⑥ 한계</a> 에 있습니다. 대상 코드는 <code>app/plugins-ext/</code> 기준.
+      </div>
+    </footer>
+  </body>
+</html>

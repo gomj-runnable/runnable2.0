@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>플러그인 시스템 · 현업의 진화</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 280);
+        --bg-grid: oklch(21% 0.025 280);
+        --surface: oklch(22% 0.03 285);
+        --surface-2: oklch(26% 0.035 285);
+        --line: oklch(37% 0.04 285);
+        --text: oklch(94% 0.01 280);
+        --text-dim: oklch(72% 0.02 285);
+        --text-faint: oklch(57% 0.02 285);
+
+        --g1: oklch(72% 0.02 285);
+        --g2: oklch(74% 0.15 200);
+        --g3: oklch(74% 0.16 145);
+        --g4: oklch(80% 0.15 85);
+        --g5: oklch(74% 0.17 320);
+        --accent-hot: oklch(74% 0.16 25);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1100px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 12% -8%, oklch(30% 0.08 320 / 0.45), transparent 60%),
+          radial-gradient(900px 500px at 95% 0%, oklch(28% 0.06 200 / 0.4), transparent 55%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      header.hero {
+        padding: clamp(3.5rem, 8vw, 7rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--g5);
+        margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.3rem, 1.1rem + 5vw, 4.4rem);
+        line-height: 1.04;
+        letter-spacing: -0.03em;
+        margin: 0 0 1rem;
+        font-weight: 800;
+      }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--g2), var(--g5)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 62ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2rem; }
+      .chip { font-family: var(--mono); font-size: 0.78rem; padding: 0.4rem 0.8rem; border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface); }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2.5rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+
+      /* ── timeline / generations ── */
+      .timeline { display: flex; flex-direction: column; gap: 1rem; }
+      .gen {
+        position: relative;
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: var(--radius-sm);
+        background: linear-gradient(100deg, color-mix(in oklch, var(--accent) 10%, var(--surface)), var(--surface) 50%);
+        padding: 1.5rem 1.6rem;
+        transition: transform var(--ease) 0.35s;
+      }
+      .gen:hover { transform: translateX(6px); }
+      .gen-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.8rem; margin-bottom: 0.5rem; }
+      .gen-badge { font-family: var(--mono); font-weight: 800; font-size: 0.85rem; color: var(--accent); letter-spacing: 0.05em; }
+      .gen-title { font-size: 1.2rem; font-weight: 700; }
+      .gen-era { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); margin-left: auto; }
+      .gen-desc { color: var(--text-dim); font-size: 0.95rem; margin: 0 0 0.9rem; }
+      .gen-ex { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .tag-ex { font-family: var(--mono); font-size: 0.74rem; padding: 0.22rem 0.6rem; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-dim); }
+
+      /* ── case cards ── */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.1rem; }
+      .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.5rem; position: relative; overflow: hidden; transition: transform var(--ease) 0.3s, border-color var(--ease) 0.3s; }
+      .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 { font-size: 1.1rem; margin: 0 0 0.15rem; color: var(--text); }
+      .card .src { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+      .card p { margin: 0.6rem 0 0.9rem; color: var(--text-dim); font-size: 0.9rem; }
+      .card .key { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); border-top: 1px dashed var(--line); padding-top: 0.7rem; }
+      .card .key b { color: var(--text-dim); font-weight: 600; }
+
+      /* ── pattern axes ── */
+      .axes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+      .axis { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.3rem; background: var(--surface); }
+      .axis .ax-name { font-family: var(--mono); font-weight: 700; color: var(--g2); font-size: 0.95rem; margin-bottom: 0.7rem; }
+      .axis .ax-flow { display: flex; align-items: center; gap: 0.5rem; font-size: 0.86rem; flex-wrap: wrap; }
+      .axis .from { color: var(--text-faint); }
+      .axis .arrow { color: var(--accent-hot); font-family: var(--mono); }
+      .axis .to { color: var(--text); font-weight: 600; }
+      .axis p { margin: 0.7rem 0 0; color: var(--text-dim); font-size: 0.86rem; }
+
+      /* ── trends ── */
+      .trends { display: flex; flex-direction: column; gap: 0.8rem; }
+      .trend { display: grid; grid-template-columns: 150px 1fr; gap: 1.2rem; padding: 1.1rem 1.3rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); align-items: baseline; }
+      .trend .t-key { font-family: var(--mono); font-weight: 700; color: var(--g3); font-size: 0.9rem; }
+      .trend .t-body { color: var(--text-dim); font-size: 0.92rem; }
+      .trend .t-body b { color: var(--text); font-weight: 600; }
+
+      /* ── runnable mapping ── */
+      .map-block { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(160deg, var(--surface-2), var(--surface)); padding: clamp(1.4rem, 3vw, 2.2rem); }
+      .map-now { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0 1.6rem; }
+      .map-now .badge { font-family: var(--mono); font-size: 0.76rem; padding: 0.3rem 0.7rem; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-dim); }
+      .map-now .badge.on { border-color: color-mix(in oklch, var(--g3) 55%, var(--line)); color: var(--g3); }
+      .path { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+      .path li { display: grid; grid-template-columns: 26px 1fr; gap: 0.8rem; align-items: start; padding-bottom: 0.9rem; border-bottom: 1px dashed var(--line); }
+      .path li:last-child { border-bottom: none; padding-bottom: 0; }
+      .box { width: 20px; height: 20px; border: 2px solid var(--text-faint); border-radius: 5px; margin-top: 2px; flex-shrink: 0; position: relative; }
+      .box.done { border-color: var(--g3); background: color-mix(in oklch, var(--g3) 25%, transparent); }
+      .box.done::after { content: "✓"; position: absolute; inset: -3px 0 0; text-align: center; color: var(--g3); font-weight: 800; font-size: 0.85rem; }
+      .path .p-title { font-weight: 600; }
+      .path .p-desc { color: var(--text-dim); font-size: 0.88rem; }
+      .path .p-where { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+
+      @media (max-width: 560px) {
+        .trend { grid-template-columns: 1fr; gap: 0.3rem; }
+        .gen-era { margin-left: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;"><a href="HOME.html" style="display:inline-flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;text-decoration:none;color:var(--text-dim);border:1px solid var(--line);border-radius:999px;padding:.45rem .95rem;background:var(--surface);">← 홈으로</a></div>
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Industry Survey · Plugin Architecture</p>
+        <h1>플러그인 시스템은<br /><em>현업에서 어떻게 진화하나</em></h1>
+        <p class="lede">
+          모든 플러그인 시스템은 같은 압력 아래 진화합니다 — <b>더 늦게 묶고(런타임), 더 적게 신뢰하고(권한·샌드박스),
+          더 멀리 배포한다(원격·마켓플레이스)</b>. 빌드타임 정적 등록에서 시작해 격리된 원격 모듈로 이동하는
+          공통 궤적을 업계 사례로 정리합니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">VS Code</span>
+          <span class="chip">Figma</span>
+          <span class="chip">Chrome MV3</span>
+          <span class="chip">Backstage</span>
+          <span class="chip">Module Federation</span>
+          <span class="chip">WASM · MCP</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 세대별 진화 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / GENERATIONS</span>
+          <h2>4세대 진화 궤적</h2>
+          <p class="sec-sub">결합 시점이 빌드타임 → 런타임 → 원격으로 늦춰질수록, 격리와 권한 모델의 요구가 함께 커집니다.</p>
+        </div>
+
+        <div class="timeline">
+          <div class="gen" style="--accent: var(--g1)">
+            <div class="gen-top">
+              <span class="gen-badge">GEN 1</span>
+              <span class="gen-title">빌드타임 정적 등록</span>
+              <span class="gen-era">컴파일 시 결합</span>
+            </div>
+            <p class="gen-desc">플러그인이 소스에 같이 번들된다. 호스트가 빌드 시점에 배열/레지스트리로 정적 등록하고, 신뢰는 전제. 격리·권한 개념이 거의 없다.</p>
+            <div class="gen-ex">
+              <span class="tag-ex">Webpack / Vite / Babel plugin</span>
+              <span class="tag-ex">ESLint / Rollup</span>
+              <span class="tag-ex">정적 registry 배열</span>
+            </div>
+          </div>
+
+          <div class="gen" style="--accent: var(--g2)">
+            <div class="gen-top">
+              <span class="gen-badge">GEN 2</span>
+              <span class="gen-title">런타임 동적 로딩 + 확장점</span>
+              <span class="gen-era">실행 중 결합</span>
+            </div>
+            <p class="gen-desc">호스트가 "확장점(extension point)/기여점(contribution point)"을 선언하고, 플러그인이 매니페스트로 어디에 무엇을 꽂을지 기술한다. 지연 활성화(lazy activation)로 필요할 때만 로드.</p>
+            <div class="gen-ex">
+              <span class="tag-ex">VS Code contribution points</span>
+              <span class="tag-ex">Obsidian community plugins</span>
+              <span class="tag-ex">Eclipse / IntelliJ</span>
+            </div>
+          </div>
+
+          <div class="gen" style="--accent: var(--g3)">
+            <div class="gen-top">
+              <span class="gen-badge">GEN 3</span>
+              <span class="gen-title">샌드박스 격리 + 권한 모델</span>
+              <span class="gen-era">신뢰 최소화</span>
+            </div>
+            <p class="gen-desc">서드파티 코드를 메인 스레드 밖(iframe·Web Worker·별도 프로세스)에서 실행하고, 능력(capability)을 명시적으로 허가받은 만큼만 노출. 보안과 성능이 동시 동인.</p>
+            <div class="gen-ex">
+              <span class="tag-ex">Figma (QuickJS/iframe)</span>
+              <span class="tag-ex">Chrome Manifest V3</span>
+              <span class="tag-ex">Shopify remote-ui / UI Extensions</span>
+            </div>
+          </div>
+
+          <div class="gen" style="--accent: var(--g4)">
+            <div class="gen-top">
+              <span class="gen-badge">GEN 4</span>
+              <span class="gen-title">원격·분산 로딩 + 마켓플레이스</span>
+              <span class="gen-era">독립 배포</span>
+            </div>
+            <p class="gen-desc">플러그인을 별도 저장소·CDN에서 독립 배포·버전 관리하고, 호스트가 런타임에 원격 모듈을 가져와 합친다. 마켓플레이스·서명·semver 계약이 필수가 된다.</p>
+            <div class="gen-ex">
+              <span class="tag-ex">Module Federation / 마이크로 프론트엔드</span>
+              <span class="tag-ex">Backstage plugins</span>
+              <span class="tag-ex">Sentry / Datadog 앱 마켓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 현업 사례 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / CASE STUDIES</span>
+          <h2>대표 사례가 푼 문제</h2>
+          <p class="sec-sub">각 제품이 "어떤 제약 때문에" 그 구조를 택했는지가 진화의 본질입니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card" style="--accent: var(--g2)">
+            <span class="src">VS Code</span>
+            <h3>Extension Host 분리</h3>
+            <p>확장은 UI 스레드가 아닌 별도 Extension Host(Node 프로세스, 웹에선 Web Worker)에서 실행. 느린 확장이 에디터를 멈추지 못하게 격리하고, activation event로 지연 로드.</p>
+            <div class="key"><b>핵심:</b> 프로세스 격리 · contribution points · 지연 활성화</div>
+          </div>
+
+          <div class="card" style="--accent: var(--g3)">
+            <span class="src">Figma</span>
+            <h3>신뢰 없는 코드 실행</h3>
+            <p>서드파티 플러그인이 디자인 파일을 건드리므로, 메인 스레드 샌드박스(QuickJS 계열)에서 코드를 돌리고 UI는 iframe으로 분리. 노출 API를 엄격히 통제.</p>
+            <div class="key"><b>핵심:</b> 메인 스레드 샌드박스 · UI iframe 분리</div>
+          </div>
+
+          <div class="card" style="--accent: var(--g3)">
+            <span class="src">Chrome MV3</span>
+            <h3>권한·원격코드 축소</h3>
+            <p>background page → service worker, 원격 코드 실행 금지, host permissions·declarativeNetRequest로 능력을 좁힘. "필요한 만큼만" 권한 모델의 표준 사례.</p>
+            <div class="key"><b>핵심:</b> 최소 권한 · 원격 코드 제거 · 선언적 API</div>
+          </div>
+
+          <div class="card" style="--accent: var(--g2)">
+            <span class="src">Obsidian</span>
+            <h3>로컬 우선 + 커뮤니티</h3>
+            <p>JS 번들을 런타임에 로드하는 비교적 개방적(고신뢰) 모델 + 커뮤니티 마켓. 자유도는 높지만 격리가 약해 신뢰·검수에 의존하는 트레이드오프를 보여줌.</p>
+            <div class="key"><b>핵심:</b> 개방형 API · 마켓 · 신뢰 기반</div>
+          </div>
+
+          <div class="card" style="--accent: var(--g4)">
+            <span class="src">Module Federation</span>
+            <h3>독립 배포 합성</h3>
+            <p>여러 팀이 따로 빌드·배포한 번들을 런타임에 동적으로 가져와 한 앱으로 합성(마이크로 프론트엔드). 공유 의존성 협상과 버전 정합이 과제.</p>
+            <div class="key"><b>핵심:</b> 런타임 원격 모듈 · 의존성 공유</div>
+          </div>
+
+          <div class="card" style="--accent: var(--g4)">
+            <span class="src">Backstage</span>
+            <h3>플러그인이 곧 제품</h3>
+            <p>개발자 포털을 코어 + 플러그인으로 구성. 확장점/extension 모델로 조직마다 다른 화면을 조립. 프론트엔드 플러그인 계약을 표준화하려는 흐름.</p>
+            <div class="key"><b>핵심:</b> 플러그인 우선 아키텍처 · 확장 계약</div>
+          </div>
+
+          <div class="card" style="--accent: var(--accent-hot)">
+            <span class="src">Shopify</span>
+            <h3>worker 안의 UI</h3>
+            <p>checkout/admin UI 확장을 Web Worker에서 실행하고 remote-ui로 메인 스레드에 안전하게 렌더 명령만 전달. 호스트 DOM 접근 없이 UI를 그리는 패턴.</p>
+            <div class="key"><b>핵심:</b> off-main-thread UI · 메시지 기반 렌더</div>
+          </div>
+
+          <div class="card" style="--accent: var(--g5)">
+            <span class="src">MCP</span>
+            <h3>AI를 위한 플러그인</h3>
+            <p>Model Context Protocol — LLM/에이전트에 도구·데이터 소스를 연결하는 표준. "플러그인 시스템"의 무게중심이 AI 도구 연동으로 확장되는 최신 흐름.</p>
+            <div class="key"><b>핵심:</b> 표준 프로토콜 · 도구 연결 계약</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 패턴 축 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / EVOLUTION AXES</span>
+          <h2>진화를 만드는 6개 축</h2>
+          <p class="sec-sub">제품은 달라도 변화의 방향은 거의 같습니다. 각 축에서 왼쪽 → 오른쪽으로 이동합니다.</p>
+        </div>
+
+        <div class="axes">
+          <div class="axis">
+            <div class="ax-name">결합 시점</div>
+            <div class="ax-flow"><span class="from">빌드타임 번들</span><span class="arrow">→</span><span class="to">런타임 · 원격 로드</span></div>
+            <p>정적 import 배열에서, 활성화 시점에 동적으로 불러오는 lazy/remote 로딩으로.</p>
+          </div>
+          <div class="axis">
+            <div class="ax-name">신뢰 모델</div>
+            <div class="ax-flow"><span class="from">전체 신뢰</span><span class="arrow">→</span><span class="to">능력 단위 허가</span></div>
+            <p>"다 줄게"에서, 매니페스트로 선언한 권한(capability)만 노출하는 최소 권한으로.</p>
+          </div>
+          <div class="axis">
+            <div class="ax-name">실행 격리</div>
+            <div class="ax-flow"><span class="from">같은 스레드</span><span class="arrow">→</span><span class="to">worker · iframe · 프로세스</span></div>
+            <p>호스트와 한 컨텍스트에서, off-main-thread 샌드박스 + 메시지 통신으로.</p>
+          </div>
+          <div class="axis">
+            <div class="ax-name">API 계약</div>
+            <div class="ax-flow"><span class="from">암묵적 내부 접근</span><span class="arrow">→</span><span class="to">버전드 공개 SDK</span></div>
+            <p>내부 모듈 직접 참조에서, semver로 관리되는 안정적 공개 표면으로.</p>
+          </div>
+          <div class="axis">
+            <div class="ax-name">확장 지점</div>
+            <div class="ax-flow"><span class="from">하드코딩 분기</span><span class="arrow">→</span><span class="to">선언적 슬롯/기여점</span></div>
+            <p>if 분기로 끼우던 것을, 호스트가 정의한 슬롯에 매니페스트로 기여하는 방식으로.</p>
+          </div>
+          <div class="axis">
+            <div class="ax-name">배포·신뢰성</div>
+            <div class="ax-flow"><span class="from">코어와 함께 배포</span><span class="arrow">→</span><span class="to">마켓 · 서명 · 검수</span></div>
+            <p>코어에 묶여 배포되던 것이, 독립 배포 + 서명·심사 마켓플레이스로.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 최신 트렌드 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / FRONTIER</span>
+          <h2>지금 움직이는 최전선</h2>
+          <p class="sec-sub">2024–2026 구간에서 두드러지는 흐름입니다.</p>
+        </div>
+
+        <div class="trends">
+          <div class="trend">
+            <span class="t-key">WASM 플러그인</span>
+            <span class="t-body"><b>언어 비종속 + 강한 격리.</b> Extism 같은 런타임으로 Rust·Go·JS 등을 WASM으로 컴파일해, 호스트 함수만 노출하는 안전한 샌드박스에서 실행. JS 외 생태계까지 플러그인 작성자 확대.</span>
+          </div>
+          <div class="trend">
+            <span class="t-key">하드닝 JS</span>
+            <span class="t-body"><b>untrusted JS를 안전하게.</b> SES(hardened JavaScript)·QuickJS-in-WASM로 전역 오염 없이 서드파티 스크립트를 격리 실행. Figma·결제 위젯류가 채택하는 방향.</span>
+          </div>
+          <div class="trend">
+            <span class="t-key">off-main-thread UI</span>
+            <span class="t-body"><b>호스트 DOM 접근 없는 렌더.</b> remote-ui 류 패턴으로 플러그인은 Worker에서 "무엇을 그릴지"만 보내고, 실제 DOM은 호스트가 그림. 성능·보안 동시 확보.</span>
+          </div>
+          <div class="trend">
+            <span class="t-key">AI · 에이전트</span>
+            <span class="t-body"><b>플러그인의 새 소비자가 LLM.</b> MCP 등 표준으로 도구·데이터를 에이전트에 연결. "사람이 쓰는 UI 확장"과 "AI가 쓰는 도구 확장"이 같은 계약 위에서 수렴 중.</span>
+          </div>
+          <div class="trend">
+            <span class="t-key">서버사이드 확장</span>
+            <span class="t-body"><b>엣지/서버에서 도는 플러그인.</b> 엣지 함수·서버리스에 사용자 코드를 격리 실행해 백엔드도 확장 가능하게. 프론트 전용에서 풀스택 확장으로.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 Runnable 위치 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / WHERE RUNNABLE STANDS</span>
+          <h2>Runnable plugins-ext 의 현재와 진화 경로</h2>
+          <p class="sec-sub">
+            현재 <code>app/plugins-ext/</code> 는 <b>Gen 1.5</b> — 빌드타임 정적 registry(Gen 1)에 런타임 슬롯/앵커 주입(Gen 2 초입)을 얹은 형태입니다.
+            매니페스트·슬롯 모델은 이미 업계 표준 궤적 위에 있습니다.
+          </p>
+        </div>
+
+        <div class="map-block">
+          <div class="map-now">
+            <span class="badge on">✓ 매니페스트 기반 등록</span>
+            <span class="badge on">✓ 슬롯/확장점 (chip·sidepanel·dashboard·popup)</span>
+            <span class="badge on">✓ 8방향 앵커 주입</span>
+            <span class="badge">정적 registry.ts (빌드타임)</span>
+            <span class="badge">격리 없음 (슬라이스 직접 import)</span>
+            <span class="badge">권한 모델 없음</span>
+          </div>
+
+          <ul class="path">
+            <li>
+              <span class="box done"></span>
+              <div>
+                <div class="p-title">매니페스트 + 슬롯 모델 (Gen 2 핵심) 도입 완료</div>
+                <div class="p-desc">PluginManifest 로 슬롯·위치·기본 활성 선언, 호스트가 자동 주입. VS Code contribution point 와 같은 발상.</div>
+                <div class="p-where">app/plugins-ext/types.ts · registry.ts · MapOverlays.vue</div>
+              </div>
+            </li>
+            <li>
+              <span class="box"></span>
+              <div>
+                <div class="p-title">호스트 API 계약 분리 (축: API 계약)</div>
+                <div class="p-desc">플러그인이 features·entities를 직접 import 하는 대신, 안정적인 plugin context/SDK 표면만 받게 하면 결합도↓·교체 안전성↑.</div>
+                <div class="p-where">plugins-ext/* → 공개 컨텍스트 주입형으로</div>
+              </div>
+            </li>
+            <li>
+              <span class="box"></span>
+              <div>
+                <div class="p-title">런타임 동적 로딩 (축: 결합 시점)</div>
+                <div class="p-desc">정적 registry 배열 → defineAsyncComponent/동적 import 로 필요 시 로드. 활성화 이벤트(lazy)로 초기 번들 절감.</div>
+                <div class="p-where">registry.ts · usePluginSurfaces.ts</div>
+              </div>
+            </li>
+            <li>
+              <span class="box"></span>
+              <div>
+                <div class="p-title">권한·격리 검토 (축: 신뢰·격리)</div>
+                <div class="p-desc">서드파티/원격 플러그인을 받을 계획이 생기면 capability 선언 + iframe/Worker 격리를 도입. 현재처럼 1st-party만이면 과설계 — YAGNI 기준으로 시점 판단.</div>
+                <div class="p-where">필요 시점에만 — 지금은 결정 보류</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        업계 개관은 일반적으로 공개된 아키텍처 지식(작성 기준 2026-01)에 근거한 정리이며, 특정 제품의 최신 세부 구현은 각 공식 문서로 확인을 권장합니다.
+        Runnable 매핑 부분만 <code>app/plugins-ext/</code> 실제 코드 기준입니다.
+      </div>
+    </footer>
+  </body>
+</html>

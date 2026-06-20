@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>온디맨드 설치형 플러그인 · 설계와 적용</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 240);
+        --bg-grid: oklch(21% 0.024 240);
+        --surface: oklch(22% 0.028 245);
+        --surface-2: oklch(26% 0.032 245);
+        --code-bg: oklch(19% 0.025 245);
+        --line: oklch(37% 0.04 245);
+        --text: oklch(94% 0.01 240);
+        --text-dim: oklch(72% 0.02 245);
+        --text-faint: oklch(57% 0.02 245);
+
+        --accent: oklch(78% 0.15 215);
+        --good: oklch(78% 0.16 150);
+        --warn: oklch(80% 0.15 80);
+        --bad: oklch(72% 0.16 25);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1000px;
+        --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1000px 520px at 85% -6%, oklch(28% 0.07 215 / 0.42), transparent 58%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.62;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .docnav { display: flex; gap: 0.5rem; padding: 1.1rem 0 0; flex-wrap: wrap; }
+      .docnav a { font-family: var(--mono); font-size: 0.75rem; text-decoration: none; color: var(--text-faint); border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.75rem; transition: color var(--ease) 0.2s, border-color var(--ease) 0.2s; }
+      .docnav a:hover { color: var(--text); border-color: var(--text-faint); }
+      .docnav a.here { color: var(--accent); border-color: color-mix(in oklch, var(--accent) 55%, var(--line)); }
+
+      header.hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3rem); border-bottom: 1px solid var(--line); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0 0 1rem; }
+      h1 { font-size: clamp(2.1rem, 1.1rem + 4.5vw, 3.8rem); line-height: 1.06; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800; }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--good)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 64ch; font-size: clamp(1.02rem, 0.95rem + 0.4vw, 1.2rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.2rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 66ch; margin: 0; }
+      h3.step { font-size: 1.15rem; margin: 2rem 0 0.6rem; display: flex; align-items: baseline; gap: 0.6rem; }
+      h3.step .si { font-family: var(--mono); font-size: 0.8rem; color: var(--bg); background: var(--accent); border-radius: 6px; padding: 0.15rem 0.5rem; font-weight: 800; }
+
+      /* lifecycle */
+      .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem; margin: 0; }
+      .flow .node { flex: 1 1 140px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); padding: 1rem; position: relative; }
+      .flow .node .ph { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 0.05em; }
+      .flow .node .ti { font-weight: 700; margin: 0.25rem 0 0.3rem; font-size: 0.98rem; }
+      .flow .node .me { font-size: 0.82rem; color: var(--text-dim); }
+      .flow .node .cost { font-family: var(--mono); font-size: 0.74rem; margin-top: 0.6rem; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
+      .flow .node .cost.zero { color: var(--good); }
+      .flow .node .cost.one { color: var(--warn); }
+      .flow .arrow { align-self: center; color: var(--text-faint); font-family: var(--mono); }
+
+      /* before/after */
+      .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .ba .col { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.2rem; background: var(--surface); }
+      .ba .col.before { border-left: 3px solid var(--bad); }
+      .ba .col.after { border-left: 3px solid var(--good); }
+      .ba .col h4 { margin: 0 0 0.7rem; font-size: 0.95rem; }
+      .ba .col.before h4 { color: var(--bad); }
+      .ba .col.after h4 { color: var(--good); }
+      .ba .col ul { margin: 0; padding-left: 1.1rem; }
+      .ba .col li { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 0.4rem; }
+      .ba .col li b { color: var(--text); }
+
+      /* code */
+      pre { margin: 0.6rem 0 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.1rem 1.2rem; overflow-x: auto; font-family: var(--mono); font-size: 0.83rem; line-height: 1.7; }
+      pre .c { color: var(--text-faint); }
+      pre .k { color: oklch(80% 0.12 300); }
+      pre .s { color: var(--good); }
+      pre .f { color: var(--accent); }
+      pre .del { color: var(--bad); }
+      pre .add { color: var(--good); }
+      code.inline { font-family: var(--mono); font-size: 0.85em; background: var(--surface-2); padding: 0.08rem 0.38rem; border-radius: 5px; color: var(--text); }
+      .filelabel { font-family: var(--mono); font-size: 0.76rem; color: var(--accent); margin-top: 1.2rem; }
+
+      .note { border-left: 3px solid var(--accent); background: var(--surface-2); padding: 0.85rem 1.1rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.9rem; color: var(--text-dim); margin: 1rem 0 0; }
+      .note b { color: var(--text); }
+
+      /* perf */
+      .perf { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem; }
+      .perf .pc { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.2rem; background: var(--surface); }
+      .perf .pc .pn { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+      .perf .pc p { margin: 0; color: var(--text-dim); font-size: 0.86rem; }
+
+      /* gotchas / checklist */
+      .check { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+      .check li { display: grid; grid-template-columns: 22px 1fr; gap: 0.7rem; align-items: start; font-size: 0.92rem; color: var(--text-dim); }
+      .check li .b { width: 18px; height: 18px; border: 2px solid var(--text-faint); border-radius: 5px; margin-top: 2px; }
+      .check li b { color: var(--text); }
+
+      .warnlist { display: flex; flex-direction: column; gap: 0.8rem; }
+      .warn-item { border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1rem 1.2rem; background: var(--surface); }
+      .warn-item .wt { font-family: var(--mono); font-size: 0.8rem; color: var(--warn); font-weight: 700; }
+      .warn-item p { margin: 0.35rem 0 0; font-size: 0.88rem; color: var(--text-dim); }
+      .warn-item p b { color: var(--text); }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+
+      @media (max-width: 620px) { .ba { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;">
+      <a href="HOME.html" style="display:inline-flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;text-decoration:none;color:var(--text-dim);border:1px solid var(--line);border-radius:999px;padding:.45rem .95rem;background:var(--surface);">← 홈으로</a>
+    </div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">On-Demand Install · Lazy Code-Split</p>
+        <h1>설치를 누르는 그 순간<br /><em>비로소 메모리에 올라오는 플러그인</em></h1>
+        <p class="lede">
+          목표는 명확합니다 — <b>사용자가 '설치'를 누르기(또는 해당 페이지로 이동하기) 전까지 그 기능의 코드는
+          네트워크로 받지도, 파싱하지도, 메모리에 올리지도 않는다.</b> 설치 시점에 그때 청크를 받아 적용하고,
+          그 전까지 성능 비용은 0입니다. 이를 가능하게 하는 기술(코드 스플리팅 + 동적 import)과
+          Runnable <code class="inline">plugins-ext/</code>에 적용하는 구체적 절차를 정리합니다.
+        </p>
+      </div>
+    </header>
+
+    <!-- 01 개념 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / CONCEPT</span>
+          <h2>"설치형"의 정체 — 지연 코드 스플리팅</h2>
+          <p class="sec-sub">
+            번들러(Vite)는 정적 <code class="inline">import</code> 은 메인 청크에 합치고, 동적
+            <code class="inline">import()</code> 는 <b>별도 청크로 분리</b>합니다. 분리된 청크는 그 함수가 실제로
+            호출될 때까지 네트워크 요청·파싱·실행이 일어나지 않습니다. "설치"란 결국 <b>그 동적 import 를 처음
+            호출하는 행위</b>입니다.
+          </p>
+        </div>
+
+        <div class="flow">
+          <div class="node">
+            <div class="ph">STATE 0</div>
+            <div class="ti">미설치</div>
+            <div class="me">청크가 빌드에는 존재하나, 한 번도 요청되지 않음.</div>
+            <div class="cost zero">비용 0 · 메모리 ✗</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="node">
+            <div class="ph">ACTION</div>
+            <div class="ti">설치 클릭</div>
+            <div class="me">동적 import() 첫 호출 + 설치 상태 영속화.</div>
+            <div class="cost one">1회 fetch</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="node">
+            <div class="ph">LOAD</div>
+            <div class="ti">메모리 적재</div>
+            <div class="me">청크 다운로드 → 파싱 → 모듈 평가 → 컴포넌트 등록.</div>
+            <div class="cost one">1회 parse/exec</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="node">
+            <div class="ph">APPLY</div>
+            <div class="ti">적용·렌더</div>
+            <div class="me">슬롯에 마운트되어 동작 시작. 재방문 시 설치 상태 유지.</div>
+            <div class="cost zero">이후 캐시</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>페이지 이동도 같은 원리.</b> Nuxt 는 <code class="inline">pages/</code> 와
+          <code class="inline">Lazy*</code> 컴포넌트를 라우트 단위로 자동 분리합니다. 특정 페이지에서만 쓰는 기능은
+          그 페이지로 이동할 때 비로소 청크가 로드됩니다 — "설치" 버튼과 "페이지 이동"은 같은 lazy 메커니즘의
+          두 트리거입니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 현재 vs 목표 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / GAP</span>
+          <h2>지금은 왜 전부 메모리에 올라오나</h2>
+          <p class="sec-sub">현재 <code class="inline">plugins-ext/</code> 는 모든 플러그인 컴포넌트를 정적으로 import 합니다. 그래서 미사용 플러그인도 첫 로드부터 메모리에 있습니다.</p>
+        </div>
+
+        <div class="ba">
+          <div class="col before">
+            <h4>✗ 현재 (eager)</h4>
+            <ul>
+              <li><b>manifest</b> 가 최상단에서 <code class="inline">import SidewalkChip from './SidewalkChip.vue'</code></li>
+              <li><b>registry.ts</b> 가 6개 매니페스트를 모두 정적 import</li>
+              <li>→ 모든 컴포넌트 코드가 메인 청크에 포함</li>
+              <li>→ 끄거나 안 쓰는 플러그인도 <b>파싱·메모리 적재됨</b></li>
+            </ul>
+          </div>
+          <div class="col after">
+            <h4>✓ 목표 (lazy)</h4>
+            <ul>
+              <li>manifest 는 <b>메타데이터만</b> 정적, 컴포넌트는 <code class="inline">loader: () =&gt; import(...)</code></li>
+              <li>registry 는 가벼운 manifest 만 모음 (컴포넌트 코드 미포함)</li>
+              <li>→ 각 컴포넌트가 <b>독립 청크</b>로 분리</li>
+              <li>→ 설치/렌더 시점에만 loader 호출 → 그때 적재</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note">
+          핵심 한 줄: <b>manifest 파일의 최상단 컴포넌트 import 를 없애고, 동적 import 로더로 바꾸는 것</b>이 전부입니다.
+          최상단 정적 import 가 하나라도 남으면 그 컴포넌트는 다시 eager 가 됩니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 적용 방법 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / HOW TO APPLY</span>
+          <h2>Runnable 적용 절차 (5단계)</h2>
+          <p class="sec-sub">아래 변경만으로 "설치 전 0 비용 → 설치 시 로드" 가 성립합니다. 코드는 방향 예시이며 실제 타입·이름에 맞게 다듬어 쓰세요.</p>
+        </div>
+
+        <h3 class="step"><span class="si">1</span> 매니페스트 타입: 컴포넌트 → 로더</h3>
+        <div class="filelabel">app/plugins-ext/types.ts</div>
+        <pre><span class="c">// component 즉시 참조를 지연 로더로 교체</span>
+<span class="k">export interface</span> PluginManifest {
+    id: <span class="k">string</span>
+    label: <span class="k">string</span>
+    description: <span class="k">string</span>
+    slot: PluginSlot
+    defaultEnabled: <span class="k">boolean</span>
+    position?: ChipAnchor
+    order?: <span class="k">number</span>
+<span class="del">-   component: Component                       // ✗ 즉시 = eager</span>
+<span class="add">+   loader: () =&gt; Promise&lt;{ default: Component }&gt;  // ✓ 호출 전엔 청크 미요청</span>
+}</pre>
+
+        <h3 class="step"><span class="si">2</span> 각 매니페스트: 최상단 import 제거</h3>
+        <div class="filelabel">app/plugins-ext/sidewalk/plugin.manifest.ts</div>
+        <pre><span class="del">- import { markRaw } from 'vue'</span>
+<span class="del">- import SidewalkChip from './SidewalkChip.vue'   // ✗ 이 줄이 eager의 원인</span>
+<span class="k">import type</span> { PluginManifest } <span class="k">from</span> <span class="s">'../types'</span>
+
+<span class="k">const</span> manifest: PluginManifest = {
+    id: <span class="s">'sidewalk'</span>,
+    label: <span class="s">'인도'</span>,
+    description: <span class="s">'선택 지역의 인도를 지도에 표시합니다.'</span>,
+    slot: <span class="s">'chip'</span>,
+    defaultEnabled: <span class="k">false</span>,   <span class="c">// 설치형이면 기본 미설치 권장</span>
+    position: <span class="s">'top-right'</span>,
+<span class="add">+   loader: () =&gt; import('./SidewalkChip.vue')   // ✓ 설치 시 1회 fetch</span>
+}
+<span class="k">export default</span> manifest</pre>
+        <div class="note"><b>registry.ts 는 그대로 둬도 됩니다.</b> manifest 객체는 이제 컴포넌트 코드를 품지 않는 가벼운 메타데이터라, 정적 import 해도 무겁지 않습니다. 무거운 <code class="inline">.vue</code> 는 loader 뒤에 숨었습니다.</div>
+
+        <h3 class="step"><span class="si">3</span> 설치 상태 store: enabled → installed 영속화</h3>
+        <div class="filelabel">app/plugins-ext/usePluginPrefs.ts (확장)</div>
+        <pre><span class="c">// 기존 isEnabled 흐름을 '설치됨' 의미로 사용/확장한다.</span>
+<span class="k">function</span> <span class="f">isInstalled</span>(plugin: PluginManifest): <span class="k">boolean</span> {
+    <span class="k">return</span> prefs.value[plugin.id] ?? plugin.defaultEnabled
+}
+
+<span class="k">async function</span> <span class="f">install</span>(id: <span class="k">string</span>) {
+    prefs.value = { ...prefs.value, [id]: <span class="k">true</span> }       <span class="c">// 낙관적 반영</span>
+    <span class="k">await</span> $fetch(<span class="s">'/api/me/feature-prefs'</span>, {
+        method: <span class="s">'PUT'</span>, body: { pluginId: id, enabled: <span class="k">true</span> }
+    })
+}
+<span class="k">async function</span> <span class="f">uninstall</span>(id: <span class="k">string</span>) {
+    prefs.value = { ...prefs.value, [id]: <span class="k">false</span> }
+    <span class="k">await</span> $fetch(<span class="s">'/api/me/feature-prefs'</span>, {
+        method: <span class="s">'PUT'</span>, body: { pluginId: id, enabled: <span class="k">false</span> }
+    })
+}</pre>
+        <div class="note"><b>설치 상태가 영속화돼야</b> 재방문 시 설치한 것만 자동 로드되고, 나머지는 여전히 0 비용으로 남습니다.</div>
+
+        <h3 class="step"><span class="si">4</span> 호스트: 설치된 것만 async 컴포넌트로 렌더</h3>
+        <div class="filelabel">app/plugins-ext/PluginSurfaceHost.vue (script)</div>
+        <pre><span class="k">import</span> { defineAsyncComponent, computed } <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> { usePluginSurfaces } <span class="k">from</span> <span class="s">'./usePluginSurfaces'</span>
+
+<span class="k">const</span> { active, close } = <span class="f">usePluginSurfaces</span>()
+
+<span class="c">// active 가 바뀔 때만 loader 호출 → 그 순간 청크 fetch</span>
+<span class="k">const</span> activeComponent = <span class="f">computed</span>(() =&gt;
+    active.value ? <span class="f">defineAsyncComponent</span>(active.value.loader) : <span class="k">null</span>
+)</pre>
+        <pre><span class="c">&lt;!-- template: 정적 component 대신 async 컴포넌트 --&gt;</span>
+&lt;component <span class="f">:is</span>=<span class="s">"activeComponent"</span> /&gt;</pre>
+        <div class="note">chip 슬롯(<code class="inline">MapOverlayAnchors</code> 가 주입)도 동일하게, <b>설치된 chip 플러그인만</b> <code class="inline">defineAsyncComponent(loader)</code> 로 렌더하도록 바꿉니다. 설치 안 된 chip 의 loader 는 호출되지 않으므로 청크가 요청되지 않습니다.</div>
+
+        <h3 class="step"><span class="si">5</span> 설치 버튼: 그 클릭이 곧 로드 트리거</h3>
+        <div class="filelabel">설정/스토어 화면 어디서든</div>
+        <pre><span class="k">const</span> { isInstalled, install, uninstall } = <span class="f">usePluginPrefs</span>()
+
+<span class="k">function</span> <span class="f">onInstallClick</span>(plugin: PluginManifest) {
+    <span class="c">// install() 로 설치 플래그 ON → 호스트의 computed 가 반응 →</span>
+    <span class="c">// defineAsyncComponent(loader) 가 처음 렌더되며 청크를 fetch</span>
+    <span class="f">install</span>(plugin.id)
+}</pre>
+        <pre><span class="c">&lt;!-- 미설치: 설치 버튼만, 코드 없음 / 설치됨: 적용 + 제거 가능 --&gt;</span>
+&lt;UButton <span class="f">v-if</span>=<span class="s">"!isInstalled(plugin)"</span> <span class="f">@click</span>=<span class="s">"onInstallClick(plugin)"</span>&gt;설치&lt;/UButton&gt;
+&lt;UButton <span class="f">v-else</span> <span class="f">@click</span>=<span class="s">"uninstall(plugin.id)"</span>&gt;제거&lt;/UButton&gt;</pre>
+      </div>
+    </section>
+
+    <!-- 04 성능 효과 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / PAYOFF</span>
+          <h2>설치 전에 절약되는 것</h2>
+          <p class="sec-sub">미설치 상태에서 0이 되는 비용들입니다. 측정은 DevTools Network(청크 요청 유무)·Performance(스크립트 평가 시간)로 확인합니다.</p>
+        </div>
+        <div class="perf">
+          <div class="pc"><div class="pn">네트워크</div><p>해당 청크 다운로드가 아예 발생하지 않음. 초기 페이지 전송량 감소.</p></div>
+          <div class="pc"><div class="pn">파싱·컴파일</div><p>JS 엔진이 그 코드를 파싱/컴파일하지 않음 → 메인 스레드 시간 절약.</p></div>
+          <div class="pc"><div class="pn">실행·초기화</div><p>모듈 top-level 실행, 의존 라이브러리 init, 반응성 등록이 안 일어남.</p></div>
+          <div class="pc"><div class="pn">메모리</div><p>컴포넌트 정의·인스턴스·구독이 힙에 올라오지 않음 → 미설치 기능은 0 점유.</p></div>
+        </div>
+        <div class="note"><b>측정 팁:</b> Network 탭에서 설치 클릭 직전엔 플러그인 청크(예: <code class="inline">SidewalkChip-xxxx.js</code>)가 안 보이다가, 클릭하는 순간 새 요청으로 나타나면 성공입니다.</div>
+      </div>
+    </section>
+
+    <!-- 05 진짜 원격 설치 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / ADVANCED</span>
+          <h2>한 발 더 — "외부 웹에서" 설치</h2>
+          <p class="sec-sub">
+            위 1~5단계는 <b>이미 내 빌드에 포함된 청크</b>를 설치 시점에 로드합니다(=배포할 때 함께 빌드됨).
+            "앱을 재배포하지 않고 외부에서 새 기능을 들여오는" 진짜 원격 설치를 원하면 한 단계 더 나아갑니다.
+          </p>
+        </div>
+        <div class="warnlist">
+          <div class="warn-item">
+            <span class="wt">옵션 A · 원격 ESM 동적 import</span>
+            <p>외부 URL의 ESM 모듈을 <code class="inline">import(/* @vite-ignore */ url)</code> 로 런타임 로드. 가장 단순하지만 <b>버전·호환·보안</b>을 직접 책임져야 함.</p>
+          </div>
+          <div class="warn-item">
+            <span class="wt">옵션 B · Module Federation</span>
+            <p>독립 배포된 원격 번들을 런타임에 합성(②의 Gen 4). 공유 의존성(Vue 등) 협상이 핵심. 마이크로 프론트엔드급 인프라.</p>
+          </div>
+          <div class="warn-item">
+            <span class="wt">반드시 함께 갈 것</span>
+            <p><b>보안·신뢰:</b> 외부 코드는 신뢰 불가 전제 → CSP(<code class="inline">script-src</code>) 정비, 서명/검수, 그리고 ②③에서 다룬 <b>iframe·Worker 격리·권한 모델</b>. 1st-party만이면 옵션 없이 1~5단계로 충분(YAGNI).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 체크리스트 & 함정 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">06 / CHECKLIST &amp; GOTCHAS</span>
+          <h2>적용 체크리스트와 주의점</h2>
+        </div>
+        <ul class="check">
+          <li><span class="b"></span><div>모든 manifest 에서 <b>컴포넌트 최상단 정적 import 제거</b> — 하나라도 남으면 그 플러그인은 eager 유지</div></li>
+          <li><span class="b"></span><div>manifest 의 <code class="inline">component</code> 를 <code class="inline">loader: () =&gt; import(...)</code> 로 전환</div></li>
+          <li><span class="b"></span><div>호스트(surface + chip)에서 <b>설치된 것만</b> <code class="inline">defineAsyncComponent</code> 로 렌더</div></li>
+          <li><span class="b"></span><div>설치 상태를 <b>영속화</b>(feature-prefs)하고, 재방문 시 설치분만 로드</div></li>
+          <li><span class="b"></span><div>Network 탭으로 <b>설치 전 청크 미요청</b> → 설치 클릭 시 요청 발생 검증</div></li>
+          <li><span class="b"></span><div>로딩 중 표시·실패 폴백: <code class="inline">defineAsyncComponent({ loader, loadingComponent, errorComponent })</code></div></li>
+        </ul>
+
+        <div class="warnlist" style="margin-top:1.6rem">
+          <div class="warn-item">
+            <span class="wt">제거(uninstall) ≠ 메모리 완전 해제</span>
+            <p>한 번 로드된 JS 모듈은 브라우저 모듈 캐시에 남습니다. 제거는 <b>컴포넌트 인스턴스·구독을 정리(언마운트)</b>해 실행 비용을 멈추지만, 코드 자체를 힙에서 evict 하진 못합니다. 진짜 의미의 "0 비용"은 <b>설치 전 상태</b>에서만 성립 — 그래서 기본값을 미설치로 두는 게 중요합니다.</p>
+          </div>
+          <div class="warn-item">
+            <span class="wt">SSR / 하이드레이션</span>
+            <p>설치형은 본질적으로 클라이언트 동작입니다. 호스트 렌더를 <code class="inline">&lt;ClientOnly&gt;</code> 로 감싸거나 클라이언트에서 prefs 로드 후 마운트해 하이드레이션 불일치를 피하세요.</p>
+          </div>
+          <div class="warn-item">
+            <span class="wt">prefetch 충돌 주의</span>
+            <p>의도와 달리 미설치 청크를 미리 받아오지 않도록, 동적 import 에 불필요한 <code class="inline">prefetch</code>/<code class="inline">preload</code> 힌트를 붙이지 마세요(필요 시 빌드 설정에서 자동 prefetch 비활성).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        대상 코드: <code>app/plugins-ext/types.ts · registry.ts · usePluginPrefs.ts · usePluginSurfaces.ts · PluginSurfaceHost.vue · MapOverlayAnchors.vue</code> ·
+        각 <code>*/plugin.manifest.ts</code>. 기술 스택: Nuxt 4 · Vue 3 · Vite 코드 스플리팅.
+        코드 조각은 적용 방향 예시이며 실제 타입·API에 맞춰 조정하세요. 산업 맥락은 ②, 단계별 학습은 ③ 참고.
+      </div>
+    </footer>
+  </body>
+</html>

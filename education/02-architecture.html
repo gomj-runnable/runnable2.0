@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable · app/ 패키지 가이드</title>
+    <style>
+      :root {
+        /* palette — dark cartographic */
+        --bg: oklch(17% 0.02 250);
+        --bg-grid: oklch(22% 0.025 250);
+        --surface: oklch(23% 0.03 255);
+        --surface-2: oklch(27% 0.035 255);
+        --line: oklch(38% 0.04 255);
+        --text: oklch(94% 0.01 250);
+        --text-dim: oklch(72% 0.02 255);
+        --text-faint: oklch(58% 0.02 255);
+
+        /* layer accents — top→bottom of the FSD stack */
+        --c-page: oklch(80% 0.15 85);
+        --c-widget: oklch(74% 0.16 25);
+        --c-feature: oklch(72% 0.17 320);
+        --c-entity: oklch(74% 0.15 200);
+        --c-shared: oklch(76% 0.16 155);
+        --c-infra: oklch(70% 0.02 255);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1100px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 85% -5%, oklch(28% 0.06 290 / 0.5), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--bg);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      /* ── header ──────────────────────────────── */
+      header.hero {
+        padding: clamp(3.5rem, 8vw, 7rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--c-feature);
+        margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.4rem, 1.2rem + 5vw, 4.6rem);
+        line-height: 1.02;
+        letter-spacing: -0.03em;
+        margin: 0 0 1rem;
+        font-weight: 800;
+      }
+      h1 .slash { color: var(--c-page); }
+      .lede {
+        max-width: 60ch;
+        font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+        color: var(--text-dim);
+        margin: 0;
+      }
+      .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 2rem;
+      }
+      .chip {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        padding: 0.4rem 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--text-dim);
+        background: var(--surface);
+      }
+
+      /* ── section scaffolding ─────────────────── */
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2.5rem; }
+      .sec-num {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        color: var(--text-faint);
+        letter-spacing: 0.1em;
+      }
+      h2 {
+        font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+        letter-spacing: -0.02em;
+        margin: 0.3rem 0 0.6rem;
+        font-weight: 700;
+      }
+      .sec-sub { color: var(--text-dim); max-width: 62ch; margin: 0; }
+
+      /* ── dependency stack diagram ────────────── */
+      .stack { display: flex; flex-direction: column; gap: 0.55rem; }
+      .stack-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        align-items: center;
+        gap: 1.2rem;
+        padding: 1.1rem 1.4rem;
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: var(--radius-sm);
+        background: linear-gradient(90deg, color-mix(in oklch, var(--accent) 12%, var(--surface)), var(--surface) 55%);
+        transition: transform var(--ease) 0.35s, box-shadow var(--ease) 0.35s;
+      }
+      .stack-row:hover { transform: translateX(6px); box-shadow: -6px 0 0 -2px var(--accent); }
+      .stack-row .tag {
+        font-family: var(--mono);
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--accent);
+      }
+      .stack-row .desc { color: var(--text-dim); font-size: 0.95rem; }
+      .stack-row .desc b { color: var(--text); font-weight: 600; }
+      .flow-note {
+        text-align: center;
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        margin: 1.4rem 0 0;
+      }
+      .flow-note .arrow { color: var(--c-feature); }
+
+      /* ── layer cards ─────────────────────────── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.1rem;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color var(--ease) 0.3s, transform var(--ease) 0.3s;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 3px;
+        background: var(--accent);
+      }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 {
+        font-family: var(--mono);
+        font-size: 1.05rem;
+        margin: 0 0 0.2rem;
+        color: var(--accent);
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+      .card h3 .path { color: var(--text-faint); font-size: 0.8rem; font-weight: 400; }
+      .card p { margin: 0.4rem 0 0.9rem; color: var(--text-dim); font-size: 0.92rem; }
+      .pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .pill {
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        padding: 0.22rem 0.55rem;
+        border-radius: 6px;
+        background: var(--surface-2);
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+      }
+
+      /* ── segment table ───────────────────────── */
+      .seg-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+      .seg {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 1.2rem;
+        background: var(--surface);
+      }
+      .seg .seg-name {
+        font-family: var(--mono);
+        font-weight: 700;
+        color: var(--c-entity);
+        font-size: 1rem;
+      }
+      .seg .seg-rule { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); margin: 0.2rem 0 0.7rem; }
+      .seg p { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+
+      /* ── inventory columns ───────────────────── */
+      .inv { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.4rem; }
+      .inv-col h4 {
+        font-family: var(--mono);
+        margin: 0 0 0.8rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--line);
+        color: var(--accent);
+        font-size: 0.95rem;
+      }
+      .inv-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .inv-col li { display: flex; gap: 0.7rem; align-items: baseline; font-size: 0.9rem; }
+      .inv-col li code {
+        font-family: var(--mono);
+        color: var(--text);
+        background: var(--surface-2);
+        padding: 0.1rem 0.4rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+      .inv-col li span { color: var(--text-faint); }
+
+      /* ── TODO checklist ──────────────────────── */
+      .todo-block {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(160deg, var(--surface-2), var(--surface));
+        padding: clamp(1.4rem, 3vw, 2.2rem);
+      }
+      .todo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+      .todo li {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 0.8rem;
+        align-items: start;
+        padding-bottom: 0.9rem;
+        border-bottom: 1px dashed var(--line);
+      }
+      .todo li:last-child { border-bottom: none; padding-bottom: 0; }
+      .box {
+        width: 20px; height: 20px;
+        border: 2px solid var(--text-faint);
+        border-radius: 5px;
+        margin-top: 2px;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .box.done { border-color: var(--c-shared); background: color-mix(in oklch, var(--c-shared) 25%, transparent); }
+      .box.done::after {
+        content: "✓";
+        position: absolute;
+        inset: -3px 0 0;
+        text-align: center;
+        color: var(--c-shared);
+        font-weight: 800;
+        font-size: 0.85rem;
+      }
+      .todo .t-title { font-weight: 600; }
+      .todo .t-desc { color: var(--text-dim); font-size: 0.88rem; }
+      .todo .t-where { font-family: var(--mono); font-size: 0.76rem; color: var(--text-faint); }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 2.5rem 0 4rem;
+        color: var(--text-faint);
+        font-size: 0.85rem;
+      }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+
+      a { color: var(--c-entity); }
+
+      @media (max-width: 560px) {
+        .stack-row { grid-template-columns: 1fr; gap: 0.4rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;"><a href="HOME.html" style="display:inline-flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;text-decoration:none;color:var(--text-dim);border:1px solid var(--line);border-radius:999px;padding:.45rem .95rem;background:var(--surface);">← 홈으로</a></div>
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable 2.0 · Frontend Guide</p>
+        <h1><span class="slash">app/</span> 패키지 역할</h1>
+        <p class="lede">
+          Cesium 기반 러닝 경로 제작 서비스의 프론트엔드입니다. Nuxt 모노리포 안에서
+          <b>FSD(Feature-Sliced Design)</b> 변형을 따라, 상위 레이어가 하위 레이어만 의존하는
+          단방향 구조로 정리되어 있습니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">Nuxt 4</span>
+          <span class="chip">Vue 3 · Composition API</span>
+          <span class="chip">Cesium</span>
+          <span class="chip">FSD 5-layer</span>
+          <span class="chip">entities 6 · features 11</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── 1. 의존 흐름 ── -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / DEPENDENCY FLOW</span>
+          <h2>레이어와 의존 방향</h2>
+          <p class="sec-sub">
+            import 은 항상 위에서 아래로만 흐릅니다. 역방향 import 와 feature 간 교차 의존은 금지이며,
+            기능 조합이 필요하면 <b>widget facade</b> 계층에서 묶습니다.
+          </p>
+        </div>
+
+        <div class="stack">
+          <div class="stack-row" style="--accent: var(--c-page)">
+            <span class="tag">pages</span>
+            <span class="desc"><b>라우팅 진입점.</b> 최상위 widget facade 만 호출하는 얇은 화면 조합 (index · settings · admin · share)</span>
+          </div>
+          <div class="stack-row" style="--accent: var(--c-widget)">
+            <span class="tag">widgets</span>
+            <span class="desc"><b>화면 단위 레이아웃 + Facade.</b> 여러 feature·entity 를 단일 인터페이스로 묶음 (map-shell, facility-overlay)</span>
+          </div>
+          <div class="stack-row" style="--accent: var(--c-feature)">
+            <span class="tag">features</span>
+            <span class="desc"><b>사용자 기능 단위.</b> 경로 그리기·탐색·비교 등 동작 UI + 로직</span>
+          </div>
+          <div class="stack-row" style="--accent: var(--c-entity)">
+            <span class="tag">entities</span>
+            <span class="desc"><b>도메인 단위.</b> route · user · boundary 등 데이터·표시 객체. shared 만 의존</span>
+          </div>
+          <div class="stack-row" style="--accent: var(--c-shared)">
+            <span class="tag">shared</span>
+            <span class="desc"><b>공용 UI · 유틸 · 지도 런타임.</b> 외부 라이브러리만 의존하는 자체 완결 레이어</span>
+          </div>
+        </div>
+        <p class="flow-note">
+          pages <span class="arrow">→</span> widgets <span class="arrow">→</span> features
+          <span class="arrow">→</span> entities <span class="arrow">→</span> shared
+          <span class="arrow">→</span> external libs
+        </p>
+      </div>
+    </section>
+
+    <!-- ── 2. 디렉터리 카드 ── -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / DIRECTORIES</span>
+          <h2>app/ 디렉터리 역할</h2>
+          <p class="sec-sub">FSD 5개 레이어와, 그 위에서 동작하는 Nuxt·플러그인 인프라 디렉터리입니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card" style="--accent: var(--c-page)">
+            <h3>pages <span class="path">app/pages/</span></h3>
+            <p>Nuxt 파일 라우팅. 화면을 조합만 하고 로직은 widget facade 에 위임합니다.</p>
+            <div class="pill-row">
+              <span class="pill">index.vue</span><span class="pill">settings.vue</span>
+              <span class="pill">admin/</span><span class="pill">share/[routeId]</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-widget)">
+            <h3>widgets <span class="path">app/widgets/</span></h3>
+            <p>화면 단위 레이아웃 + Facade. map-shell 이 인증·레이어·그리기·저장 등 11개 sub-facade 를 조합합니다.</p>
+            <div class="pill-row">
+              <span class="pill">map-shell</span><span class="pill">facility-overlay</span>
+              <span class="pill">use*Facade.ts</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-feature)">
+            <h3>features <span class="path">app/features/</span></h3>
+            <p>사용자 기능 11종. 각 기능은 api·lib·model·ui 세그먼트 중 필요한 것만 둡니다.</p>
+            <div class="pill-row">
+              <span class="pill">draw-route</span><span class="pill">explore</span>
+              <span class="pill">route-compare</span><span class="pill">camera</span><span class="pill">+7</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-entity)">
+            <h3>entities <span class="path">app/entities/</span></h3>
+            <p>도메인 단위 6종. 데이터·표시 객체와 도메인별 sideeffect·store 를 보유합니다.</p>
+            <div class="pill-row">
+              <span class="pill">route</span><span class="pill">user</span><span class="pill">boundary</span>
+              <span class="pill">facility</span><span class="pill">gradient</span><span class="pill">notification</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-shared)">
+            <h3>shared <span class="path">app/shared/</span></h3>
+            <p>공용 UI primitive, composable 유틸, Cesium 지도 런타임(useCesiumRuntime 등). 자체 완결.</p>
+            <div class="pill-row">
+              <span class="pill">ui/</span><span class="pill">lib/</span>
+              <span class="pill">lib/map/</span><span class="pill">model/</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-infra)">
+            <h3>plugins-ext <span class="path">app/plugins-ext/</span></h3>
+            <p>런타임 플러그인 슬롯 시스템. PluginManifest 로 chip·sidepanel·dashboard·popup 슬롯을 정적 등록합니다.</p>
+            <div class="pill-row">
+              <span class="pill">registry.ts</span><span class="pill">types.ts</span>
+              <span class="pill">chip/sidepanel/dashboard/popup</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-infra)">
+            <h3>assets <span class="path">app/assets/</span></h3>
+            <p>CSS 토큰(primitive·semantic)과 컴포넌트·페이지 스타일, 아이콘 자산.</p>
+            <div class="pill-row">
+              <span class="pill">css/base</span><span class="pill">css/components</span><span class="pill">icons</span>
+            </div>
+          </div>
+
+          <div class="card" style="--accent: var(--c-infra)">
+            <h3>plugins · middleware <span class="path">app/</span></h3>
+            <p>Nuxt 런타임 훅. developer-gate 플러그인, admin-only 전역 미들웨어, 루트 app.vue · app.config.ts(z-index 티어).</p>
+            <div class="pill-row">
+              <span class="pill">developer-gate</span><span class="pill">admin-only.global</span>
+              <span class="pill">app.config.ts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 3. 세그먼트 규약 ── -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / SLICE SEGMENTS</span>
+          <h2>슬라이스 내부 4세그먼트</h2>
+          <p class="sec-sub">
+            entities·features 의 각 슬라이스는 아래 세그먼트로 책임을 나눕니다. 필요한 세그먼트만 둡니다 —
+            예) <code>entities/route</code> 는 lib·model·ui 만, <code>entities/notification</code> 은 lib·model 만.
+          </p>
+        </div>
+
+        <div class="seg-grid">
+          <div class="seg">
+            <div class="seg-name">api/</div>
+            <div class="seg-rule">use*Sideeffect.ts</div>
+            <p>외부 API 호출 + store 동기화. 결과를 store 로 흘려보내는 단방향 흐름.</p>
+          </div>
+          <div class="seg">
+            <div class="seg-name">model/</div>
+            <div class="seg-rule">use*Store.ts · use*Action.ts</div>
+            <p>useState 기반 상태 store 와 액션. 도메인 상태의 단일 출처.</p>
+          </div>
+          <div class="seg">
+            <div class="seg-name">lib/</div>
+            <div class="seg-rule">도메인별 함수</div>
+            <p>순수 비즈니스 로직 — 계산·변환·파싱·렌더러. 부수 효과 없음.</p>
+          </div>
+          <div class="seg">
+            <div class="seg-name">ui/</div>
+            <div class="seg-rule">&lt;Name&gt;.vue</div>
+            <p>도메인·기능 컴포넌트 (popup · panel · modal · toggle).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 4. 인벤토리 ── -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / INVENTORY</span>
+          <h2>entities · features 목록</h2>
+          <p class="sec-sub">현재 도메인 6종과 기능 11종의 역할입니다.</p>
+        </div>
+
+        <div class="inv">
+          <div class="inv-col">
+            <h4>entities — 도메인 (6)</h4>
+            <ul>
+              <li><code>route</code><span>러닝 경로 데이터·표시 객체</span></li>
+              <li><code>user</code><span>사용자·인증 도메인</span></li>
+              <li><code>boundary</code><span>행정구역 경계(시·구·동)</span></li>
+              <li><code>facility</code><span>시설물 POI(Billboard 핀)</span></li>
+              <li><code>gradient</code><span>경사도·고도 그라디언트</span></li>
+              <li><code>notification</code><span>알림 표시</span></li>
+            </ul>
+          </div>
+          <div class="inv-col">
+            <h4>features — 기능 (11)</h4>
+            <ul>
+              <li><code>base-map</code><span>기본 지도 레이어</span></li>
+              <li><code>camera</code><span>카메라 시점 제어</span></li>
+              <li><code>draw-route</code><span>경로 그리기·분할</span></li>
+              <li><code>elevation-layer</code><span>고도 레이어</span></li>
+              <li><code>explore</code><span>경로 탐색·둘러보기</span></li>
+              <li><code>graphic-quality</code><span>그래픽 품질 설정</span></li>
+            </ul>
+          </div>
+          <div class="inv-col">
+            <h4>features (계속)</h4>
+            <ul>
+              <li><code>route-compare</code><span>경로 비교</span></li>
+              <li><code>route-info</code><span>경로 정보 표시</span></li>
+              <li><code>route-social</code><span>경로 공유·소셜</span></li>
+              <li><code>share-viewer</code><span>공유 링크 뷰어</span></li>
+              <li><code>view-mode</code><span>보기 모드 전환</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 5. TODO ── -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / TODO</span>
+          <h2>구조 정비 체크리스트</h2>
+          <p class="sec-sub">
+            현재 의존 규칙 준수율은 약 85% 수준입니다. 아래는 위키(2-Architecture)에 명시된 정비 항목과
+            문서화 후속 과제입니다.
+          </p>
+        </div>
+
+        <div class="todo-block">
+          <ul class="todo">
+            <li>
+              <span class="box"></span>
+              <div>
+                <div class="t-title">feature 간 교차 의존 제거</div>
+                <div class="t-desc">explore ↔ route-social, explore ↔ route-compare, draw-route ↔ elevation-layer 의 직접 의존을 widget facade 계층 조합으로 정리.</div>
+                <div class="t-where">app/features/* · app/widgets/map-shell/model/</div>
+              </div>
+            </li>
+            <li>
+              <span class="box"></span>
+              <div>
+                <div class="t-title">세부 가이드 문서 작성</div>
+                <div class="t-desc">위키 2.2 app/ 레이어(Nuxt FSD 디테일), 2.3 server/ 레이어, 2.4 shared/ 레이어 규약 채우기.</div>
+                <div class="t-where">docs/wiki/2-Architecture.md</div>
+              </div>
+            </li>
+            <li>
+              <span class="box"></span>
+              <div>
+                <div class="t-title">슬라이스 경계 import 점검</div>
+                <div class="t-desc">슬라이스를 넘는 import 는 절대경로(~/...), 내부는 상대경로 — 위반 케이스 정리.</div>
+                <div class="t-where">app/**</div>
+              </div>
+            </li>
+            <li>
+              <span class="box done"></span>
+              <div>
+                <div class="t-title">FSD 5-layer 경계 확립</div>
+                <div class="t-desc">pages → widgets → features → entities → shared 단방향 의존 구조 정립 완료.</div>
+                <div class="t-where">app/</div>
+              </div>
+            </li>
+            <li>
+              <span class="box done"></span>
+              <div>
+                <div class="t-title">Widget Facade 도입</div>
+                <div class="t-desc">map-shell 에서 11개 sub-facade 를 useRouteMapFacade 단일 진입점으로 묶음.</div>
+                <div class="t-where">app/widgets/map-shell/model/</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        출처 — <code>docs/wiki/2-Architecture.md</code>, <code>.claude/skills/runnable-architecture/SKILL.md</code>, <code>CLAUDE.md</code>.
+        체크박스는 정적 표시이며, 진행 상황은 위 문서를 기준으로 갱신합니다.
+      </div>
+    </footer>
+  </body>
+</html>

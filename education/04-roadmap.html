@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>플러그인 개발자 · 성장 로드맵</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.018 160);
+        --bg-grid: oklch(21% 0.022 160);
+        --surface: oklch(22% 0.028 165);
+        --surface-2: oklch(26% 0.032 165);
+        --line: oklch(37% 0.04 165);
+        --text: oklch(94% 0.01 160);
+        --text-dim: oklch(72% 0.02 165);
+        --text-faint: oklch(57% 0.02 165);
+
+        --l1: oklch(76% 0.15 155);
+        --l2: oklch(76% 0.15 200);
+        --l3: oklch(78% 0.15 270);
+        --l4: oklch(80% 0.15 330);
+        --hot: oklch(80% 0.15 85);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1080px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1000px 520px at 88% -6%, oklch(28% 0.07 270 / 0.4), transparent 58%),
+          radial-gradient(800px 480px at 5% 4%, oklch(26% 0.06 155 / 0.4), transparent 55%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .docnav { display: flex; gap: 0.5rem; padding: 1.1rem 0 0; flex-wrap: wrap; }
+      .docnav a { font-family: var(--mono); font-size: 0.75rem; text-decoration: none; color: var(--text-faint); border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.75rem; transition: color var(--ease) 0.2s, border-color var(--ease) 0.2s; }
+      .docnav a:hover { color: var(--text); border-color: var(--text-faint); }
+      .docnav a.here { color: var(--l1); border-color: color-mix(in oklch, var(--l1) 55%, var(--line)); }
+
+      header.hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--line); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--l3); margin: 0 0 1rem; }
+      h1 { font-size: clamp(2.3rem, 1.1rem + 5vw, 4.2rem); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800; }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--l1), var(--l3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 62ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.22rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2.4rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+
+      /* ── stage ladder ── */
+      .ladder { display: flex; flex-direction: column; gap: 1.3rem; }
+      .stage { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--accent) 9%, var(--surface)), var(--surface) 55%); overflow: hidden; }
+      .stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; padding: 1.3rem 1.5rem; border-bottom: 1px solid var(--line); }
+      .stage-lv { font-family: var(--mono); font-weight: 800; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--bg); background: var(--accent); padding: 0.25rem 0.6rem; border-radius: 6px; }
+      .stage-name { font-size: 1.25rem; font-weight: 700; }
+      .stage-gen { font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); margin-left: auto; }
+      .stage-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2rem; padding: 1.4rem 1.5rem; }
+      .blk h4 { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.7rem; }
+      .blk ul { list-style: none; margin: 0 0 1.2rem; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+      .blk li { font-size: 0.9rem; color: var(--text-dim); padding-left: 1.1rem; position: relative; }
+      .blk li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+      .blk li b { color: var(--text); font-weight: 600; }
+      .blk li code { font-family: var(--mono); font-size: 0.8rem; background: var(--surface-2); padding: 0.05rem 0.35rem; border-radius: 4px; color: var(--text); }
+      .gate { margin: 0 1.5rem 1.4rem; padding: 0.85rem 1rem; border-left: 3px solid var(--hot); background: var(--surface-2); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.88rem; color: var(--text-dim); }
+      .gate b { color: var(--hot); font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+      /* ── competency radar (text) ── */
+      .comp { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+      .comp-card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.3rem; background: var(--surface); }
+      .comp-card .c-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.2rem; }
+      .comp-card .c-why { font-family: var(--mono); font-size: 0.74rem; color: var(--l2); margin-bottom: 0.7rem; }
+      .comp-card p { margin: 0; color: var(--text-dim); font-size: 0.88rem; }
+
+      /* ── project ladder ── */
+      .projects { display: flex; flex-direction: column; gap: 0.8rem; }
+      .proj { display: grid; grid-template-columns: 44px 1fr; gap: 1rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); padding: 1.1rem 1.3rem; align-items: start; }
+      .proj .n { font-family: var(--mono); font-weight: 800; font-size: 1.3rem; color: var(--accent); line-height: 1.1; }
+      .proj .p-title { font-weight: 600; margin-bottom: 0.25rem; }
+      .proj .p-desc { color: var(--text-dim); font-size: 0.88rem; }
+      .proj .p-skill { font-family: var(--mono); font-size: 0.73rem; color: var(--text-faint); margin-top: 0.45rem; }
+
+      /* ── pitfalls ── */
+      .pit { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.9rem; }
+      .pit-card { border: 1px solid var(--line); border-left: 3px solid var(--hot); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1.1rem 1.2rem; background: var(--surface); }
+      .pit-card .x { font-family: var(--mono); color: var(--hot); font-size: 0.8rem; font-weight: 700; }
+      .pit-card p { margin: 0.4rem 0 0; font-size: 0.88rem; color: var(--text-dim); }
+      .pit-card p b { color: var(--text); }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+
+      @media (max-width: 600px) {
+        .stage-body { grid-template-columns: 1fr; gap: 0; }
+        .stage-gen { margin-left: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;">
+      <a href="HOME.html" style="display:inline-flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;text-decoration:none;color:var(--text-dim);border:1px solid var(--line);border-radius:999px;padding:.45rem .95rem;background:var(--surface);">← 홈으로</a>
+    </div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Plugin Developer · Growth Roadmap</p>
+        <h1>플러그인 개발자로<br /><em>나아가기 위한 학습 경로</em></h1>
+        <p class="lede">
+          ②에서 본 산업의 진화 궤적(빌드타임 → 런타임 → 격리 → 분산)을 <b>개인 학습 순서로 번역</b>한 가이드입니다.
+          각 단계는 <b>Runnable <code>app/plugins-ext/</code>를 실습장</b>으로 쓰고, "이걸 만들 수 있으면 통과"라는
+          검증 기준(gate)으로 끝납니다. 책을 읽는 게 아니라 <b>슬롯에 무언가를 꽂아 보면서</b> 올라갑니다.
+        </p>
+      </div>
+    </header>
+
+    <!-- 01 단계 사다리 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / STAGE LADDER</span>
+          <h2>4단계 성장 사다리</h2>
+          <p class="sec-sub">각 레벨은 산업 세대(Gen)와 짝지어집니다. 아래 단계의 gate를 통과해야 다음으로 올라갑니다.</p>
+        </div>
+
+        <div class="ladder">
+          <!-- L1 -->
+          <div class="stage" style="--accent: var(--l1)">
+            <div class="stage-head">
+              <span class="stage-lv">L1</span>
+              <span class="stage-name">소비자 → 첫 플러그인</span>
+              <span class="stage-gen">↔ Gen 1 · 빌드타임 등록</span>
+            </div>
+            <div class="stage-body">
+              <div class="blk">
+                <h4>배울 것</h4>
+                <ul>
+                  <li>호스트–플러그인 경계: <b>매니페스트</b>가 무엇을 선언하는가 (<code>PluginManifest</code>의 slot·position·defaultEnabled)</li>
+                  <li>슬롯/확장점 개념 — 호스트가 자리를 열고 플러그인이 채운다</li>
+                  <li>컴포넌트 등록 흐름: <code>plugin.manifest.ts</code> → <code>registry.ts</code> → 호스트 렌더</li>
+                  <li>Vue 컴포넌트 기본기 (props·emit·composable 소비)</li>
+                </ul>
+              </div>
+              <div class="blk">
+                <h4>Runnable에서 할 것</h4>
+                <ul>
+                  <li><code>demo-coords</code> 등 기존 데모 플러그인을 그대로 읽고 한 줄씩 추적</li>
+                  <li>새 <b>chip 플러그인</b> 하나를 만들어 8방향 앵커 중 하나에 띄우기</li>
+                  <li><code>registry.ts</code> 배열에 등록 → 화면에 뜨는지 확인</li>
+                  <li>position·order를 바꿔 가며 정렬 동작 체감</li>
+                </ul>
+              </div>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;빈 매니페스트부터 시작해, 지도 위 원하는 모서리에 내 chip을 띄우고 클릭 동작을 붙일 수 있다.</div>
+          </div>
+
+          <!-- L2 -->
+          <div class="stage" style="--accent: var(--l2)">
+            <div class="stage-head">
+              <span class="stage-lv">L2</span>
+              <span class="stage-name">상태·사이드이펙트를 다루는 플러그인</span>
+              <span class="stage-gen">↔ Gen 2 · 런타임 결합</span>
+            </div>
+            <div class="stage-body">
+              <div class="blk">
+                <h4>배울 것</h4>
+                <ul>
+                  <li>플러그인이 앱 상태를 <b>읽고 쓰는</b> 흐름 — store·sideeffect 소비 (<code>SidewalkChip</code> 패턴)</li>
+                  <li>단방향 데이터 흐름: 외부 API → sideeffect → store → UI</li>
+                  <li>슬롯 타입별 차이: chip vs sidepanel vs dashboard vs popup</li>
+                  <li>지연 활성화(lazy) 개념과 <code>defineAsyncComponent</code></li>
+                  <li>플러그인 prefs / on-off 토글 (<code>usePluginPrefs</code>)</li>
+                </ul>
+              </div>
+              <div class="blk">
+                <h4>Runnable에서 할 것</h4>
+                <ul>
+                  <li>지도 데이터(시설/경로)를 소비하는 <b>sidepanel 플러그인</b> 제작</li>
+                  <li>토글로 켜고 끄며 store 상태에 반응하는 UI 구현</li>
+                  <li><code>useMapViewer</code>/<code>useMapActions</code>로 지도와 상호작용</li>
+                  <li>플러그인을 동적 import로 바꿔 초기 번들에서 분리</li>
+                </ul>
+              </div>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;앱의 실제 상태(경로·시설)에 반응하고, 사용자가 켜고 끌 수 있으며, 필요할 때만 로드되는 패널 플러그인을 만든다.</div>
+          </div>
+
+          <!-- L3 -->
+          <div class="stage" style="--accent: var(--l3)">
+            <div class="stage-head">
+              <span class="stage-lv">L3</span>
+              <span class="stage-name">계약 설계자 — 호스트 API를 만든다</span>
+              <span class="stage-gen">↔ Gen 2.5 · API 계약 분리</span>
+            </div>
+            <div class="stage-body">
+              <div class="blk">
+                <h4>배울 것</h4>
+                <ul>
+                  <li>플러그인 입장에서 <b>안정적인 공개 표면(plugin context/SDK)</b> 설계</li>
+                  <li>내부 슬라이스 직접 import의 위험 (결합·깨짐) vs 주입형 컨텍스트</li>
+                  <li>API 버저닝·하위호환·deprecation 전략 (semver 사고)</li>
+                  <li>확장점을 <b>새로 여는</b> 쪽 설계 — 호스트가 슬롯을 정의하는 법</li>
+                  <li>타입으로 계약 강제하기 (TS 인터페이스·제네릭)</li>
+                </ul>
+              </div>
+              <div class="blk">
+                <h4>Runnable에서 할 것</h4>
+                <ul>
+                  <li>플러그인에 넘길 <b>PluginContext</b> 인터페이스 초안 설계 (지도·경로·인증 능력만 노출)</li>
+                  <li>기존 플러그인 1개를 직접 import → context 주입형으로 리팩터링</li>
+                  <li>새로운 슬롯 타입 하나를 호스트에 추가해 보기</li>
+                  <li>계약을 깨는 변경 시 타입 에러로 잡히는지 검증</li>
+                </ul>
+              </div>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;플러그인이 앱 내부를 몰라도 동작하도록 공개 컨텍스트를 설계하고, 한 플러그인을 그 위로 옮긴다.</div>
+          </div>
+
+          <!-- L4 -->
+          <div class="stage" style="--accent: var(--l4)">
+            <div class="stage-head">
+              <span class="stage-lv">L4</span>
+              <span class="stage-name">격리·분산·신뢰 — 플랫폼 엔지니어</span>
+              <span class="stage-gen">↔ Gen 3–4 · 샌드박스/원격</span>
+            </div>
+            <div class="stage-body">
+              <div class="blk">
+                <h4>배울 것</h4>
+                <ul>
+                  <li><b>실행 격리</b>: iframe·Web Worker·remote-ui 패턴 (호스트 DOM 비접근 렌더)</li>
+                  <li><b>권한 모델</b>: capability 선언과 최소 권한 (Chrome MV3식 사고)</li>
+                  <li>untrusted JS 격리: SES / QuickJS-in-WASM, WASM 플러그인(Extism)</li>
+                  <li><b>원격 로딩</b>: Module Federation·마이크로 프론트엔드, 버전 협상</li>
+                  <li>배포·신뢰성: 서명·검수·마켓플레이스, 그리고 AI 도구 계약(MCP)</li>
+                </ul>
+              </div>
+              <div class="blk">
+                <h4>Runnable에서 할 것</h4>
+                <ul>
+                  <li>데모 플러그인 하나를 <b>Web Worker + 메시지 통신</b>으로 격리 실행 PoC</li>
+                  <li>capability 화이트리스트를 매니페스트에 추가하는 설계 스케치</li>
+                  <li>원격 URL에서 매니페스트를 불러오는 실험 (1st-party 한정)</li>
+                  <li>"언제 이걸 도입할지" 판단 — YAGNI 기준으로 트레이드오프 문서화</li>
+                </ul>
+              </div>
+            </div>
+            <div class="gate"><b>Gate</b> &nbsp;서드파티 플러그인을 안전하게 받는다면 어떤 격리·권한·배포가 필요한지 설계하고, 핵심 한 가지를 PoC로 증명한다.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 핵심 역량 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / CORE COMPETENCIES</span>
+          <h2>가로지르는 6개 역량</h2>
+          <p class="sec-sub">레벨과 무관하게 계속 깊어져야 하는 축입니다. 단계가 올라갈수록 같은 역량을 더 높은 강도로 요구합니다.</p>
+        </div>
+
+        <div class="comp">
+          <div class="comp-card">
+            <div class="c-name">경계 설계</div>
+            <div class="c-why">host ↔ plugin contract</div>
+            <p>무엇을 노출하고 무엇을 숨길지. 플러그인 개발의 70%는 좋은 경계를 긋는 일.</p>
+          </div>
+          <div class="comp-card">
+            <div class="c-name">상태·데이터 흐름</div>
+            <div class="c-why">unidirectional flow</div>
+            <p>store·sideeffect·반응성. 플러그인이 앱 상태를 안전하게 읽고 쓰는 규율.</p>
+          </div>
+          <div class="comp-card">
+            <div class="c-name">격리·보안</div>
+            <div class="c-why">isolation &amp; capability</div>
+            <p>신뢰할 수 없는 코드를 가정하기. 샌드박스·권한·CSP·XSS 표면 이해.</p>
+          </div>
+          <div class="comp-card">
+            <div class="c-name">성능</div>
+            <div class="c-why">lazy &amp; off-main-thread</div>
+            <p>지연 로딩, 번들 분할, 무거운 작업의 worker 이전. 플러그인이 앱을 느리게 하지 않기.</p>
+          </div>
+          <div class="comp-card">
+            <div class="c-name">버저닝·호환</div>
+            <div class="c-why">semver &amp; deprecation</div>
+            <p>계약을 깨지 않고 진화시키기. 구버전 플러그인을 살려두는 전략.</p>
+          </div>
+          <div class="comp-card">
+            <div class="c-name">DX·배포</div>
+            <div class="c-why">authoring &amp; distribution</div>
+            <p>플러그인 작성자가 겪는 경험. 스캐폴딩·문서·예제·마켓·서명.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 프로젝트 사다리 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / BUILD LADDER</span>
+          <h2>만들면서 배우는 6개 프로젝트</h2>
+          <p class="sec-sub">읽기만으로는 늘지 않습니다. 순서대로 직접 만들면 위 4단계를 자연히 통과합니다.</p>
+        </div>
+
+        <div class="projects">
+          <div class="proj"><span class="n">1</span><div><div class="p-title">Hello-Chip</div><div class="p-desc">아무 동작 없는 chip 하나를 모서리에 띄운다. 매니페스트→레지스트리→렌더 전 과정 체득.</div><div class="p-skill">L1 · 경계 설계 입문</div></div></div>
+          <div class="proj"><span class="n">2</span><div><div class="p-title">상태 반응 패널</div><div class="p-desc">현재 경로/시설 데이터를 보여주는 sidepanel. store 구독과 반응성.</div><div class="p-skill">L2 · 상태·데이터 흐름</div></div></div>
+          <div class="proj"><span class="n">3</span><div><div class="p-title">토글 + 지연 로딩</div><div class="p-desc">사용자가 켜고 끄며, 켤 때만 동적 import 되는 플러그인. prefs 연동.</div><div class="p-skill">L2 · 성능</div></div></div>
+          <div class="proj"><span class="n">4</span><div><div class="p-title">PluginContext SDK</div><div class="p-desc">플러그인에 주입할 공개 API 표면을 설계하고, 기존 플러그인을 그 위로 이전.</div><div class="p-skill">L3 · 경계 설계 · 버저닝</div></div></div>
+          <div class="proj"><span class="n">5</span><div><div class="p-title">새 확장점 열기</div><div class="p-desc">호스트에 새 슬롯 타입을 추가해, 다른 사람이 거기에 꽂을 수 있게 한다.</div><div class="p-skill">L3 · DX·배포</div></div></div>
+          <div class="proj"><span class="n">6</span><div><div class="p-title">Worker 격리 PoC</div><div class="p-desc">플러그인 로직을 Web Worker로 분리하고 메시지로 렌더 명령만 주고받는다.</div><div class="p-skill">L4 · 격리·보안 · 성능</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 흔한 함정 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / PITFALLS</span>
+          <h2>초·중급에서 자주 빠지는 함정</h2>
+          <p class="sec-sub">대부분 "경계를 안 그어서" 생깁니다. 미리 알면 한 단계 빨리 통과합니다.</p>
+        </div>
+
+        <div class="pit">
+          <div class="pit-card"><span class="x">✗ 내부 직접 의존</span><p>플러그인이 <b>features·entities를 직접 import</b>. 호스트가 리팩터링하면 다 깨짐. → context 주입으로.</p></div>
+          <div class="pit-card"><span class="x">✗ 전부 신뢰</span><p>"내가 만든 거니까 괜찮아"로 권한·격리를 건너뜀. 서드파티를 받는 순간 재설계 비용 폭증.</p></div>
+          <div class="pit-card"><span class="x">✗ 동기 무거운 작업</span><p>메인 스레드에서 큰 계산. 플러그인 하나가 <b>앱 전체를 멈춤</b>. → worker/lazy로.</p></div>
+          <div class="pit-card"><span class="x">✗ 계약 없는 변경</span><p>호스트 API를 말없이 바꿔 기존 플러그인이 조용히 깨짐. → semver·deprecation 경로.</p></div>
+          <div class="pit-card"><span class="x">✗ 과설계</span><p>1st-party만 있는데 샌드박스·마켓까지 미리 구축. <b>YAGNI</b> — 필요해질 때 도입.</p></div>
+          <div class="pit-card"><span class="x">✗ DX 무시</span><p>작성 방법이 머릿속에만. 스캐폴딩·예제·문서 없으면 아무도(미래의 나 포함) 못 씀.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Runnable 실습 지점은 <code>app/plugins-ext/</code> (types.ts · registry.ts · usePluginSurfaces.ts · sidewalk/explore 예제) 와
+        마운트 지점 <code>app/widgets/map-shell/ui/MapOverlays.vue</code> 기준입니다.
+        산업 맥락은 ②(TODO2)와 연결됩니다. 학습 순서·gate는 가이드라인이며, 본인 페이스에 맞게 조정하세요.
+      </div>
+    </footer>
+  </body>
+</html>

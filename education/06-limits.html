@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>한계와 미래 · 개인화 웹이 아직 불가능한 이유</title>
+    <style>
+      :root {
+        --bg: oklch(15% 0.018 30);
+        --bg-grid: oklch(20% 0.022 30);
+        --surface: oklch(22% 0.028 30);
+        --surface-2: oklch(26% 0.032 30);
+        --line: oklch(37% 0.04 30);
+        --text: oklch(95% 0.01 30);
+        --text-dim: oklch(73% 0.02 30);
+        --text-faint: oklch(57% 0.02 30);
+
+        --accent: oklch(76% 0.16 25);
+        --good: oklch(78% 0.16 150);
+        --warn: oklch(80% 0.15 85);
+        --cool: oklch(78% 0.14 215);
+
+        --radius: 14px;
+        --radius-sm: 9px;
+        --maxw: 1060px;
+        --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 88% -6%, oklch(30% 0.08 30 / 0.45), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 40px,
+          var(--bg);
+        line-height: 1.62;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+      .backbtn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 999px; padding: 0.45rem 0.95rem; background: var(--surface); transition: color var(--ease) 0.2s, border-color var(--ease) 0.2s; }
+      .backbtn:hover { color: var(--text); border-color: var(--text-faint); }
+
+      header.hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--line); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0 0 1rem; }
+      h1 { font-size: clamp(2.1rem, 1.1rem + 4.8vw, 4rem); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800; }
+      h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--warn)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 66ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+
+      section { padding: var(--space-section) 0; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 66ch; margin: 0; }
+
+      /* walls */
+      .walls { display: flex; flex-direction: column; gap: 1rem; }
+      .wall { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius-sm); background: linear-gradient(100deg, color-mix(in oklch, var(--accent) 8%, var(--surface)), var(--surface) 55%); padding: 1.4rem 1.6rem; }
+      .wall-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.8rem; margin-bottom: 0.6rem; }
+      .wall-n { font-family: var(--mono); font-weight: 850; font-size: 1.1rem; color: var(--accent); }
+      .wall-title { font-size: 1.18rem; font-weight: 700; }
+      .wall-axis { font-family: var(--mono); font-size: 0.72rem; color: var(--text-faint); margin-left: auto; border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.6rem; }
+      .wall p { margin: 0 0 0.8rem; color: var(--text-dim); font-size: 0.95rem; }
+      .wall p:last-child { margin-bottom: 0; }
+      .wall p b { color: var(--text); font-weight: 600; }
+      .wall .ex { font-family: var(--mono); font-size: 0.8rem; color: var(--text-faint); border-top: 1px dashed var(--line); padding-top: 0.7rem; }
+      .wall .ex b { color: var(--text-dim); font-weight: 600; }
+
+      /* possible-now */
+      .now-block { border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: var(--radius); background: linear-gradient(160deg, color-mix(in oklch, var(--good) 8%, var(--surface-2)), var(--surface)); padding: clamp(1.4rem, 3vw, 2.2rem); }
+      .now-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+      .now-col h3 { font-size: 1.05rem; margin: 0 0 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+      .now-col.can h3 { color: var(--good); }
+      .now-col.cant h3 { color: var(--accent); }
+      .now-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+      .now-col li { font-size: 0.9rem; color: var(--text-dim); padding-left: 1.3rem; position: relative; }
+      .now-col.can li::before { content: "✓"; position: absolute; left: 0; color: var(--good); font-weight: 800; }
+      .now-col.cant li::before { content: "✗"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+      .now-col li b { color: var(--text); }
+
+      /* position */
+      .pos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+      .pc { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 1.3rem; background: var(--surface); }
+      .pc .pc-h { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--cool); margin-bottom: 0.5rem; }
+      .pc .pc-t { font-weight: 700; font-size: 1.02rem; margin-bottom: 0.4rem; }
+      .pc p { margin: 0; color: var(--text-dim); font-size: 0.88rem; }
+
+      .pull { border-left: 3px solid var(--warn); background: var(--surface-2); padding: 1.1rem 1.3rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 1.8rem 0 0; color: var(--text-dim); font-size: 0.96rem; }
+      .pull b { color: var(--text); }
+      .pull.big { font-size: 1.05rem; line-height: 1.55; }
+
+      footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      footer a { color: var(--cool); }
+
+      @media (max-width: 600px) { .now-grid { grid-template-columns: 1fr; } .wall-axis { margin-left: 0; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" style="padding-top:1.1rem;"><a class="backbtn" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Why Not Yet · 한계와 미래</p>
+        <h1>이 꿈을 꾼 사람은 너만이 아니다<br /><em>그런데 왜 아직 안 될까</em></h1>
+        <p class="lede">
+          "아무 데서나 페이지를 가져와 내 메인에 조립한다"는 비전은 기술적으로 상상 가능합니다. 그런데 웹 <b>전체 규모</b>에선
+          아직 안 됩니다. 그 이유는 코드 실력의 문제가 아니라 <b>7개의 구조적 벽</b> 때문입니다. 각 벽은 ③에서 본
+          Gen 1→4 진화 축과 정확히 대응됩니다. 벽을 알아야, 지금 무엇이 가능하고 네가 어디에 서 있는지 보입니다.
+        </p>
+      </div>
+    </header>
+
+    <!-- 01 7개의 벽 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / THE SEVEN WALLS</span>
+          <h2>아직 불가능한 7가지 이유</h2>
+          <p class="sec-sub">앞쪽일수록 더 근본적입니다. 1~3은 기술, 4~5는 표준·데이터, 6~7은 시장·사람의 벽입니다.</p>
+        </div>
+
+        <div class="walls">
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">1</span><span class="wall-title">보편 계약(contract)의 부재</span><span class="wall-axis">축: API 계약</span></div>
+            <p>플러그인은 host와 plugin이 <b>같은 약속</b>(슬롯·데이터 모양·생명주기·권한)을 공유할 때만 꽂힙니다. Runnable이 되는 이유는 <b>한 팀이 양쪽을 다 통제</b>하기 때문입니다. 웹 전체엔 모두가 합의한 <b>보편 UI/페이지 계약</b>이 없습니다.</p>
+            <p>React·Vue·Svelte의 컴포넌트 모델은 서로 호환되지 않고, Web Components·Module Federation은 부분적·파편적 시도에 그칩니다. (AI 도구 쪽에서 MCP가 이 "보편 계약"을 노리는 중)</p>
+            <div class="ex"><b>현재 상태:</b> 단일 벤더 안에서만 계약이 성립 · 범웹 표준 없음</div>
+          </div>
+
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">2</span><span class="wall-title">신뢰·격리의 벽</span><span class="wall-axis">축: 신뢰·격리</span></div>
+            <p>아무 데서나 페이지를 가져온다 = 내 컨텍스트에서 <b>신뢰할 수 없는 남의 코드를 실행</b>한다는 뜻입니다. 안전하려면 샌드박스(iframe·Worker·WASM) + 권한(capability) 모델 + CSP가 필수입니다.</p>
+            <p>그런데 브라우저엔 <b>세밀한 capability 모델이 없어</b> 안전한 조립의 비용이 큽니다. 이건 ③의 Gen 3 — <b>업계 전체가 아직 씨름 중인 최전선</b>이지, 개인이 풀 수 있는 문제가 아닙니다.</p>
+            <div class="ex"><b>현재 상태:</b> Figma·Chrome MV3가 부분 해결 · 범용 안전 합성은 미해결</div>
+          </div>
+
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">3</span><span class="wall-title">공유 의존성·버전 지옥</span><span class="wall-axis">축: 결합 시점</span></div>
+            <p>독립적으로 빌드된 모듈을 런타임에 합치면 <b>Vue 버전·디자인 토큰·인증 토큰</b> 같은 공유 자원을 협상해야 합니다. Module Federation이 가능함을 보여주지만 깨지기 쉽습니다.</p>
+            <p>벤더 간 <b>버전 협상 표준이 없어</b>, A가 만든 모듈과 B가 만든 모듈이 같은 페이지에서 충돌 없이 공존한다는 보장을 만들기 어렵습니다.</p>
+            <div class="ex"><b>현재 상태:</b> 같은 조직·정해진 스택 안에서만 안정적</div>
+          </div>
+
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">4</span><span class="wall-title">상태·데이터 소유권</span><span class="wall-axis">축: 데이터</span></div>
+            <p>모듈 간에 <b>내 데이터</b>가 안전하게 흘러야 진짜 개인화입니다. 그런데 누가 데이터를 소유하고, 모듈 사이에 어떻게 권한을 넘기며, 신원·인증을 어떻게 연합하느냐에 대한 <b>합의된 표준이 없습니다</b>.</p>
+            <p>Solid(데이터 pod)·페디버스가 시도하지만 비주류입니다. 데이터가 플랫폼에 갇혀 있는 한, 모듈은 내 데이터를 자유롭게 조합할 수 없습니다.</p>
+            <div class="ex"><b>현재 상태:</b> 데이터는 플랫폼별로 고립 · 이동·연합 표준 미성숙</div>
+          </div>
+
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">5</span><span class="wall-title">배포·발견(마켓)의 거버넌스</span><span class="wall-axis">축: 배포·신뢰성</span></div>
+            <p>계약이 있어도, 모듈을 안전하게 유통하려면 <b>서명·검수·semver·큐레이션</b>이 필요합니다. 이건 코드 문제가 아니라 <b>거버넌스 문제</b>입니다 — 누가 심사하고, 누가 책임지고, 악성 모듈을 어떻게 걷어내나.</p>
+            <p>VS Code·Chrome 웹스토어가 보여주듯, 신뢰할 만한 마켓을 운영하는 건 거대한 조직적 비용입니다.</p>
+            <div class="ex"><b>현재 상태:</b> 폐쇄적 단일 마켓만 작동 · 개방형 범웹 마켓 부재</div>
+          </div>
+
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">6</span><span class="wall-title">경제적 역인센티브</span><span class="wall-axis">축: 시장</span></div>
+            <p>가장 큰 벽이자 코드로 풀 수 없는 벽. 플랫폼은 <b>조립당하길 원하지 않습니다</b> — 사업 모델이 담장 친 정원(락인·광고·체류시간)이기 때문입니다. 기술이 아니라 <b>시장이 막습니다</b>.</p>
+            <p><b>RSS → 알고리즘 피드</b>가 교훈입니다. 한때 우리는 피드를 자유롭게 조립할 수 있었지만, 그게 돈이 안 되자 시장이 죽였습니다. 개방형 조립은 늘 상업적 저항에 부딪힙니다.</p>
+            <div class="ex"><b>현재 상태:</b> 기술보다 비즈니스 모델이 가장 단단한 벽</div>
+          </div>
+
+          <div class="wall">
+            <div class="wall-top"><span class="wall-n">7</span><span class="wall-title">"직접 구현"의 간극 (DX)</span><span class="wall-axis">축: 저작 경험</span></div>
+            <p>비전의 "직접 구현한다"가 성립하려면, 비전문가도 <b>페이지를 가져와 손볼 수 있는 저작 도구</b>가 있거나, 모두가 코딩을 해야 합니다. 그 중간을 메우는 추상화가 아직 그 충실도로 존재하지 않습니다.</p>
+            <p>로우코드 도구는 자유도가 낮고, 코드는 진입장벽이 높습니다. (LLM 기반 생성이 이 간극을 빠르게 좁히는 중 — 여기가 가장 빠르게 바뀌는 지점)</p>
+            <div class="ex"><b>현재 상태:</b> 제작자/소비자 사이 다리가 얇음 · AI가 변화 중</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 지금 가능한 것 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / WHAT'S POSSIBLE NOW</span>
+          <h2>그래서 지금 가능한 것</h2>
+          <p class="sec-sub">벽은 "웹 전체 규모"의 이야기입니다. 범위를 <b>단일 벤더(네가 양쪽을 통제)</b>로 좁히면, 비전의 핵심은 이미 오늘 만들 수 있습니다.</p>
+        </div>
+
+        <div class="now-block">
+          <div class="now-grid">
+            <div class="now-col can">
+              <h3>오늘 가능 — 단일 벤더 호스트</h3>
+              <ul>
+                <li>매니페스트 + <b>슬롯/확장점</b> 모델 (chip·panel·dashboard·popup)</li>
+                <li>호스트가 모듈을 <b>자동 주입·렌더</b></li>
+                <li><b>온디맨드 설치</b> — 동적 import 로 0비용 미설치 (⑤)</li>
+                <li>사용자별 on/off <b>영속화</b> (feature-prefs)</li>
+                <li><b>안정적 계약(PluginContext)</b> 설계 — 1st-party 한정 (④ L3)</li>
+                <li>Worker 격리 <b>PoC</b> 수준 (④ L4)</li>
+              </ul>
+            </div>
+            <div class="now-col cant">
+              <h3>아직 불가 — 범웹 규모</h3>
+              <ul>
+                <li>아무 출처의 <b>신뢰 불가 모듈</b>을 안전하게 받기 (벽 2)</li>
+                <li>벤더를 넘는 <b>보편 계약</b>으로 조립 (벽 1)</li>
+                <li>모듈 간 <b>데이터 자유 이동</b>·신원 연합 (벽 4)</li>
+                <li>개방형 <b>마켓·서명·검수</b> 생태계 (벽 5)</li>
+                <li>플랫폼들이 <b>스스로 조립을 허용</b> (벽 6)</li>
+                <li>비전문가의 <b>완전한 직접 구현</b> (벽 7)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pull big">
+            결론: <b>"내가 양쪽을 통제하는 판"은 지금 완성도 높게 만들 수 있고</b>, "아무나 끼어드는 판"은 아직 인류 공통의 숙제다.
+            전자를 깊이 파는 것이 후자가 열렸을 때 가장 먼저 준비된 사람이 되는 길.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 네가 선 자리 -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / WHERE YOU STAND</span>
+          <h2>그래서 Runnable에서 너는</h2>
+          <p class="sec-sub">③ 기준으로 plugins-ext 는 <b>Gen 1.5</b>(빌드타임 registry + 런타임 슬롯). 벽을 못 넘어서가 아니라, 1st-party만 받으므로 <b>지금은 넘을 필요가 없는</b> 상태 — 이게 핵심입니다.</p>
+        </div>
+
+        <div class="pos">
+          <div class="pc">
+            <div class="pc-h">기르는 근육</div>
+            <div class="pc-t">경계 설계</div>
+            <p>무엇을 노출/은폐할지. 벽 1·2가 풀려도 가장 먼저 필요한 능력. 범웹이든 단일 벤더든 동일.</p>
+          </div>
+          <div class="pc">
+            <div class="pc-h">기르는 근육</div>
+            <div class="pc-t">계약·버저닝</div>
+            <p>깨지 않고 진화시키기. 벽 1·3의 축소판을 손으로 경험. semver 사고는 어디서나 통용.</p>
+          </div>
+          <div class="pc">
+            <div class="pc-h">기르는 근육</div>
+            <div class="pc-t">격리·권한 감각</div>
+            <p>벽 2를 PoC로 맛보기. "언제 도입할지"의 판단(YAGNI)이 실제로는 더 중요한 역량.</p>
+          </div>
+          <div class="pc">
+            <div class="pc-h">기르는 근육</div>
+            <div class="pc-t">성능·DX</div>
+            <p>온디맨드 로딩(벽과 무관하게 늘 가치)과 작성자 경험. 벽 7이 열릴 때 직접 강점이 됨.</p>
+          </div>
+        </div>
+
+        <div class="pull big">
+          한 줄 요약 — <b>범웹 개인화 웹은 아직 멀지만, 그것이 요구하는 근육은 지금 단일 벤더 호스트에서 정확히 기를 수 있다.</b>
+          벽이 무너지는 날, 근육을 미리 길러둔 사람이 그 판을 짓는다. 그게 네가 Runnable을 훈련장으로 쓰는 정확한 이유다.
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        업계 제약은 작성 기준(2026년 상반기) 공개된 아키텍처 지식에 근거한 정리입니다. 진화 궤적은 <a href="03-evolution.html">③ 진화</a>,
+        단계별 실습은 <a href="04-roadmap.html">④ 로드맵</a>, 비전 전체는 <a href="00-vision.html">⓪ 비전</a> 참고.
+        Runnable 위치 판단만 <code>app/plugins-ext/</code> 실제 코드 기준입니다.
+      </div>
+    </footer>
+  </body>
+</html>

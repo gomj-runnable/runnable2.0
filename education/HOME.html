@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable 플러그인 교육 · 홈</title>
+    <style>
+      :root {
+        --bg: oklch(15% 0.02 265);
+        --bg-grid: oklch(20% 0.024 265);
+        --surface: oklch(22% 0.03 270);
+        --surface-2: oklch(26% 0.035 270);
+        --line: oklch(37% 0.04 270);
+        --text: oklch(95% 0.01 265);
+        --text-dim: oklch(73% 0.02 270);
+        --text-faint: oklch(58% 0.02 270);
+
+        --c0: oklch(78% 0.14 190);
+        --c1: oklch(80% 0.15 85);
+        --c2: oklch(74% 0.17 320);
+        --c3: oklch(76% 0.15 150);
+        --c4: oklch(78% 0.15 215);
+        --c5: oklch(76% 0.16 25);
+        --c6: oklch(72% 0.16 300);
+        --c7: oklch(80% 0.14 130);
+
+        --radius: 16px;
+        --radius-sm: 9px;
+        --maxw: 1060px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 80% -8%, oklch(30% 0.09 300 / 0.5), transparent 60%),
+          radial-gradient(900px 500px at 0% 5%, oklch(26% 0.07 215 / 0.45), transparent 55%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 42px,
+          var(--bg);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      header.hero { padding: clamp(3.5rem, 9vw, 7rem) 0 clamp(2.5rem, 5vw, 4rem); }
+      .eyebrow { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c2); margin: 0 0 1.1rem; }
+      h1 { font-size: clamp(2.6rem, 1.2rem + 6vw, 5rem); line-height: 1.0; letter-spacing: -0.035em; margin: 0 0 1.1rem; font-weight: 850; }
+      h1 em { font-style: normal; background: linear-gradient(100deg, var(--c4), var(--c2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .lede { max-width: 62ch; font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .lede code { font-family: var(--mono); font-size: 0.9em; color: var(--text-dim); }
+
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 2rem; }
+      .chip { font-family: var(--mono); font-size: 0.76rem; padding: 0.38rem 0.8rem; border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface); }
+
+      .section-label { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-faint); margin: 0 0 1.3rem; padding-top: clamp(2rem, 4vw, 3rem); border-top: 1px solid var(--line); }
+
+      /* thesis band */
+      .thesis { border: 1px solid var(--line); border-left: 4px solid var(--c2); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--c2) 10%, var(--surface)), var(--surface) 60%); padding: clamp(1.4rem, 3vw, 2rem); margin-bottom: 0.5rem; }
+      .thesis .q { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c2); margin: 0 0 0.7rem; }
+      .thesis p.body { margin: 0; font-size: clamp(1.05rem, 0.98rem + 0.4vw, 1.28rem); color: var(--text); line-height: 1.5; }
+      .thesis p.body b { color: var(--c4); }
+
+      /* doc cards */
+      .docs { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.1rem; padding-bottom: 1.5rem; }
+      .doc { position: relative; display: flex; flex-direction: column; text-decoration: none; color: inherit; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.6rem 1.5rem 1.4rem; overflow: hidden; transition: transform var(--ease) 0.35s, border-color var(--ease) 0.35s, background var(--ease) 0.35s; }
+      .doc::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--accent); }
+      .doc:hover { transform: translateY(-6px); border-color: color-mix(in oklch, var(--accent) 55%, var(--line)); background: var(--surface-2); }
+      .doc .num { font-family: var(--mono); font-weight: 850; font-size: 2.3rem; line-height: 1; color: var(--accent); opacity: 0.9; }
+      .doc h3 { font-size: 1.25rem; margin: 0.7rem 0 0.4rem; letter-spacing: -0.01em; }
+      .doc .sub { font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); margin-bottom: 0.9rem; }
+      .doc p { margin: 0 0 1.1rem; color: var(--text-dim); font-size: 0.92rem; flex: 1; }
+      .doc .go { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); display: inline-flex; align-items: center; gap: 0.4rem; }
+      .doc .badge { position: absolute; top: 1.2rem; right: 1.3rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.55rem; }
+
+      /* reading path */
+      .path { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding-bottom: 3rem; }
+      .path .p { font-family: var(--mono); font-size: 0.82rem; color: var(--text-dim); border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.8rem; background: var(--surface); }
+      .path .p b { color: var(--text); }
+      .path .ar { color: var(--c2); font-family: var(--mono); }
+
+      footer { border-top: 1px solid var(--line); padding: 2.2rem 0 4rem; color: var(--text-faint); font-size: 0.84rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable · Plugin Education</p>
+        <h1>판을 쓰는 사람이 아니라<br /><em>판을 만드는 사람</em></h1>
+        <p class="lede">
+          개인화된 웹 — 모두가 자기 메인 페이지를 갖고, 기능을 <b>모듈처럼 가져다 쓰거나 직접 구현</b>하는 미래.
+          그 미래는 <b>플러그인을 받아주는 판(host)을 설계할 줄 아는 사람</b>을 필요로 합니다. 이 자료는
+          Runnable <code>plugins-ext</code> 를 훈련장 삼아 그 길을
+          비전 → 토대 → 산업 → 로드맵 → 실전 → 한계 → 기록의 한 흐름으로 묶습니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">Nuxt 4 · Vue 3</span>
+          <span class="chip">FSD</span>
+          <span class="chip">plugins-ext</span>
+          <span class="chip">문서 8종</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <p class="section-label">THESIS</p>
+      <div class="thesis">
+        <p class="q">이 자료가 향하는 한 문장</p>
+        <p class="body">
+          웹의 다음 단계는 <b>서비스의 개인화</b>다. 그것을 가능케 하는 건 기능을 꽂고 뺄 수 있는
+          <b>확장 가능한 판</b>이고, 그 판을 설계하는 역량은 — 지금은 단일 벤더 호스트에서만 온전히 훈련된다.
+        </p>
+      </div>
+
+      <p class="section-label">DOCUMENTS</p>
+      <div class="docs">
+        <a class="doc" href="00-vision.html" style="--accent: var(--c2)">
+          <span class="badge">시작</span>
+          <span class="num">00</span>
+          <h3>왜 — 개인화 웹</h3>
+          <div class="sub">Vision · Why</div>
+          <p>이 모든 문서가 향하는 미래와, 네가 정확히 무엇을 훈련하는지. 나머지를 읽기 전 좌표.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="01-prerequisites.html" style="--accent: var(--c0)">
+          <span class="badge">먼저 읽기</span>
+          <span class="num">01</span>
+          <h3>사전 지식</h3>
+          <div class="sub">Prerequisites</div>
+          <p>런타임·모듈·Vue·Nuxt·아키텍처·플러그인 어휘를 7개 묶음으로. 낯선 묶음만 골라 읽는 용어집.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="02-architecture.html" style="--accent: var(--c1)">
+          <span class="num">02</span>
+          <h3>app/ 패키지 구조</h3>
+          <div class="sub">Architecture · FSD</div>
+          <p>pages→widgets→features→entities→shared 5층 구조와 슬라이스·세그먼트, 의존 방향.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="03-evolution.html" style="--accent: var(--c6)">
+          <span class="num">03</span>
+          <h3>플러그인 진화</h3>
+          <div class="sub">Industry Survey</div>
+          <p>빌드타임→런타임→격리→분산. VS Code·Figma·Chrome·MCP 사례로 본 4세대 궤적.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="04-roadmap.html" style="--accent: var(--c3)">
+          <span class="num">04</span>
+          <h3>개발자 로드맵</h3>
+          <div class="sub">Growth Path</div>
+          <p>L1~L4 성장 사다리 + 6개 실습 프로젝트 + 흔한 함정. plugins-ext를 실습장으로.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="05-on-demand.html" style="--accent: var(--c4)">
+          <span class="badge">실전</span>
+          <span class="num">05</span>
+          <h3>온디맨드 설치</h3>
+          <div class="sub">Lazy Install</div>
+          <p>'설치' 누를 때 비로소 메모리에 올라오는 플러그인. 코드 스플리팅 + 동적 import 적용 5단계.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="06-limits.html" style="--accent: var(--c5)">
+          <span class="badge">현실</span>
+          <span class="num">06</span>
+          <h3>한계와 미래</h3>
+          <div class="sub">Why Not Yet</div>
+          <p>개인화 웹이 아직 웹 전체 규모로 불가능한 7개의 벽. 그리고 지금 가능한 것 — 네가 선 자리.</p>
+          <span class="go">읽기 →</span>
+        </a>
+
+        <a class="doc" href="07-log.html" style="--accent: var(--c7)">
+          <span class="badge">살아있는 문서</span>
+          <span class="num">07</span>
+          <h3>학습 로그</h3>
+          <div class="sub">Build Log</div>
+          <p>L1~L4 gate 통과·6개 프로젝트 진척·날짜별 기록. 읽는 문서가 아니라 채워 가는 문서.</p>
+          <span class="go">열기 →</span>
+        </a>
+      </div>
+
+      <p class="section-label">RECOMMENDED PATH</p>
+      <div class="path">
+        <span class="p"><b>00</b> 비전</span>
+        <span class="ar">→</span>
+        <span class="p"><b>01</b> 사전 지식</span>
+        <span class="ar">→</span>
+        <span class="p"><b>02</b> 구조</span>
+        <span class="ar">→</span>
+        <span class="p"><b>03</b> 진화</span>
+        <span class="ar">→</span>
+        <span class="p"><b>04</b> 로드맵</span>
+        <span class="ar">→</span>
+        <span class="p"><b>05</b> 온디맨드</span>
+        <span class="ar">→</span>
+        <span class="p"><b>06</b> 한계</span>
+        <span class="ar">→</span>
+        <span class="p"><b>07</b> 로그(상시)</span>
+      </div>
+    </div>
+
+    <footer>
+      <div class="wrap">
+        교육 자료 위치 <code>education/</code> · 대상 코드 <code>app/plugins-ext/</code>, <code>app/widgets/map-shell/ui/MapOverlays.vue</code> ·
+        기술 스택 Nuxt 4 · Vue 3 · Vite. 정적 HTML이므로 브라우저로 <code>HOME.html</code> 을 열면 됩니다.
+      </div>
+    </footer>
+  </body>
+</html>
