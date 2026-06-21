@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable · FE강의 01 · 반응형(Reactivity)</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 230);
+        --bg-grid: oklch(21% 0.024 230);
+        --surface: oklch(22% 0.03 235);
+        --surface-2: oklch(26% 0.035 235);
+        --line: oklch(37% 0.04 235);
+        --text: oklch(95% 0.01 230);
+        --text-dim: oklch(73% 0.02 235);
+        --text-faint: oklch(58% 0.02 235);
+
+        --lec: oklch(80% 0.14 195);
+        --lec-2: oklch(78% 0.15 215);
+        --accent: var(--lec);
+
+        --radius: 16px;
+        --radius-sm: 9px;
+        --maxw: 1000px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 88% -6%, oklch(28% 0.07 215 / 0.5), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--bg);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .topbar { padding-top: 1.1rem; }
+      .back {
+        display: inline-flex; align-items: center; gap: .45rem;
+        font-family: var(--mono); font-size: .78rem; letter-spacing: .04em;
+        text-decoration: none; color: var(--text-dim);
+        border: 1px solid var(--line); border-radius: 999px;
+        padding: .45rem .95rem; background: var(--surface);
+      }
+
+      header.hero {
+        padding: clamp(3rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--lec); margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.3rem, 1.2rem + 5vw, 4.2rem);
+        line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800;
+      }
+      h1 em { font-style: normal; color: var(--lec); }
+      .lede { max-width: 60ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.22rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+      .chip {
+        font-family: var(--mono); font-size: 0.78rem; padding: 0.4rem 0.8rem;
+        border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface);
+      }
+
+      section { padding: var(--space-section) 0; border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent); }
+      section:last-of-type { border-bottom: none; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.55rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+      p.body { color: var(--text-dim); max-width: 68ch; }
+      p.body b { color: var(--text); }
+      code.inl { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 0.1rem 0.42rem; border-radius: 5px; color: var(--text); }
+
+      /* code block */
+      .code {
+        font-family: var(--mono); font-size: 0.84rem; line-height: 1.7;
+        background: oklch(13% 0.02 235); border: 1px solid var(--line);
+        border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+        padding: 1.1rem 1.3rem; overflow-x: auto; color: var(--text-dim); margin: 0;
+      }
+      .code .c { color: var(--text-faint); font-style: italic; }
+      .code .k { color: var(--lec); }
+      .code .s { color: oklch(80% 0.13 130); }
+
+      /* two-col compare */
+      .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; }
+      .pane { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; }
+      .pane.bad { border-left: 4px solid oklch(70% 0.16 25); }
+      .pane.good { border-left: 4px solid oklch(76% 0.15 150); }
+      .pane h3 { font-family: var(--mono); font-size: 0.95rem; margin: 0 0 0.8rem; }
+      .pane.bad h3 { color: oklch(76% 0.16 25); }
+      .pane.good h3 { color: oklch(80% 0.15 150); }
+      .pane p { color: var(--text-dim); font-size: 0.9rem; margin: 0.8rem 0 0; }
+
+      /* primitive cards */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
+      .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; position: relative; overflow: hidden; transition: transform var(--ease) 0.3s, border-color var(--ease) 0.3s; }
+      .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 { font-family: var(--mono); font-size: 1rem; margin: 0 0 0.3rem; color: var(--accent); }
+      .card p { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+      .card .when { display: block; margin-top: 0.7rem; font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); }
+
+      /* callout */
+      .callout { border: 1px solid var(--line); border-left: 4px solid var(--lec-2); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--lec-2) 10%, var(--surface)), var(--surface) 60%); padding: clamp(1.3rem, 3vw, 1.9rem); }
+      .callout .q { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lec-2); margin: 0 0 0.7rem; }
+      .callout p { margin: 0; color: var(--text); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem); }
+      .callout p b { color: var(--lec); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
+
+      footer { padding: 2.4rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      a { color: var(--lec-2); }
+      .pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      .pager a { font-family: var(--mono); font-size: 0.82rem; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 1rem; background: var(--surface); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap topbar"><a class="back" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable · Frontend Lecture · 01</p>
+        <h1>화면은 왜 <em>알아서</em> 바뀌는가<br />— 반응형(Reactivity)</h1>
+        <p class="lede">
+          현대 프론트엔드의 출발점은 단 하나의 질문입니다 — <b>데이터가 바뀌면 화면이 어떻게 따라오는가.</b>
+          이 챕터는 Vue의 <code class="inl">ref·reactive·computed·watch</code> 가 그 일을 어떻게 자동화하는지,
+          그리고 그게 왜 이후 모든 패턴(MVVM·상태관리)의 토대가 되는지를 다룹니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">난이도 ★☆☆</span>
+          <span class="chip">선행: 01 사전지식</span>
+          <span class="chip">키워드 reactivity</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 WHY -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / WHY</span>
+          <h2>명령형 vs 선언형</h2>
+          <p class="sec-sub">반응형이 없던 시절엔, 데이터가 바뀔 때마다 화면을 <b>사람이 직접</b> 다시 그려야 했습니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>명령형 — 직접 갱신 (옛 jQuery 식)</h3>
+            <pre class="code"><span class="k">let</span> count = 0
+button.onclick = () => {
+  count++
+  <span class="c">// 데이터를 바꾼 뒤,</span>
+  <span class="c">// DOM 도 손으로 다시 써야 한다</span>
+  label.textContent = count
+}</pre>
+            <p>데이터와 화면을 <b>두 번</b> 관리. 갱신을 빠뜨리면 화면이 데이터와 어긋난다. 화면이 복잡해질수록 동기화 코드가 폭발한다.</p>
+          </div>
+          <div class="pane good">
+            <h3>선언형 — 반응형 (Vue)</h3>
+            <pre class="code"><span class="k">const</span> count = ref(0)
+<span class="c">// 데이터만 바꾼다</span>
+button.onclick = () => count.value++
+
+<span class="c">// 템플릿은 count 에 "묶여" 있어</span>
+<span class="c">// 값이 바뀌면 화면이 알아서 갱신</span>
+&lt;span&gt;{{ count }}&lt;/span&gt;</pre>
+            <p><b>데이터 하나만</b> 관리하면 된다. "어떻게 갱신할지"가 아니라 "무엇을 보여줄지"만 선언한다. 동기화는 프레임워크의 몫.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 PRIMITIVES -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / PRIMITIVES</span>
+          <h2>반응형 4총사</h2>
+          <p class="sec-sub">Vue Composition API 의 반응형은 네 가지 도구로 거의 다 표현됩니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ref()</h3>
+            <p>단일 값을 반응형으로. 값 접근·변경은 <code class="inl">.value</code> 로. 숫자·문자열·객체 무엇이든.</p>
+            <span class="when">언제: 하나의 상태 조각</span>
+          </div>
+          <div class="card">
+            <h3>reactive()</h3>
+            <p>객체 전체를 반응형으로. <code class="inl">.value</code> 없이 속성 접근. 중첩 객체까지 추적.</p>
+            <span class="when">언제: 묶음 상태 객체</span>
+          </div>
+          <div class="card">
+            <h3>computed()</h3>
+            <p>다른 반응형 값에서 <b>파생</b>되는 값. 의존 값이 바뀔 때만 다시 계산하고 캐싱한다.</p>
+            <span class="when">언제: 계산된 결과</span>
+          </div>
+          <div class="card">
+            <h3>watch()</h3>
+            <p>특정 반응형 값이 바뀌는 <b>순간</b> 부수효과 실행. API 호출·렌더링 트리거 등.</p>
+            <span class="when">언제: 변화에 반응한 동작</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          핵심 구분: <b>computed 는 "값"</b>이고 <b>watch 는 "동작"</b>이다. "다른 값에서 새 값을 만든다"면 computed,
+          "값이 바뀌면 무언가를 한다(네트워크·렌더링)"면 watch. 이 둘을 헷갈리면 불필요한 상태가 늘어난다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 IN RUNNABLE -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / IN RUNNABLE</span>
+          <h2>이 프로젝트에서의 반응형</h2>
+          <p class="sec-sub">Runnable 의 store 는 Nuxt 의 <code class="inl">useState</code> 위에 선 반응형 상태입니다 — ref 의 SSR 안전 버전.</p>
+        </div>
+
+        <pre class="code"><span class="c">// entities/route/model/useRouteInfoStore.ts</span>
+<span class="k">const</span> routeInfos = useState(<span class="s">'routeInfo.data'</span>, () => [])   <span class="c">// 반응형 상태</span>
+<span class="k">const</span> isLoading  = useState(<span class="s">'routeInfo.isLoading'</span>, () => false)
+
+<span class="c">// features/route-info/api/useRouteInfoSideeffect.ts</span>
+watch(                                  <span class="c">// 상태가 바뀌는 순간</span>
+  [() => store.routeInfos.value, () => store.draftRouteInfos.value],
+  () => renderRouteInfoMarkers(),        <span class="c">// 지도 마커를 다시 그린다</span>
+  { deep: true }
+)</pre>
+
+        <p class="body" style="margin-top:1.4rem;">
+          여기서 흐름은: <b>서버 응답 → store 갱신 → watch 감지 → 지도 재렌더</b>. 컴포넌트는 store 값을 그냥 읽기만 하고,
+          값이 바뀌면 화면(과 지도)이 알아서 따라옵니다. 이 "알아서"가 반응형이고, 다음 챕터의 MVVM 은 이 토대 위에 세워집니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 MENTAL MODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / MENTAL MODEL</span>
+          <h2>의존성 추적 그래프로 상상하라</h2>
+        </div>
+        <div class="callout">
+          <p class="q">한 문장 멘탈 모델</p>
+          <p>
+            반응형이란 <b>"이 화면 조각이 어떤 데이터에 의존하는지" 를 프레임워크가 자동으로 기록</b>해 두었다가,
+            그 데이터가 바뀌면 <b>의존하던 조각만 콕 집어</b> 다시 실행하는 시스템이다. 너는 그래프를 그릴 필요가 없다 —
+            값을 읽는 순간 그래프가 자동으로 그려진다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 챕터가 <b>학습 완료</b>로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">'명령형 DOM 갱신'의 가장 큰 문제로 이 챕터가 지목한 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 코드가 너무 짧아진다</li>
+              <li><b>b)</b> 데이터와 화면을 이중으로 관리해야 해, 갱신을 빠뜨리면 어긋난다</li>
+              <li><b>c)</b> 브라우저가 ref 를 지원하지 않는다</li>
+              <li><b>d)</b> 서버에서만 동작한다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">"다른 반응형 값에서 새 값을 파생시키고, 결과를 캐싱"하는 데 알맞은 도구는?</p>
+            <ul class="opts">
+              <li><b>a)</b> watch()</li>
+              <li><b>b)</b> ref()</li>
+              <li><b>c)</b> computed()</li>
+              <li><b>d)</b> reactive()</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">"값이 바뀌는 순간 서버 호출이나 지도 재렌더 같은 부수효과를 실행"하는 도구는?</p>
+            <ul class="opts">
+              <li><b>a)</b> watch()</li>
+              <li><b>b)</b> computed()</li>
+              <li><b>c)</b> ref().value</li>
+              <li><b>d)</b> useState()</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">Runnable 에서 <code class="inl">store.routeInfos</code> 가 바뀌었을 때 지도 마커가 다시 그려지는 이유는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 컴포넌트가 1초마다 폴링하기 때문</li>
+              <li><b>b)</b> sideeffect 의 watch 가 상태 변경을 감지해 renderRouteInfoMarkers 를 호출하기 때문</li>
+              <li><b>c)</b> 사용자가 새로고침하기 때문</li>
+              <li><b>d)</b> 서버가 화면을 직접 그리기 때문</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@fe-01-reactivity 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
+        </p>
+
+        <div class="pager">
+          <a href="HOME.html">← 홈</a>
+          <a href="fe-02-mvvm.html">다음: 02 MVVM →</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Runnable Frontend Lecture · 01 / 04 — 반응형. 다음 챕터에서 이 토대 위에 <code>MVVM</code> 을 세웁니다.
+      </div>
+    </footer>
+  </body>
+</html>

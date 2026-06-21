@@ -106,6 +106,18 @@
       footer a { color: var(--a2); }
 
       @media (max-width: 600px) { .shift { grid-template-columns: 1fr; } .claim { grid-template-columns: 1fr; gap: 0.4rem; } }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
     </style>
   </head>
   <body>
@@ -275,6 +287,60 @@
           <a class="dm" href="06-limits.html"><span class="dm-n">06</span><span class="dm-t"><b>한계와 미래</b> — 이 꿈이 웹 전체 규모로는 왜 아직 불가능한가.</span></a>
           <a class="dm" href="07-log.html"><span class="dm-n">07</span><span class="dm-t"><b>학습 로그</b> — 네가 실제로 통과한 gate와 만든 것을 기록하는 곳.</span></a>
         </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">이 비전 문서의 4개 명제와 역할 전환을 제대로 짚었는지 4문항으로 확인합니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">이 문서가 말하는 '개인화 웹'에서 메인 페이지는 무엇인가?</p>
+            <ul class="opts">
+              <li><b>a)</b> 한 회사가 정해준 화면을 그대로 소비하는 것</li>
+              <li><b>b)</b> 내가 필요한 기능을 골라 꽂고 안 쓰는 건 빼서 조립한 결과</li>
+              <li><b>c)</b> 검색 엔진이 자동 생성해 주는 화면</li>
+              <li><b>d)</b> 디자이너만 수정할 수 있는 고정 레이아웃</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">이 비전이 "되려는 사람"으로 지목한, 드물고 희소한 역할은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 주어진 프레임워크 안에서 기능만 구현하는 소비자 개발자</li>
+              <li><b>b)</b> 호스트가 정해준 규칙을 빠르게 따르는 개발자</li>
+              <li><b>c)</b> 슬롯·계약·권한 등 규칙 자체를 설계하는 '판을 만드는 개발자'</li>
+              <li><b>d)</b> 플러그인을 가장 많이 설치해 본 사용자</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">개인화 웹의 모든 조립을 떠받치는 핵심(4번째 명제)은 무엇인가?</p>
+            <ul class="opts">
+              <li><b>a)</b> 더 빠른 인터넷 회선</li>
+              <li><b>b)</b> 슬롯·계약·생명주기·권한을 정의하는 '판(host)'</li>
+              <li><b>c)</b> 더 많은 광고 수익</li>
+              <li><b>d)</b> 단일 회사의 통합 디자인 시스템</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">Runnable의 <code style="font-family:var(--mono)">plugins-ext</code> 가 이 비전의 훈련장으로 적합한 이유는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 큰 미래를 한 번에 완성된 형태로 이미 구현해 두었기 때문</li>
+              <li><b>b)</b> 추상적 개념을 지금 손으로 만질 수 있는 최소 형태로 갖고 있어, 한 칸씩 만들며 근육을 기를 수 있기 때문</li>
+              <li><b>c)</b> 서드파티 격리·권한·원격까지 모두 완성돼 있기 때문</li>
+              <li><b>d)</b> 플러그인을 쓰는 법만 가르치기 때문</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@00-vision 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+        </p>
       </div>
     </section>
 

@@ -81,6 +81,18 @@
 
       footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
       footer code { font-family: var(--mono); color: var(--text-dim); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
     </style>
   </head>
   <body>
@@ -232,6 +244,60 @@
             <div class="term" style="--accent: var(--d)"><div class="tn">샌드박스 / 권한</div><p>신뢰 못 할 코드를 격리(iframe·Worker)하고 능력만 허가. ②③의 상위 개념.</p></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec" style="--accent: var(--a)">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 문서를 <b>학습 완료</b>로 기록합니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">묶음 A에서, 브라우저가 JS 실행·렌더를 처리하는 단일 흐름에서 무거운 일을 하면 생기는 일은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 메모리가 자동으로 비워진다</li>
+              <li><b>b)</b> 화면이 멈춘다(버벅임)</li>
+              <li><b>c)</b> 네트워크 속도가 빨라진다</li>
+              <li><b>d)</b> 청크가 자동으로 쪼개진다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">묶음 B에서 "④ 설치"의 기술적 정체로 지목된, 호출하는 순간에만 모듈을 로드하는 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 최상단 정적 <code>import</code></li>
+              <li><b>b)</b> 모듈 캐시</li>
+              <li><b>c)</b> 동적 <code>import()</code></li>
+              <li><b>d)</b> 번들러 / Vite</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">묶음 C에서, 로더 함수를 받아 렌더 시점에 컴포넌트를 로드하는 ④의 핵심 도구는?</p>
+            <ul class="opts">
+              <li><b>a)</b> <code>computed</code></li>
+              <li><b>b)</b> <code>defineAsyncComponent</code></li>
+              <li><b>c)</b> 컴포저블 <code>use*</code></li>
+              <li><b>d)</b> <code>ref</code></li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">묶음 F(FSD)에서, 레이어 간 의존 방향의 핵심 규칙으로 옳은 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 아래 레이어가 위 레이어를 자유롭게 import 한다</li>
+              <li><b>b)</b> 모든 레이어가 서로 교차 의존한다</li>
+              <li><b>c)</b> 위가 아래만 의존하는 단방향이며, 역방향·교차 의존은 금지</li>
+              <li><b>d)</b> 의존 방향에는 규칙이 없다</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@01-prerequisites 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+        </p>
       </div>
     </section>
 

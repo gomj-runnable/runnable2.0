@@ -120,6 +120,18 @@
       footer { border-top: 1px solid var(--line); padding: 2.5rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
       footer code { font-family: var(--mono); color: var(--text-dim); }
       footer a { color: var(--l2); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
     </style>
   </head>
   <body>
@@ -293,6 +305,60 @@
             <span class="tag">L0 · 준비</span>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>이 문서를 제대로 쓰고 있는가</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 문서의 <b>사용법을 이해한 것</b>으로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">이 <code style="font-family:var(--mono)">07-log.html</code> 문서의 성격을 가장 잘 설명한 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> ①~⑥처럼 지식을 읽기만 하는 강의 문서</li>
+              <li><b>b)</b> 통과한 gate·만든 것·막힌 지점을 날짜와 함께 직접 채워 가는 살아있는 문서</li>
+              <li><b>c)</b> 자동으로 진척이 갱신되는 대시보드</li>
+              <li><b>d)</b> 한 번 읽고 버리는 안내문</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">gate나 프로젝트를 "통과/완성"으로 체크하려면 어떻게 해야 하는가?</p>
+            <ul class="opts">
+              <li><b>a)</b> 서버에 요청을 보낸다</li>
+              <li><b>b)</b> 해당 <code style="font-family:var(--mono)">box</code> 의 클래스를 <code style="font-family:var(--mono)">class="box done"</code> 로 직접 바꾼다</li>
+              <li><b>c)</b> 다음 날까지 기다린다</li>
+              <li><b>d)</b> 진척 막대를 마우스로 끌어 채운다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">날짜별 기록(JOURNAL)에 새 기록을 추가하는 올바른 방법은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 점선 템플릿 카드를 복사해 맨 위에 새 날짜로 추가한다</li>
+              <li><b>b)</b> 기존 기록을 지우고 덮어쓴다</li>
+              <li><b>c)</b> 맨 아래(가장 오래된 쪽)에 붙인다</li>
+              <li><b>d)</b> 별도 파일을 새로 만든다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">이 문서가 추적하는 두 성장 트랙은 무엇인가?</p>
+            <ul class="opts">
+              <li><b>a)</b> 디자인 트랙과 마케팅 트랙</li>
+              <li><b>b)</b> 프론트엔드 L1~L4 와 서버 S1~S4 두 트랙</li>
+              <li><b>c)</b> 초급과 고급 단 두 단계</li>
+              <li><b>d)</b> 읽기 트랙과 쓰기 트랙</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@07-log 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+        </p>
       </div>
     </section>
 

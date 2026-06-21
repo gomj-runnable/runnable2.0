@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable · FE강의 03 · 상태(store) vs 부수효과(sideeffect)</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 230);
+        --bg-grid: oklch(21% 0.024 230);
+        --surface: oklch(22% 0.03 235);
+        --surface-2: oklch(26% 0.035 235);
+        --line: oklch(37% 0.04 235);
+        --text: oklch(95% 0.01 230);
+        --text-dim: oklch(73% 0.02 235);
+        --text-faint: oklch(58% 0.02 235);
+
+        --lec: oklch(80% 0.14 195);
+        --lec-2: oklch(78% 0.15 215);
+        --accent: var(--lec);
+
+        --radius: 16px;
+        --radius-sm: 9px;
+        --maxw: 1000px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 88% -6%, oklch(28% 0.07 215 / 0.5), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--bg);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .topbar { padding-top: 1.1rem; }
+      .back {
+        display: inline-flex; align-items: center; gap: .45rem;
+        font-family: var(--mono); font-size: .78rem; letter-spacing: .04em;
+        text-decoration: none; color: var(--text-dim);
+        border: 1px solid var(--line); border-radius: 999px;
+        padding: .45rem .95rem; background: var(--surface);
+      }
+
+      header.hero {
+        padding: clamp(3rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--lec); margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.3rem, 1.2rem + 5vw, 4.2rem);
+        line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800;
+      }
+      h1 em { font-style: normal; color: var(--lec); }
+      .lede { max-width: 60ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.22rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+      .chip {
+        font-family: var(--mono); font-size: 0.78rem; padding: 0.4rem 0.8rem;
+        border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface);
+      }
+
+      section { padding: var(--space-section) 0; border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent); }
+      section:last-of-type { border-bottom: none; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.55rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+      p.body { color: var(--text-dim); max-width: 68ch; }
+      p.body b { color: var(--text); }
+      code.inl { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 0.1rem 0.42rem; border-radius: 5px; color: var(--text); }
+
+      /* code block */
+      .code {
+        font-family: var(--mono); font-size: 0.84rem; line-height: 1.7;
+        background: oklch(13% 0.02 235); border: 1px solid var(--line);
+        border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+        padding: 1.1rem 1.3rem; overflow-x: auto; color: var(--text-dim); margin: 0;
+      }
+      .code .c { color: var(--text-faint); font-style: italic; }
+      .code .k { color: var(--lec); }
+      .code .s { color: oklch(80% 0.13 130); }
+
+      /* two-col compare */
+      .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; }
+      .pane { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; }
+      .pane.bad { border-left: 4px solid oklch(70% 0.16 25); }
+      .pane.good { border-left: 4px solid oklch(76% 0.15 150); }
+      .pane h3 { font-family: var(--mono); font-size: 0.95rem; margin: 0 0 0.8rem; }
+      .pane.bad h3 { color: oklch(76% 0.16 25); }
+      .pane.good h3 { color: oklch(80% 0.15 150); }
+      .pane p { color: var(--text-dim); font-size: 0.9rem; margin: 0.8rem 0 0; }
+
+      /* primitive cards */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
+      .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; position: relative; overflow: hidden; transition: transform var(--ease) 0.3s, border-color var(--ease) 0.3s; }
+      .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 { font-family: var(--mono); font-size: 1rem; margin: 0 0 0.3rem; color: var(--accent); }
+      .card p { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+      .card .when { display: block; margin-top: 0.7rem; font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); }
+
+      /* callout */
+      .callout { border: 1px solid var(--line); border-left: 4px solid var(--lec-2); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--lec-2) 10%, var(--surface)), var(--surface) 60%); padding: clamp(1.3rem, 3vw, 1.9rem); }
+      .callout .q { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lec-2); margin: 0 0 0.7rem; }
+      .callout p { margin: 0; color: var(--text); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem); }
+      .callout p b { color: var(--lec); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
+
+      footer { padding: 2.4rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      a { color: var(--lec-2); }
+      .pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      .pager a { font-family: var(--mono); font-size: 0.82rem; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 1rem; background: var(--surface); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap topbar"><a class="back" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable · Frontend Lecture · 03</p>
+        <h1>상태와 부수효과를 <em>가르다</em><br />— store vs sideeffect</h1>
+        <p class="lede">
+          같은 도메인을 다룬다고 한 곳에 몰아넣으면 안 됩니다. <b>'무엇인지'와 '그걸로 무엇을 하는지'는 서로 다른 책임</b>입니다.
+          경로정보가 <b>무엇인지</b>를 담는 자리(store)와, 그 상태를 들고 서버·지도와 <b>무엇을 하는지</b>를 담는 자리(sideeffect)를
+          왜·어떻게 가르는지 — 이 챕터에서 Runnable 의 실제 코드로 짚습니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">난이도 ★★☆</span>
+          <span class="chip">선행: 02 MVVM</span>
+          <span class="chip">키워드 store · sideeffect</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 TWO ROLES -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / TWO ROLES</span>
+          <h2>두 개의 역할, 두 개의 자리</h2>
+          <p class="sec-sub">하나의 도메인(경로정보)이라도 책임이 다르면 파일을 가릅니다. 왼쪽은 상태, 오른쪽은 그 상태로 바깥세계와 부딪히는 동작.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane good">
+            <h3>store — entities/*/model</h3>
+            <p>
+              <b>순수 상태 컨테이너</b>입니다. Nuxt 의 <code class="inl">useState</code> 위에 선 반응형 상태와,
+              그 값을 <b>동기적으로 바꾸는 함수</b>만 가집니다. Cesium 도 네트워크도 모릅니다 —
+              "지금 경로정보가 무엇인지"만 안다. 앱 전역에서 단 하나의 출처(single source of truth) = MVVM 의 <b>ViewModel state</b>.
+            </p>
+          </div>
+          <div class="pane bad">
+            <h3>sideeffect — features/*/api</h3>
+            <p>
+              store 를 <b>들고 바깥세계와 부딪히는</b> 자리입니다. <code class="inl">$fetch</code> 로 서버와 통신하고,
+              Cesium 마커를 렌더링하고, 지도 클릭 핸들러를 등록하고, store 를 <code class="inl">watch</code> 합니다.
+              순수한 service 가 아니라 <b>application service + view 어댑터의 합성물</b> — 그래서 store 와 한 칸에 둘 수 없습니다.
+            </p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          핵심은 <b>방향</b>입니다. store 는 안쪽(상태)만 보고, sideeffect 는 store 를 들고 바깥(서버·지도·이벤트)을 향합니다.
+          상태가 부수효과를 알면 안 되지만, 부수효과는 상태를 알아야 한다 — 의존은 <b>한 방향</b>으로만 흐릅니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 MVVM MAP -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / MVVM MAP</span>
+          <h2>MVVM 위에 다시 얹어보기</h2>
+          <p class="sec-sub">02장의 MVVM 4계층이 Runnable 디렉터리에 어떻게 내려앉는지, 그리고 왜 굳이 가르는지.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>MVVM ↔ Runnable</h3>
+            <p>
+              <b>Model</b> = <code class="inl">shared/types · schemas · server</code><br />
+              <b>ViewModel state</b> = <code class="inl">entities/*/model</code> store<br />
+              <b>부수효과·Presenter</b> = <code class="inl">features/*/api</code> sideeffect<br />
+              <b>View</b> = <code class="inl">*.vue</code>
+            </p>
+            <span class="when">매핑: 계층 → 디렉터리</span>
+          </div>
+          <div class="card">
+            <h3>왜 나누나</h3>
+            <p>
+              <b>테스트</b>: store 는 순수 단위테스트, sideeffect 는 $fetch·Cesium 모킹.
+              <b>생명주기</b>: store 는 전역, sideeffect 는 viewer 종속 자원.
+              <b>재사용</b>: UI 는 상태만 구독하면 된다.
+            </p>
+            <span class="when">이유: 테스트·생명주기·재사용</span>
+          </div>
+          <div class="card">
+            <h3>진짜 service 는 따로</h3>
+            <p>
+              여기서 sideeffect 의 "service"는 클라이언트 측 어댑터입니다.
+              비즈니스 로직의 진짜 service 는 <b>서버에</b> 있습니다 —
+              <code class="inl">server/services/route.service.ts</code>.
+            </p>
+            <span class="when">위치: 서버 도메인 로직</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          그래서 sideeffect 를 "service"라 부르되 오해는 금물입니다. 클라이언트 sideeffect 는 <b>상태를 바깥세계에 잇는 다리</b>이고,
+          도메인 규칙을 책임지는 서버 service 와는 역할이 다릅니다. 둘을 같은 단어로 부른다고 같은 일을 하는 게 아닙니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 IN RUNNABLE -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / IN RUNNABLE</span>
+          <h2>route-info 한 쌍을 펼쳐보기</h2>
+          <p class="sec-sub">경로정보(route-info) 기능은 store 한 파일, sideeffect 한 파일로 정확히 갈라져 있습니다.</p>
+        </div>
+
+        <pre class="code"><span class="c">// entities/route/model/useRouteInfoStore.ts  — 상태만</span>
+<span class="k">const</span> routeInfos        = useState(<span class="s">'routeInfo.data'</span>, () => [])       <span class="c">// 서버 저장본</span>
+<span class="k">const</span> draftRouteInfos   = useState(<span class="s">'routeInfo.draftData'</span>, () => [])  <span class="c">// 미저장 초안</span>
+<span class="k">const</span> isAddingRouteInfo = useState(<span class="s">'routeInfo.isAdding'</span>, () => false)  <span class="c">// 추가 모드</span>
+
+<span class="k">const</span> toggleAddingMode  = () => { isAddingRouteInfo.value = !isAddingRouteInfo.value }
+<span class="k">const</span> addDraftRouteInfo = (item) => { draftRouteInfos.value = [...draftRouteInfos.value, item] }
+<span class="k">const</span> clearRouteInfos   = () => { <span class="c">/* 모든 상태 초기화 */</span> }
+<span class="c">// → Cesium·$fetch 단어는 단 한 번도 등장하지 않는다</span></pre>
+
+        <pre class="code" style="margin-top:1rem;"><span class="c">// features/route-info/api/useRouteInfoSideeffect.ts  — 동작</span>
+<span class="k">const</span> store = useRouteInfoStore()                          <span class="c">// 상태를 들고 온다</span>
+
+<span class="k">const</span> fetchRouteInfos     = async (id) => $fetch(<span class="s">`/api/routes/${id}/feedbacks`</span>)
+<span class="k">const</span> submitRouteInfo     = async (id, input) => $fetch(...)   <span class="c">// 서버 통신</span>
+<span class="k">const</span> saveLocalRouteInfos = async (id) => { <span class="c">/* 초안 일괄 저장 */</span> }
+<span class="k">const</span> renderRouteInfoMarkers = () => { <span class="c">/* Cesium 마커 그리기 */</span> }
+
+watch(                                                       <span class="c">// 상태가 바뀌면</span>
+  [() => store.routeInfos.value, () => store.draftRouteInfos.value],
+  () => renderRouteInfoMarkers(),                            <span class="c">// 마커 재렌더</span>
+  { deep: true }
+)</pre>
+
+        <p class="body" style="margin-top:1.4rem;">
+          흐름을 따라가 보면: <b>$fetch 서버 응답 → store.routeInfos 갱신 → watch 감지 → renderRouteInfoMarkers 호출</b>.
+          store 는 자기가 바뀌었다는 사실만 알릴 뿐, 지도를 그릴 줄은 모릅니다. 그 "그리기"는 전부 sideeffect 쪽에 모여 있습니다 —
+          이게 가른 보람입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 MENTAL MODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / MENTAL MODEL</span>
+          <h2>한 문장으로 가르는 기준</h2>
+        </div>
+        <div class="callout">
+          <p class="q">한 문장 멘탈 모델</p>
+          <p>
+            <b>store 는 경로정보가 "무엇인지"를</b> 담당하고,
+            <b>sideeffect 는 그걸로 지도·서버와 "무엇을 하는지"를</b> 담당한다.
+            새 코드를 어디 둘지 고민될 때는 이 한 문장만 물어보면 된다 — "이건 상태인가, 상태로 하는 일인가?"
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 챕터가 <b>학습 완료</b>로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q"><code class="inl">entities/*/model</code> 의 store 가 책임지는 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> Cesium 마커 렌더링과 서버 $fetch</li>
+              <li><b>b)</b> useState 기반 순수 상태와 동기적 상태 변경 함수</li>
+              <li><b>c)</b> 지도 클릭 핸들러 등록</li>
+              <li><b>d)</b> 데이터베이스 마이그레이션</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q"><code class="inl">$fetch</code> 서버 통신, Cesium 마커 렌더링, store watch 가 함께 모이는 자리는?</p>
+            <ul class="opts">
+              <li><b>a)</b> entities/*/model 의 store</li>
+              <li><b>b)</b> shared/types 의 타입 정의</li>
+              <li><b>c)</b> features/*/api 의 sideeffect</li>
+              <li><b>d)</b> *.vue 의 View</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">MVVM 의 'ViewModel state' 와 'View' 는 Runnable 에서 각각 어디에 해당하는가?</p>
+            <ul class="opts">
+              <li><b>a)</b> ViewModel state = server, View = schemas</li>
+              <li><b>b)</b> ViewModel state = entities/*/model store, View = *.vue</li>
+              <li><b>c)</b> ViewModel state = *.vue, View = features/*/api</li>
+              <li><b>d)</b> 둘 다 features/*/api 안에 있다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q"><code class="inl">store.routeInfos</code> 가 바뀌었을 때 지도 마커가 다시 그려지는 경로는?</p>
+            <ul class="opts">
+              <li><b>a)</b> store 가 직접 renderRouteInfoMarkers 를 호출한다</li>
+              <li><b>b)</b> 서버 service 가 화면을 직접 그린다</li>
+              <li><b>c)</b> sideeffect 의 watch 가 변경을 감지해 renderRouteInfoMarkers 를 호출한다</li>
+              <li><b>d)</b> *.vue 컴포넌트가 1초마다 폴링한다</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@fe-03-state-sideeffect 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
+        </p>
+
+        <div class="pager">
+          <a href="fe-02-mvvm.html">← 02 MVVM</a>
+          <a href="fe-04-vue-vs-react.html">다음: 04 Vue vs React →</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Runnable Frontend Lecture · 03 / 04 — 상태와 부수효과. 다음 챕터에서 <code>Vue vs React</code> 로 이 분리 감각을 비교합니다.
+      </div>
+    </footer>
+  </body>
+</html>

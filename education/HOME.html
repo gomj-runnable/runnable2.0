@@ -88,6 +88,21 @@
 
       footer { border-top: 1px solid var(--line); padding: 2.2rem 0 4rem; color: var(--text-faint); font-size: 0.84rem; }
       footer code { font-family: var(--mono); color: var(--text-dim); }
+
+      /* lecture track tag */
+      .doc .lectag { position: absolute; top: 1.2rem; right: 1.3rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c0); border: 1px solid color-mix(in oklch, var(--c0) 45%, var(--line)); border-radius: 999px; padding: 0.2rem 0.55rem; background: color-mix(in oklch, var(--c0) 10%, transparent); }
+
+      /* progress board */
+      .progress { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.6rem; padding-bottom: 1rem; }
+      .prog-item { display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; border: 1px solid var(--line); border-radius: 10px; padding: 0.65rem 0.9rem; background: var(--surface); }
+      .prog-item .pname { font-family: var(--mono); font-size: 0.82rem; color: var(--text-dim); }
+      .prog-item .pstat { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; padding: 0.22rem 0.55rem; border-radius: 999px; border: 1px solid var(--line); color: var(--text-faint); white-space: nowrap; }
+      .prog-item.done { border-color: color-mix(in oklch, var(--c3) 45%, var(--line)); background: color-mix(in oklch, var(--c3) 7%, var(--surface)); }
+      .prog-item.done .pname { color: var(--text); }
+      .prog-item.done .pstat { color: var(--c3); border-color: color-mix(in oklch, var(--c3) 50%, var(--line)); background: color-mix(in oklch, var(--c3) 14%, transparent); }
+      .prog-note { font-family: var(--mono); font-size: 0.78rem; color: var(--text-faint); margin: 0.4rem 0 3rem; }
+      .prog-note code { color: var(--text-dim); }
+      .prog-group { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); margin: 1.4rem 0 0.7rem; }
     </style>
   </head>
   <body>
@@ -226,6 +241,74 @@
         <span class="ar">·</span>
         <span class="p">실무(GIS 서버)를 ④ 프론트 사다리와 병행하는 서버판 S1~S4</span>
       </div>
+
+      <p class="section-label">FRONTEND LECTURE — Vue · 프론트엔드 전반</p>
+      <div class="thesis" style="border-left-color: var(--c0); background: linear-gradient(120deg, color-mix(in oklch, var(--c0) 10%, var(--surface)), var(--surface) 60%); margin-bottom: 1.1rem;">
+        <p class="q" style="color: var(--c0);">별도 학습 탭</p>
+        <p class="body">
+          플러그인 트랙과 독립된 <b>프론트엔드 기초 강의</b>. 반응형부터 MVVM·상태관리·프레임워크 선택까지,
+          Runnable 코드를 예시로 한 흐름으로 묶습니다. 각 챕터 끝 퀴즈를 풀어 아래 진도표를 채워가세요.
+        </p>
+      </div>
+      <div class="docs">
+        <a class="doc" href="fe-01-reactivity.html" style="--accent: var(--c0)">
+          <span class="lectag">강의</span>
+          <span class="num">01</span>
+          <h3>반응형</h3>
+          <div class="sub">Reactivity</div>
+          <p>화면은 왜 알아서 바뀌나. ref·reactive·computed·watch 와 의존성 추적. 모든 패턴의 토대.</p>
+          <span class="go">읽기 →</span>
+        </a>
+        <a class="doc" href="fe-02-mvvm.html" style="--accent: var(--c4)">
+          <span class="lectag">강의</span>
+          <span class="num">02</span>
+          <h3>MVVM 패턴</h3>
+          <div class="sub">Model · View · ViewModel</div>
+          <p>화면과 상태를 잇는 방법. MVC와의 차이는 '바인딩'. ViewModel = 화면이 바로 쓸 상태+함수.</p>
+          <span class="go">읽기 →</span>
+        </a>
+        <a class="doc" href="fe-03-state-sideeffect.html" style="--accent: var(--c2)">
+          <span class="lectag">강의</span>
+          <span class="num">03</span>
+          <h3>상태 vs 부수효과</h3>
+          <div class="sub">store · sideeffect</div>
+          <p>store는 '무엇인지', sideeffect는 '그걸로 무엇을 하는지'. Runnable의 책임 분리를 MVVM으로.</p>
+          <span class="go">읽기 →</span>
+        </a>
+        <a class="doc" href="fe-04-vue-vs-react.html" style="--accent: var(--c5)">
+          <span class="lectag">강의</span>
+          <span class="num">04</span>
+          <h3>Vue vs React</h3>
+          <div class="sub">양방향 vs 단방향</div>
+          <p>같은 웹, 다른 선택. 반응형 양방향 바인딩이면 MVVM, React는 일부러 단방향.</p>
+          <span class="go">읽기 →</span>
+        </a>
+      </div>
+
+      <p class="section-label">PROGRESS — 학습 완료 현황</p>
+      <p class="prog-group">플러그인 트랙</p>
+      <div class="progress">
+        <div class="prog-item" data-page="00-vision"><span class="pname">00 비전</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="01-prerequisites"><span class="pname">01 사전지식</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="02-architecture"><span class="pname">02 구조</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="03-evolution"><span class="pname">03 진화</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="04-roadmap"><span class="pname">04 로드맵</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="05-on-demand"><span class="pname">05 온디맨드</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="06-limits"><span class="pname">06 한계</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="07-log"><span class="pname">07 로그</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="08-server-platform"><span class="pname">08 GIS 서버</span><span class="pstat">미완료</span></div>
+      </div>
+      <p class="prog-group">프론트엔드 강의</p>
+      <div class="progress">
+        <div class="prog-item" data-page="fe-01-reactivity"><span class="pname">FE01 반응형</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-02-mvvm"><span class="pname">FE02 MVVM</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-03-state-sideeffect"><span class="pname">FE03 상태·부수효과</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-04-vue-vs-react"><span class="pname">FE04 Vue vs React</span><span class="pstat">미완료</span></div>
+      </div>
+      <p class="prog-note">
+        풀이 제출 — 각 페이지 하단 퀴즈를 풀고 채팅에 <code>@{페이지} 답: 1-?, 2-?, 3-?, 4-?</code> 형식으로 보내면 채점합니다.
+        만점 시 해당 항목이 <code>완료 ✓</code> 로 바뀝니다.
+      </p>
     </div>
 
     <footer>

@@ -147,6 +147,18 @@
         .trend { grid-template-columns: 1fr; gap: 0.3rem; }
         .gen-era { margin-left: 0; }
       }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--g2, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--g2, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--g2, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
     </style>
   </head>
   <body>
@@ -444,6 +456,61 @@
             </li>
           </ul>
         </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 챕터가 <b>학습 완료</b>로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">이 챕터가 정리한 4세대 진화에서, 결합 시점이 빌드타임에서 가장 멀어진 GEN 4(원격·분산 로딩)의 특징은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 플러그인을 소스에 같이 번들해 빌드 시 정적 등록한다</li>
+              <li><b>b)</b> 별도 저장소·CDN에서 독립 배포·버전 관리하고, 마켓플레이스·서명·semver 계약이 필수가 된다</li>
+              <li><b>c)</b> 항상 같은 스레드에서 실행하며 격리가 전혀 없다</li>
+              <li><b>d)</b> 호스트가 if 분기로 직접 끼워 넣는다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">'신뢰 모델' 축에서 진화는 어느 방향으로 이동한다고 설명했나?</p>
+            <ul class="opts">
+              <li><b>a)</b> 능력 단위 허가 → 전체 신뢰</li>
+              <li><b>b)</b> 전체 신뢰 → 능력(capability) 단위 최소 권한 허가</li>
+              <li><b>c)</b> 런타임 → 빌드타임</li>
+              <li><b>d)</b> 마켓 서명 → 코어와 함께 배포</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">Figma 사례가 '신뢰 없는 코드 실행'을 위해 택한 핵심 구조는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 모든 플러그인을 메인 UI 스레드에서 직접 실행한다</li>
+              <li><b>b)</b> 메인 스레드 샌드박스(QuickJS 계열)에서 코드를 돌리고 UI는 iframe으로 분리한다</li>
+              <li><b>c)</b> 원격 코드 실행을 전면 허용하고 권한을 두지 않는다</li>
+              <li><b>d)</b> 빌드타임 정적 registry 배열로만 등록한다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">이 페이지가 평가한 Runnable <code class="inl">app/plugins-ext/</code> 의 현재 위치는?</p>
+            <ul class="opts">
+              <li><b>a)</b> Gen 4 — 원격·분산 로딩 + 마켓플레이스 완성</li>
+              <li><b>b)</b> Gen 3 — 샌드박스 격리 + 권한 모델 적용</li>
+              <li><b>c)</b> Gen 1.5 — 빌드타임 정적 registry에 런타임 슬롯/앵커 주입을 얹은 형태</li>
+              <li><b>d)</b> 아직 플러그인 시스템이 없음</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@03-evolution 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
+        </p>
       </div>
     </section>
 

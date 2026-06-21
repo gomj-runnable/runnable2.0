@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable · FE강의 04 · Vue vs React</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 230);
+        --bg-grid: oklch(21% 0.024 230);
+        --surface: oklch(22% 0.03 235);
+        --surface-2: oklch(26% 0.035 235);
+        --line: oklch(37% 0.04 235);
+        --text: oklch(95% 0.01 230);
+        --text-dim: oklch(73% 0.02 235);
+        --text-faint: oklch(58% 0.02 235);
+
+        --lec: oklch(80% 0.14 195);
+        --lec-2: oklch(78% 0.15 215);
+        --accent: var(--lec);
+
+        --radius: 16px;
+        --radius-sm: 9px;
+        --maxw: 1000px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 88% -6%, oklch(28% 0.07 215 / 0.5), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--bg);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .topbar { padding-top: 1.1rem; }
+      .back {
+        display: inline-flex; align-items: center; gap: .45rem;
+        font-family: var(--mono); font-size: .78rem; letter-spacing: .04em;
+        text-decoration: none; color: var(--text-dim);
+        border: 1px solid var(--line); border-radius: 999px;
+        padding: .45rem .95rem; background: var(--surface);
+      }
+
+      header.hero {
+        padding: clamp(3rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--lec); margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.3rem, 1.2rem + 5vw, 4.2rem);
+        line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800;
+      }
+      h1 em { font-style: normal; color: var(--lec); }
+      .lede { max-width: 60ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.22rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+      .chip {
+        font-family: var(--mono); font-size: 0.78rem; padding: 0.4rem 0.8rem;
+        border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface);
+      }
+
+      section { padding: var(--space-section) 0; border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent); }
+      section:last-of-type { border-bottom: none; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.55rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+      p.body { color: var(--text-dim); max-width: 68ch; }
+      p.body b { color: var(--text); }
+      code.inl { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 0.1rem 0.42rem; border-radius: 5px; color: var(--text); }
+
+      /* code block */
+      .code {
+        font-family: var(--mono); font-size: 0.84rem; line-height: 1.7;
+        background: oklch(13% 0.02 235); border: 1px solid var(--line);
+        border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+        padding: 1.1rem 1.3rem; overflow-x: auto; color: var(--text-dim); margin: 0;
+      }
+      .code .c { color: var(--text-faint); font-style: italic; }
+      .code .k { color: var(--lec); }
+      .code .s { color: oklch(80% 0.13 130); }
+
+      /* two-col compare */
+      .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; }
+      .pane { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; }
+      .pane.bad { border-left: 4px solid oklch(70% 0.16 25); }
+      .pane.good { border-left: 4px solid oklch(76% 0.15 150); }
+      .pane h3 { font-family: var(--mono); font-size: 0.95rem; margin: 0 0 0.8rem; }
+      .pane.bad h3 { color: oklch(76% 0.16 25); }
+      .pane.good h3 { color: oklch(80% 0.15 150); }
+      .pane p { color: var(--text-dim); font-size: 0.9rem; margin: 0.8rem 0 0; }
+
+      /* primitive cards */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
+      .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; position: relative; overflow: hidden; transition: transform var(--ease) 0.3s, border-color var(--ease) 0.3s; }
+      .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 { font-family: var(--mono); font-size: 1rem; margin: 0 0 0.3rem; color: var(--accent); }
+      .card p { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+      .card .when { display: block; margin-top: 0.7rem; font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); }
+
+      /* callout */
+      .callout { border: 1px solid var(--line); border-left: 4px solid var(--lec-2); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--lec-2) 10%, var(--surface)), var(--surface) 60%); padding: clamp(1.3rem, 3vw, 1.9rem); }
+      .callout .q { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lec-2); margin: 0 0 0.7rem; }
+      .callout p { margin: 0; color: var(--text); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem); }
+      .callout p b { color: var(--lec); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
+
+      footer { padding: 2.4rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      a { color: var(--lec-2); }
+      .pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      .pager a { font-family: var(--mono); font-size: 0.82rem; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 1rem; background: var(--surface); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap topbar"><a class="back" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable · Frontend Lecture · 04</p>
+        <h1>같은 웹, <em>다른</em> 선택<br />— Vue vs React</h1>
+        <p class="lede">
+          Vue 도 React 도 똑같이 브라우저에서 도는 웹 프레임워크입니다. 그런데 한쪽은 흔히 <b>MVVM</b> 이라 불리고,
+          한쪽은 아닙니다. 둘을 가르는 건 플랫폼이 아니라 단 하나의 선택입니다 —
+          <b>"반응형 양방향 바인딩을 채택했느냐."</b> 이 챕터는 그 갈림길을 따라가며, 왜 같은 웹인데 한쪽만 MVVM 인지를 풉니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">난이도 ★★☆</span>
+          <span class="chip">선행: 02 MVVM</span>
+          <span class="chip">키워드 binding</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 BINDING -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / BINDING</span>
+          <h2>MVVM 의 본질은 '반응형 바인딩'</h2>
+          <p class="sec-sub">MVVM 을 가르는 핵심은 화면 종류가 아니라, <b>상태와 화면이 자동으로 묶여(bind) 서로를 따라오느냐</b> 입니다.</p>
+        </div>
+
+        <p class="body">
+          MVVM 에서 ViewModel 은 화면이 보여줄 상태를 들고 있고, <b>바인딩</b>이 그 상태와 View 를 자동으로 동기화합니다.
+          Vue 는 바로 이 바인딩 메커니즘을 언어 차원에서 제공합니다 — <code class="inl">ref·reactive·computed·watch</code> 가
+          곧 ViewModel 이자 바인딩입니다. 그래서 Vue 는 전형적인 MVVM 으로 분류됩니다.
+        </p>
+
+        <pre class="code"><span class="c">// Vue — ViewModel 이 곧 반응형 상태, 바인딩은 자동</span>
+<span class="k">const</span> count = ref(0)            <span class="c">// ViewModel 의 상태</span>
+<span class="k">const</span> doubled = computed(() => count.value * 2)
+
+<span class="c">// 템플릿(View)은 상태에 "묶여" 있다 — 양방향</span>
+&lt;input v-model="count" /&gt;       <span class="c">// 입력 → 상태 자동 반영</span>
+&lt;span&gt;{{ doubled }}&lt;/span&gt;          <span class="c">// 상태 → 화면 자동 반영</span></pre>
+
+        <p class="body" style="margin-top:1.4rem;">
+          Vue 창시자 <b>Evan You</b> 도 초기에 MVVM 의 영향을 직접 언급했고, 한동안 반응형 인스턴스를
+          <code class="inl">vm</code>(ViewModel) 이라는 변수명으로 부르던 시절도 있었습니다. Vue 의 뿌리에 MVVM 이 박혀 있다는 증거죠.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 REACT IS DIFFERENT -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / REACT IS DIFFERENT</span>
+          <h2>React 는 일부러 바인딩을 버렸다</h2>
+          <p class="sec-sub">React 는 양방향 바인딩을 <b>의도적으로 포기</b>하고, 데이터가 한 방향으로만 흐르는 구조를 택했습니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane good">
+            <h3>Vue — 양방향 reactive</h3>
+            <pre class="code"><span class="k">const</span> name = ref(<span class="s">''</span>)
+
+<span class="c">// v-model 이 양방향을 자동 연결</span>
+&lt;input v-model="name" /&gt;
+<span class="c">// 입력하면 name.value 가 알아서 바뀐다</span></pre>
+            <p>상태와 입력이 <b>서로</b> 묶인다. 동기화는 프레임워크가 책임 → MVVM 의 ViewModel 바인딩 그 자체.</p>
+          </div>
+          <div class="pane bad">
+            <h3>React — 단방향 setState</h3>
+            <pre class="code"><span class="k">const</span> [name, setName] = useState(<span class="s">''</span>)
+
+<span class="c">// props down: 상태 → 화면</span>
+&lt;input value={name}
+  <span class="c">// events up: 이벤트 → 직접 setState</span>
+  onChange={e => setName(e.target.value)} /&gt;</pre>
+            <p>상태는 위에서 아래로(<b>props down</b>), 변경 요청은 이벤트로 위로(<b>events up</b>). 동기화를 <b>네가</b> 명시한다.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          이게 React 의 <b>단방향 데이터 흐름</b>(Flux 사상)입니다. 양방향 바인딩의 "마법"을 포기한 대가로,
+          데이터가 어디서 어떻게 바뀌는지를 명시적으로 추적할 수 있게 됩니다. 그래서 React 는 보통 MVVM 이 아니라
+          <b>단방향 아키텍처</b>로 분류됩니다 — 같은 웹이어도 선택이 다른 것입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 SAME FAMILY -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / SAME FAMILY</span>
+          <h2>MVVM 은 하나의 가문이다</h2>
+          <p class="sec-sub">반응형 바인딩을 채택한 프레임워크들은, 플랫폼이 달라도 같은 조상을 공유합니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>WPF</h3>
+            <p>데스크톱의 원조 MVVM(2005). <code class="inl">{Binding}</code> 으로 View ↔ ViewModel 양방향 바인딩.</p>
+            <span class="when">분류: MVVM (원조)</span>
+          </div>
+          <div class="card">
+            <h3>SwiftUI</h3>
+            <p>iOS 선언형 UI. <code class="inl">@State</code>/<code class="inl">@Binding</code> 이 곧 반응형 바인딩.</p>
+            <span class="when">분류: MVVM</span>
+          </div>
+          <div class="card">
+            <h3>Jetpack Compose</h3>
+            <p>안드로이드 선언형 UI. <code class="inl">mutableStateOf</code> 가 반응형 상태.</p>
+            <span class="when">분류: MVVM</span>
+          </div>
+          <div class="card">
+            <h3>Vue</h3>
+            <p>웹 반응형의 대표. <code class="inl">ref</code>/<code class="inl">v-model</code> 로 양방향 바인딩.</p>
+            <span class="when">분류: MVVM</span>
+          </div>
+          <div class="card">
+            <h3>React</h3>
+            <p>양방향 바인딩 대신 <code class="inl">setState</code> + 단방향 흐름. 같은 가문이 아니다.</p>
+            <span class="when">분류: 단방향 (MVVM 아님)</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          오해하기 쉬운 점 — SwiftUI·Compose 가 MVVM 인 건 "모바일이라서"가 아닙니다. <b>Vue·SwiftUI·Compose·WPF 가
+          모두 반응형 바인딩이라는 MVVM 공통 조상을 공유</b>하기 때문입니다. 플랫폼(웹·iOS·안드로이드·데스크톱)은 제각각이지만,
+          상태↔화면을 자동으로 묶는다는 <b>설계 철학</b>이 같으면 같은 가문입니다. React 만 그 철학에서 의도적으로 빠져나온 것이죠.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 WHY CARE -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / WHY CARE</span>
+          <h2>이름표보다 중요한 질문</h2>
+          <p class="sec-sub">"이건 MVVM 이야?" 보다 중요한 건, <b>상태→화면 동기화를 누가 책임지는가</b> 입니다.</p>
+        </div>
+
+        <p class="body">
+          패턴 이름표(MVVM·Flux·MVC)는 결국 같은 질문에 대한 서로 다른 답일 뿐입니다 —
+          <b>"데이터가 바뀌면 화면을 누가, 어떻게 따라오게 하는가."</b> Vue 처럼 바인딩이 자동으로 책임지면 코드는 짧아지지만
+          흐름이 암묵적이고, React 처럼 네가 직접 명시하면 코드는 늘지만 흐름이 투명합니다. 둘 다 옳은 선택이고, 트레이드오프가 다를 뿐입니다.
+        </p>
+
+        <p class="body" style="margin-top:1.4rem;">
+          Runnable 은 <b>Vue</b> 로 만들어졌습니다. 그래서 이 프로젝트에서는 <b>바인딩(반응형)이 동기화를 책임</b>집니다 —
+          store 값이 바뀌면 화면과 지도가 알아서 따라옵니다(01·02 챕터에서 본 그대로). 우리가 React 였다면, 그 따라옴을
+          매번 손으로 명시해야 했을 겁니다. 어떤 프레임워크를 쓰느냐가 곧 "동기화의 책임을 누구에게 맡길 것인가"의 선택입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 05 MENTAL MODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / MENTAL MODEL</span>
+          <h2>한 문장으로 정리</h2>
+        </div>
+        <div class="callout">
+          <p class="q">한 문장 멘탈 모델</p>
+          <p>
+            Vue 가 MVVM 인 이유는 웹이라서가 아니라 <b>반응형 양방향 바인딩을 채택</b>했기 때문이고,
+            React 가 MVVM 이 아닌 이유도 웹이라서가 아니라 <b>그 바인딩을 일부러 버리고 단방향 흐름을 택</b>했기 때문이다 —
+            패턴은 플랫폼이 아니라 <b>설계 선택</b>이 결정한다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 챕터가 <b>학습 완료</b>로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">이 챕터에 따르면, Vue 와 React 를 'MVVM 이냐 아니냐'로 가르는 진짜 기준은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 웹이냐 모바일이냐</li>
+              <li><b>b)</b> 반응형 양방향 바인딩을 채택했느냐</li>
+              <li><b>c)</b> 컴포넌트 파일 확장자가 무엇이냐</li>
+              <li><b>d)</b> 회사가 어디서 만들었느냐</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">React 가 MVVM 으로 분류되지 않는 이유로 이 챕터가 든 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 반응형 기능이 아예 없어서</li>
+              <li><b>b)</b> 양방향 바인딩을 일부러 버리고 단방향 데이터 흐름을 택해서</li>
+              <li><b>c)</b> 브라우저에서 동작하지 않아서</li>
+              <li><b>d)</b> 상태를 전혀 쓰지 않아서</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">WPF · SwiftUI · Jetpack Compose · Vue 가 '같은 MVVM 가문'으로 묶이는 이유는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 모두 모바일 플랫폼을 닮아서</li>
+              <li><b>b)</b> 모두 같은 회사 제품이라서</li>
+              <li><b>c)</b> 모두 반응형 바인딩이라는 MVVM 공통 조상을 공유해서</li>
+              <li><b>d)</b> 모두 JavaScript 로 작성되어서</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">Runnable 은 Vue 로 만들어졌습니다. 그렇다면 이 프로젝트에서 '상태→화면 동기화'를 책임지는 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 개발자가 매번 손으로 명시하는 setState</li>
+              <li><b>b)</b> 바인딩(반응형) — store 가 바뀌면 화면·지도가 알아서 따라온다</li>
+              <li><b>c)</b> 서버가 화면을 직접 그린다</li>
+              <li><b>d)</b> 1초마다 폴링하는 타이머</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@fe-04-vue-vs-react 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
+        </p>
+
+        <div class="pager">
+          <a href="fe-03-state-sideeffect.html">← 03 상태 vs 부수효과</a>
+          <a href="HOME.html">강의 끝 · 홈으로 →</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Runnable Frontend Lecture · 04 / 04 — Vue vs React. MVVM 이냐 아니냐는 플랫폼이 아니라 <code>바인딩 선택</code> 이 가릅니다.
+      </div>
+    </footer>
+  </body>
+</html>
