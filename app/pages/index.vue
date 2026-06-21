@@ -6,7 +6,7 @@
  * 자식 panel 은 `provide`한 컨텍스트로 facade·flow·auth 에 접근한다.
  */
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import MapShell from '~/widgets/map-shell/ui/MapShell.vue'
+import MapCanvas from '~/widgets/map-shell/ui/MapCanvas.vue'
 import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
 import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
 import MapOverlays from '~/widgets/map-shell/ui/MapOverlays.vue'
@@ -222,74 +222,78 @@ watch(
 </script>
 
 <template>
-    <div class="index-page">
-        <MapShell>
-            <template #sidebar>
-                <MapSidebar
-                    :active-nav="slideOver.lastActive.value"
-                    :is-logged-in="authStore.isLoggedIn.value"
-                    :user-role="authStore.user.value?.role"
-                    @select="handleNavSelect"
-                />
-            </template>
-            <template #default><div id="map" class="map-view" /></template>
-            <template #footer><MapFooter :label="features.camera.footerLabel.value" /></template>
-            <template #overlay>
-                <MapOverlays
-                    v-bind="{
-                        slideOverOpen: slideOver.isOpen.value,
-                        elevation,
-                        facility,
-                        facilityEffect,
-                        viewerReady: !!viewer,
-                        showRouteInfoChip,
-                        overlayContext,
-                        elevationChart,
-                        closing,
-                        drawing,
-                        activeNav,
-                        gradient,
-                        routeInfoEffect,
-                        routeInfoStore,
-                        showRouteInfoGuide
-                    }"
-                    @toggle-elevation-chart="elevationChart.setOpen(!elevationChart.open)"
-                    @route-info-submit="handleRouteInfoSubmit"
-                    @close-route-info-guide="showRouteInfoGuide = false"
-                >
-                    <template #drawing-help-modal>
-                        <UModal
-                            v-model:open="showDrawingHelpModal"
-                            title="경로 그리기 안내"
-                            :ui="{ footer: 'justify-end' }"
-                        >
-                            <template #body>
-                                <div class="flex flex-col gap-3 text-sm">
-                                    <p>
-                                        <UIcon
-                                            name="i-lucide-hand"
-                                            class="size-5 text-(--ui-primary)"
-                                        />
-                                        <strong>지도를 탭</strong>하여 경로 구간을 추가하세요.
-                                    </p>
-                                    <p>
-                                        <UIcon
-                                            name="i-lucide-check-circle"
-                                            class="size-5 text-(--ui-primary)"
-                                        />
-                                        구간 2개 이상 추가 후 <strong>"경로 완성"</strong> 버튼을
-                                        누르세요.
-                                    </p>
-                                </div>
-                            </template>
-                            <template #footer
-                                ><UButton label="확인" @click="showDrawingHelpModal = false"
-                            /></template>
-                        </UModal>
-                    </template>
-                </MapOverlays>
-            </template>
-        </MapShell>
+    <div class="index-page flex flex-col h-screen">
+        <!-- 앱 헤더: 로고 + 전역 지도 컨트롤 + nav (MapSidebar 의 UHeader 가 <header> 를 렌더) -->
+        <MapSidebar
+            :active-nav="slideOver.lastActive.value"
+            :is-logged-in="authStore.isLoggedIn.value"
+            :user-role="authStore.user.value?.role"
+            @select="handleNavSelect"
+        />
+
+        <!-- main: 지도 캔버스 + 그 위에 떠 있는 HUD -->
+        <main class="relative flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            <MapCanvas>
+                <template #footer
+                    ><MapFooter :label="features.camera.footerLabel.value"
+                /></template>
+                <template #overlay>
+                    <MapOverlays
+                        v-bind="{
+                            slideOverOpen: slideOver.isOpen.value,
+                            elevation,
+                            facility,
+                            facilityEffect,
+                            viewerReady: !!viewer,
+                            showRouteInfoChip,
+                            overlayContext,
+                            elevationChart,
+                            closing,
+                            drawing,
+                            activeNav,
+                            gradient,
+                            routeInfoEffect,
+                            routeInfoStore,
+                            showRouteInfoGuide
+                        }"
+                        @toggle-elevation-chart="elevationChart.setOpen(!elevationChart.open)"
+                        @route-info-submit="handleRouteInfoSubmit"
+                        @close-route-info-guide="showRouteInfoGuide = false"
+                    >
+                        <template #drawing-help-modal>
+                            <UModal
+                                v-model:open="showDrawingHelpModal"
+                                title="경로 그리기 안내"
+                                :ui="{ footer: 'justify-end' }"
+                            >
+                                <template #body>
+                                    <div class="flex flex-col gap-3 text-sm">
+                                        <p>
+                                            <UIcon
+                                                name="i-lucide-hand"
+                                                class="size-5 text-(--ui-primary)"
+                                            />
+                                            <strong>지도를 탭</strong>하여 경로 구간을 추가하세요.
+                                        </p>
+                                        <p>
+                                            <UIcon
+                                                name="i-lucide-check-circle"
+                                                class="size-5 text-(--ui-primary)"
+                                            />
+                                            구간 2개 이상 추가 후
+                                            <strong>"경로 완성"</strong> 버튼을 누르세요.
+                                        </p>
+                                    </div>
+                                </template>
+                                <template #footer
+                                    ><UButton label="확인" @click="showDrawingHelpModal = false"
+                                /></template>
+                            </UModal>
+                        </template>
+                    </MapOverlays>
+                </template>
+            </MapCanvas>
+        </main>
 
         <USlideover
             :open="slideOver.isOpen.value"
@@ -389,12 +393,6 @@ watch(
 </template>
 
 <style>
-.slideover-from-rail[data-state='open'] {
-    animation: rail-slide-in 200ms ease-out;
-}
-.slideover-from-rail[data-state='closed'] {
-    animation: rail-slide-out 150ms ease-in;
-}
 @keyframes rail-slide-in {
     from {
         opacity: 0;
