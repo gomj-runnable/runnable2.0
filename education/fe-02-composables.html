@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable · FE강의 02 · 컴포저블(use*)</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 300);
+        --bg-grid: oklch(21% 0.024 300);
+        --surface: oklch(22% 0.03 305);
+        --surface-2: oklch(26% 0.035 305);
+        --line: oklch(37% 0.04 305);
+        --text: oklch(95% 0.01 300);
+        --text-dim: oklch(73% 0.02 305);
+        --text-faint: oklch(58% 0.02 305);
+
+        --lec: oklch(76% 0.16 300);
+        --lec-2: oklch(74% 0.17 320);
+        --accent: var(--lec);
+
+        --radius: 16px;
+        --radius-sm: 9px;
+        --maxw: 1000px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 88% -6%, oklch(28% 0.07 320 / 0.5), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--bg);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .topbar { padding-top: 1.1rem; }
+      .back {
+        display: inline-flex; align-items: center; gap: .45rem;
+        font-family: var(--mono); font-size: .78rem; letter-spacing: .04em;
+        text-decoration: none; color: var(--text-dim);
+        border: 1px solid var(--line); border-radius: 999px;
+        padding: .45rem .95rem; background: var(--surface);
+      }
+
+      header.hero {
+        padding: clamp(3rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--lec); margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.3rem, 1.2rem + 5vw, 4.2rem);
+        line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800;
+      }
+      h1 em { font-style: normal; color: var(--lec); }
+      .lede { max-width: 60ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.22rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+      .chip {
+        font-family: var(--mono); font-size: 0.78rem; padding: 0.4rem 0.8rem;
+        border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface);
+      }
+
+      section { padding: var(--space-section) 0; border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent); }
+      section:last-of-type { border-bottom: none; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.55rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+      p.body { color: var(--text-dim); max-width: 68ch; }
+      p.body b { color: var(--text); }
+      code.inl { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 0.1rem 0.42rem; border-radius: 5px; color: var(--text); }
+
+      /* code block */
+      .code {
+        font-family: var(--mono); font-size: 0.84rem; line-height: 1.7;
+        background: oklch(13% 0.02 305); border: 1px solid var(--line);
+        border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+        padding: 1.1rem 1.3rem; overflow-x: auto; color: var(--text-dim); margin: 0;
+      }
+      .code .c { color: var(--text-faint); font-style: italic; }
+      .code .k { color: var(--lec); }
+      .code .s { color: oklch(80% 0.13 130); }
+
+      /* two-col compare */
+      .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; }
+      .pane { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; }
+      .pane.bad { border-left: 4px solid oklch(70% 0.16 25); }
+      .pane.good { border-left: 4px solid oklch(76% 0.15 150); }
+      .pane h3 { font-family: var(--mono); font-size: 0.95rem; margin: 0 0 0.8rem; }
+      .pane.bad h3 { color: oklch(76% 0.16 25); }
+      .pane.good h3 { color: oklch(80% 0.15 150); }
+      .pane p { color: var(--text-dim); font-size: 0.9rem; margin: 0.8rem 0 0; }
+      .pane pre { margin: 0; }
+
+      /* primitive cards */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
+      .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; position: relative; overflow: hidden; transition: transform var(--ease) 0.3s, border-color var(--ease) 0.3s; }
+      .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 { font-family: var(--mono); font-size: 1rem; margin: 0 0 0.3rem; color: var(--accent); }
+      .card p { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+      .card .when { display: block; margin-top: 0.7rem; font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); }
+
+      /* callout */
+      .callout { border: 1px solid var(--line); border-left: 4px solid var(--lec-2); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--lec-2) 10%, var(--surface)), var(--surface) 60%); padding: clamp(1.3rem, 3vw, 1.9rem); }
+      .callout .q { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lec-2); margin: 0 0 0.7rem; }
+      .callout p { margin: 0; color: var(--text); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem); }
+      .callout p b { color: var(--lec); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a3140), var(--surface, #232a38)); border-top: 1px solid var(--line, #3a4356); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4356); border-radius: var(--radius-sm, 9px); background: var(--surface, #232a38); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #4cc9d6); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f5f8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3bccb); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #4cc9d6); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3bccb); border: 1px dashed var(--line, #3a4356); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #4cc9d6) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f5f8); }
+
+      footer { padding: 2.4rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      a { color: var(--lec-2); }
+      .pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      .pager a { font-family: var(--mono); font-size: 0.82rem; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 1rem; background: var(--surface); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap topbar"><a class="back" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable · Frontend Lecture · 02</p>
+        <h1>반응형을 <em>한 상자에</em> 묶다<br />— 컴포저블과 use*</h1>
+        <p class="lede">
+          앞 챕터의 <code class="inl">ref·computed·watch</code> 는 낱개 부품입니다. 그 부품들을 모아
+          <b>"상태 + 그 상태를 다루는 함수"를 한 함수에 담아 재사용</b>하는 단위가 <b>컴포저블</b>입니다.
+          이름 앞의 <code class="inl">use</code> 는 단순한 관례가 아니라, Vue·Nuxt 가 부여한 <b>세 겹의 약속</b>입니다 —
+          이 챕터에서 그 정체를 풉니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">난이도 ★★☆</span>
+          <span class="chip">선행: 01 반응형</span>
+          <span class="chip">키워드 composable · use*</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 WHAT -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / WHAT</span>
+          <h2>컴포저블 = 상태를 가진 함수</h2>
+          <p class="sec-sub">보통 함수는 값을 받아 값을 돌려주고 끝납니다. 컴포저블은 자기만의 반응형 상태를 들고, 그 상태가 바뀌면 화면이 따라 갱신됩니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>그냥 함수 — 기억이 없다</h3>
+            <pre class="code"><span class="k">function</span> add(a, b) {
+  <span class="k">return</span> a + b   <span class="c">// 호출하면 끝, 상태 없음</span>
+}</pre>
+            <p>입력 → 출력. 화면과도, 생명주기와도 무관합니다.</p>
+          </div>
+          <div class="pane good">
+            <h3>컴포저블 — 살아있는 상태</h3>
+            <pre class="code"><span class="k">function</span> useCounter() {
+  <span class="k">const</span> count  = ref(0)              <span class="c">// 반응형 상태</span>
+  <span class="k">const</span> double = computed(() => count.value * 2)
+  <span class="k">const</span> increment = () => { count.value++ }  <span class="c">// 바꾸면 화면 자동 갱신</span>
+  <span class="k">return</span> { count, double, increment }
+}</pre>
+            <p>상태·파생값·동작을 한 상자에 담아 어디서든 <code class="inl">const { count } = useCounter()</code> 한 줄로 재사용.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          진짜 가치는 <b>로직 재사용</b>입니다. "마우스 추적", "경로 초안 관리" 같은 로직을 컴포저블 하나에 캡슐화하면 —
+          상태 선언, 이벤트 등록, 그리고 <b>컴포넌트가 사라질 때의 정리(<code class="inl">onUnmounted</code>)</b>까지 한 곳에 담겨
+          여러 컴포넌트가 레고 블록처럼 끼워 씁니다. React 를 안다면 <b>커스텀 훅과 사실상 같은 개념</b>입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 USE PREFIX -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / THREE MEANINGS</span>
+          <h2><code class="inl" style="font-size:0.85em">use</code> 가 포개고 있는 세 겹</h2>
+          <p class="sec-sub"><code class="inl">use*</code> 는 그냥 이름 규칙이 아닙니다. Vue 의 관례 위에 Nuxt 가 두 겹의 약속을 더 얹은 신호입니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>① Vue 의 관례</h3>
+            <p>
+              안에서 <code class="inl">ref·computed·watch·onMounted</code> 같은 <b>반응성·생명주기 도구를 쓰는 함수</b>라는 표식.
+              단순 유틸과 시각적으로 구분하려는 합의된 접두사입니다.
+            </p>
+            <span class="when">의미: "이건 컴포저블이다"</span>
+          </div>
+          <div class="card">
+            <h3>② Nuxt auto-import</h3>
+            <p>
+              <code class="inl">app/composables/</code> 안에 <code class="inl">use*</code> 로 시작하는 함수를 두면
+              <b>import 없이 전역에서</b> 쓸 수 있게 Nuxt 가 자동 등록합니다.
+            </p>
+            <span class="when">특권: import 한 줄도 생략</span>
+          </div>
+          <div class="card">
+            <h3>③ setup 컨텍스트 제약</h3>
+            <p>
+              <code class="inl">useRoute·useRuntimeConfig·useState</code> 등은 <b>setup·plugin·middleware 안에서 동기적으로</b>
+              호출해야 합니다. <code class="inl">await</code> 뒤나 콜백 안에서 부르면 인스턴스 컨텍스트를 잃습니다.
+            </p>
+            <span class="when">제약: 호출 타이밍이 정해져 있다</span>
+          </div>
+        </div>
+
+        <pre class="code" style="margin-top:1.4rem;"><span class="c">// ❌ await 뒤 → 컨텍스트 유실, 경고 발생</span>
+<span class="k">const</span> data   = <span class="k">await</span> fetch(...)
+<span class="k">const</span> config = useRuntimeConfig()
+
+<span class="c">// ✅ setup 최상단에서 동기적으로</span>
+<span class="k">const</span> config = useRuntimeConfig()
+<span class="k">const</span> data   = <span class="k">await</span> fetch(...)</pre>
+      </div>
+    </section>
+
+    <!-- 03 SSR -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / SSR SAFETY</span>
+          <h2>useState 는 "안 섞이게" 막는 장치다</h2>
+          <p class="sec-sub">흔한 오해 하나를 먼저 깹니다 — <code class="inl">useState</code> 는 사용자별로 <b>다르게 보여주는</b> 기능이 아니라, 사용자끼리 <b>안 섞이게</b> 막는 SSR 안전장치입니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>모듈 스코프 ref — 사고</h3>
+            <pre class="code"><span class="c">// 서버 1대가 요청 100개를 처리</span>
+<span class="k">const</span> draft = ref([])   <span class="c">// 모듈 전역</span>
+<span class="c">// → 모든 요청이 같은 메모리 공유</span>
+<span class="c">// → A 가 만든 경로가 B 화면에 보임</span></pre>
+            <p>요청 간 상태 오염(cross-request leak). SSR 에서 가장 흔한 함정.</p>
+          </div>
+          <div class="pane good">
+            <h3>useState — 안전</h3>
+            <pre class="code"><span class="c">// 요청마다 격리된 상태 박스를 발급</span>
+<span class="k">const</span> draft = useState(<span class="s">'route.draft'</span>, () => [])
+<span class="c">// → A 의 상태와 B 의 상태가 안 섞임</span>
+<span class="c">// → 서버→클라 직렬화·하이드레이션</span></pre>
+            <p>요청별 격리 + 서버에서 만든 상태를 클라이언트로 이어줌.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          그럼 "사용자별로 다른 데이터"는 누가 하나요? — 그건 별개의 레이어입니다.
+          <b>인증/세션</b>이 누구인지 식별하고, <b>DB 조회</b>(보통 <code class="inl">useAsyncData</code> 안의 fetch)가 그 사용자의 데이터를 가져옵니다.
+          <code class="inl">useState</code> 는 그렇게 가져온 값을 <b>요청 안에서 안전하게 담아두는 그릇</b>일 뿐입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 IN RUNNABLE -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / IN RUNNABLE</span>
+          <h2>우리 코드의 use* 는 전부 컴포저블</h2>
+          <p class="sec-sub">Runnable 은 <code class="inl">use*</code> 를 책임별로 갈라 씁니다. 이름만 봐도 그게 상태인지, 동작인지, 부수효과인지 읽힙니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>useXxxStore</h3>
+            <p><code class="inl">useState</code> + computed + 동기적 mutation. 앱 전역에서 공유하는 <b>순수 상태</b> 컨테이너.</p>
+            <span class="when">예: useRouteInfoStore</span>
+          </div>
+          <div class="card">
+            <h3>useXxxAction</h3>
+            <p>사용자 인터랙션의 <b>진입점</b>. 클릭·제출 같은 행위를 받아 store 와 sideeffect 를 엮습니다.</p>
+            <span class="when">예: useRouteDrawAction</span>
+          </div>
+          <div class="card">
+            <h3>useXxxSideeffect</h3>
+            <p>store 를 들고 <b>바깥세계와 부딪히는</b> 자리. Cesium 렌더·$fetch·watch 등 생명주기 자원.</p>
+            <span class="when">예: useRouteInfoSideeffect</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.4rem;">
+          즉 이 코드베이스에서 <code class="inl">use</code> 는 "<b>auto-import 되는, setup 컨텍스트에 묶인, 책임이 분리된 반응형 로직 단위</b>"라는
+          합의된 신호입니다. 다음 챕터(MVVM)에서 이 store 가 어떻게 이미 <b>ViewModel</b> 인지로 이어집니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- MENTAL MODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">MENTAL MODEL</span>
+          <h2>한 문장으로</h2>
+        </div>
+        <div class="callout">
+          <p class="q">한 문장 멘탈 모델</p>
+          <p>
+            <b>컴포저블</b>은 반응형 상태와 로직을 한 상자에 담아 재사용하는 함수이고,
+            <b>use*</b> 는 그 위에 ① Vue 의 컴포저블 관례 + ② Nuxt 의 auto-import + ③ setup 컨텍스트 제약이
+            포개진 신호다. <code class="inl">useState</code> 의 격리는 개인화가 아니라 <b>요청끼리 안 섞이게</b> 막는 안전장치다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 챕터가 <b>학습 완료</b>로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q">일반 함수와 구분되는 <b>컴포저블</b>의 핵심은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 매개변수를 받아 값을 반환하고 바로 끝난다</li>
+              <li><b>b)</b> ref 등 반응형 상태를 갖고, 그 변화가 화면에 자동 반영된다</li>
+              <li><b>c)</b> 항상 import 를 명시해야만 쓸 수 있다</li>
+              <li><b>d)</b> 오직 서버에서만 실행된다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q"><code class="inl">app/composables/</code> 의 <code class="inl">use*</code> 함수가 Nuxt 에서 누리는 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 자동으로 결과가 캐싱된다</li>
+              <li><b>b)</b> import 없이 어디서나 호출 가능(auto-import)</li>
+              <li><b>c)</b> 서버에서만 동작한다</li>
+              <li><b>d)</b> 반드시 .vue 파일 안에서만 정의해야 한다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q"><code class="inl">useState(key, init)</code> 가 SSR 에서 보장하는 것은?</p>
+            <ul class="opts">
+              <li><b>a)</b> 로그인 사용자별로 다른 개인화 데이터를 자동 생성</li>
+              <li><b>b)</b> 모든 요청이 같은 전역 메모리를 공유</li>
+              <li><b>c)</b> 요청마다 격리된 상태 + 서버→클라 하이드레이션</li>
+              <li><b>d)</b> 데이터베이스를 자동으로 연결</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q"><code class="inl">useRoute·useRuntimeConfig</code> 같은 Nuxt 컴포저블을 호출해야 하는 위치는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 어디서든, 콜백 안이나 await 뒤도 무방</li>
+              <li><b>b)</b> setup·plugin·middleware 안에서 동기적으로</li>
+              <li><b>c)</b> 오직 서버 API 핸들러 안에서만</li>
+              <li><b>d)</b> 전역 모듈 스코프에서만</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@fe-02-composables 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
+        </p>
+
+        <div class="pager">
+          <a href="fe-01-reactivity.html">← 01 반응형</a>
+          <a href="fe-03-mvvm.html">다음: 03 MVVM →</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Runnable Frontend Lecture · 02 / 05 — 컴포저블과 use*. 다음 챕터에서 이 컴포저블 store 가 어떻게 <code>MVVM</code> 의 ViewModel 인지로 이어집니다.
+      </div>
+    </footer>
+  </body>
+</html>

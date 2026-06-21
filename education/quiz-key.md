@@ -42,9 +42,10 @@
 | page                      | 1   | 2   | 3   | 4   |
 | ------------------------- | --- | --- | --- | --- |
 | `@fe-01-reactivity`       | b   | c   | a   | b   |
-| `@fe-02-mvvm`             | c   | b   | a   | b   |
-| `@fe-03-state-sideeffect` | b   | c   | b   | c   |
-| `@fe-04-vue-vs-react`     | b   | b   | c   | b   |
+| `@fe-02-composables`      | b   | b   | c   | b   |
+| `@fe-03-mvvm`             | c   | b   | a   | b   |
+| `@fe-04-state-sideeffect` | b   | c   | b   | c   |
+| `@fe-05-vue-vs-react`     | b   | b   | c   | b   |
 
 ---
 
@@ -60,6 +61,7 @@
 - **07-log**: 1)채워 가는 문서 2)box에 done 클래스로 체크 3)템플릿 복사해 최신을 위로 4)프론트 L1~L4 + 서버 S1~S4 두 트랙
 - **08-server-platform**: 1)GIS 서버=두 번째 훈련장(확장 구조) 2)S2=코어 안 건드리고 확장 추가 3)SPI↔PluginManifest 다리 4)확장점 과설계 경계=YAGNI
 - **fe-01-reactivity**: 1)명령형=데이터·화면 이중관리 2)computed=파생+캐싱 3)watch=부수효과 4)sideeffect watch가 마커 재렌더
-- **fe-02-mvvm**: 1)ViewModel=주방(손질) 2)차이=바인딩(자동 갱신) 3)뿌리=2005 WPF 4)useRouteInfoStore=ViewModel 그 자체
-- **fe-03-state-sideeffect**: 1)store=순수 상태 2)$fetch·렌더·watch=sideeffect 3)ViewModel state=model store 4)store는 직접 안 그림(watch→render)
-- **fe-04-vue-vs-react**: 1)기준=반응형 양방향 바인딩 채택 여부 2)React=단방향(MVVM 아님) 3)반응형 바인딩 공통조상 가문 4)Vue라 바인딩이 동기화 책임
+- **fe-02-composables**: 1)컴포저블=반응형 상태를 가진 함수(상태 변화→화면 자동 반영) 2)Nuxt auto-import(import 없이 호출) 3)useState=요청별 격리+하이드레이션(개인화 아님) 4)setup·plugin·middleware 안 동기 호출
+- **fe-03-mvvm**: 1)ViewModel=주방(손질) 2)차이=바인딩(자동 갱신) 3)뿌리=2005 WPF 4)useRouteInfoStore=ViewModel 그 자체
+- **fe-04-state-sideeffect**: 1)store=순수 상태 2)$fetch·렌더·watch=sideeffect 3)ViewModel state=model store 4)store는 직접 안 그림(watch→render)
+- **fe-05-vue-vs-react**: 1)기준=반응형 양방향 바인딩 채택 여부 2)React=단방향(MVVM 아님) 3)반응형 바인딩 공통조상 가문 4)Vue라 바인딩이 동기화 책임

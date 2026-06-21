@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Runnable · FE강의 03 · 상태(store) vs 부수효과(sideeffect)</title>
+    <title>Runnable · FE강의 03 · MVVM</title>
     <style>
       :root {
         --bg: oklch(16% 0.02 230);
@@ -143,156 +143,176 @@
     <header class="hero">
       <div class="wrap">
         <p class="eyebrow">Runnable · Frontend Lecture · 03</p>
-        <h1>상태와 부수효과를 <em>가르다</em><br />— store vs sideeffect</h1>
+        <h1>화면과 상태를 <em>잇는</em> 방법<br />— MVVM</h1>
         <p class="lede">
-          같은 도메인을 다룬다고 한 곳에 몰아넣으면 안 됩니다. <b>'무엇인지'와 '그걸로 무엇을 하는지'는 서로 다른 책임</b>입니다.
-          경로정보가 <b>무엇인지</b>를 담는 자리(store)와, 그 상태를 들고 서버·지도와 <b>무엇을 하는지</b>를 담는 자리(sideeffect)를
-          왜·어떻게 가르는지 — 이 챕터에서 Runnable 의 실제 코드로 짚습니다.
+          앞 챕터에서 "데이터가 바뀌면 화면이 알아서 따라온다"는 반응형을 배웠습니다. 그렇다면 그 데이터를
+          <b>어디에 두고, 어떻게 정리해서, 누가 화면에 넘겨줄까요?</b> 오래된 답은 MVC였지만, 반응형 시대의 답은
+          <b>MVVM</b> 입니다. 이 챕터는 MVC를 넘어 왜 MVVM인지, 그리고 Runnable의 store가 어떻게 이미 ViewModel인지를 다룹니다.
         </p>
         <div class="meta-row">
           <span class="chip">난이도 ★★☆</span>
-          <span class="chip">선행: 02 MVVM</span>
-          <span class="chip">키워드 store · sideeffect</span>
+          <span class="chip">선행: 02 컴포저블</span>
+          <span class="chip">키워드 mvvm</span>
         </div>
       </div>
     </header>
 
-    <!-- 01 TWO ROLES -->
+    <!-- 01 WHAT -->
     <section>
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">01 / TWO ROLES</span>
-          <h2>두 개의 역할, 두 개의 자리</h2>
-          <p class="sec-sub">하나의 도메인(경로정보)이라도 책임이 다르면 파일을 가릅니다. 왼쪽은 상태, 오른쪽은 그 상태로 바깥세계와 부딪히는 동작.</p>
-        </div>
-
-        <div class="compare">
-          <div class="pane good">
-            <h3>store — entities/*/model</h3>
-            <p>
-              <b>순수 상태 컨테이너</b>입니다. Nuxt 의 <code class="inl">useState</code> 위에 선 반응형 상태와,
-              그 값을 <b>동기적으로 바꾸는 함수</b>만 가집니다. Cesium 도 네트워크도 모릅니다 —
-              "지금 경로정보가 무엇인지"만 안다. 앱 전역에서 단 하나의 출처(single source of truth) = MVVM 의 <b>ViewModel state</b>.
-            </p>
-          </div>
-          <div class="pane bad">
-            <h3>sideeffect — features/*/api</h3>
-            <p>
-              store 를 <b>들고 바깥세계와 부딪히는</b> 자리입니다. <code class="inl">$fetch</code> 로 서버와 통신하고,
-              Cesium 마커를 렌더링하고, 지도 클릭 핸들러를 등록하고, store 를 <code class="inl">watch</code> 합니다.
-              순수한 service 가 아니라 <b>application service + view 어댑터의 합성물</b> — 그래서 store 와 한 칸에 둘 수 없습니다.
-            </p>
-          </div>
-        </div>
-
-        <p class="body" style="margin-top:1.6rem;">
-          핵심은 <b>방향</b>입니다. store 는 안쪽(상태)만 보고, sideeffect 는 store 를 들고 바깥(서버·지도·이벤트)을 향합니다.
-          상태가 부수효과를 알면 안 되지만, 부수효과는 상태를 알아야 한다 — 의존은 <b>한 방향</b>으로만 흐릅니다.
-        </p>
-      </div>
-    </section>
-
-    <!-- 02 MVVM MAP -->
-    <section>
-      <div class="wrap">
-        <div class="sec-head">
-          <span class="sec-num">02 / MVVM MAP</span>
-          <h2>MVVM 위에 다시 얹어보기</h2>
-          <p class="sec-sub">02장의 MVVM 4계층이 Runnable 디렉터리에 어떻게 내려앉는지, 그리고 왜 굳이 가르는지.</p>
+          <span class="sec-num">01 / WHAT</span>
+          <h2>MVVM 은 세 칸짜리 구조다</h2>
+          <p class="sec-sub">MVVM = <b>Model · View · ViewModel</b>. 식당으로 비유하면 한눈에 들어옵니다.</p>
         </div>
 
         <div class="grid">
           <div class="card">
-            <h3>MVVM ↔ Runnable</h3>
-            <p>
-              <b>Model</b> = <code class="inl">shared/types · schemas · server</code><br />
-              <b>ViewModel state</b> = <code class="inl">entities/*/model</code> store<br />
-              <b>부수효과·Presenter</b> = <code class="inl">features/*/api</code> sideeffect<br />
-              <b>View</b> = <code class="inl">*.vue</code>
-            </p>
-            <span class="when">매핑: 계층 → 디렉터리</span>
+            <h3>Model — 창고</h3>
+            <p>가공 안 된 <b>원재료</b>. 서버 응답, DB 행(row), 순수 데이터 그 자체. 화면이 어떻게 생겼는지는 전혀 모른다.</p>
+            <span class="when">예: 서버가 준 route JSON</span>
           </div>
           <div class="card">
-            <h3>왜 나누나</h3>
-            <p>
-              <b>테스트</b>: store 는 순수 단위테스트, sideeffect 는 $fetch·Cesium 모킹.
-              <b>생명주기</b>: store 는 전역, sideeffect 는 viewer 종속 자원.
-              <b>재사용</b>: UI 는 상태만 구독하면 된다.
-            </p>
-            <span class="when">이유: 테스트·생명주기·재사용</span>
+            <h3>ViewModel — 주방</h3>
+            <p>원재료를 <b>손질해서 바로 낼 수 있는 접시</b>로 준비. 화면이 그대로 쓰면 되는 상태와, 그 상태를 바꾸는 함수를 들고 있다.</p>
+            <span class="when">예: 정리된 routeInfos + 토글 함수</span>
           </div>
           <div class="card">
-            <h3>진짜 service 는 따로</h3>
-            <p>
-              여기서 sideeffect 의 "service"는 클라이언트 측 어댑터입니다.
-              비즈니스 로직의 진짜 service 는 <b>서버에</b> 있습니다 —
-              <code class="inl">server/services/route.service.ts</code>.
-            </p>
-            <span class="when">위치: 서버 도메인 로직</span>
+            <h3>View — 테이블</h3>
+            <p>주방이 차려준 접시를 <b>받아서 보여주기만</b> 한다. 요리하지 않는다. 화면(.vue)은 ViewModel 값을 읽어 그릴 뿐.</p>
+            <span class="when">예: routeInfos 를 그리는 .vue</span>
           </div>
         </div>
 
         <p class="body" style="margin-top:1.6rem;">
-          그래서 sideeffect 를 "service"라 부르되 오해는 금물입니다. 클라이언트 sideeffect 는 <b>상태를 바깥세계에 잇는 다리</b>이고,
-          도메인 규칙을 책임지는 서버 service 와는 역할이 다릅니다. 둘을 같은 단어로 부른다고 같은 일을 하는 게 아닙니다.
+          핵심은 <b>책임 분리</b>입니다. 데이터를 어디서 가져오는지(Model), 화면이 쓰기 좋게 다듬는지(ViewModel),
+          어떻게 보여주는지(View)를 한 덩어리로 섞지 않습니다. 테이블 손님(View)이 직접 창고(Model)에 들어가 재료를 꺼내 썰지 않듯이.
         </p>
       </div>
     </section>
 
-    <!-- 03 IN RUNNABLE -->
+    <!-- 02 VS MVC -->
     <section>
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">03 / IN RUNNABLE</span>
-          <h2>route-info 한 쌍을 펼쳐보기</h2>
-          <p class="sec-sub">경로정보(route-info) 기능은 store 한 파일, sideeffect 한 파일로 정확히 갈라져 있습니다.</p>
+          <span class="sec-num">02 / VS MVC</span>
+          <h2>MVC 와 MVVM, 결정적 차이는 '바인딩'</h2>
+          <p class="sec-sub">두 패턴 다 데이터·로직·화면을 나눕니다. 진짜 차이는 <b>화면을 누가, 어떻게 갱신하느냐</b>입니다.</p>
         </div>
 
-        <pre class="code"><span class="c">// entities/route/model/useRouteInfoStore.ts  — 상태만</span>
-<span class="k">const</span> routeInfos        = useState(<span class="s">'routeInfo.data'</span>, () => [])       <span class="c">// 서버 저장본</span>
-<span class="k">const</span> draftRouteInfos   = useState(<span class="s">'routeInfo.draftData'</span>, () => [])  <span class="c">// 미저장 초안</span>
-<span class="k">const</span> isAddingRouteInfo = useState(<span class="s">'routeInfo.isAdding'</span>, () => false)  <span class="c">// 추가 모드</span>
+        <div class="compare">
+          <div class="pane bad">
+            <h3>MVC — Controller 가 View 를 직접 조작</h3>
+            <pre class="code"><span class="c">// Controller</span>
+model.count++
+<span class="c">// 화면을 "내가" 손으로 다시 쓴다</span>
+view.label.textContent = model.count
+view.refresh()</pre>
+            <p>상태가 바뀔 때마다 <b>Controller 가 직접</b> View 를 찾아가 갱신해야 한다. 갱신을 빠뜨리면 화면이 데이터와 어긋난다.</p>
+          </div>
+          <div class="pane good">
+            <h3>MVVM — 바인딩이 View 를 자동 갱신</h3>
+            <pre class="code"><span class="c">// ViewModel</span>
+count.value++
+<span class="c">// 끝. View 는 count 에 "묶여"(bound) 있어</span>
+<span class="c">// 값이 바뀌면 알아서 다시 그려진다</span>
+&lt;span&gt;{{ count }}&lt;/span&gt;</pre>
+            <p>ViewModel 의 상태만 바꾸면, <b>바인딩</b>이 그 값에 묶인 View 를 자동으로 갱신한다. "어떻게 갱신할지"를 쓸 필요가 없다.</p>
+          </div>
+        </div>
 
-<span class="k">const</span> toggleAddingMode  = () => { isAddingRouteInfo.value = !isAddingRouteInfo.value }
-<span class="k">const</span> addDraftRouteInfo = (item) => { draftRouteInfos.value = [...draftRouteInfos.value, item] }
-<span class="k">const</span> clearRouteInfos   = () => { <span class="c">/* 모든 상태 초기화 */</span> }
-<span class="c">// → Cesium·$fetch 단어는 단 한 번도 등장하지 않는다</span></pre>
-
-        <pre class="code" style="margin-top:1rem;"><span class="c">// features/route-info/api/useRouteInfoSideeffect.ts  — 동작</span>
-<span class="k">const</span> store = useRouteInfoStore()                          <span class="c">// 상태를 들고 온다</span>
-
-<span class="k">const</span> fetchRouteInfos     = async (id) => $fetch(<span class="s">`/api/routes/${id}/feedbacks`</span>)
-<span class="k">const</span> submitRouteInfo     = async (id, input) => $fetch(...)   <span class="c">// 서버 통신</span>
-<span class="k">const</span> saveLocalRouteInfos = async (id) => { <span class="c">/* 초안 일괄 저장 */</span> }
-<span class="k">const</span> renderRouteInfoMarkers = () => { <span class="c">/* Cesium 마커 그리기 */</span> }
-
-watch(                                                       <span class="c">// 상태가 바뀌면</span>
-  [() => store.routeInfos.value, () => store.draftRouteInfos.value],
-  () => renderRouteInfoMarkers(),                            <span class="c">// 마커 재렌더</span>
-  { deep: true }
-)</pre>
-
-        <p class="body" style="margin-top:1.4rem;">
-          흐름을 따라가 보면: <b>$fetch 서버 응답 → store.routeInfos 갱신 → watch 감지 → renderRouteInfoMarkers 호출</b>.
-          store 는 자기가 바뀌었다는 사실만 알릴 뿐, 지도를 그릴 줄은 모릅니다. 그 "그리기"는 전부 sideeffect 쪽에 모여 있습니다 —
-          이게 가른 보람입니다.
+        <p class="body" style="margin-top:1.6rem;">
+          그래서 MVVM 은 <b>01 챕터의 반응형 위에서만</b> 성립합니다. "값이 바뀌면 화면이 알아서 따라온다"는 반응형이
+          바로 여기서 말하는 <b>바인딩</b>이니까요. 반응형이 토대, MVVM 은 그 위에 세운 집의 구조도입니다.
         </p>
       </div>
     </section>
 
-    <!-- 04 MENTAL MODEL -->
+    <!-- 03 HISTORY -->
     <section>
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">04 / MENTAL MODEL</span>
-          <h2>한 문장으로 가르는 기준</h2>
+          <span class="sec-num">03 / HISTORY</span>
+          <h2>MVVM 은 어디서 왔나</h2>
+          <p class="sec-sub">뿌리는 <b>2005년 Microsoft 의 WPF</b>(데스크톱 UI). 이후 거의 모든 현대 UI 프레임워크가 같은 계열로 수렴했습니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>WPF (2005)</h3>
+            <p>Microsoft 데스크톱. MVVM 이라는 이름과 <b>양방향 바인딩</b> 개념이 처음 정립된 출발점.</p>
+            <span class="when">원조 · 데스크톱</span>
+          </div>
+          <div class="card">
+            <h3>SwiftUI</h3>
+            <p>Apple. <code class="inl">@State</code> 값이 바뀌면 뷰가 자동으로 다시 그려진다. 같은 바인딩 사상.</p>
+            <span class="when">iOS · @State</span>
+          </div>
+          <div class="card">
+            <h3>Jetpack Compose</h3>
+            <p>Android. <code class="inl">mutableStateOf</code> 로 상태를 만들면 그 상태를 읽는 UI 가 자동 갱신.</p>
+            <span class="when">Android · mutableStateOf</span>
+          </div>
+          <div class="card">
+            <h3>Vue</h3>
+            <p>웹. <code class="inl">ref / reactive</code> 로 만든 상태가 템플릿에 바인딩되어 자동 갱신. Runnable 이 쓰는 길.</p>
+            <span class="when">Web · ref / reactive</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          이름과 문법은 제각각이지만 사상은 하나입니다 — <b>"상태를 선언하고, 화면을 그 상태에 묶는다."</b>
+          그래서 한 플랫폼에서 MVVM 을 익히면 다른 플랫폼으로 건너갈 때 개념이 거의 그대로 옮겨집니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 VIEWMODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / VIEWMODEL</span>
+          <h2>ViewModel = 다듬어 둔 상태 + 그걸 바꾸는 함수</h2>
+          <p class="sec-sub">정의 한 줄: ViewModel 은 <b>"화면이 바로 쓸 수 있게 다듬어 둔 상태"</b> 와 <b>"그 상태를 바꾸는 함수"</b>의 묶음입니다.</p>
+        </div>
+
+        <pre class="code"><span class="c">// entities/route/model/useRouteInfoStore.ts — 거의 ViewModel 그 자체</span>
+<span class="k">const</span> routeInfos = useState(<span class="s">'routeInfo.data'</span>, () => [])      <span class="c">// 다듬어 둔 상태</span>
+<span class="k">const</span> isLoading  = useState(<span class="s">'routeInfo.isLoading'</span>, () => false) <span class="c">// 화면용 상태</span>
+
+<span class="c">// 상태를 바꾸는 함수들</span>
+<span class="k">const</span> toggleAddingMode  = () => { isAddingMode.value = !isAddingMode.value }
+<span class="k">const</span> clearRouteInfos   = () => { routeInfos.value = [] }
+
+<span class="k">return</span> { routeInfos, isLoading, toggleAddingMode, clearRouteInfos }</pre>
+
+        <p class="body" style="margin-top:1.4rem;">
+          여기서 View(<code class="inl">.vue</code>)는 철저히 <b>dumb</b> 합니다. <code class="inl">routeInfos</code> 를 읽어 목록을 그리고,
+          버튼을 누르면 <code class="inl">toggleAddingMode()</code> 를 호출할 뿐 — 직접 데이터를 자르거나 서버를 부르지 않습니다.
+          "무엇을 어떻게 보여줄지를 다듬는 일"은 전부 ViewModel(store) 안에 있습니다.
+        </p>
+
+        <pre class="code" style="margin-top:1.2rem;"><span class="c">// RouteInfoPanel.vue — dumb View</span>
+<span class="k">const</span> { routeInfos, toggleAddingMode } = useRouteInfoStore()
+
+&lt;button @click=<span class="s">"toggleAddingMode"</span>&gt;추가&lt;/button&gt;
+&lt;li v-for=<span class="s">"r in routeInfos"</span>&gt;{{ r.name }}&lt;/li&gt;</pre>
+      </div>
+    </section>
+
+    <!-- 05 MENTAL MODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / MENTAL MODEL</span>
+          <h2>한 문장으로 기억하라</h2>
         </div>
         <div class="callout">
           <p class="q">한 문장 멘탈 모델</p>
           <p>
-            <b>store 는 경로정보가 "무엇인지"를</b> 담당하고,
-            <b>sideeffect 는 그걸로 지도·서버와 "무엇을 하는지"를</b> 담당한다.
-            새 코드를 어디 둘지 고민될 때는 이 한 문장만 물어보면 된다 — "이건 상태인가, 상태로 하는 일인가?"
+            MVVM 이란 <b>주방(ViewModel)이 손질해 차려둔 상태를, 테이블(View)이 받아 보여주기만</b> 하는 구조이고,
+            그 둘을 잇는 끈이 <b>바인딩</b>이다. 주방의 접시가 바뀌면 테이블의 화면이 알아서 바뀐다 —
+            그래서 View 는 절대 직접 요리하지 않는다.
           </p>
         </div>
       </div>
@@ -309,58 +329,58 @@ watch(                                                       <span class="c">// 
 
         <ol class="quiz">
           <li>
-            <p class="q"><code class="inl">entities/*/model</code> 의 store 가 책임지는 것은?</p>
+            <p class="q">식당 비유에서 "원재료를 손질해 바로 낼 수 있는 접시로 준비하는" 역할은 MVVM 의 무엇인가?</p>
             <ul class="opts">
-              <li><b>a)</b> Cesium 마커 렌더링과 서버 $fetch</li>
-              <li><b>b)</b> useState 기반 순수 상태와 동기적 상태 변경 함수</li>
-              <li><b>c)</b> 지도 클릭 핸들러 등록</li>
-              <li><b>d)</b> 데이터베이스 마이그레이션</li>
+              <li><b>a)</b> Model (창고)</li>
+              <li><b>b)</b> View (테이블)</li>
+              <li><b>c)</b> ViewModel (주방)</li>
+              <li><b>d)</b> Controller</li>
             </ul>
           </li>
           <li>
-            <p class="q"><code class="inl">$fetch</code> 서버 통신, Cesium 마커 렌더링, store watch 가 함께 모이는 자리는?</p>
+            <p class="q">이 챕터가 꼽은 MVC 와 MVVM 의 결정적 차이는?</p>
             <ul class="opts">
-              <li><b>a)</b> entities/*/model 의 store</li>
-              <li><b>b)</b> shared/types 의 타입 정의</li>
-              <li><b>c)</b> features/*/api 의 sideeffect</li>
-              <li><b>d)</b> *.vue 의 View</li>
+              <li><b>a)</b> MVC 는 화면이 없다</li>
+              <li><b>b)</b> MVVM 은 바인딩으로 View 가 자동 갱신되고, MVC 는 Controller 가 View 를 직접 조작한다</li>
+              <li><b>c)</b> MVC 가 더 최신 패턴이다</li>
+              <li><b>d)</b> MVVM 은 서버에서만 동작한다</li>
             </ul>
           </li>
           <li>
-            <p class="q">MVVM 의 'ViewModel state' 와 'View' 는 Runnable 에서 각각 어디에 해당하는가?</p>
+            <p class="q">이 챕터가 말한 MVVM 의 뿌리(원조)는?</p>
             <ul class="opts">
-              <li><b>a)</b> ViewModel state = server, View = schemas</li>
-              <li><b>b)</b> ViewModel state = entities/*/model store, View = *.vue</li>
-              <li><b>c)</b> ViewModel state = *.vue, View = features/*/api</li>
-              <li><b>d)</b> 둘 다 features/*/api 안에 있다</li>
+              <li><b>a)</b> 2005년 Microsoft 의 WPF</li>
+              <li><b>b)</b> Apple 의 SwiftUI</li>
+              <li><b>c)</b> Google 의 Jetpack Compose</li>
+              <li><b>d)</b> Vue 3</li>
             </ul>
           </li>
           <li>
-            <p class="q"><code class="inl">store.routeInfos</code> 가 바뀌었을 때 지도 마커가 다시 그려지는 경로는?</p>
+            <p class="q">Runnable 의 <code class="inl">useRouteInfoStore</code> 가 "거의 ViewModel"인 이유로 가장 알맞은 것은?</p>
             <ul class="opts">
-              <li><b>a)</b> store 가 직접 renderRouteInfoMarkers 를 호출한다</li>
-              <li><b>b)</b> 서버 service 가 화면을 직접 그린다</li>
-              <li><b>c)</b> sideeffect 의 watch 가 변경을 감지해 renderRouteInfoMarkers 를 호출한다</li>
-              <li><b>d)</b> *.vue 컴포넌트가 1초마다 폴링한다</li>
+              <li><b>a)</b> 서버 데이터베이스를 직접 들고 있어서</li>
+              <li><b>b)</b> 화면이 바로 쓸 상태(routeInfos·isLoading)와 그 상태를 바꾸는 함수(toggleAddingMode 등)를 함께 제공해서</li>
+              <li><b>c)</b> .vue 파일이 직접 서버를 호출해서</li>
+              <li><b>d)</b> CSS 스타일을 정의해서</li>
             </ul>
           </li>
         </ol>
 
         <p class="submit-note">
-          제출 방법 — 채팅에 <b>@fe-03-state-sideeffect 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          제출 방법 — 채팅에 <b>@fe-03-mvvm 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
           만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
         </p>
 
         <div class="pager">
-          <a href="fe-02-mvvm.html">← 02 MVVM</a>
-          <a href="fe-04-vue-vs-react.html">다음: 04 Vue vs React →</a>
+          <a href="fe-02-composables.html">← 02 컴포저블</a>
+          <a href="fe-04-state-sideeffect.html">다음: 04 상태 vs 부수효과 →</a>
         </div>
       </div>
     </section>
 
     <footer>
       <div class="wrap">
-        Runnable Frontend Lecture · 03 / 04 — 상태와 부수효과. 다음 챕터에서 <code>Vue vs React</code> 로 이 분리 감각을 비교합니다.
+        Runnable Frontend Lecture · 03 / 05 — MVVM. 다음 챕터에서 ViewModel 안의 <code>상태</code> 와 <code>부수효과</code> 를 갈라봅니다.
       </div>
     </footer>
   </body>
