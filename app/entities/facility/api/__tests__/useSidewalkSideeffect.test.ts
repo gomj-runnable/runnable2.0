@@ -2,10 +2,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
 
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 vi.stubGlobal('onMounted', (fn: any) => fn())
 vi.stubGlobal('onBeforeUnmount', vi.fn())
 vi.stubGlobal('watch', vueWatch)
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 // Vue ref 객체를 hoisted 에서 만들 수 없으므로 import 후 노출.
 // useSidewalkStore mock 이 setup 시점에 같은 인스턴스를 반환하도록 module-level 변수에 저장.
@@ -59,6 +74,10 @@ const C: any = {
 }
 vi.stubGlobal('window', { Cesium: C } as any)
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 const makeViewer = () => {
     const added: any[] = []
     return {
@@ -82,7 +101,9 @@ describe('useSidewalkSideeffect', () => {
     let viewer: ReturnType<typeof shallowRef<any>>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
+        setMockViewer(viewer.value)
         sharedSidewalk = {
             districts: ref<any[]>([]),
             selectedDistrict: ref<string | null>(null),
@@ -99,7 +120,7 @@ describe('useSidewalkSideeffect', () => {
         vi.spyOn(console, 'error').mockImplementation(() => {})
     })
 
-    const create = () => useSidewalkSideeffect({ viewer: viewer as any })
+    const create = () => useSidewalkSideeffect()
 
     it('onMounted — districts 미로드 시 /sidewalk/index.json fetch', async () => {
         $fetchMock.mockResolvedValue([{ name: '강남구', code: '11680', count: 100, dongs: [] }])

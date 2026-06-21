@@ -1,14 +1,12 @@
 import { watch } from 'vue'
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { CesiumViewerRuntime } from '#shared/types/cesium'
 import type { BaseMapEnum } from '#shared/types/base-map.enum'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { useBaseMapStore } from '~/features/base-map/model/useBaseMapStore'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { buildVworldUrl, VWORLD_MIN_LEVEL, VWORLD_MAX_LEVEL } from '~/features/base-map/lib/vworld'
 
 interface UseBaseMapSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     /** V-World WMTS 키 (runtimeConfig.public.vworldKey) */
     vworldKey: string
 }
@@ -18,7 +16,8 @@ interface UseBaseMapSideeffectOptions {
  * 베이스맵 종류 상태는 useBaseMapStore가 보유하며, 이 composable이 store를 watch해 교체한다.
  */
 export const useBaseMapSideeffect = (options: UseBaseMapSideeffectOptions) => {
-    const { viewer, vworldKey } = options
+    const { vworldKey } = options
+    const { viewer } = useMapViewer()
     const store = useBaseMapStore()
 
     /** 선택된 베이스맵 imagery로 단일 레이어를 교체한다. */

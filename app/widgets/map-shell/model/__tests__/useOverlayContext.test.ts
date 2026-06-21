@@ -7,7 +7,7 @@ const makeRouteInfoStore = () => ({
     isAddingRouteInfo: ref(false),
     selectedMarkerRouteInfo: ref<any>(null),
     routeInfos: ref<any[]>([]),
-    localRouteInfos: ref<any[]>([])
+    draftRouteInfos: ref<any[]>([])
 })
 
 const makeRouteInfoEffect = () => ({

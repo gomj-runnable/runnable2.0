@@ -1,13 +1,12 @@
 import { booleanPointInPolygon, point, polygon } from '@turf/turf'
-import type { ShallowRef, Ref } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import type { Ref } from 'vue'
 import type { GeoFeature } from '#shared/types/geojson'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 interface UseCameraSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     centerLat: Ref<number | null>
     centerLng: Ref<number | null>
     altitude: Ref<number | null>
@@ -23,7 +22,8 @@ interface UseCameraSideeffectOptions {
  * @param options - 뷰어와 카메라 store ref를 포함한 의존성 옵션
  */
 export const useCameraSideeffect = (options: UseCameraSideeffectOptions) => {
-    const { viewer, centerLat, centerLng, altitude, heading, pitch, locationLabel } = options
+    const { centerLat, centerLng, altitude, heading, pitch, locationLabel } = options
+    const { viewer } = useMapViewer()
     const { guGeojson, dongGeojson } = useDistrictStore()
     const { ensureGuBoundaryLoaded, ensureDongBoundaryLoaded } = useDistrictSideeffect()
 

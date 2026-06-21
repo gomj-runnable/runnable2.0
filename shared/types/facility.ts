@@ -7,8 +7,8 @@ export type FacilityType = 'crosswalk' | 'fountain' | 'locker' | 'hospital' | 's
 /** POI 저장용 타입 (경로 구간에 연결되는 관심지점) */
 export type PoiType = 'HOSPITAL' | 'CROSSWALK' | 'WATER'
 
-/** POI 생성 입력 (DraftInput) */
-export interface PoiDraftInput {
+/** POI 생성 입력 (CreateInput) */
+export interface PoiCreateInput {
     name: string
     description?: string
     type: PoiType

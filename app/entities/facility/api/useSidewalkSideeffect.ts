@@ -1,19 +1,14 @@
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-
-interface UseSidewalkSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
-}
 
 /**
  * 동별 인도 데이터를 로드하고 Cesium GroundPolylinePrimitive로 렌더링하는 sideeffect composable.
  * `useSidewalkStore`의 selectedDistrict·selectedDong 변화를 감지해 동별로 fetch·렌더·제거를 처리한다.
  */
-export const useSidewalkSideeffect = (options: UseSidewalkSideeffectOptions) => {
-    const { viewer } = options
+export const useSidewalkSideeffect = () => {
+    const { viewer } = useMapViewer()
     const store = useSidewalkStore()
     const camera = useCameraStore()
 

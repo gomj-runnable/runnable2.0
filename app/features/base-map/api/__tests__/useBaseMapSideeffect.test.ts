@@ -1,10 +1,23 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { shallowRef, nextTick, effectScope } from 'vue'
-import type { ShallowRef } from 'vue'
 import { BaseMapEnum } from '#shared/types/base-map.enum'
 import { useBaseMapSideeffect } from '~/features/base-map/api/useBaseMapSideeffect'
 import { useBaseMapStore } from '~/features/base-map/model/useBaseMapStore'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 const createdUrls: string[] = []
 
@@ -41,21 +54,26 @@ const makeViewer = () => ({
     }
 })
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 describe('useBaseMapSideeffect', () => {
     const store = useBaseMapStore()
     let scope: ReturnType<typeof effectScope> | null = null
 
-    const mount = (viewer: ShallowRef<unknown>) => {
+    const mount = (viewerValue: unknown) => {
+        setMockViewer(viewerValue)
         scope = effectScope()
         return scope.run(() =>
             useBaseMapSideeffect({
-                viewer: viewer as ShallowRef<CesiumViewer | null>,
                 vworldKey: 'TEST_KEY'
             })
         )!
     }
 
     beforeEach(async () => {
+        setMockViewer(null)
         createdUrls.length = 0
         store.setKind(BaseMapEnum.SATELLITE)
         await nextTick()
@@ -69,7 +87,7 @@ describe('useBaseMapSideeffect', () => {
 
     it('viewer 준비 시 — 위성영상 타일을 즉시 적용', () => {
         const viewer = shallowRef(makeViewer())
-        mount(viewer)
+        mount(viewer.value)
 
         expect(viewer.value.imageryLayers.removeAll).toHaveBeenCalledTimes(1)
         expect(viewer.value.imageryLayers.addImageryProvider).toHaveBeenCalledTimes(1)
@@ -78,7 +96,7 @@ describe('useBaseMapSideeffect', () => {
 
     it('기본지도 전환 — 레이어 교체', async () => {
         const viewer = shallowRef(makeViewer())
-        mount(viewer)
+        mount(viewer.value)
 
         store.setKind(BaseMapEnum.BASE)
         await nextTick()
@@ -88,8 +106,7 @@ describe('useBaseMapSideeffect', () => {
     })
 
     it('viewer null — throw 없음, 레이어 미적용', async () => {
-        const viewer = shallowRef(null)
-        mount(viewer)
+        mount(null)
         store.setKind(BaseMapEnum.BASE)
         await expect(nextTick()).resolves.toBeUndefined()
         expect(createdUrls.length).toBe(0)

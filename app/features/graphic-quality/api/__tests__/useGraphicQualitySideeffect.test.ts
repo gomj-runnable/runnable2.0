@@ -7,7 +7,21 @@ import {
     decideAutoLevel
 } from '~/features/graphic-quality/api/useGraphicQualitySideeffect'
 import { useGraphicQualityStore } from '~/features/graphic-quality/model/useGraphicQualityStore'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 vi.mock('~/features/graphic-quality/model/useGraphicQualityStore', async () => {
     const { ref, computed } = await import('vue')
@@ -43,20 +57,22 @@ const makeViewer = (tileset = makeTileset()) => ({
     }
 })
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 describe('useGraphicQualitySideeffect', () => {
     const store = useGraphicQualityStore()
     let scope: ReturnType<typeof effectScope> | null = null
 
     const mount = (viewer: ShallowRef<unknown>) => {
+        setMockViewer(viewer.value)
         scope = effectScope()
-        return scope.run(() =>
-            useGraphicQualitySideeffect({
-                viewer: viewer as ShallowRef<CesiumViewer | null>
-            })
-        )
+        return scope.run(() => useGraphicQualitySideeffect())
     }
 
     beforeEach(async () => {
+        setMockViewer(null)
         store.setLevel(GraphicQualityEnum.AUTO)
         store.setAppliedLevel(GraphicQualityEnum.HIGH)
         await nextTick()

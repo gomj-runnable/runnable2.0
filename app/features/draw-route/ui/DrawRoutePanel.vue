@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 경로 그리기 패널 UI — 구간 목록, GPX 가져오기, 구간 나누기 안내 모달을 포함한다.
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
-import type { PoiDraftInput } from '#shared/types/facility'
+import type { PoiCreateInput } from '#shared/types/facility'
 import { getSectionColor } from '~/entities/route/lib/useRouteDrawUtils'
 import TextfieldCard from '~/shared/ui/cards/TextfieldCard.vue'
 
@@ -11,7 +11,7 @@ defineProps<{
     /** 구간별 거리 (km) */
     sectionDistances?: number[]
     /** 구간 인덱스별 연결된 POI 배열 */
-    sectionPois?: Record<number, PoiDraftInput[]>
+    sectionPois?: Record<number, PoiCreateInput[]>
     /** 현재 POI 연결 대상 구간 인덱스 */
     activeSectionIndex?: number | null
 }>()

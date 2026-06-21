@@ -1,13 +1,9 @@
 import { watch, getCurrentScope, onScopeDispose } from 'vue'
-import type { ShallowRef } from 'vue'
 import type { Cartesian3 } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { useViewModeStore } from '~/features/view-mode/model/useViewModeStore'
-
-interface UseViewModeSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
-}
 
 /** 2D 모드 수직 하향 시점 pitch (도) */
 const PITCH_2D_DEG = -90
@@ -25,8 +21,8 @@ const TWO_PI = Math.PI * 2
  * 구현하는 "유사 2D" 방식이다. 모드 상태는 useViewModeStore가 보유하며,
  * 이 composable이 store를 watch해 카메라 전환을 수행한다 (이벤트 바인딩 없음).
  */
-export const useViewModeSideeffect = (options: UseViewModeSideeffectOptions) => {
-    const { viewer } = options
+export const useViewModeSideeffect = () => {
+    const { viewer } = useMapViewer()
     const store = useViewModeStore()
 
     let guardViewer: CesiumViewer | null = null

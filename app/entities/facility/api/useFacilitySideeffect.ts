@@ -1,10 +1,9 @@
-import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { CesiumDrawHandler } from '#shared/types/cesium'
-import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
+import type { Facility, FacilityType, PoiCreateInput } from '#shared/types/facility'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import {
     useFacilityRenderer,
@@ -16,22 +15,21 @@ import {
 } from '~/entities/facility/lib/useFacilityConversion'
 
 interface UseFacilitySideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     facilities: Ref<Facility[]>
     activeTypes: Ref<Set<FacilityType>>
     isLoading: Ref<boolean>
     isSearching: Ref<boolean>
-    onPoiClick?: (poi: PoiDraftInput) => void
+    onPoiClick?: (poi: PoiCreateInput) => void
 }
 
 /** 시설물 데이터를 서버에서 불러오고 활성 유형에 따라 Cesium 지도에 렌더링하는 sideeffect composable. */
 export const useFacilitySideeffect = (options: UseFacilitySideeffectOptions) => {
-    const { viewer, facilities, activeTypes, isLoading, isSearching, onPoiClick } = options
+    const { facilities, activeTypes, isLoading, isSearching, onPoiClick } = options
+    const { viewer } = useMapViewer()
     const camera = useCameraStore()
     const facilityStore = useFacilityStore()
 
     const renderer = useFacilityRenderer({
-        viewer,
         facilities,
         onPoiClick: onPoiClick
             ? (facility) => {

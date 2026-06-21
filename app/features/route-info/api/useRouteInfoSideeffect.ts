@@ -1,9 +1,9 @@
-import type { ShallowRef } from 'vue'
-import type { SavedRouteInfo, RouteInfoDraftInput } from '#shared/types/routeInfo'
-import type { CesiumViewer, CesiumEntity } from '~/shared/lib/useWindow'
+import type { SavedRouteInfo, RouteInfoCreateInput } from '#shared/types/routeInfo'
+import type { CesiumEntity } from '~/shared/lib/useWindow'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import type { CesiumDrawHandler } from '#shared/types/cesium'
 
 export interface RouteInfoClickedPosition {
@@ -16,10 +16,11 @@ export interface RouteInfoClickedPosition {
  * 경로정보 데이터 페칭, Cesium 마커 렌더링, 지도 클릭 핸들링을 담당하는 sideeffect.
  * 서버 저장된 경로정보와 로컬 미저장 경로정보 모두 지도에 표시한다.
  */
-export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) => {
+export const useRouteInfoSideeffect = () => {
+    const { viewer } = useMapViewer()
     const store = useRouteInfoStore()
-    const entityGroup = createEntityGroup(viewer)
-    const entityToRouteInfoMap = new Map<CesiumEntity, SavedRouteInfo | RouteInfoDraftInput>()
+    const entityGroup = createEntityGroup()
+    const entityToRouteInfoMap = new Map<CesiumEntity, SavedRouteInfo | RouteInfoCreateInput>()
 
     /** 지도 클릭으로 선택된 경로정보 위치 */
     const clickedPosition = ref<RouteInfoClickedPosition | null>(null)
@@ -134,7 +135,7 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
     /** 로컬 경로정보를 서버에 일괄 저장한다 */
     const saveLocalRouteInfos = async (routeId: string) => {
-        const locals = store.localRouteInfos.value
+        const locals = store.draftRouteInfos.value
         if (!locals.length) return
 
         for (const input of locals) {
@@ -148,11 +149,11 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
                 console.error('[RouteInfoSideeffect] 경로정보 일괄 저장 실패:', e)
             }
         }
-        store.clearLocalRouteInfos()
+        store.clearDraftRouteInfos()
     }
 
     /** 새 경로정보를 서버에 즉시 전송한다 (저장된 경로에서 ChipButton으로 추가 시) */
-    const submitRouteInfo = async (routeId: string, input: RouteInfoDraftInput) => {
+    const submitRouteInfo = async (routeId: string, input: RouteInfoCreateInput) => {
         try {
             const item = await $fetch<SavedRouteInfo>(`/api/routes/${routeId}/feedbacks`, {
                 method: 'POST',
@@ -176,9 +177,9 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
         const C = getCesiumRuntime()
         clearMarkers()
 
-        const allItems: (SavedRouteInfo | RouteInfoDraftInput)[] = [
+        const allItems: (SavedRouteInfo | RouteInfoCreateInput)[] = [
             ...store.routeInfos.value,
-            ...store.localRouteInfos.value
+            ...store.draftRouteInfos.value
         ]
 
         for (const item of allItems) {
@@ -231,7 +232,7 @@ export const useRouteInfoSideeffect = (viewer: ShallowRef<CesiumViewer | null>) 
 
     // 경로정보 목록 또는 로컬 경로정보 변경 시 마커 재렌더링
     watch(
-        [() => store.routeInfos.value, () => store.localRouteInfos.value],
+        [() => store.routeInfos.value, () => store.draftRouteInfos.value],
         () => renderRouteInfoMarkers(),
         { deep: true }
     )

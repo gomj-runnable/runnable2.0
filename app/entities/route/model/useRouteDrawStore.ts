@@ -5,7 +5,7 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteElevationProfile, SavedRoute } from '#shared/types/route'
 import { RouteDraftBuilder } from '~/entities/route/lib/useRouteDraftBuilder'
 import type { SectionPointRange } from '~/entities/route/lib/useRouteDrawDraft'
-import type { PoiDraftInput } from '#shared/types/facility'
+import type { PoiCreateInput } from '#shared/types/facility'
 import { useRouteClosingStore } from '~/entities/route/model/useRouteClosingStore'
 import type { RouteOptimizationMode } from '#shared/types/route-optimization'
 
@@ -14,6 +14,19 @@ import type { RouteOptimizationMode } from '#shared/types/route-optimization'
  * 지도 드로잉 결과(포인트·측정값), 구간 초안, 저장 모달 개폐 여부, 경로 폼 입력값을 보유한다.
  * 상태 변경 로직(이벤트 핸들러)은 `useRouteDrawSideeffect`에 위임하고,
  * 이 store는 상태 노출과 초기화만 담당한다.
+ * @example
+ * ```ts
+ * const drawStore = useRouteDrawStore()
+ *
+ * // 저장 모달에서 경로 제목·설명을 입력받는다
+ * drawStore.routeForm.value = { title: '한강 야경 코스', description: '10km 평지' }
+ *
+ * // closingMode·왕복 여부가 반영된 총 거리(meters)를 읽는다
+ * console.log(drawStore.routeDistance.value)
+ *
+ * // 새 경로 드로잉을 시작하거나 저장을 취소할 때 전체 상태를 초기화한다
+ * drawStore.resetRouteDrawState()
+ * ```
  */
 export const useRouteDrawStore = () => {
     const closingStore = useRouteClosingStore()
@@ -43,7 +56,7 @@ export const useRouteDrawStore = () => {
         () => []
     )
     /** 구간 인덱스별 연결된 POI 배열. key = 구간 인덱스 */
-    const sectionPois = useState<Record<number, PoiDraftInput[]>>(
+    const sectionPois = useState<Record<number, PoiCreateInput[]>>(
         'routeDraw.sectionPois',
         () => ({})
     )

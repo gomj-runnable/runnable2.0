@@ -1,5 +1,5 @@
-// 시설물 엔티티를 POI 관련 타입(PoiDto, PoiDraftInput)으로 변환하는 유틸리티 모음.
-import type { Facility, FacilityType, PoiDraftInput } from '#shared/types/facility'
+// 시설물 엔티티를 POI 관련 타입(PoiDto, PoiCreateInput)으로 변환하는 유틸리티 모음.
+import type { Facility, FacilityType, PoiCreateInput } from '#shared/types/facility'
 import { facilityLngLat } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
 import type { PoiDto } from '~/shared/lib/map/usePoiOverlay'
@@ -25,11 +25,11 @@ export const toPoiDto = (facility: Facility): PoiDto => {
 }
 
 /**
- * Facility 엔티티 → PoiDraftInput 변환 헬퍼.
+ * Facility 엔티티 → PoiCreateInput 변환 헬퍼.
  * FacilityType → PoiType 매핑 및 geom 생성을 담당한다.
  * geometry(좌표)가 없으면 변환할 수 없으므로 null 을 반환한다.
  */
-export const facilityToPoiDraft = (facility: Facility): PoiDraftInput | null => {
+export const facilityToPoiDraft = (facility: Facility): PoiCreateInput | null => {
     const enumInstance = FacilityTypeEnum.from(facility.type)
     const poiType = enumInstance?.poiType
 

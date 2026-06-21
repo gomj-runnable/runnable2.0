@@ -1,6 +1,5 @@
 /** 지도 초기화 및 인증·레이어·카메라 등 핵심 기능을 onMounted 에서 병렬로 부트스트랩하는 composable. */
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { onScopeDispose } from 'vue'
 import { useMapInit } from '~/shared/lib/map/useMapInit'
 import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import {
@@ -21,7 +20,6 @@ type RouteMapFacadeReturn = ReturnType<typeof useRouteMapFacade>
 type DrawingFacade = RouteMapFacadeReturn['drawing']
 
 interface UseMapFeatureInitOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     drawing: DrawingFacade
     routeDrawStore: RouteDrawStore
     notification: NotificationStore
@@ -32,7 +30,6 @@ interface UseMapFeatureInitOptions {
 }
 
 export function useMapFeatureInit({
-    viewer,
     drawing,
     routeDrawStore,
     notification,
@@ -66,7 +63,6 @@ export function useMapFeatureInit({
         gradient,
         gradientEffect
     } = useMapLayersFacade({
-        viewer,
         drawing,
         routeDrawStore,
         notification,
@@ -76,12 +72,14 @@ export function useMapFeatureInit({
 
     // ─── 카메라 정보 ─────────────────────────────────────────────────
     const camera = useCameraStore()
-    const cameraEffect = useCameraSideeffect({ viewer, ...camera })
+    const cameraEffect = useCameraSideeffect({ ...camera })
+
+    // unmount 시 camera.moveEnd 리스너 정리 (init() 만 호출되고 destroy() 누락 보완)
+    onScopeDispose(() => cameraEffect.destroy())
 
     // ─── 마운트: 지도 초기화 → 각 기능 병렬 로드 ─────────────────────
     onMounted(async () => {
         await init()
-        viewer.value = window.viewer
         useMapViewer().setViewer(window.viewer)
         await Promise.all([
             authEffect.fetchSession(),

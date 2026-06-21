@@ -1,7 +1,7 @@
 // 경로·구간·POI 생성 Zod 검증 스키마 모음
 import { z } from 'zod'
 import type { RouteSectionDraftInput } from '#shared/types/route'
-import type { PoiDraftInput } from '#shared/types/facility'
+import type { PoiCreateInput } from '#shared/types/facility'
 import { geoJsonPositionSchema } from './geojson.schema'
 
 export const geoJsonPointSchema = z.object({
@@ -15,7 +15,7 @@ export const poiSchema = z.object({
     type: z.enum(['HOSPITAL', 'CROSSWALK', 'WATER']),
     geom: geoJsonPointSchema,
     attribute: z.record(z.string(), z.unknown()).optional()
-}) satisfies z.ZodType<PoiDraftInput>
+}) satisfies z.ZodType<PoiCreateInput>
 
 const geoJsonLineStringPositionSchema = geoJsonPositionSchema
 export const geoJsonLineStringSchema = z.object({

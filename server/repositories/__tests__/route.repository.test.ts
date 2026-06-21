@@ -3,7 +3,7 @@ import { initTestDb, resetDb } from '../../database/client'
 import { truncateAll } from '../../test/pgContainer'
 import type { IRouteRepository } from '../route.repository'
 import { DrizzleRouteRepository } from '../route.repository'
-import type { RouteDraftInput } from '#shared/types/route'
+import type { RouteCreateInput } from '#shared/types/route'
 import { users } from '../../database/schema'
 import type { getDb } from '../../database/client'
 
@@ -33,7 +33,7 @@ async function insertTestUser(db: Db, id: string): Promise<void> {
     })
 }
 
-const sampleInput = (overrides: Partial<RouteDraftInput> = {}): RouteDraftInput => ({
+const sampleInput = (overrides: Partial<RouteCreateInput> = {}): RouteCreateInput => ({
     title: '테스트 경로',
     description: '설명',
     isPublic: true,

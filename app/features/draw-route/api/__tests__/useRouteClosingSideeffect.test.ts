@@ -1,11 +1,30 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ref, shallowRef, nextTick, watchEffect as vueWatchEffect } from 'vue'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ref, shallowRef, nextTick, effectScope, watchEffect as vueWatchEffect } from 'vue'
 import type { Ref, ShallowRef } from 'vue'
 
 import { useRouteClosingSideeffect } from '~/features/draw-route/api/useRouteClosingSideeffect'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 vi.stubGlobal('watchEffect', vueWatchEffect)
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
 
 const C = {
     Color: {
@@ -41,19 +60,30 @@ describe('useRouteClosingSideeffect', () => {
     let viewer: ShallowRef<any>
     let drawnPositions: Ref<any>
     let closingMode: Ref<any>
+    let scope: ReturnType<typeof effectScope> | null = null
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
         drawnPositions = ref(null)
         closingMode = ref(null)
     })
 
-    const create = () =>
-        useRouteClosingSideeffect({
-            viewer: viewer as any,
-            drawnPositions,
-            closingMode
-        })
+    afterEach(() => {
+        scope?.stop()
+        scope = null
+    })
+
+    const create = () => {
+        setMockViewer(viewer.value)
+        scope = effectScope()
+        return scope.run(() =>
+            useRouteClosingSideeffect({
+                drawnPositions,
+                closingMode
+            })
+        )!
+    }
 
     it('positions 가 null 이면 entity 추가 없음', async () => {
         create()

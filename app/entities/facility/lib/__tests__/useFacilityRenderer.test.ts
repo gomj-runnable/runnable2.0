@@ -5,7 +5,22 @@ import {
     useFacilityRenderer,
     ALL_FACILITY_TYPES
 } from '~/entities/facility/lib/useFacilityRenderer'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import type { Facility } from '#shared/types/facility'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 // usePoiOverlay 의존 — 가벼운 mock 으로 격리
 const poiOverlayMock = vi.hoisted(() => ({
@@ -26,6 +41,10 @@ const C: any = {
 }
 vi.stubGlobal('window', { Cesium: C } as any)
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 const makeViewer = () => {
     const added: any[] = []
     return {
@@ -39,6 +58,8 @@ const makeViewer = () => {
                 const i = added.indexOf(e)
                 if (i >= 0) added.splice(i, 1)
             },
+            suspendEvents: () => {},
+            resumeEvents: () => {},
             list: added
         }
     }
@@ -66,7 +87,9 @@ describe('useFacilityRenderer', () => {
     let facilities: ReturnType<typeof ref<Facility[]>>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
+        setMockViewer(viewer.value)
         facilities = ref<Facility[]>([])
         poiOverlayMock.showPoi.mockReset()
         poiOverlayMock.unshowPoi.mockReset()
@@ -76,7 +99,6 @@ describe('useFacilityRenderer', () => {
     type RendererOpts = Parameters<typeof useFacilityRenderer>[0]
     const create = () =>
         useFacilityRenderer({
-            viewer: viewer as any,
             facilities: facilities as RendererOpts['facilities'],
             onFacilitySelect: vi.fn()
         })
@@ -142,7 +164,7 @@ describe('useFacilityRenderer', () => {
         })
 
         it('viewer null 이면 showLayer 무동작', () => {
-            viewer.value = null
+            setMockViewer(null)
             facilities.value = [facility({ id: 'c1' })]
             const renderer = create()
             renderer.showLayer('crosswalk')

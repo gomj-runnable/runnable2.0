@@ -127,7 +127,7 @@ export function useRouteSelectionFlow({
         () => routeDrawStore.drawnPositions.value,
         (positions) => {
             if (!positions) {
-                routeInfoStore.clearLocalRouteInfos()
+                routeInfoStore.clearDraftRouteInfos()
                 routeInfoEffect.clearMarkers()
             }
         }

@@ -1,24 +1,20 @@
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { SavedSection } from '#shared/types/route'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { geomToRouteDrawPositions, getSectionColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
-
-interface UseShareViewerOptions {
-    viewer: ShallowRef<CesiumViewer | null>
-}
 
 /**
  * 공유 페이지에서 경로 섹션을 읽기 전용으로 지도에 렌더링하는 sideeffect.
  * 폴리라인 엔티티를 추가하고 카메라를 경로에 맞게 이동한다.
  */
-export const useShareViewerSideeffect = (options: UseShareViewerOptions) => {
-    const polylines = createEntityGroup(options.viewer)
+export const useShareViewerSideeffect = () => {
+    const { viewer } = useMapViewer()
+    const polylines = createEntityGroup()
 
     const renderSections = (sections: SavedSection[]) => {
-        const v = options.viewer.value
+        const v = viewer.value
         if (!v) return
 
         polylines.clear()

@@ -1,17 +1,17 @@
-import type { Ref, ShallowRef } from 'vue'
-import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
+import type { Ref } from 'vue'
+import type { CesiumEntity } from '~/shared/lib/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingMode } from '~/entities/route/model/useRouteClosingStore'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 /**
  * `useRouteClosingSideeffect`에 주입하는 의존성 옵션.
  */
 interface UseRouteClosingSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     drawnPositions: Ref<GeoJsonPosition[] | null>
     closingMode: Ref<RouteClosingMode>
 }
@@ -22,8 +22,9 @@ interface UseRouteClosingSideeffectOptions {
  * - round-trip: 역순 경로에 점선 + 외곽선 효과
  */
 export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOptions) => {
+    const { viewer } = useMapViewer()
     /** 마감 모드 미리보기로 지도에 추가한 엔티티 목록 */
-    const preview = createEntityGroup(options.viewer)
+    const preview = createEntityGroup()
 
     /** 현재 마감 미리보기 엔티티를 모두 지도에서 제거한다. */
     const clearClosingPreview = () => {
@@ -33,13 +34,13 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
     /** loop-close 모드: 마지막 점에서 첫 점을 잇는 반투명 직선을 그린다. */
     const renderLoopClosePreview = () => {
         const positions = options.drawnPositions.value
-        if (!options.viewer.value || !positions || positions.length < 2) return
+        if (!viewer.value || !positions || positions.length < 2) return
 
         const firstPoint = positions[0]!
         const lastPoint = positions[positions.length - 1]!
 
         const Cesium = getCesiumRuntime()
-        const entity = options.viewer.value.entities.add({
+        const entity = viewer.value.entities.add({
             polyline: createClampedPolyline(Cesium, {
                 positions: [lastPoint, firstPoint],
                 width: 4,
@@ -53,14 +54,14 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
     /** round-trip 모드: 역순 경로에 외곽 스트로크와 내부 점선을 겹쳐 그린다. */
     const renderRoundTripPreview = () => {
         const positions = options.drawnPositions.value
-        if (!options.viewer.value || !positions || positions.length < 2) return
+        if (!viewer.value || !positions || positions.length < 2) return
 
         const reversedPositions = [...positions].reverse()
         const entities: CesiumEntity[] = []
 
         const Cesium = getCesiumRuntime()
         // 외곽 스트로크 (넓고 반투명 — 감싸는 효과)
-        const outerEntity = options.viewer.value.entities.add({
+        const outerEntity = viewer.value.entities.add({
             polyline: createClampedPolyline(Cesium, {
                 positions: reversedPositions,
                 width: 8,
@@ -70,7 +71,7 @@ export const useRouteClosingSideeffect = (options: UseRouteClosingSideeffectOpti
         entities.push(outerEntity)
 
         // 내부 점선
-        const innerEntity = options.viewer.value.entities.add({
+        const innerEntity = viewer.value.entities.add({
             polyline: createClampedPolyline(Cesium, {
                 positions: reversedPositions,
                 width: 4,

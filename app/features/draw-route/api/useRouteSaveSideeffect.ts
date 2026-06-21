@@ -1,4 +1,4 @@
-import type { RouteDraftInput, RouteSectionDraftInput } from '#shared/types/route'
+import type { RouteCreateInput, RouteSectionDraftInput } from '#shared/types/route'
 
 /**
  * 경로 저장 API 호출을 담당하는 sideeffect composable.
@@ -12,7 +12,7 @@ export const useRouteSaveSideeffect = () => {
      * @param route - 저장할 경로 초안 데이터
      * @param sections - 저장할 구간 초안 배열
      */
-    const saveRoute = (route: RouteDraftInput, sections: RouteSectionDraftInput[]) =>
+    const saveRoute = (route: RouteCreateInput, sections: RouteSectionDraftInput[]) =>
         $fetch('/api/routes', {
             method: 'POST',
             body: {
@@ -31,7 +31,7 @@ export const useRouteSaveSideeffect = () => {
      */
     const updateRoute = (
         routeId: string,
-        route: RouteDraftInput,
+        route: RouteCreateInput,
         sections: RouteSectionDraftInput[]
     ) =>
         $fetch(`/api/routes/${routeId}`, {

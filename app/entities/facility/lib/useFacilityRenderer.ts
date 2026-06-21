@@ -1,4 +1,3 @@
-import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { GeoJsonPosition } from '#shared/types/geojson'
@@ -6,6 +5,7 @@ import type { Facility, FacilityType } from '#shared/types/facility'
 import { facilityPolyline, facilityAttrBool } from '#shared/types/facility'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { usePoiOverlay } from '~/shared/lib/map/usePoiOverlay'
 import type { PoiDto } from '~/shared/lib/map/usePoiOverlay'
@@ -21,7 +21,6 @@ export const ALL_FACILITY_TYPES: FacilityType[] = ['crosswalk', 'fountain', 'loc
 const getLayerColor = (type: FacilityType) => FacilityTypeEnum.from(type)?.color ?? '#FFFFFF'
 
 interface UseFacilityRendererOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     facilities: Ref<Facility[]>
     onPoiClick?: (facility: Facility) => void
     onFacilitySelect?: (facility: Facility | null) => void
@@ -31,7 +30,8 @@ interface UseFacilityRendererOptions {
  * 시설물 렌더링 로직: Entity/POI 추가·제거를 관리한다.
  */
 export const useFacilityRenderer = (options: UseFacilityRendererOptions) => {
-    const { viewer, facilities, onPoiClick, onFacilitySelect } = options
+    const { facilities, onPoiClick, onFacilitySelect } = options
+    const { viewer } = useMapViewer()
 
     /** 유형별 추가된 Entity 참조 보관 (횡단보도 polyline 전용) */
     const entityMap = new Map<FacilityType, Entity[]>()
@@ -44,7 +44,7 @@ export const useFacilityRenderer = (options: UseFacilityRendererOptions) => {
     const poiToFacilityMap = new Map<string, Facility>()
 
     /** POI(음수대/물품보관함/화장실) HTML Overlay */
-    const poiOverlay = usePoiOverlay(viewer, {
+    const poiOverlay = usePoiOverlay({
         onClick: (dto) => {
             const facility = poiToFacilityMap.get(dto.id)
             if (!facility) return
@@ -97,12 +97,18 @@ export const useFacilityRenderer = (options: UseFacilityRendererOptions) => {
 
         if (type === 'crosswalk') {
             const entities: Entity[] = []
-            for (const facility of items) {
-                const entity = addCrosswalkEntity(v, facility)
-                if (entity) {
-                    entities.push(entity)
-                    entityToFacilityMap.set(entity, facility)
+            // 대량 polyline entity 추가를 단일 collectionChanged 로 묶는다.
+            v.entities.suspendEvents()
+            try {
+                for (const facility of items) {
+                    const entity = addCrosswalkEntity(v, facility)
+                    if (entity) {
+                        entities.push(entity)
+                        entityToFacilityMap.set(entity, facility)
+                    }
                 }
+            } finally {
+                v.entities.resumeEvents()
             }
             entityMap.set(type, entities)
         } else {

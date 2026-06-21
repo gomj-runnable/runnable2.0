@@ -1,7 +1,5 @@
 /** 편의시설·행정경계·고도·경사도 레이어 스토어와 사이드이펙트를 조합하는 map layers sub-facade. */
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
-import type { PoiDraftInput } from '#shared/types/facility'
+import type { PoiCreateInput } from '#shared/types/facility'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
@@ -26,7 +24,6 @@ type NotificationStore = ReturnType<typeof useNotificationStore>
 type DrawingFacade = ReturnType<typeof useRouteMapFacade>['drawing']
 
 interface UseMapLayersFacadeOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     drawing: DrawingFacade
     routeDrawStore: RouteDrawStore
     notification: NotificationStore
@@ -35,7 +32,6 @@ interface UseMapLayersFacadeOptions {
 }
 
 export function useMapLayersFacade({
-    viewer,
     drawing,
     routeDrawStore,
     notification,
@@ -45,9 +41,8 @@ export function useMapLayersFacade({
     // ─── 편의시설 ────────────────────────────────────────────────────
     const facility = useFacilityStore()
     const facilityEffect = useFacilitySideeffect({
-        viewer,
         ...facility,
-        onPoiClick: (poi: PoiDraftInput) => {
+        onPoiClick: (poi: PoiCreateInput) => {
             if (!drawing.sectionDraft) return
 
             const ranges = routeDrawStore.sectionPointRanges.value
@@ -93,19 +88,17 @@ export function useMapLayersFacade({
 
     // ─── 행정경계 ────────────────────────────────────────────────────
     const boundary = useBoundaryStore()
-    const boundaryEffect = useBoundarySideeffect({ viewer })
+    const boundaryEffect = useBoundarySideeffect()
 
     // ─── 고도 시각화 ─────────────────────────────────────────────────
     const elevation = useElevationLayerStore()
     const elevationEffect = useElevationLayerSideeffect({
-        viewer,
         isElevationVisible: elevation.isElevationVisible
     })
 
     // ─── 경사도 시각화 ───────────────────────────────────────────────
     const gradient = useGradientStore()
     const gradientEffect = useGradientSideeffect({
-        viewer,
         isGradientVisible: gradient.isGradientVisible,
         drawnPositions: routeDrawStore.drawnPositions,
         setSegments: gradient.setSegments,

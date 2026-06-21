@@ -1,7 +1,7 @@
 import { getRouteRepository } from '../repositories'
 import { lookupDistricts } from '../utils/district/district-lookup'
 import { conflict, notFound } from '#server/errors'
-import type { RouteDraftInput } from '#shared/types/route'
+import type { RouteCreateInput } from '#shared/types/route'
 import type { SavedRoute, SavedSection, CreateSectionInput } from '../repositories/route.repository'
 
 export const routeService = {
@@ -22,7 +22,7 @@ export const routeService = {
     },
 
     async createRouteWithSections(
-        routeInput: RouteDraftInput,
+        routeInput: RouteCreateInput,
         sectionInputs: CreateSectionInput[],
         userId: string
     ): Promise<{ route: SavedRoute; sections: SavedSection[] }> {
@@ -45,7 +45,7 @@ export const routeService = {
 
     async updateRouteWithSections(
         routeId: string,
-        routeInput: Partial<RouteDraftInput> | undefined,
+        routeInput: Partial<RouteCreateInput> | undefined,
         sectionInputs: CreateSectionInput[] | undefined
     ): Promise<{ route: SavedRoute | null; sections: SavedSection[] }> {
         const repo = await getRouteRepository()

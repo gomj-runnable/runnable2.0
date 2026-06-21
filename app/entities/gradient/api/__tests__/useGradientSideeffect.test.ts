@@ -2,9 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
 
 import { useGradientSideeffect } from '~/entities/gradient/api/useGradientSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 vi.stubGlobal('onBeforeUnmount', vi.fn())
 vi.stubGlobal('watch', vueWatch)
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 const C: any = {
     Color: {
@@ -14,6 +29,10 @@ const C: any = {
     HeightReference: { CLAMP_TO_GROUND: 1 }
 }
 vi.stubGlobal('window', { Cesium: C } as any)
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
 
 const makeViewer = () => {
     const added: any[] = []
@@ -43,7 +62,9 @@ describe('useGradientSideeffect', () => {
     let showRoutePolylines: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
+        setMockViewer(viewer.value)
         isGradientVisible = ref(false)
         drawnPositions = ref<any>(null)
         setSegments = vi.fn()
@@ -55,7 +76,6 @@ describe('useGradientSideeffect', () => {
     type GradientOpts = Parameters<typeof useGradientSideeffect>[0]
     const create = () =>
         useGradientSideeffect({
-            viewer: viewer as any,
             isGradientVisible: isGradientVisible as GradientOpts['isGradientVisible'],
             drawnPositions: drawnPositions as GradientOpts['drawnPositions'],
             setSegments: setSegments as GradientOpts['setSegments'],
@@ -109,7 +129,7 @@ describe('useGradientSideeffect', () => {
     })
 
     it('viewer null → entity 추가 안 함', async () => {
-        viewer.value = null
+        setMockViewer(null)
         drawnPositions.value = [
             [127, 37, 0],
             [127.001, 37.001, 5]

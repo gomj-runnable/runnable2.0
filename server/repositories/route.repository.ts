@@ -2,14 +2,14 @@
 import { randomUUID } from 'node:crypto'
 import { eq, and, ilike, or, desc, sql } from 'drizzle-orm'
 import type {
-    RouteDraftInput,
+    RouteCreateInput,
     RouteSectionCreateInput,
     SavedRoute,
     SavedSection,
     SectionAttr
 } from '#shared/types/route'
 import type { GeoJsonLineString, GeoJsonPoint } from '#shared/types/geojson'
-import type { PoiDraftInput, PoiType } from '#shared/types/facility'
+import type { PoiCreateInput, PoiType } from '#shared/types/facility'
 import type { getDb } from '../database/client'
 import { routes, routeSections, routeLikes } from '../database/schema/routes'
 import { routeSectionPois } from '../database/schema/routeSectionPois'
@@ -25,12 +25,12 @@ export type CreateSectionInput = RouteSectionCreateInput
  * 구현체(InMemory, Postgres 등)만 교체하면 저장 방식을 변경할 수 있다.
  */
 export interface IRouteRepository {
-    createRoute(input: RouteDraftInput, userId: string): Promise<SavedRoute>
+    createRoute(input: RouteCreateInput, userId: string): Promise<SavedRoute>
     getRoute(routeId: string): Promise<SavedRoute | null>
     listRoutes(): Promise<SavedRoute[]>
     listRoutesByUser(userId: string): Promise<SavedRoute[]>
     searchPublicRoutes(query?: string): Promise<SavedRoute[]>
-    updateRoute(routeId: string, input: Partial<RouteDraftInput>): Promise<SavedRoute | null>
+    updateRoute(routeId: string, input: Partial<RouteCreateInput>): Promise<SavedRoute | null>
     deleteRoute(routeId: string): Promise<boolean>
     createSection(routeId: string, input: CreateSectionInput): Promise<SavedSection>
     createSections(routeId: string, inputs: CreateSectionInput[]): Promise<SavedSection[]>
@@ -133,7 +133,7 @@ export class DrizzleRouteRepository implements IRouteRepository {
         return this.db.select().from(routes).leftJoin(users, eq(routes.userId, users.id))
     }
 
-    async createRoute(input: RouteDraftInput, userId: string): Promise<SavedRoute> {
+    async createRoute(input: RouteCreateInput, userId: string): Promise<SavedRoute> {
         const routeId = randomUUID()
         const [row] = await this.db
             .insert(routes)
@@ -195,7 +195,7 @@ export class DrizzleRouteRepository implements IRouteRepository {
 
     async updateRoute(
         routeId: string,
-        input: Partial<RouteDraftInput>
+        input: Partial<RouteCreateInput>
     ): Promise<SavedRoute | null> {
         const values: Partial<typeof routes.$inferInsert> = {}
         if (input.title !== undefined) values.title = input.title
@@ -296,7 +296,7 @@ export class DrizzleRouteRepository implements IRouteRepository {
             FROM route_section_pois
             WHERE section_id = ANY(${idsArray}::text[])
         `)
-        const poiMap = new Map<string, PoiDraftInput[]>()
+        const poiMap = new Map<string, PoiCreateInput[]>()
         for (const p of poiResult.rows as unknown as PoiRow[]) {
             const list = poiMap.get(p.section_id) ?? []
             list.push({

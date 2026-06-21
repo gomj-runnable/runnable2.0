@@ -1,7 +1,6 @@
-import type { ShallowRef } from 'vue'
 import type { GeoJsonPosition } from '#shared/types/geojson'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useCesiumController } from '~/shared/lib/map/CesiumController'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 /**
  * Cesium 지형 고도 샘플링 헬퍼.
@@ -11,7 +10,8 @@ import { useCesiumController } from '~/shared/lib/map/CesiumController'
  * 단일 좌표 배열 샘플링(`sampleTerrain`)과
  * 구간 배열의 보간+샘플링 파이프라인(`densifyAndSampleSections`)을 제공한다.
  */
-export const useTerrainSampler = (viewer: ShallowRef<CesiumViewer | null>) => {
+export const useTerrainSampler = () => {
+    const { viewer } = useMapViewer()
     const controller = useCesiumController()
 
     return {

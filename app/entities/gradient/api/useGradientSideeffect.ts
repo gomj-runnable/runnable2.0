@@ -1,6 +1,5 @@
 // 경사도 폴리라인 레이어를 Cesium 지도에 렌더링·제거하고 난이도를 계산하는 sideeffect composable.
-import type { Ref, ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import type { Ref } from 'vue'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { GradientSegment } from '#shared/types/gradient'
 import type { DifficultyLevelEnum } from '#shared/types/difficulty-level.enum'
@@ -8,12 +7,12 @@ import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { useGradientAction } from '~/entities/gradient/lib/useGradientAction'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
 import { distance, point } from '@turf/turf'
 
 interface GradientSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     isGradientVisible: Ref<boolean>
     drawnPositions: Ref<GeoJsonPosition[] | null>
     setSegments: (segments: GradientSegment[]) => void
@@ -24,7 +23,6 @@ interface GradientSideeffectOptions {
 
 export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
     const {
-        viewer,
         isGradientVisible,
         drawnPositions,
         setSegments,
@@ -32,8 +30,9 @@ export const useGradientSideeffect = (options: GradientSideeffectOptions) => {
         hideRoutePolylines,
         showRoutePolylines
     } = options
+    const { viewer } = useMapViewer()
     const { calculateSegmentGradients, classifyDifficulty } = useGradientAction()
-    const gradientPolylines = createEntityGroup(viewer)
+    const gradientPolylines = createEntityGroup()
 
     const drawGradientPolylines = (positions: GeoJsonPosition[]) => {
         const v = viewer.value

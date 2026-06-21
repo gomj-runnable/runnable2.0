@@ -5,7 +5,7 @@
  * nested route(`pages/index/*`)로 분리해 `<NuxtPage>`로 렌더한다.
  * 자식 panel 은 `provide`한 컨텍스트로 facade·flow·auth 에 접근한다.
  */
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import MapCanvas from '~/widgets/map-shell/ui/MapCanvas.vue'
 import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
 import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
@@ -39,7 +39,8 @@ import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelecti
 definePageMeta({ ssr: false })
 useHead({ link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }] })
 
-const viewer = shallowRef<CesiumViewer | null>(null)
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. useMapFeatureInit 이 onMounted 에서 등록한다.
+const { viewer } = useMapViewer()
 
 // NOTE 1. Store 선언
 const notification = useNotificationStore() // 알림
@@ -47,10 +48,10 @@ const routeInfoStore = useRouteInfoStore() // 경로 정보
 const routeDrawStore = useRouteDrawStore() // 그리기
 
 // NOTE 2. Sideeffect 선언
-const routeInfoEffect = useRouteInfoSideeffect(viewer)
+const routeInfoEffect = useRouteInfoSideeffect()
 
 // 경로 퍼싸드
-const facade = useRouteMapFacade(viewer, {
+const facade = useRouteMapFacade({
     onAfterSave: async (routeId) => {
         await routeInfoEffect.saveLocalRouteInfos(routeId)
     }
@@ -70,7 +71,6 @@ const {
 } = facade
 
 const features = useMapFeatureInit({
-    viewer,
     drawing,
     routeDrawStore,
     notification,
@@ -97,9 +97,9 @@ const compareEffect = useRouteCompareSideeffect()
 
 // 헤더 버튼(베이스맵·2D/3D 토글·그래픽 품질)이 변경하는 store 상태를 viewer에 반영하는 공통 컨텍스트 sideeffect
 const runtimeConfig = useRuntimeConfig()
-useViewModeSideeffect({ viewer })
-useGraphicQualitySideeffect({ viewer })
-useBaseMapSideeffect({ viewer, vworldKey: runtimeConfig.public.vworldKey })
+useViewModeSideeffect()
+useGraphicQualitySideeffect()
+useBaseMapSideeffect({ vworldKey: runtimeConfig.public.vworldKey })
 
 // 탐색은 사이드패널 플러그인으로 분리됐지만, 선택 경로 ID는 store(useState) 기반 전역 상태라
 // 코어도 동일 인스턴스를 통해 오버레이 컨텍스트(EXPLORE_SELECTED)를 판별한다.

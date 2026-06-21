@@ -1,8 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { shallowRef } from 'vue'
-import type { Ref, ShallowRef } from 'vue'
 
 import { useTerrainSampler } from '~/shared/lib/map/useTerrainSampler'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
 
 const sampleTerrainMostDetailed = vi.fn()
 const C = {
@@ -15,52 +32,50 @@ const C = {
 vi.stubGlobal('window', { Cesium: C } as any)
 
 describe('useTerrainSampler.sampleTerrain()', () => {
-    let viewer: ShallowRef<any>
-
     beforeEach(() => {
-        viewer = shallowRef({ terrainProvider: { id: 'tp' } })
+        setMockViewer(null)
+        setMockViewer({ terrainProvider: { id: 'tp' } } as any)
         sampleTerrainMostDetailed.mockReset()
     })
 
     it('viewer 가 null 이면 원본 반환', async () => {
-        viewer.value = null
-        const { sampleTerrain } = useTerrainSampler(viewer)
+        setMockViewer(null)
+        const { sampleTerrain } = useTerrainSampler()
         const positions = [[127, 37, 0]] as any
         await expect(sampleTerrain(positions)).resolves.toBe(positions)
     })
 
     it('positions 빈 배열은 원본 반환', async () => {
-        const { sampleTerrain } = useTerrainSampler(viewer)
+        const { sampleTerrain } = useTerrainSampler()
         await expect(sampleTerrain([])).resolves.toEqual([])
     })
 
     it('샘플링 성공 — height 가 반영된 새 배열', async () => {
         sampleTerrainMostDetailed.mockResolvedValue([{ longitude: 127, latitude: 37, height: 55 }])
-        const { sampleTerrain } = useTerrainSampler(viewer)
+        const { sampleTerrain } = useTerrainSampler()
         const result = await sampleTerrain([[127, 37, 0]])
         expect(result).toEqual([[127, 37, 55]])
     })
 
     it('샘플링 실패(throw) 시 원본 반환', async () => {
         sampleTerrainMostDetailed.mockRejectedValue(new Error('terrain error'))
-        const { sampleTerrain } = useTerrainSampler(viewer)
+        const { sampleTerrain } = useTerrainSampler()
         const positions = [[127, 37, 0]] as any
         await expect(sampleTerrain(positions)).resolves.toBe(positions)
     })
 
     it('height 누락 시 0 으로 처리', async () => {
         sampleTerrainMostDetailed.mockResolvedValue([{ longitude: 127, latitude: 37 }])
-        const { sampleTerrain } = useTerrainSampler(viewer)
+        const { sampleTerrain } = useTerrainSampler()
         const result = await sampleTerrain([[127, 37, 0]])
         expect(result).toEqual([[127, 37, 0]])
     })
 })
 
 describe('useTerrainSampler.densifyAndSample() / Sections()', () => {
-    let viewer: ShallowRef<any>
-
     beforeEach(() => {
-        viewer = shallowRef({ terrainProvider: {} })
+        setMockViewer(null)
+        setMockViewer({ terrainProvider: {} } as any)
         sampleTerrainMostDetailed.mockReset()
     })
 
@@ -69,7 +84,7 @@ describe('useTerrainSampler.densifyAndSample() / Sections()', () => {
         sampleTerrainMostDetailed.mockImplementation(async (_provider, carts) =>
             carts.map((c: any) => ({ longitude: c.lng, latitude: c.lat, height: 10 }))
         )
-        const { densifyAndSample } = useTerrainSampler(viewer)
+        const { densifyAndSample } = useTerrainSampler()
         const result = await densifyAndSample([
             [127, 37, 0],
             [127.01, 37.01, 0]
@@ -82,7 +97,7 @@ describe('useTerrainSampler.densifyAndSample() / Sections()', () => {
         sampleTerrainMostDetailed.mockImplementation(async (_provider, carts) =>
             carts.map((c: any) => ({ longitude: c.lng, latitude: c.lat, height: 7 }))
         )
-        const { densifyAndSampleSections } = useTerrainSampler(viewer)
+        const { densifyAndSampleSections } = useTerrainSampler()
         const sections = [
             {
                 label: 'A',

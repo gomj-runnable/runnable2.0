@@ -1,10 +1,34 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ref, nextTick, watch as vueWatch } from 'vue'
 
 import { useFacilitySideeffect } from '~/entities/facility/api/useFacilitySideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 가 공유 ref 이므로, 테스트 간 누수된 watch 가 다음 테스트의 viewer 변경에
+// 재발화하지 않도록 watch 핸들을 추적해 afterEach 에서 일괄 정지한다.
+const activeWatchStops: Array<() => void> = []
+const trackedWatch = ((...args: Parameters<typeof vueWatch>) => {
+    const stop = vueWatch(...args)
+    activeWatchStops.push(stop)
+    return stop
+}) as typeof vueWatch
 
 vi.stubGlobal('onBeforeUnmount', vi.fn())
-vi.stubGlobal('watch', vueWatch)
+vi.stubGlobal('watch', trackedWatch)
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 const sharedCamera = vi.hoisted(() => ({
     centerLat: { value: 37.5 as number | null },
@@ -47,6 +71,10 @@ const C: any = {
 }
 vi.stubGlobal('window', { Cesium: C } as any)
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 const makeViewer = () => ({
     scene: {
         canvas: {},
@@ -55,14 +83,14 @@ const makeViewer = () => ({
 })
 
 describe('useFacilitySideeffect', () => {
-    let viewer: ReturnType<typeof shallowRef<any>>
     let facilities: ReturnType<typeof ref<any[]>>
     let activeTypes: ReturnType<typeof ref<Set<any>>>
     let isLoading: ReturnType<typeof ref<boolean>>
     let isSearching: ReturnType<typeof ref<boolean>>
 
     beforeEach(() => {
-        viewer = shallowRef(makeViewer())
+        setMockViewer(null)
+        setMockViewer(makeViewer())
         facilities = ref<any[]>([])
         activeTypes = ref(new Set())
         isLoading = ref(false)
@@ -77,9 +105,13 @@ describe('useFacilitySideeffect', () => {
         rendererMock.isLayerShown.mockReset().mockReturnValue(false)
     })
 
+    afterEach(() => {
+        // 누수된 watch 정지 → 다음 테스트 beforeEach 의 viewer 변경에 재발화 방지
+        while (activeWatchStops.length) activeWatchStops.pop()?.()
+    })
+
     const create = (extraOpts: any = {}) =>
         useFacilitySideeffect({
-            viewer: viewer as any,
             facilities,
             activeTypes,
             isLoading,
@@ -150,7 +182,7 @@ describe('useFacilitySideeffect', () => {
     })
 
     it('viewer null 이면 click handler 등록 안 함', async () => {
-        viewer.value = null
+        setMockViewer(null)
         create()
         await nextTick()
         // 검증 — ScreenSpaceEventHandler 생성 카운트는 별도 검증 어려움

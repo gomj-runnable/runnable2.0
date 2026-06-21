@@ -52,7 +52,7 @@ describe('useRouteSelectionFlow', () => {
         activeNav = ref('탐색')
         routeInfoStore = {
             clearRouteInfos: vi.fn(),
-            clearLocalRouteInfos: vi.fn()
+            clearDraftRouteInfos: vi.fn()
         }
         routeInfoEffect = {
             fetchRouteInfos: vi.fn(),

@@ -6,6 +6,7 @@
 import type { SavedRoute, SavedSection } from '#shared/types/route'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { useMapInit } from '~/shared/lib/map/useMapInit'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { useShareViewerSideeffect } from '~/features/share-viewer/api/useShareViewerSideeffect'
 
 definePageMeta({ ssr: false, layout: 'default' })
@@ -25,9 +26,10 @@ const sharedData = ref<{
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 
-const viewer = shallowRef<CesiumViewer | null>(null)
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. share 페이지가 init 후 setViewer 로 등록한다.
+const { viewer, setViewer } = useMapViewer()
 const { init } = useMapInit()
-const shareViewer = useShareViewerSideeffect({ viewer })
+const shareViewer = useShareViewerSideeffect()
 
 async function loadShare() {
     isLoading.value = true
@@ -53,7 +55,7 @@ async function retry() {
 onMounted(async () => {
     await loadShare()
     await init()
-    viewer.value = (window as Window & { viewer?: CesiumViewer }).viewer ?? null
+    setViewer((window as Window & { viewer?: CesiumViewer }).viewer ?? null)
 
     if (sharedData.value && viewer.value) {
         shareViewer.renderSections(sharedData.value.sections)
@@ -62,6 +64,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     shareViewer.clear()
+    setViewer(null)
 })
 
 const distanceKm = computed(() => {
@@ -90,17 +93,11 @@ const elevationRange = computed(() => {
         </div>
 
         <!-- 오류 -->
-        <div
-            v-else-if="error"
-            class="absolute inset-0 flex items-center justify-center z-10 px-4"
-        >
+        <div v-else-if="error" class="absolute inset-0 flex items-center justify-center z-10 px-4">
             <div
                 class="rounded-xl bg-black/70 backdrop-blur-sm px-6 py-5 text-white text-center max-w-sm"
             >
-                <UIcon
-                    name="i-lucide-circle-alert"
-                    class="w-10 h-10 mx-auto mb-3 text-red-400"
-                />
+                <UIcon name="i-lucide-circle-alert" class="w-10 h-10 mx-auto mb-3 text-red-400" />
                 <p class="text-base font-medium">{{ error }}</p>
                 <p class="text-xs text-gray-400 mt-2">잠시 후 다시 시도해주세요.</p>
                 <div class="mt-4 flex items-center justify-center gap-2">
@@ -112,13 +109,7 @@ const elevationRange = computed(() => {
                         variant="outline"
                         @click="retry"
                     />
-                    <UButton
-                        label="홈으로"
-                        to="/"
-                        size="sm"
-                        color="neutral"
-                        variant="ghost"
-                    />
+                    <UButton label="홈으로" to="/" size="sm" color="neutral" variant="ghost" />
                 </div>
             </div>
         </div>

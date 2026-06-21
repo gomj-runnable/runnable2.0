@@ -1,5 +1,5 @@
-import type { Ref, ShallowRef } from 'vue'
-import type { DrawActionData, CesiumViewer } from '~/shared/lib/useWindow'
+import type { Ref } from 'vue'
+import type { DrawActionData } from '~/shared/lib/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
@@ -19,9 +19,9 @@ import type { NotificationOptions } from '~/entities/notification/model/useNotif
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteGraphicsRenderer } from '~/features/draw-route/lib/useRouteGraphicsRenderer'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 interface UseRouteDrawSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     drawnPositions: Ref<GeoJsonPosition[] | null>
     drawMetrics: Ref<DrawActionData | null>
     sectionDraft: Ref<CreateSectionSchema | null>
@@ -34,11 +34,11 @@ interface UseRouteDrawSideeffectOptions {
 
 /** 경로 드로잉 이벤트(리셋·저장·구간 수정·삭제)를 오케스트레이션하는 sideeffect composable. */
 const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
+    const { viewer } = useMapViewer()
     const isDrawingActive = ref(false)
 
     const { sectionPolylines, sectionPoints, clearSectionGraphics, redrawSectionGraphics } =
         useRouteGraphicsRenderer({
-            viewer: options.viewer,
             drawnPositions: options.drawnPositions,
             sectionPointRanges: options.sectionPointRanges,
             closingMode: options.closingMode
@@ -46,7 +46,6 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     // ─── Split Mode (구간 포인트 선택/드래그) ───────────────────────
     const { splitMode, enterSplitMode, exitSplitMode } = useSplitModeSideeffect({
-        viewer: options.viewer,
         drawnPositions: options.drawnPositions,
         sectionPointRanges: options.sectionPointRanges,
         sectionDraft: options.sectionDraft,
@@ -56,7 +55,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     /** 드로잉을 초기화하고 새 경로 드로잉을 시작한다. */
     const handleDrawReset = async (): Promise<GeoJsonPosition[] | null> => {
-        if (!options.viewer.value) {
+        if (!viewer.value) {
             options.notify({
                 title: '지도 로딩 중',
                 message: '지도를 아직 불러오는 중입니다.',
@@ -70,7 +69,7 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
         isDrawingActive.value = true
         options.notify({ title: '경로 그리기', message: '좌클릭: 구간 추가\n우클릭: 완료' })
 
-        const result = await options.viewer.value._drawAction({
+        const result = await viewer.value._drawAction({
             shapeType: 1,
             showLabel: true
         })
@@ -106,16 +105,16 @@ const useRouteDrawSideeffect = (options: UseRouteDrawSideeffectOptions) => {
 
     /** 진행 중인 드로잉을 취소하고 지도 위 구간 그래픽을 정리한다. */
     const cancelDrawing = () => {
-        if (!options.viewer.value) return
+        if (!viewer.value) return
         isDrawingActive.value = false
-        options.viewer.value._cancelDrawAction()
+        viewer.value._cancelDrawAction()
         clearSectionGraphics()
     }
 
     /** 진행 중인 드로잉을 현재 포인트로 완료한다. (모바일 우클릭 대체) */
     const finishDrawing = () => {
-        if (!options.viewer.value) return
-        options.viewer.value._finishDrawAction()
+        if (!viewer.value) return
+        viewer.value._finishDrawAction()
     }
     /** 현재 구간 초안을 Zod 스키마로 파싱하고 저장 모달을 연다. */
     const handleDrawSave = () => {

@@ -1,5 +1,6 @@
-import type { Ref, ShallowRef } from 'vue'
-import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
+import { onScopeDispose } from 'vue'
+import type { Ref } from 'vue'
+import type { CesiumEntity } from '~/shared/lib/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { NotificationOptions } from '~/entities/notification/model/useNotificationStore'
@@ -13,9 +14,9 @@ import {
     toCesiumColor
 } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPoint } from '~/entities/route/lib/useGroundClamping'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 export interface UseSplitModeSideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     drawnPositions: Ref<GeoJsonPosition[] | null>
     sectionPointRanges: Ref<Array<{ start: number; end: number }>>
     sectionDraft: Ref<CreateSectionSchema | null>
@@ -32,9 +33,10 @@ export interface UseSplitModeSideeffectOptions {
  * `useRouteDrawSideeffect`에서 추출되어 책임을 분리한다.
  */
 export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) => {
+    const { viewer } = useMapViewer()
     const splitMode = ref(false)
     const splitTargetIndex = ref<number | null>(null)
-    const splitPointGroup = createEntityGroup(options.viewer)
+    const splitPointGroup = createEntityGroup()
     const splitPointMap = new Map<CesiumEntity, number>()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let splitHandler: any = null
@@ -70,9 +72,9 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
             splitHandler = null
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const viewer = options.viewer.value as any
-        if (viewer?.scene?.screenSpaceCameraController) {
-            viewer.scene.screenSpaceCameraController.enableRotate = true
+        const v = viewer.value as any
+        if (v?.scene?.screenSpaceCameraController) {
+            v.scene.screenSpaceCameraController.enableRotate = true
         }
     }
 
@@ -80,7 +82,7 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
     const enterSplitMode = (sectionIndex: number) => {
         const positions = options.drawnPositions.value
         const range = options.sectionPointRanges.value[sectionIndex]
-        if (!positions || !range || !options.viewer.value) return
+        if (!positions || !range || !viewer.value) return
 
         exitSplitMode()
 
@@ -95,7 +97,7 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
             if (!pos) continue
 
             const isEndpoint = i === range.start || i === range.end
-            const entity = options.viewer.value.entities.add({
+            const entity = viewer.value.entities.add({
                 position: toCartesianPosition(Cesium, pos),
                 point: createClampedPoint(Cesium, {
                     color: isEndpoint
@@ -116,14 +118,14 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
 
         // 클릭/드래그 이벤트 핸들러
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const viewer = options.viewer.value as any
-        splitHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+        const v = viewer.value as any
+        splitHandler = new Cesium.ScreenSpaceEventHandler(v.scene.canvas)
 
         let dragEntity: CesiumEntity | null = null
         let dragPointIndex: number | null = null
 
         const pickSplitEntity = (pos: unknown): CesiumEntity | null => {
-            const picked = viewer.scene.pick(pos)
+            const picked = v.scene.pick(pos)
             const entity = picked?.id as CesiumEntity | undefined
             return entity && splitPointMap.has(entity) ? entity : null
         }
@@ -154,8 +156,8 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
 
             dragEntity = entity
             dragPointIndex = splitPointMap.get(entity)!
-            if (viewer.scene.screenSpaceCameraController) {
-                viewer.scene.screenSpaceCameraController.enableRotate = false
+            if (v.scene.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableRotate = false
             }
         }, Cesium.ScreenSpaceEventType.LEFT_DOWN)
 
@@ -164,8 +166,8 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
             if (!dragEntity || dragPointIndex === null) return
 
             const cartesian =
-                viewer.scene.pickPosition?.(movement.endPosition) ??
-                viewer.camera.pickEllipsoid?.(movement.endPosition, Cesium.Ellipsoid.WGS84)
+                v.scene.pickPosition?.(movement.endPosition) ??
+                v.camera.pickEllipsoid?.(movement.endPosition, Cesium.Ellipsoid.WGS84)
             if (!cartesian) return // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ;(dragEntity as any).position = cartesian
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
@@ -188,8 +190,8 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
                 options.drawnPositions.value = updated
             }
 
-            if (viewer.scene.screenSpaceCameraController) {
-                viewer.scene.screenSpaceCameraController.enableRotate = true
+            if (v.scene.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableRotate = true
             }
             dragEntity = null
             dragPointIndex = null
@@ -198,6 +200,9 @@ export const useSplitModeSideeffect = (options: UseSplitModeSideeffectOptions) =
             enterSplitMode(sectionIndex)
         }, Cesium.ScreenSpaceEventType.LEFT_UP)
     }
+
+    // 컴포넌트 unmount 시 split 핸들러·엔티티 누수 방지 (활성 중 언마운트 안전망)
+    onScopeDispose(exitSplitMode)
 
     return {
         splitMode,

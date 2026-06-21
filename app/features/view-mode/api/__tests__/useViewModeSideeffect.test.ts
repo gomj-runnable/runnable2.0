@@ -4,7 +4,7 @@ import type { ShallowRef } from 'vue'
 import { ScreenModeEnum } from '#shared/types/screen-mode.enum'
 import { useViewModeSideeffect } from '~/features/view-mode/api/useViewModeSideeffect'
 import { useViewModeStore } from '~/features/view-mode/model/useViewModeStore'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 vi.mock('~/features/view-mode/model/useViewModeStore', async () => {
     const { ref, computed } = await import('vue')
@@ -56,6 +56,24 @@ vi.mock('~/shared/lib/map/useCesiumRuntime', () => ({
     })
 }))
 
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 const makeTileset = () => ({ maximumScreenSpaceError: 0, show: true })
 
 const makeViewer = (tileset = makeTileset()) => ({
@@ -95,13 +113,13 @@ describe('useViewModeSideeffect', () => {
     let scope: ReturnType<typeof effectScope> | null = null
 
     const mount = (viewer: ShallowRef<unknown>) => {
+        setMockViewer(viewer.value)
         scope = effectScope()
-        return scope.run(() =>
-            useViewModeSideeffect({ viewer: viewer as ShallowRef<CesiumViewer | null> })
-        )!
+        return scope.run(() => useViewModeSideeffect())!
     }
 
     beforeEach(async () => {
+        setMockViewer(null)
         store.setMode(ScreenModeEnum.MODE3D)
         store.setTransitioning(false)
         await nextTick()

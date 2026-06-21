@@ -1,6 +1,7 @@
-import type { Ref, ShallowRef } from 'vue'
-import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
+import type { Ref } from 'vue'
+import type { CesiumEntity } from '~/shared/lib/useWindow'
 import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import {
@@ -13,7 +14,6 @@ import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 
 interface UseRouteGraphicsRendererOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     drawnPositions: Ref<GeoJsonPosition[] | null>
     sectionPointRanges: Ref<Array<{ start: number; end: number }>>
     closingMode?: Ref<RouteClosingModeEnum | null>
@@ -24,8 +24,9 @@ interface UseRouteGraphicsRendererOptions {
  * Cesium 엔티티 생성·제거 로직만 분리하여 관리한다.
  */
 export const useRouteGraphicsRenderer = (options: UseRouteGraphicsRendererOptions) => {
-    const sectionPolylines = createEntityGroup(options.viewer)
-    const sectionPoints = createEntityGroup(options.viewer)
+    const { viewer } = useMapViewer()
+    const sectionPolylines = createEntityGroup()
+    const sectionPoints = createEntityGroup()
 
     /**
      * 단일 구간의 폴리라인을 지도에 그린다.
@@ -35,7 +36,7 @@ export const useRouteGraphicsRenderer = (options: UseRouteGraphicsRendererOption
         sectionIndex: number,
         isDashed = false
     ): CesiumEntity | null => {
-        if (!options.viewer.value) {
+        if (!viewer.value) {
             return null
         }
 
@@ -48,7 +49,7 @@ export const useRouteGraphicsRenderer = (options: UseRouteGraphicsRendererOption
               })
             : toCesiumColor(Cesium, color, 0.95)
 
-        return options.viewer.value.entities.add({
+        return viewer.value.entities.add({
             polyline: createClampedPolyline(Cesium, {
                 positions,
                 width: 4,
@@ -58,11 +59,11 @@ export const useRouteGraphicsRenderer = (options: UseRouteGraphicsRendererOption
     }
 
     const createRoutePoint = (position: GeoJsonPosition, color: string): CesiumEntity | null => {
-        if (!options.viewer.value) {
+        if (!viewer.value) {
             return null
         }
 
-        return addRoutePointEntity(getCesiumRuntime(), options.viewer.value, position, color)
+        return addRoutePointEntity(getCesiumRuntime(), viewer.value, position, color)
     }
 
     /**
@@ -84,7 +85,7 @@ export const useRouteGraphicsRenderer = (options: UseRouteGraphicsRendererOption
 
         clearSectionGraphics()
 
-        if (!options.viewer.value || positions.length < 2 || ranges.length === 0) {
+        if (!viewer.value || positions.length < 2 || ranges.length === 0) {
             return
         }
 

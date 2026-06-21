@@ -2,6 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef, watch as vueWatch } from 'vue'
 
 import { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 vi.stubGlobal('watch', vueWatch)
 
@@ -76,18 +91,24 @@ const makeViewer = () => {
     }
 }
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 describe('useRouteInfoSideeffect', () => {
     let viewer: ReturnType<typeof shallowRef<any>>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
+        setMockViewer(viewer.value)
         sharedStore.store = {
             routeInfos: ref<any[]>([]),
-            localRouteInfos: ref<any[]>([]),
+            draftRouteInfos: ref<any[]>([]),
             isAddingRouteInfo: ref(false),
             selectedMarkerRouteInfo: ref<any>(null),
             isLoading: ref(false),
-            clearLocalRouteInfos: vi.fn(),
+            clearDraftRouteInfos: vi.fn(),
             clearRouteInfos: vi.fn()
         }
         $fetchMock.mockReset()
@@ -99,7 +120,7 @@ describe('useRouteInfoSideeffect', () => {
             $fetchMock.mockResolvedValue([
                 { name: 'info1', geom: { type: 'Point', coordinates: [127, 37] } }
             ])
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             await sideeffect.fetchRouteInfos('r-1')
             expect($fetchMock).toHaveBeenCalledWith('/api/routes/r-1/feedbacks')
             expect(sharedStore.store.routeInfos.value).toHaveLength(1)
@@ -108,7 +129,7 @@ describe('useRouteInfoSideeffect', () => {
 
         it('실패 시 console.error + 데이터 변경 없음', async () => {
             $fetchMock.mockRejectedValue(new Error('boom'))
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             await sideeffect.fetchRouteInfos('r-1')
             expect(sharedStore.store.routeInfos.value).toEqual([])
             expect(sharedStore.store.isLoading.value).toBe(false)
@@ -122,7 +143,7 @@ describe('useRouteInfoSideeffect', () => {
                 geom: { type: 'Point', coordinates: [127, 37] }
             })
             sharedStore.store.isAddingRouteInfo.value = true
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             await sideeffect.submitRouteInfo('r-1', { name: 'new' } as any)
             expect(sharedStore.store.routeInfos.value).toHaveLength(1)
             expect(sharedStore.store.isAddingRouteInfo.value).toBe(false)
@@ -130,20 +151,20 @@ describe('useRouteInfoSideeffect', () => {
 
         it('실패 → throw', async () => {
             $fetchMock.mockRejectedValue(new Error('boom'))
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             await expect(sideeffect.submitRouteInfo('r-1', {} as any)).rejects.toThrow('boom')
         })
     })
 
     describe('saveLocalRouteInfos', () => {
-        it('localRouteInfos 비어 있으면 무동작', async () => {
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+        it('draftRouteInfos 비어 있으면 무동작', async () => {
+            const sideeffect = useRouteInfoSideeffect()
             await sideeffect.saveLocalRouteInfos('r-1')
             expect($fetchMock).not.toHaveBeenCalled()
         })
 
-        it('각 local 항목에 대해 POST 후 clearLocalRouteInfos', async () => {
-            sharedStore.store.localRouteInfos.value = [
+        it('각 local 항목에 대해 POST 후 clearDraftRouteInfos', async () => {
+            sharedStore.store.draftRouteInfos.value = [
                 { name: 'a', geom: { type: 'Point', coordinates: [127, 37] } },
                 { name: 'b', geom: { type: 'Point', coordinates: [127, 37] } }
             ] as any
@@ -151,14 +172,14 @@ describe('useRouteInfoSideeffect', () => {
                 name: 'saved',
                 geom: { type: 'Point', coordinates: [127, 37] }
             })
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             await sideeffect.saveLocalRouteInfos('r-1')
             expect($fetchMock).toHaveBeenCalledTimes(2)
-            expect(sharedStore.store.clearLocalRouteInfos).toHaveBeenCalled()
+            expect(sharedStore.store.clearDraftRouteInfos).toHaveBeenCalled()
         })
 
         it('일부 실패해도 다음 항목 진행', async () => {
-            sharedStore.store.localRouteInfos.value = [
+            sharedStore.store.draftRouteInfos.value = [
                 { name: 'a', geom: { type: 'Point', coordinates: [127, 37] } },
                 { name: 'b', geom: { type: 'Point', coordinates: [127, 37] } }
             ] as any
@@ -166,32 +187,32 @@ describe('useRouteInfoSideeffect', () => {
                 name: 'b',
                 geom: { type: 'Point', coordinates: [127, 37] }
             })
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             await sideeffect.saveLocalRouteInfos('r-1')
             expect(sharedStore.store.routeInfos.value).toHaveLength(1)
-            expect(sharedStore.store.clearLocalRouteInfos).toHaveBeenCalled()
+            expect(sharedStore.store.clearDraftRouteInfos).toHaveBeenCalled()
         })
     })
 
     describe('renderRouteInfoMarkers / clearMarkers', () => {
-        it('routeInfos + localRouteInfos 모두 entity 로 렌더링', () => {
+        it('routeInfos + draftRouteInfos 모두 entity 로 렌더링', () => {
             sharedStore.store.routeInfos.value = [
                 { name: '서버', geom: { type: 'Point', coordinates: [127, 37, 50] } }
             ] as any
-            sharedStore.store.localRouteInfos.value = [
+            sharedStore.store.draftRouteInfos.value = [
                 { name: '로컬', geom: { type: 'Point', coordinates: [127.001, 37.001] } }
             ] as any
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             sideeffect.renderRouteInfoMarkers()
             expect(viewer.value.entities.list.length).toBe(2)
         })
 
         it('viewer null 이면 entity 추가 안 함', () => {
-            viewer.value = null
+            setMockViewer(null)
             sharedStore.store.routeInfos.value = [
                 { name: 'x', geom: { type: 'Point', coordinates: [127, 37] } }
             ] as any
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             sideeffect.renderRouteInfoMarkers()
             // throw 없음
         })
@@ -200,7 +221,7 @@ describe('useRouteInfoSideeffect', () => {
             sharedStore.store.routeInfos.value = [
                 { name: 'x', geom: { type: 'Point', coordinates: [127, 37] } }
             ] as any
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             sideeffect.renderRouteInfoMarkers()
             expect(viewer.value.entities.list.length).toBe(1)
             sideeffect.clearMarkers()
@@ -211,7 +232,7 @@ describe('useRouteInfoSideeffect', () => {
     describe('cancelAdding', () => {
         it('isAddingRouteInfo=false + clickedPosition=null', () => {
             sharedStore.store.isAddingRouteInfo.value = true
-            const sideeffect = useRouteInfoSideeffect(viewer as any)
+            const sideeffect = useRouteInfoSideeffect()
             sideeffect.cancelAdding()
             expect(sharedStore.store.isAddingRouteInfo.value).toBe(false)
             expect(sideeffect.clickedPosition.value).toBeNull()

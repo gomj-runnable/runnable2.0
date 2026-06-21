@@ -1,16 +1,12 @@
-import type { ShallowRef } from 'vue'
 import type { Entity } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { BoundaryFeature, BoundaryLevel } from '~/entities/boundary/lib/boundaryGeojson'
 import { loadBoundaryGeojson } from '~/entities/boundary/lib/boundaryGeojson'
 import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
 import { MapLayerZIndexEnum } from '#shared/types/map-layer-z-index.enum'
-
-interface UseBoundarySideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
-}
 
 interface BoundaryLayerStyle {
     level: BoundaryLevel
@@ -133,8 +129,8 @@ const renderFeature = (
  * 시군구(zIndex -2)와 읍면동(zIndex -1)을 독립 토글하며, 읍면동이 시군구 위에 그려진다.
  * 둘 다 횡단보도(zIndex 0) 아래에 위치한다.
  */
-export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => {
-    const { viewer } = options
+export const useBoundarySideeffect = () => {
+    const { viewer } = useMapViewer()
     const { isGuActive, isDongActive } = useBoundaryStore()
 
     /**
@@ -158,9 +154,15 @@ export const useBoundarySideeffect = (options: UseBoundarySideeffectOptions) => 
             const lineCol = C.Color.fromCssColorString(style.lineColor).withAlpha(style.lineAlpha)
             const labelCol = C.Color.fromCssColorString(style.lineColor).withAlpha(style.labelAlpha)
 
-            for (const feature of geojson.features) {
-                renderFeature(v, C, entities, feature, lineCol, style)
-                addLabel(v, C, entities, feature, labelCol, style)
+            // 대량 entity 추가를 단일 collectionChanged 로 묶어 재계산 비용을 줄인다.
+            v.entities.suspendEvents()
+            try {
+                for (const feature of geojson.features) {
+                    renderFeature(v, C, entities, feature, lineCol, style)
+                    addLabel(v, C, entities, feature, labelCol, style)
+                }
+            } finally {
+                v.entities.resumeEvents()
             }
         }
 

@@ -1,6 +1,6 @@
-import type { ShallowRef } from 'vue'
 import type { Cartesian3 } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 /** 기본 POI DTO */
 export interface PoiDto {
@@ -57,14 +57,14 @@ export const createLabelHtml = (text: string): string =>
  *
  * @example 기본 사용 (PoiDto)
  * ```ts
- * const overlay = usePoiOverlay(viewer, { onClick: (dto) => console.log(dto) })
+ * const overlay = usePoiOverlay({ onClick: (dto) => console.log(dto) })
  * overlay.showPoi({ id: '1', lon: 127, lat: 37, name: '음수대', descript: '' })
  * ```
  *
  * @example 커스텀 DTO + 렌더러
  * ```ts
  * interface MyMarker { id: string; x: number; y: number; label: string }
- * const overlay = usePoiOverlay<MyMarker>(viewer, {
+ * const overlay = usePoiOverlay<MyMarker>({
  *     toPosition: (d) => Cesium.Cartesian3.fromDegrees(d.x, d.y),
  *     renderIcon: (d) => '<img src="marker.png" width="24" height="24"/>',
  *     renderLabel: (d) => `<span>${d.label}</span>`,
@@ -73,9 +73,9 @@ export const createLabelHtml = (text: string): string =>
  * ```
  */
 export const usePoiOverlay = <T extends { id: string } = PoiDto>(
-    viewer: ShallowRef<CesiumViewer | null>,
     options: PoiOverlayOptions<T> = {} as PoiOverlayOptions<T>
 ) => {
+    const { viewer } = useMapViewer()
     const poiMap = new Map<string, PoiEntry<T>>()
     let container: HTMLDivElement | null = null
     let removeListener: (() => void) | null = null

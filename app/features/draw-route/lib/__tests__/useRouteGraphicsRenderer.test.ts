@@ -4,6 +4,25 @@ import type { Ref, ShallowRef } from 'vue'
 
 import { useRouteGraphicsRenderer } from '~/features/draw-route/lib/useRouteGraphicsRenderer'
 import { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
 
 const C: any = {
     Color: {
@@ -41,18 +60,20 @@ describe('useRouteGraphicsRenderer', () => {
     let sectionPointRanges: Ref<any>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
         drawnPositions = ref(null)
         sectionPointRanges = ref<any>([])
     })
 
-    const create = (closingMode?: any) =>
-        useRouteGraphicsRenderer({
-            viewer: viewer as any,
+    const create = (closingMode?: any) => {
+        setMockViewer(viewer.value)
+        return useRouteGraphicsRenderer({
             drawnPositions,
             sectionPointRanges,
             closingMode
         })
+    }
 
     it('drawnPositions null 이면 redraw 시 entity 없음', () => {
         const r = create()

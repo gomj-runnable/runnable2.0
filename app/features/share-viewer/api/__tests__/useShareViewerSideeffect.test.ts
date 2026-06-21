@@ -1,9 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { shallowRef } from 'vue'
-import type { Ref, ShallowRef } from 'vue'
 
 // createClampedPolyline / getSectionColor 의존 import 는 그대로 둠 (Cesium 만 stub).
 import { useShareViewerSideeffect } from '~/features/share-viewer/api/useShareViewerSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
 
 // Cesium runtime stub
 const C = {
@@ -38,20 +55,22 @@ const makeViewer = () => {
 }
 
 describe('useShareViewerSideeffect.renderSections()', () => {
-    let viewer: ShallowRef<any>
+    let viewer: ReturnType<typeof makeViewer>
 
     beforeEach(() => {
-        viewer = shallowRef(makeViewer())
+        setMockViewer(null)
+        viewer = makeViewer()
+        setMockViewer(viewer as any)
     })
 
     it('viewer 가 null 이면 무동작', () => {
-        viewer.value = null
-        const { renderSections } = useShareViewerSideeffect({ viewer })
+        setMockViewer(null)
+        const { renderSections } = useShareViewerSideeffect()
         expect(() => renderSections([])).not.toThrow()
     })
 
     it('비어 있거나 좌표 < 2 인 section 은 스킵', () => {
-        const { renderSections } = useShareViewerSideeffect({ viewer })
+        const { renderSections } = useShareViewerSideeffect()
         renderSections([
             {
                 geom: { type: 'LineString', coordinates: [[127, 37, 0]] },
@@ -59,12 +78,12 @@ describe('useShareViewerSideeffect.renderSections()', () => {
                 pois: []
             } as any
         ])
-        expect((viewer.value.entities as any).list).toHaveLength(0)
-        expect(viewer.value.camera.flyToBoundingSphere).not.toHaveBeenCalled()
+        expect((viewer.entities as any).list).toHaveLength(0)
+        expect(viewer.camera.flyToBoundingSphere).not.toHaveBeenCalled()
     })
 
     it('좌표 ≥ 2 인 section 은 entity 추가 + camera flyToBoundingSphere 호출', () => {
-        const { renderSections } = useShareViewerSideeffect({ viewer })
+        const { renderSections } = useShareViewerSideeffect()
         renderSections([
             {
                 geom: {
@@ -79,12 +98,12 @@ describe('useShareViewerSideeffect.renderSections()', () => {
             } as any
         ])
 
-        expect((viewer.value.entities as any).list).toHaveLength(1)
-        expect(viewer.value.camera.flyToBoundingSphere).toHaveBeenCalledOnce()
+        expect((viewer.entities as any).list).toHaveLength(1)
+        expect(viewer.camera.flyToBoundingSphere).toHaveBeenCalledOnce()
     })
 
     it('clear — 추가된 entity 모두 제거', () => {
-        const { renderSections, clear } = useShareViewerSideeffect({ viewer })
+        const { renderSections, clear } = useShareViewerSideeffect()
         renderSections([
             {
                 geom: {
@@ -99,6 +118,6 @@ describe('useShareViewerSideeffect.renderSections()', () => {
             } as any
         ])
         clear()
-        expect((viewer.value.entities as any).list).toHaveLength(0)
+        expect((viewer.entities as any).list).toHaveLength(0)
     })
 })

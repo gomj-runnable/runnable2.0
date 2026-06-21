@@ -1,14 +1,13 @@
-import type { ShallowRef, Ref } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
+import type { Ref } from 'vue'
 import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
 import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import {
     ELEVATION_ENTRIES,
     ELEVATION_ALPHA
 } from '~/features/elevation-layer/lib/useElevationBands'
 
 interface ElevationLayerOptions {
-    viewer: ShallowRef<CesiumViewer | null>
     isElevationVisible: Ref<boolean>
 }
 
@@ -17,7 +16,8 @@ interface ElevationLayerOptions {
  * 서울 고도 범위(5m~836m)를 파랑→초록→노랑→빨강 그라데이션으로 표현한다.
  */
 export const useElevationLayerSideeffect = (options: ElevationLayerOptions) => {
-    const { viewer, isElevationVisible } = options
+    const { isElevationVisible } = options
+    const { viewer } = useMapViewer()
     let originalMaterial: unknown = null
 
     const applyElevationMaterial = () => {

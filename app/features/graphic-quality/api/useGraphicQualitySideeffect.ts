@@ -1,13 +1,9 @@
 import { watch, getCurrentScope, onScopeDispose } from 'vue'
-import type { ShallowRef } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { GraphicQualityEnum } from '#shared/types/graphic-quality.enum'
 import type { FixedQualityKey } from '#shared/types/graphic-quality.enum'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 import { useGraphicQualityStore } from '~/features/graphic-quality/model/useGraphicQualityStore'
-
-interface UseGraphicQualitySideeffectOptions {
-    viewer: ShallowRef<CesiumViewer | null>
-}
 
 /** 품질 레벨별 Cesium 렌더링 부하 조절 값 */
 interface QualityPreset {
@@ -82,8 +78,8 @@ export const decideAutoLevel = (avgFps: number): FixedQualityKey | null => {
  * 자동 모드에선 scene.postRender로 실측 FPS를 집계해 5초 주기로 품질을 자동 상·하향한다.
  * 품질 레벨 상태는 useGraphicQualityStore가 보유하며, 이 composable이 store를 watch해 적용한다.
  */
-export const useGraphicQualitySideeffect = (options: UseGraphicQualitySideeffectOptions) => {
-    const { viewer } = options
+export const useGraphicQualitySideeffect = () => {
+    const { viewer } = useMapViewer()
     const store = useGraphicQualityStore()
 
     let frameCount = 0

@@ -3,6 +3,21 @@ import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
 import type { Ref, ShallowRef } from 'vue'
 
 import { useElevationLayerSideeffect } from '~/features/elevation-layer/api/useElevationLayerSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 vi.stubGlobal('onBeforeUnmount', vi.fn())
 vi.stubGlobal('watch', vueWatch)
@@ -31,12 +46,18 @@ const makeViewer = () => {
     }
 }
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 describe('useElevationLayerSideeffect', () => {
     let viewer: ShallowRef<any>
     let isVisible: Ref<boolean>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
+        setMockViewer(viewer.value)
         isVisible = ref(false)
         createElevationBandMaterial.mockClear()
         fromType.mockClear()
@@ -44,7 +65,6 @@ describe('useElevationLayerSideeffect', () => {
 
     it('isVisible=true 시 createElevationBandMaterial 호출, depthTestAgainstTerrain=true', async () => {
         const { init } = useElevationLayerSideeffect({
-            viewer: viewer as any,
             isElevationVisible: isVisible
         })
         init()
@@ -58,7 +78,6 @@ describe('useElevationLayerSideeffect', () => {
 
     it('isVisible=true → false 토글 시 apply 직전 material 로 복원', async () => {
         const { init } = useElevationLayerSideeffect({
-            viewer: viewer as any,
             isElevationVisible: isVisible
         })
         init()
@@ -81,7 +100,6 @@ describe('useElevationLayerSideeffect', () => {
     it('createElevationBandMaterial 미지원 — Material.fromType 폴백', async () => {
         delete C.createElevationBandMaterial
         const { init } = useElevationLayerSideeffect({
-            viewer: viewer as any,
             isElevationVisible: isVisible
         })
         init()
@@ -94,9 +112,8 @@ describe('useElevationLayerSideeffect', () => {
     })
 
     it('viewer 가 null 이면 apply/remove 둘 다 무동작', async () => {
-        viewer.value = null
+        setMockViewer(null)
         const { init } = useElevationLayerSideeffect({
-            viewer: viewer as any,
             isElevationVisible: isVisible
         })
         init()

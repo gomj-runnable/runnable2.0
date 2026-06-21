@@ -2,10 +2,13 @@
 // Nuxt UI 한국어 로케일 정의 및 앱 루트 레이아웃 (UApp + NuxtPage 마운트).
 import type { Messages } from '@nuxt/ui'
 
+/**
+ * Nuxt UI가 기본으로 제공하는 영어 문구를 한글로 매핑해주는 설정 값.
+ */
 const locale = defineLocale<Messages>({
     name: '한국어',
     code: 'ko',
-    dir: 'ltr',
+    dir: 'ltr', // 글자를 읽는 방향
     messages: {
         alert: { close: '닫기' },
         authForm: {

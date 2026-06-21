@@ -1,5 +1,3 @@
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import {
     buildDraftSectionInputs,
     createRouteElevationProfile
@@ -25,19 +23,15 @@ import type { useRouteElevationFacade } from './useRouteElevationFacade'
  *
  * optimization/terrain/elevation은 오케스트레이터에서 생성된 인스턴스를 주입받는다.
  */
-export const useRouteDrawingFacade = (
-    viewer: ShallowRef<CesiumViewer | null>,
-    deps: {
-        optimizationFacade: ReturnType<typeof useRouteOptimizationFacade>
-        terrainFacade: ReturnType<typeof useRouteTerrainFacade>
-        elevationFacade: ReturnType<typeof useRouteElevationFacade>
-    }
-) => {
+export const useRouteDrawingFacade = (deps: {
+    optimizationFacade: ReturnType<typeof useRouteOptimizationFacade>
+    terrainFacade: ReturnType<typeof useRouteTerrainFacade>
+    elevationFacade: ReturnType<typeof useRouteElevationFacade>
+}) => {
     const store = useRouteDrawStore()
     const notification = useNotificationStore()
 
     const drawEffect = useRouteDrawSideeffect({
-        viewer,
         drawnPositions: store.drawnPositions,
         drawMetrics: store.drawMetrics,
         sectionDraft: store.sectionDraft,
@@ -49,7 +43,6 @@ export const useRouteDrawingFacade = (
     })
 
     useRouteClosingSideeffect({
-        viewer,
         drawnPositions: store.drawnPositions,
         closingMode: store.closingMode
     })
@@ -192,7 +185,7 @@ export const useRouteDrawingFacade = (
 
     const addPoiToSection = (
         sectionIndex: number,
-        poi: import('#shared/types/facility').PoiDraftInput
+        poi: import('#shared/types/facility').PoiCreateInput
     ) => {
         const current = store.sectionPois.value[sectionIndex] ?? []
         store.sectionPois.value = {

@@ -3,9 +3,24 @@ import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
 import type { BoundaryGeojson } from '~/entities/boundary/lib/boundaryGeojson'
 
 import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
 vi.stubGlobal('onBeforeUnmount', vi.fn())
 vi.stubGlobal('watch', vueWatch)
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
 
 const sharedBoundary = vi.hoisted(() => ({ store: null as any }))
 vi.mock('~/entities/boundary/model/useBoundaryStore', () => ({
@@ -37,6 +52,10 @@ const C: any = {
 }
 vi.stubGlobal('window', { Cesium: C } as any)
 
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
+
 const makeViewer = () => {
     const added: any[] = []
     return {
@@ -49,6 +68,8 @@ const makeViewer = () => {
                 const i = added.indexOf(e)
                 if (i >= 0) added.splice(i, 1)
             },
+            suspendEvents: () => {},
+            resumeEvents: () => {},
             list: added
         }
     }
@@ -58,7 +79,9 @@ describe('useBoundarySideeffect', () => {
     let viewer: ReturnType<typeof shallowRef<any>>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
+        setMockViewer(viewer.value)
         sharedBoundary.store = {
             isGuActive: ref(false),
             isDongActive: ref(false),
@@ -97,7 +120,7 @@ describe('useBoundarySideeffect', () => {
     })
 
     it('init — 두 토글 watch 초기화 (immediate false 분기, 토글 비활성)', async () => {
-        const sideeffect = useBoundarySideeffect({ viewer: viewer as any })
+        const sideeffect = useBoundarySideeffect()
         sideeffect.init()
         await nextTick()
 
@@ -108,7 +131,7 @@ describe('useBoundarySideeffect', () => {
 
     it('isGuActive=true → geojson 의 feature 로 entity 추가', async () => {
         loaded.sgg = guGeoJson()
-        const sideeffect = useBoundarySideeffect({ viewer: viewer as any })
+        const sideeffect = useBoundarySideeffect()
         sideeffect.init()
 
         sharedBoundary.store.isGuActive.value = true
@@ -122,7 +145,7 @@ describe('useBoundarySideeffect', () => {
 
     it('isGuActive=true → false → entity 제거', async () => {
         loaded.sgg = guGeoJson()
-        const sideeffect = useBoundarySideeffect({ viewer: viewer as any })
+        const sideeffect = useBoundarySideeffect()
         sideeffect.init()
 
         sharedBoundary.store.isGuActive.value = true
@@ -165,7 +188,7 @@ describe('useBoundarySideeffect', () => {
                 }
             ]
         }
-        const sideeffect = useBoundarySideeffect({ viewer: viewer as any })
+        const sideeffect = useBoundarySideeffect()
         sideeffect.init()
 
         sharedBoundary.store.isGuActive.value = true
@@ -180,7 +203,7 @@ describe('useBoundarySideeffect', () => {
             type: 'FeatureCollection',
             features: [{ properties: { NAME: 'empty' }, geometry: null }, ...guGeoJson().features]
         }
-        const sideeffect = useBoundarySideeffect({ viewer: viewer as any })
+        const sideeffect = useBoundarySideeffect()
         sideeffect.init()
         sharedBoundary.store.isGuActive.value = true
         await nextTick()
@@ -209,7 +232,7 @@ describe('useBoundarySideeffect', () => {
                 }
             ]
         }
-        const sideeffect = useBoundarySideeffect({ viewer: viewer as any })
+        const sideeffect = useBoundarySideeffect()
         sideeffect.init()
         sharedBoundary.store.isDongActive.value = true
         await nextTick()

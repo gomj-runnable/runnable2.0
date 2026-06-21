@@ -6,10 +6,8 @@
  */
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useSidewalkSideeffect } from '~/entities/facility/api/useSidewalkSideeffect'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
 
-const { viewer } = useMapViewer()
-useSidewalkSideeffect({ viewer })
+useSidewalkSideeffect()
 
 const sidewalk = useSidewalkStore()
 </script>

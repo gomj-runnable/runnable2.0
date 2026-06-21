@@ -3,6 +3,25 @@ import { ref, shallowRef } from 'vue'
 import type { Ref, ShallowRef } from 'vue'
 
 import { useRouteListSideeffect } from '~/features/draw-route/api/useRouteListSideeffect'
+import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
+vi.mock('~/shared/lib/map/useMapViewer', async () => {
+    const { shallowRef } = await import('vue')
+    const viewer = shallowRef<unknown>(null)
+    return {
+        useMapViewer: () => ({
+            viewer,
+            setViewer: (v: unknown) => {
+                viewer.value = v
+            }
+        })
+    }
+})
+
+const { setViewer: setMockViewer } = useMapViewer() as unknown as {
+    setViewer: (v: unknown) => void
+}
 
 const C = {
     Color: {
@@ -41,6 +60,7 @@ describe('useRouteListSideeffect', () => {
     let drawnPositions: Ref<any>
 
     beforeEach(() => {
+        setMockViewer(null)
         viewer = shallowRef(makeViewer())
         routes = ref([])
         selectedRouteId = ref<string | null>(null)
@@ -48,13 +68,14 @@ describe('useRouteListSideeffect', () => {
         $fetchMock.mockReset()
     })
 
-    const create = () =>
-        useRouteListSideeffect({
-            viewer: viewer as any,
+    const create = () => {
+        setMockViewer(viewer.value)
+        return useRouteListSideeffect({
             routes,
             selectedRouteId,
             drawnPositions
         })
+    }
 
     it('fetchRoutes — $fetch 결과를 routes 에 반영', async () => {
         $fetchMock.mockResolvedValue([{ routeId: 'r1', title: 'A' }])

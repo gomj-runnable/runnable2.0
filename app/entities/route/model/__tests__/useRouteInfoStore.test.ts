@@ -5,7 +5,7 @@ describe('useRouteInfoStore', () => {
     it('초기값', () => {
         const s = useRouteInfoStore()
         expect(s.routeInfos.value).toEqual([])
-        expect(s.localRouteInfos.value).toEqual([])
+        expect(s.draftRouteInfos.value).toEqual([])
         expect(s.isAddingRouteInfo.value).toBe(false)
         expect(s.selectedMarkerRouteInfo.value).toBeNull()
         expect(s.isLoading.value).toBe(false)
@@ -25,27 +25,27 @@ describe('useRouteInfoStore', () => {
         expect(s.selectedMarkerRouteInfo.value).toBeNull()
     })
 
-    it('addLocalRouteInfo / clearLocalRouteInfos', () => {
+    it('addDraftRouteInfo / clearDraftRouteInfos', () => {
         const s = useRouteInfoStore()
-        s.addLocalRouteInfo({ name: 'a' } as any)
-        s.addLocalRouteInfo({ name: 'b' } as any)
-        expect(s.localRouteInfos.value).toHaveLength(2)
+        s.addDraftRouteInfo({ name: 'a' } as any)
+        s.addDraftRouteInfo({ name: 'b' } as any)
+        expect(s.draftRouteInfos.value).toHaveLength(2)
 
-        s.clearLocalRouteInfos()
-        expect(s.localRouteInfos.value).toEqual([])
+        s.clearDraftRouteInfos()
+        expect(s.draftRouteInfos.value).toEqual([])
     })
 
     it('clearRouteInfos 는 모든 상태 초기화', () => {
         const s = useRouteInfoStore()
         s.routeInfos.value = [{ routeInfoId: 'ri-1' } as any]
-        s.addLocalRouteInfo({ name: 'a' } as any)
+        s.addDraftRouteInfo({ name: 'a' } as any)
         s.selectedMarkerRouteInfo.value = { name: 'm' } as any
         s.isAddingRouteInfo.value = true
 
         s.clearRouteInfos()
 
         expect(s.routeInfos.value).toEqual([])
-        expect(s.localRouteInfos.value).toEqual([])
+        expect(s.draftRouteInfos.value).toEqual([])
         expect(s.selectedMarkerRouteInfo.value).toBeNull()
         expect(s.isAddingRouteInfo.value).toBe(false)
     })

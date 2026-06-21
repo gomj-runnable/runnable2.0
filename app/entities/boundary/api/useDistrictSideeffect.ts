@@ -1,3 +1,4 @@
+import { markRaw } from 'vue'
 import type { SeoulDistrictData } from '#shared/types/district'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 
@@ -23,7 +24,9 @@ export const useDistrictSideeffect = () => {
     const ensureGuBoundaryLoaded = async () => {
         if (store.guGeojson.value) return
         try {
-            store.guGeojson.value = await $fetch('/api/boundary/seoul')
+            const gu = await $fetch('/api/boundary/seoul')
+            // markRaw: 대용량 GeoJSON 을 deep reactive proxy 대상에서 제외 (읽기 전용 소비)
+            store.guGeojson.value = gu && typeof gu === 'object' ? markRaw(gu) : gu
         } catch {
             store.guGeojson.value = null
         }
@@ -33,7 +36,9 @@ export const useDistrictSideeffect = () => {
     const ensureDongBoundaryLoaded = async () => {
         if (store.dongGeojson.value) return
         try {
-            store.dongGeojson.value = await $fetch('/api/boundary/seoul-dong')
+            const dong = await $fetch('/api/boundary/seoul-dong')
+            // markRaw: 대용량 GeoJSON 을 deep reactive proxy 대상에서 제외 (읽기 전용 소비)
+            store.dongGeojson.value = dong && typeof dong === 'object' ? markRaw(dong) : dong
         } catch {
             store.dongGeojson.value = null
         }

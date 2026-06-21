@@ -1,5 +1,3 @@
-import type { ShallowRef } from 'vue'
-import type { CesiumViewer } from '~/shared/lib/useWindow'
 import {
     buildSavedSectionInputs,
     createRouteElevationProfile
@@ -19,32 +17,27 @@ import { useRouteDrawingFacade } from './useRouteDrawingFacade'
  *
  * 내부적으로 8개의 sub-facade를 조합하며,
  * 페이지는 이 composable만 사용해 그리기·저장·목록 기능을 이용한다.
- *
- * @param viewer - 페이지에서 초기화한 Cesium 뷰어 ref
  */
 interface RouteMapFacadeOptions {
     onAfterSave?: (routeId: string) => Promise<void>
 }
 
-export const useRouteMapFacade = (
-    viewer: ShallowRef<CesiumViewer | null>,
-    facadeOptions?: RouteMapFacadeOptions
-) => {
+export const useRouteMapFacade = (facadeOptions?: RouteMapFacadeOptions) => {
     // ─── sub-facade 조합 ──────────────────────────────────────────
 
     const store = useRouteDrawStore()
 
     const optimizationFacade = useRouteOptimizationFacade()
-    const terrainFacade = useRouteTerrainFacade(viewer)
+    const terrainFacade = useRouteTerrainFacade()
     const elevationFacade = useRouteElevationFacade()
     const { closing } = useRouteClosingFacade()
 
-    const { listEffect, filteredRoutes, searchQuery, selectedRouteId } = useRouteListFacade(viewer)
+    const { listEffect, filteredRoutes, searchQuery, selectedRouteId } = useRouteListFacade()
     const { downloadRouteGpx } = useRouteDownloadFacade(listEffect)
     const { saveModal, confirmSave } = useRouteSaveFacade(listEffect, {
         onAfterSave: facadeOptions?.onAfterSave
     })
-    const { drawEffect, drawing, startDrawing } = useRouteDrawingFacade(viewer, {
+    const { drawEffect, drawing, startDrawing } = useRouteDrawingFacade({
         optimizationFacade,
         terrainFacade,
         elevationFacade

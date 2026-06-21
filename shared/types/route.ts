@@ -1,8 +1,8 @@
-// 경로(Route)·구간(Section) 타입 정의 — Base/DraftInput/Saved 계층
+// 경로(Route)·구간(Section) 타입 정의 — Base/Create·DraftInput/Saved 계층
 import type { Feature } from 'geojson'
 import type { SectionAttrSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonLineString } from '#shared/types/geojson'
-import type { PoiDraftInput } from '#shared/types/facility'
+import type { PoiCreateInput } from '#shared/types/facility'
 
 export type SectionAttr = SectionAttrSchema
 
@@ -35,7 +35,7 @@ export interface RouteElevationProfile {
     lowestPoint: RouteElevationPoint
 }
 
-/** 경로 공통 필드 베이스 (DraftInput·SavedRoute 공유) */
+/** 경로 공통 필드 베이스 (CreateInput·SavedRoute 공유) */
 export interface RouteBase {
     title: string
     description?: string
@@ -51,7 +51,7 @@ export interface RouteBase {
     sourceRouteId?: string
 }
 
-export type RouteDraftInput = RouteBase
+export type RouteCreateInput = RouteBase
 
 /** 저장된 경로 엔티티 (routeId·작성자 등 포함) */
 export interface SavedRoute extends RouteBase {
@@ -69,7 +69,7 @@ export interface RouteSectionBase {
     geom?: GeoJsonLineString
     attrs?: SectionAttr[]
     /** 구간에 연결된 POI 목록 */
-    pois?: PoiDraftInput[]
+    pois?: PoiCreateInput[]
 }
 
 /** 구간 생성 입력 (routeId 포함) */
