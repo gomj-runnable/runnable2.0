@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, shallowRef } from 'vue'
 
 import { useCameraSideeffect } from '~/features/camera/api/useCameraSideeffect'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {
@@ -106,7 +106,7 @@ describe('useCameraSideeffect', () => {
         }
     })
 
-    it('init — ensureGu/Dong + moveEnd 리스너 등록 + 즉시 한번 onMoveEnd', async () => {
+    it('getters — ensureGu/Dong + moveEnd 리스너 등록 + 즉시 한번 onMoveEnd', async () => {
         const sideeffect = useCameraSideeffect(opts)
         await sideeffect.init()
         expect(districtEffect.ensureGuBoundaryLoaded).toHaveBeenCalled()
@@ -273,7 +273,7 @@ describe('useCameraSideeffect', () => {
         expect(viewer.value.camera.moveEnd.listeners.length).toBe(initial - 1)
     })
 
-    it('viewer null 이면 init 후 무동작', async () => {
+    it('viewer null 이면 getters 후 무동작', async () => {
         setMockViewer(null)
         const sideeffect = useCameraSideeffect(opts)
         await sideeffect.init()

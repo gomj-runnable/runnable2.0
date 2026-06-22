@@ -2,7 +2,7 @@
 import type { Facility, FacilityType, PoiCreateInput } from '#shared/types/facility'
 import { facilityLngLat } from '#shared/types/facility'
 import { FacilityTypeEnum } from '#shared/types/facility-type.enum'
-import type { PoiDto } from '~/shared/lib/map/usePoiOverlay'
+import type { PoiDto } from '~/shared/lib/cesium/operation/usePoiOverlay'
 
 /** POI 현재 위치 검색 대상 유형 */
 export const SEARCHABLE_FACILITY_TYPES: FacilityType[] = [

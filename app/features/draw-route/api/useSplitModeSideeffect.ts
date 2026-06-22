@@ -4,8 +4,8 @@ import type { CesiumEntity } from '~/shared/lib/useWindow'
 import type { CreateSectionSchema } from '#shared/schemas/route.schema'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { NotificationOptions } from '~/entities/notification/model/useNotificationStore'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { splitSectionAtPoint, syncSectionAttrs } from '~/entities/route/lib/useRouteDrawDraft'
 import {
@@ -14,7 +14,7 @@ import {
     toCesiumColor
 } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPoint } from '~/entities/route/lib/useGroundClamping'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 export interface UseSplitModeSideeffectOptions {
     drawnPositions: Ref<GeoJsonPosition[] | null>

@@ -70,7 +70,7 @@ export const useFabGroups = (options: FabGroupsOptions) => {
             ]
         },
         {
-            key: 'map-layer',
+            key: 'cesium-layer',
             label: '지도 레이어',
             icon: 'i-lucide-layers',
             items: [
@@ -86,14 +86,14 @@ export const useFabGroups = (options: FabGroupsOptions) => {
                 {
                     key: 'gu',
                     label: '시군구',
-                    icon: 'i-lucide-map',
+                    icon: 'i-lucide-cesium',
                     active: boundary.isGuActive.value,
                     onClick: () => boundary.toggleGu()
                 },
                 {
                     key: 'dong',
                     label: '읍면동',
-                    icon: 'i-lucide-map-pin',
+                    icon: 'i-lucide-cesium-pin',
                     active: boundary.isDongActive.value,
                     onClick: () => boundary.toggleDong()
                 }

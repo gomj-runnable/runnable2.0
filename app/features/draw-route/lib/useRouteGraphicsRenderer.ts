@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { CesiumEntity } from '~/shared/lib/useWindow'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingModeEnum } from '#shared/types/route-closing-mode.enum'
 import {
@@ -11,7 +11,7 @@ import {
 } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 
 interface UseRouteGraphicsRendererOptions {
     drawnPositions: Ref<GeoJsonPosition[] | null>

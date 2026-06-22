@@ -4,9 +4,9 @@ import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { RouteClosingMode } from '~/entities/route/model/useRouteClosingStore'
 import { toCesiumColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 /**
  * `useRouteClosingSideeffect`에 주입하는 의존성 옵션.

@@ -1,9 +1,9 @@
 import { watch } from 'vue'
 import type { CesiumViewerRuntime } from '#shared/types/cesium'
 import type { BaseMapEnum } from '#shared/types/base-map.enum'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 import { useBaseMapStore } from '~/features/base-map/model/useBaseMapStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import { buildVworldUrl, VWORLD_MIN_LEVEL, VWORLD_MAX_LEVEL } from '~/features/base-map/lib/vworld'
 
 interface UseBaseMapSideeffectOptions {

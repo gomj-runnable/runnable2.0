@@ -1,7 +1,7 @@
 import { shallowRef } from 'vue'
 import type { CesiumEntity } from '~/shared/lib/useWindow'
-import { useCesiumController } from '~/shared/lib/map/CesiumController'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useCesiumController } from '~/shared/lib/cesium/CesiumController'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 /**
  * Cesium 엔티티 배열의 생명주기를 관리하는 헬퍼를 생성한다.

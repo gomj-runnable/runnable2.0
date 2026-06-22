@@ -1,7 +1,7 @@
 import { useSidewalkStore } from '~/entities/facility/model/useSidewalkStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 
 /**
  * 동별 인도 데이터를 로드하고 Cesium GroundPolylinePrimitive로 렌더링하는 sideeffect composable.

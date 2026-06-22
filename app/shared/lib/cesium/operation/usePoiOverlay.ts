@@ -1,6 +1,6 @@
 import type { Cartesian3 } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 /** 기본 POI DTO */
 export interface PoiDto {

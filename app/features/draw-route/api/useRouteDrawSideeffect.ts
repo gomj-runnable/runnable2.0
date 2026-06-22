@@ -16,10 +16,10 @@ import {
 import { normalizeDrawPositions } from '~/entities/route/lib/useRouteDrawUtils'
 import { useSplitModeSideeffect } from './useSplitModeSideeffect'
 import type { NotificationOptions } from '~/entities/notification/model/useNotificationStore'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useRouteGraphicsRenderer } from '~/features/draw-route/lib/useRouteGraphicsRenderer'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 interface UseRouteDrawSideeffectOptions {
     drawnPositions: Ref<GeoJsonPosition[] | null>

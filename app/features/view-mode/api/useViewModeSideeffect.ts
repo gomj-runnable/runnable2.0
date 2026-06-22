@@ -1,8 +1,8 @@
 import { watch, getCurrentScope, onScopeDispose } from 'vue'
 import type { Cartesian3 } from 'cesium'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import { useViewModeStore } from '~/features/view-mode/model/useViewModeStore'
 
 /** 2D 모드 수직 하향 시점 pitch (도) */

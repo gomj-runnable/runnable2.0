@@ -5,8 +5,8 @@
  */
 import type { SavedRoute, SavedSection } from '#shared/types/route'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import { useMapInit } from '~/shared/lib/map/useMapInit'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapInit } from '~/shared/lib/cesium/lifecycle/useMapInit'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import { useShareViewerSideeffect } from '~/features/share-viewer/api/useShareViewerSideeffect'
 
 definePageMeta({ ssr: false, layout: 'default' })
@@ -26,7 +26,7 @@ const sharedData = ref<{
 const error = ref<string | null>(null)
 const isLoading = ref(true)
 
-// viewer 소유권은 CesiumController(useMapViewer)에 있다. share 페이지가 init 후 setViewer 로 등록한다.
+// viewer 소유권은 CesiumController(useMapViewer)에 있다. share 페이지가 getters 후 setViewer 로 등록한다.
 const { viewer, setViewer } = useMapViewer()
 const { init } = useMapInit()
 const shareViewer = useShareViewerSideeffect()

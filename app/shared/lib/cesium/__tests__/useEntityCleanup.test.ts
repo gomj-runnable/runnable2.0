@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import type { CesiumEntity, CesiumViewer } from '~/shared/lib/useWindow'
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {

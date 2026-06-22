@@ -5,11 +5,11 @@ import {
     useFacilityRenderer,
     ALL_FACILITY_TYPES
 } from '~/entities/facility/lib/useFacilityRenderer'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import type { Facility } from '#shared/types/facility'
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {
@@ -28,7 +28,7 @@ const poiOverlayMock = vi.hoisted(() => ({
     unshowPoi: vi.fn(),
     clear: vi.fn()
 }))
-vi.mock('~/shared/lib/map/usePoiOverlay', () => ({
+vi.mock('~/shared/lib/cesium/operation/usePoiOverlay', () => ({
     usePoiOverlay: () => poiOverlayMock
 }))
 

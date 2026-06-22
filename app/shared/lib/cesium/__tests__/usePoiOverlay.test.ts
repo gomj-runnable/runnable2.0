@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createPinIconHtml, createLabelHtml } from '../usePoiOverlay'
+import { createPinIconHtml, createLabelHtml } from '../operation/usePoiOverlay'
 
 describe('createPinIconHtml', () => {
     it('지정된 색상으로 SVG를 생성한다', () => {

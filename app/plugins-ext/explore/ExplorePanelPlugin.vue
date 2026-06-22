@@ -10,7 +10,7 @@ import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSea
 import { FILTER_ALL } from '~/features/explore/model/useExploreFilterStore'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 import { useAuthStore } from '~/entities/user/model/useAuthStore'
-import { useMapActions } from '~/shared/lib/map/useMapActions'
+import { useMapActions } from '~/shared/lib/useMapActions'
 
 const explore = useExploreSearchSideeffect()
 const districtStore = useDistrictStore()

@@ -1,5 +1,5 @@
 import type { CesiumRuntime } from '#shared/types/cesium'
-import { useCesiumController } from '~/shared/lib/map/CesiumController'
+import { useCesiumController } from '~/shared/lib/cesium/CesiumController'
 
 /**
  * `window.Cesium`에 대한 단일 접근점을 제공하는 Provider composable.

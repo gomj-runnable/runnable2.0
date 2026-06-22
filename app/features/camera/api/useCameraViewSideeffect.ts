@@ -1,5 +1,5 @@
 import { useCameraViewStore } from '~/features/camera/model/useCameraViewStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 /**
  * Cesium viewer의 카메라 컨트롤러를 1인칭/3인칭 모드로 전환하는 sideeffect composable.

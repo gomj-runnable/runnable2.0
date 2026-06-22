@@ -2,9 +2,9 @@
 /**
  * 지도 렌더링 표면(Cesium Canvas) + 그 위에 떠 있는 HUD(footer·overlay)를 담는 호스트.
  *
- * - Cesium 은 내부 `#map` div 에 마운트된다(전역 CSS 가 absolute inset-0 로 채움).
- * - htmlPoi(usePoiOverlay)는 `viewer.container`(=`#map` 하위)에 자동 부착되므로 자연히 이 안에 들어온다.
- * - footer·overlay 는 지도 좌표가 아닌 화면에 고정된 map-anchored HUD 라 이 컴포넌트가 positioning 을 소유한다.
+ * - Cesium 은 내부 `#cesium` div 에 마운트된다(전역 CSS 가 absolute inset-0 로 채움).
+ * - htmlPoi(usePoiOverlay)는 `viewer.container`(=`#cesium` 하위)에 자동 부착되므로 자연히 이 안에 들어온다.
+ * - footer·overlay 는 지도 좌표가 아닌 화면에 고정된 cesium-anchored HUD 라 이 컴포넌트가 positioning 을 소유한다.
  *
  * 페이지 chrome(header·aside·modal·FAB)은 여기 들어오지 않는다 — 그건 page/shell 책임이다.
  */

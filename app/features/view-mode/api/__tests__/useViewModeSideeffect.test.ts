@@ -4,7 +4,7 @@ import type { ShallowRef } from 'vue'
 import { ScreenModeEnum } from '#shared/types/screen-mode.enum'
 import { useViewModeSideeffect } from '~/features/view-mode/api/useViewModeSideeffect'
 import { useViewModeStore } from '~/features/view-mode/model/useViewModeStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 vi.mock('~/features/view-mode/model/useViewModeStore', async () => {
     const { ref, computed } = await import('vue')
@@ -26,7 +26,7 @@ vi.mock('~/features/view-mode/model/useViewModeStore', async () => {
     return { useViewModeStore: () => store }
 })
 
-vi.mock('~/shared/lib/map/useCesiumRuntime', () => ({
+vi.mock('~/shared/lib/cesium/getters/useCesiumRuntime', () => ({
     getCesiumRuntime: () => ({
         Math: { toRadians: (deg: number) => (deg * Math.PI) / 180 },
         Cartesian2: class {
@@ -57,7 +57,7 @@ vi.mock('~/shared/lib/map/useCesiumRuntime', () => ({
 }))
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {

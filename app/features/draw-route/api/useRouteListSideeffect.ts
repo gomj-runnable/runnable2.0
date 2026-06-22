@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { CesiumEntity } from '~/shared/lib/useWindow'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import type { RouteSectionBase, SavedRoute, SavedSection } from '#shared/types/route'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import { SECTION_START_MARKER_COLOR } from '#shared/constants/route'
@@ -12,7 +12,7 @@ import {
     toCesiumColor
 } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 
 /** `useRouteListSideeffect`에 주입하는 의존성 옵션 */
 interface UseRouteListSideeffectOptions {

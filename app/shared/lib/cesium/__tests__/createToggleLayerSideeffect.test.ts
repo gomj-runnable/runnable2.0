@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { ref } from 'vue'
 
-import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
+import { createToggleLayerSideeffect } from '~/shared/lib/cesium/operation/createToggleLayerSideeffect'
 
 vi.stubGlobal('onBeforeUnmount', vi.fn())
 

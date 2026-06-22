@@ -3,13 +3,13 @@ import { ref, shallowRef, nextTick, watch as vueWatch } from 'vue'
 import type { BoundaryGeojson } from '~/entities/boundary/lib/boundaryGeojson'
 
 import { useBoundarySideeffect } from '~/entities/boundary/api/useBoundarySideeffect'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 vi.stubGlobal('onBeforeUnmount', vi.fn())
 vi.stubGlobal('watch', vueWatch)
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {
@@ -119,7 +119,7 @@ describe('useBoundarySideeffect', () => {
         ]
     })
 
-    it('init — 두 토글 watch 초기화 (immediate false 분기, 토글 비활성)', async () => {
+    it('getters — 두 토글 watch 초기화 (immediate false 분기, 토글 비활성)', async () => {
         const sideeffect = useBoundarySideeffect()
         sideeffect.init()
         await nextTick()

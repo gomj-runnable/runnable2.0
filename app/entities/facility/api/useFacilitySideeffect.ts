@@ -3,8 +3,8 @@ import type { CesiumDrawHandler } from '#shared/types/cesium'
 import type { Facility, FacilityType, PoiCreateInput } from '#shared/types/facility'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'
 import { useCameraStore } from '~/shared/model/useCameraStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 import {
     useFacilityRenderer,
     ALL_FACILITY_TYPES

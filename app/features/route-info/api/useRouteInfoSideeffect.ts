@@ -1,9 +1,9 @@
 import type { SavedRouteInfo, RouteInfoCreateInput } from '#shared/types/routeInfo'
 import type { CesiumEntity } from '~/shared/lib/useWindow'
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import type { CesiumDrawHandler } from '#shared/types/cesium'
 
 export interface RouteInfoClickedPosition {

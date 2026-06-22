@@ -1,7 +1,7 @@
 /** 지도 초기화 및 인증·레이어·카메라 등 핵심 기능을 onMounted 에서 병렬로 부트스트랩하는 composable. */
 import { onScopeDispose } from 'vue'
-import { useMapInit } from '~/shared/lib/map/useMapInit'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapInit } from '~/shared/lib/cesium/lifecycle/useMapInit'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import {
     isBuildingPick,
     findNearestGroundPosition
@@ -25,7 +25,7 @@ interface UseMapFeatureInitOptions {
     notification: NotificationStore
     hideRoutePolylines: () => void
     showRoutePolylines: () => void
-    /** districtEffect.init() 등 외부 init을 onMounted에 추가 */
+    /** districtEffect.getters() 등 외부 init을 onMounted에 추가 */
     additionalInits?: (() => Promise<unknown>)[]
 }
 
@@ -74,7 +74,7 @@ export function useMapFeatureInit({
     const camera = useCameraStore()
     const cameraEffect = useCameraSideeffect({ ...camera })
 
-    // unmount 시 camera.moveEnd 리스너 정리 (init() 만 호출되고 destroy() 누락 보완)
+    // unmount 시 camera.moveEnd 리스너 정리 (getters() 만 호출되고 destroy() 누락 보완)
     onScopeDispose(() => cameraEffect.destroy())
 
     // ─── 마운트: 지도 초기화 → 각 기능 병렬 로드 ─────────────────────

@@ -7,10 +7,10 @@ import {
     decideAutoLevel
 } from '~/features/graphic-quality/api/useGraphicQualitySideeffect'
 import { useGraphicQualityStore } from '~/features/graphic-quality/model/useGraphicQualityStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {

@@ -3,10 +3,10 @@ import { shallowRef, nextTick, effectScope } from 'vue'
 import { BaseMapEnum } from '#shared/types/base-map.enum'
 import { useBaseMapSideeffect } from '~/features/base-map/api/useBaseMapSideeffect'
 import { useBaseMapStore } from '~/features/base-map/model/useBaseMapStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. 테스트는 공유 ref 를 직접 제어한다.
-vi.mock('~/shared/lib/map/useMapViewer', async () => {
+vi.mock('~/shared/lib/cesium/getters/useMapViewer', async () => {
     const { shallowRef } = await import('vue')
     const viewer = shallowRef<unknown>(null)
     return {
@@ -35,7 +35,7 @@ vi.mock('~/features/base-map/model/useBaseMapStore', async () => {
     return { useBaseMapStore: () => store }
 })
 
-vi.mock('~/shared/lib/map/useCesiumRuntime', () => ({
+vi.mock('~/shared/lib/cesium/getters/useCesiumRuntime', () => ({
     getCesiumRuntime: () => ({
         UrlTemplateImageryProvider: class {
             url: string

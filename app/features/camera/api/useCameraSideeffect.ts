@@ -3,8 +3,8 @@ import type { Ref } from 'vue'
 import type { GeoFeature } from '#shared/types/geojson'
 import { useDistrictStore } from '~/entities/boundary/model/useDistrictStore'
 import { useDistrictSideeffect } from '~/entities/boundary/api/useDistrictSideeffect'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 
 interface UseCameraSideeffectOptions {
     centerLat: Ref<number | null>

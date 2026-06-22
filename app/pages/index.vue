@@ -5,7 +5,7 @@
  * nested route(`pages/index/*`)로 분리해 `<NuxtPage>`로 렌더한다.
  * 자식 panel 은 `provide`한 컨텍스트로 facade·flow·auth 에 접근한다.
  */
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import MapCanvas from '~/widgets/map-page/ui/MapCanvas.vue'
 import MapSidebar from '~/widgets/map-page/ui/MapSidebar.vue'
 import MapFooter from '~/widgets/map-page/ui/MapFooter.vue'
@@ -30,7 +30,7 @@ import { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSi
 import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { useExploreRouteActions } from '~/features/explore/model/useExploreRouteActions'
 import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
-import { useMapActions } from '~/shared/lib/map/useMapActions'
+import { useMapActions } from '~/shared/lib/useMapActions'
 import { useOverlayContext } from '~/widgets/map-page/model/useOverlayContext'
 import { useFabGroups } from '~/widgets/map-page/model/useFabGroups'
 import { useMapFeatureInit } from '~/widgets/map-page/model/useMapFeatureInit'

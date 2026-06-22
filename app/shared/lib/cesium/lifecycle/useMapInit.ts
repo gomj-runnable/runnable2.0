@@ -3,7 +3,7 @@ import type { CommonResponse } from '#shared/types/common'
 import type { CesiumDrawHandler, CesiumViewerRuntime } from '#shared/types/cesium'
 import type { GeoJsonPosition } from '#shared/types/geojson'
 import type { DrawActionData, DrawActionResult, CesiumViewer } from '~/shared/lib/useWindow'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
 
 /**
  * 클릭 위치가 건물(3DTileset) 위인지 판별하고, 그렇다면 인근 비건물 지면 좌표를 찾는 헬퍼 인터페이스.
@@ -42,7 +42,7 @@ interface MapInitOptions {
 /**
  * Cesium 3D 지도 뷰어를 초기화하는 sideeffect composable.
  * Cesium 스크립트를 동적 로드한 뒤 viewer를 만들고, 앱에서 쓰는 드로잉 helper를 부착한다.
- * SSR 비활성화(`ssr: false`) 페이지의 `onMounted`에서 `init()`을 호출해야 한다.
+ * SSR 비활성화(`ssr: false`) 페이지의 `onMounted`에서 `getters()`을 호출해야 한다.
  */
 export const useMapInit = (options?: MapInitOptions) => {
     /** 3D 타일셋·지형 URL (runtimeConfig.public). 미설정 시 빈 문자열 → 해당 레이어 생략. */

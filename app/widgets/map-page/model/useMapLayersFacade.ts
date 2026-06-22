@@ -1,4 +1,4 @@
-/** 편의시설·행정경계·고도·경사도 레이어 스토어와 사이드이펙트를 조합하는 map layers sub-facade. */
+/** 편의시설·행정경계·고도·경사도 레이어 스토어와 사이드이펙트를 조합하는 cesium layers sub-facade. */
 import type { PoiCreateInput } from '#shared/types/facility'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
 import { useFacilityStore } from '~/entities/facility/model/useFacilityStore'

@@ -142,7 +142,7 @@ describe('useRouteSelectionFlow', () => {
         create()
         // selectedRouteId 가 직접 변경되는 패턴이 아니라 reactivity 가 필요한 경우, watch 가 동작하도록 별도 ref 가 필요.
         // 이 컴포저블은 routeList.selectedRouteId 를 watch — primitive 라 변경 감지 안 됨.
-        // 결과적으로 watch 콜백 자체의 분기는 init 시 호출되지 않음 (selectedRouteId 가 변경되지 않으므로).
+        // 결과적으로 watch 콜백 자체의 분기는 getters 시 호출되지 않음 (selectedRouteId 가 변경되지 않으므로).
         // 따라서 이 케이스는 reactive ref 로 전달해야 의미 있음 — 다음 케이스에서 검증.
     })
 })

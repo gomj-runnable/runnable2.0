@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { createToggleLayerSideeffect } from '~/shared/lib/cesium/operation/createToggleLayerSideeffect'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import {
     ELEVATION_ENTRIES,
     ELEVATION_ALPHA

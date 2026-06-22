@@ -1,7 +1,7 @@
 import type { SavedSection } from '#shared/types/route'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { createEntityGroup } from '~/shared/lib/map/useEntityCleanup'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { createEntityGroup } from '~/shared/lib/cesium/operation/useEntityCleanup'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import { geomToRouteDrawPositions, getSectionColor } from '~/entities/route/lib/useRouteDrawUtils'
 import { createClampedPolyline } from '~/entities/route/lib/useGroundClamping'
 

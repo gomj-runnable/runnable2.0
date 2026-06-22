@@ -1,5 +1,5 @@
 import type { CesiumViewer } from '~/shared/lib/useWindow'
-import { useCesiumController } from '~/shared/lib/map/CesiumController'
+import { useCesiumController } from '~/shared/lib/cesium/CesiumController'
 
 /**
  * 코어·플러그인 공용 viewer 접근. 내부적으로 `CesiumController` 로 위임한다.
@@ -8,7 +8,7 @@ import { useCesiumController } from '~/shared/lib/map/CesiumController'
 export function useMapViewer() {
     const controller = useCesiumController()
     return {
-        viewer: controller.viewerRef,
+        viewer: controller.viewer,
         setViewer: (v: CesiumViewer | null) => controller.setViewer(v)
     }
 }

@@ -2,7 +2,7 @@ import { watch, getCurrentScope, onScopeDispose } from 'vue'
 import type { CesiumViewer } from '~/shared/lib/useWindow'
 import { GraphicQualityEnum } from '#shared/types/graphic-quality.enum'
 import type { FixedQualityKey } from '#shared/types/graphic-quality.enum'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
 import { useGraphicQualityStore } from '~/features/graphic-quality/model/useGraphicQualityStore'
 
 /** 품질 레벨별 Cesium 렌더링 부하 조절 값 */

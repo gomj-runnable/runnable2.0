@@ -3,9 +3,9 @@ import type { CesiumViewer } from '~/shared/lib/useWindow'
 import type { BoundaryFeature, BoundaryLevel } from '~/entities/boundary/lib/boundaryGeojson'
 import { loadBoundaryGeojson } from '~/entities/boundary/lib/boundaryGeojson'
 import { useBoundaryStore } from '~/entities/boundary/model/useBoundaryStore'
-import { useMapViewer } from '~/shared/lib/map/useMapViewer'
-import { getCesiumRuntime } from '~/shared/lib/map/useCesiumRuntime'
-import { createToggleLayerSideeffect } from '~/shared/lib/map/createToggleLayerSideeffect'
+import { useMapViewer } from '~/shared/lib/cesium/getters/useMapViewer'
+import { getCesiumRuntime } from '~/shared/lib/cesium/getters/useCesiumRuntime'
+import { createToggleLayerSideeffect } from '~/shared/lib/cesium/operation/createToggleLayerSideeffect'
 import { MapLayerZIndexEnum } from '#shared/types/map-layer-z-index.enum'
 
 interface BoundaryLayerStyle {
