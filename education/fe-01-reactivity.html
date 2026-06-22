@@ -277,6 +277,42 @@ watch(                                  <span class="c">// 상태가 바뀌는 �
       </div>
     </section>
 
+    <!-- 05 PITFALLS -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / PITFALLS</span>
+          <h2>반응형을 잃는 함정</h2>
+          <p class="sec-sub">reactive 를 잘못 다루면 반응성이 조용히 끊깁니다. 세 가지 함정을 코드로 짚습니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>구조분해 — 반응성 끊김</h3>
+            <pre class="code"><span class="k">const</span> state = reactive({ count: 0, name: <span class="s">''</span> })
+
+<span class="c">// ❌ 구조분해하면 일반 값이 복사됨</span>
+<span class="k">const</span> { count, name } = state
+count++   <span class="c">// state.count 는 그대로 — 화면 안 바뀜</span></pre>
+            <p><code class="inl">reactive</code> 객체를 구조분해(destructure)하면 <b>반응성 추적 연결이 끊깁니다.</b> 그냥 숫자·문자열 복사본이 됩니다.</p>
+          </div>
+          <div class="pane good">
+            <h3>toRefs — 반응성 유지</h3>
+            <pre class="code"><span class="k">const</span> state = reactive({ count: 0, name: <span class="s">''</span> })
+
+<span class="c">// ✅ toRefs 로 각 속성을 ref 로 변환 후 분해</span>
+<span class="k">const</span> { count, name } = toRefs(state)
+count.value++   <span class="c">// state.count 가 바뀌고 화면 갱신</span></pre>
+            <p><code class="inl">toRefs</code> 는 reactive 의 각 속성을 <b>ref 로 래핑</b>해 반응성을 유지하면서 구조분해를 허용합니다.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          나머지 두 함정: <b>① ref 의 .value 빠뜨리기</b> — 스크립트에서 <code class="inl">count</code> 가 아니라 <code class="inl">count.value</code> 를 써야 반응성이 유지됩니다(템플릿 안에서는 자동 언래핑). <b>② ref vs reactive 선택</b> — 단일 원시값은 <code class="inl">ref</code>, 연관 속성이 묶인 객체는 <code class="inl">reactive</code>. 단, reactive 를 파일 바깥으로 넘겨야 할 때는 구조분해 함정 때문에 ref 묶음이 더 안전합니다.
+        </p>
+      </div>
+    </section>
+
     <!-- QUIZ -->
     <section class="quiz-sec">
       <div class="wrap">
@@ -339,7 +375,7 @@ watch(                                  <span class="c">// 상태가 바뀌는 �
 
     <footer>
       <div class="wrap">
-        Runnable Frontend Lecture · 01 / 05 — 반응형. 다음 챕터에서 이 토대 위에 <code>컴포저블</code> 로 반응형을 묶는 법을 배웁니다.
+        Runnable Frontend Lecture · 01 / 09 — 반응형. 다음 챕터에서 이 토대 위에 <code>컴포저블</code> 로 반응형을 묶는 법을 배웁니다.
       </div>
     </footer>
   </body>

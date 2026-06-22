@@ -298,6 +298,56 @@ watch(                                                       <span class="c">// 
       </div>
     </section>
 
+    <!-- 05 PITFALLS -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / PITFALLS</span>
+          <h2>이건 store? sideeffect? 판별 체크리스트</h2>
+          <p class="sec-sub">새 코드를 작성할 때 어디에 둘지 헷갈린다면, 아래 질문 순서대로 물어봅니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Q1. 외부와 통신하나?</h3>
+            <p>
+              <code class="inl">$fetch</code> · API 호출 · WebSocket 수신처럼 <b>네트워크를 타면</b> → sideeffect.
+              상태를 읽고 쓰기만 한다면 다음 질문으로.
+            </p>
+            <span class="when">예: fetchRouteInfos → sideeffect</span>
+          </div>
+          <div class="card">
+            <h3>Q2. DOM / 지도를 건드나?</h3>
+            <p>
+              Cesium viewer 조작, <code class="inl">document.querySelector</code>, Canvas 그리기처럼 <b>렌더 트리나 Cesium 을 조작하면</b> → sideeffect.
+            </p>
+            <span class="when">예: renderRouteInfoMarkers → sideeffect</span>
+          </div>
+          <div class="card">
+            <h3>Q3. 시간에 따라 반응하나?</h3>
+            <p>
+              <code class="inl">watch · setInterval · onMounted</code> 처럼 <b>생명주기나 시간 변화에 반응</b>하면 → sideeffect.
+              언제 어떤 상황에서 불리는지가 중요한 코드.
+            </p>
+            <span class="when">예: watch(store.routeInfos, ...) → sideeffect</span>
+          </div>
+          <div class="card">
+            <h3>Q4. 셋 다 아니라면</h3>
+            <p>
+              순수히 <b>"지금 무엇인지"를 담기만</b> 한다면 → store.
+              useState + 동기 mutation 함수.
+              외부 세계를 건드리지 않는 순수 상태.
+            </p>
+            <span class="when">예: routeInfos · isAddingRouteInfo → store</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          헷갈리는 실전 예시 3가지: <b>① "경로 목록 초기화 함수"</b> — 상태를 <code class="inl">[]</code> 로 바꾸는 동기 함수 → store. <b>② "경로 저장 버튼 핸들러"</b> — $fetch 로 서버에 올린 뒤 store 를 갱신 → sideeffect(action). <b>③ "지도에서 선택된 경로 id"</b> — 순수히 "무엇이 선택됐는지" 기록 → store. 지도 클릭 이벤트를 <em>등록</em>하는 코드는 → sideeffect.
+        </p>
+      </div>
+    </section>
+
     <!-- QUIZ -->
     <section class="quiz-sec">
       <div class="wrap">
@@ -360,7 +410,7 @@ watch(                                                       <span class="c">// 
 
     <footer>
       <div class="wrap">
-        Runnable Frontend Lecture · 04 / 05 — 상태와 부수효과. 다음 챕터에서 <code>Vue vs React</code> 로 이 분리 감각을 비교합니다.
+        Runnable Frontend Lecture · 04 / 09 — 상태와 부수효과. 다음 챕터에서 <code>Vue vs React</code> 로 이 분리 감각을 비교합니다.
       </div>
     </footer>
   </body>

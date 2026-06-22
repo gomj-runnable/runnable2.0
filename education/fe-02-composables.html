@@ -330,6 +330,47 @@
       </div>
     </section>
 
+    <!-- DEEPER -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / DEEPER</span>
+          <h2>공유 상태 vs 인스턴스 상태</h2>
+          <p class="sec-sub">같은 <code class="inl">useXxx</code> 이름이라도, <b>ref 를 어디에 두느냐</b>에 따라 "전역 공유"와 "호출마다 격리"가 완전히 갈립니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>모듈 스코프 ref — 전역 공유</h3>
+            <pre class="code"><span class="c">// 파일 최상단에 ref 선언</span>
+<span class="k">const</span> count = ref(0)    <span class="c">// 앱 전체가 이 하나를 씀</span>
+
+<span class="k">export function</span> useSharedCounter() {
+  <span class="k">const</span> increment = () => { count.value++ }
+  <span class="k">return</span> { count, increment }
+}
+<span class="c">// → A 컴포넌트에서 증가 → B 컴포넌트에서도 바뀜</span></pre>
+            <p>모듈이 로드될 때 ref 가 딱 한 번 만들어집니다. 어디서 불러도 <b>같은 상태 객체를 공유</b>합니다 — 전역 싱글턴.</p>
+          </div>
+          <div class="pane good">
+            <h3>함수 내부 ref — 호출마다 새 인스턴스</h3>
+            <pre class="code"><span class="k">export function</span> useLocalCounter() {
+  <span class="c">// 호출할 때마다 새 ref 가 생성됨</span>
+  <span class="k">const</span> count = ref(0)
+  <span class="k">const</span> increment = () => { count.value++ }
+  <span class="k">return</span> { count, increment }
+}
+<span class="c">// → A 컴포넌트의 count 와 B 컴포넌트의 count 는 별개</span></pre>
+            <p><code class="inl">useLocalCounter()</code> 를 호출할 때마다 새 ref 가 만들어집니다. 컴포넌트마다 <b>독립된 상태</b>를 가집니다.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          Runnable 에서 <code class="inl">useRouteInfoStore</code> 는 <b>모듈 스코프 방식(<code class="inl">useState</code>)</b>을 써서 앱 어디서 불러도 같은 상태를 읽습니다 — 이게 "single source of truth"의 구현입니다. 반면 지역 UI 상태(예: 팝업 열림 여부)는 컴포넌트 내부에서 <code class="inl">ref()</code> 를 직접 선언해 격리합니다. <b>어느 패턴을 쓸지는 "이 상태를 여러 컴포넌트가 공유해야 하는가"로 결정</b>하면 됩니다.
+        </p>
+      </div>
+    </section>
+
     <!-- QUIZ -->
     <section class="quiz-sec">
       <div class="wrap">
@@ -392,7 +433,7 @@
 
     <footer>
       <div class="wrap">
-        Runnable Frontend Lecture · 02 / 05 — 컴포저블과 use*. 다음 챕터에서 이 컴포저블 store 가 어떻게 <code>MVVM</code> 의 ViewModel 인지로 이어집니다.
+        Runnable Frontend Lecture · 02 / 09 — 컴포저블과 use*. 다음 챕터에서 이 컴포저블 store 가 어떻게 <code>MVVM</code> 의 ViewModel 인지로 이어집니다.
       </div>
     </footer>
   </body>

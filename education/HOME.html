@@ -246,8 +246,9 @@
       <div class="thesis" style="border-left-color: var(--c0); background: linear-gradient(120deg, color-mix(in oklch, var(--c0) 10%, var(--surface)), var(--surface) 60%); margin-bottom: 1.1rem;">
         <p class="q" style="color: var(--c0);">별도 학습 탭</p>
         <p class="body">
-          플러그인 트랙과 독립된 <b>프론트엔드 기초 강의</b>. 반응형부터 MVVM·상태관리·프레임워크 선택까지,
-          Runnable 코드를 예시로 한 흐름으로 묶습니다. 각 챕터 끝 퀴즈를 풀어 아래 진도표를 채워가세요.
+          플러그인 트랙과 독립된 <b>프론트엔드 기초 강의 9부작</b>. 개념 축(반응형·컴포저블·MVVM·상태/부수효과·Vue vs React)에서
+          실무 축(컴포넌트 통신·생명주기·렌더링/성능·타입·테스트)까지, Runnable 코드를 예시로 한 흐름으로 묶습니다.
+          각 챕터 끝 퀴즈를 풀어 아래 진도표를 채워가세요.
         </p>
       </div>
       <div class="docs">
@@ -291,6 +292,38 @@
           <p>같은 웹, 다른 선택. 반응형 양방향 바인딩이면 MVVM, React는 일부러 단방향.</p>
           <span class="go">읽기 →</span>
         </a>
+        <a class="doc" href="fe-06-communication.html" style="--accent: var(--c3)">
+          <span class="lectag">강의</span>
+          <span class="num">06</span>
+          <h3>컴포넌트 통신</h3>
+          <div class="sub">props · emit · slots · provide/inject</div>
+          <p>데이터는 어떻게 컴포넌트 사이를 흐르나. 아래로 props, 위로 emit, 깊으면 inject. FSD 경계와 직결.</p>
+          <span class="go">읽기 →</span>
+        </a>
+        <a class="doc" href="fe-07-lifecycle.html" style="--accent: var(--c6)">
+          <span class="lectag">강의</span>
+          <span class="num">07</span>
+          <h3>생명주기 · 정리</h3>
+          <div class="sub">mounted · unmounted · cleanup</div>
+          <p>컴포넌트는 태어나고 죽는다. 켜질 때 잡은 리스너·watch·Cesium viewer를 꺼질 때 같은 손으로 놓기.</p>
+          <span class="go">읽기 →</span>
+        </a>
+        <a class="doc" href="fe-08-rendering.html" style="--accent: var(--c1)">
+          <span class="lectag">강의</span>
+          <span class="num">08</span>
+          <h3>렌더링 · 성능</h3>
+          <div class="sub">key · computed 캐싱 · 동적 import</div>
+          <p>반응형은 공짜가 아니다. 안정적 key, 캐싱되는 computed, 필요할 때만 부르는 동적 import로 비용을 다스리기.</p>
+          <span class="go">읽기 →</span>
+        </a>
+        <a class="doc" href="fe-09-types-testing.html" style="--accent: var(--c8)">
+          <span class="lectag">강의</span>
+          <span class="num">09</span>
+          <h3>타입 · 테스트</h3>
+          <div class="sub">Vue+TS · Zod · 컴포저블 테스트</div>
+          <p>런타임 에러를 컴파일 타임으로 당기는 두 그물. 타입은 정적 안전망, 테스트는 동적 명세. 트랙의 마무리.</p>
+          <span class="go">읽기 →</span>
+        </a>
       </div>
 
       <p class="section-label">PROGRESS — 학습 완료 현황</p>
@@ -313,6 +346,10 @@
         <div class="prog-item" data-page="fe-03-mvvm"><span class="pname">FE03 MVVM</span><span class="pstat">미완료</span></div>
         <div class="prog-item" data-page="fe-04-state-sideeffect"><span class="pname">FE04 상태·부수효과</span><span class="pstat">미완료</span></div>
         <div class="prog-item" data-page="fe-05-vue-vs-react"><span class="pname">FE05 Vue vs React</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-06-communication"><span class="pname">FE06 컴포넌트 통신</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-07-lifecycle"><span class="pname">FE07 생명주기·정리</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-08-rendering"><span class="pname">FE08 렌더링·성능</span><span class="pstat">미완료</span></div>
+        <div class="prog-item" data-page="fe-09-types-testing"><span class="pname">FE09 타입·테스트</span><span class="pstat">미완료</span></div>
       </div>
       <p class="prog-note">
         풀이 제출 — 각 페이지 하단 퀴즈를 풀고 채팅에 <code>@{페이지} 답: 1-?, 2-?, 3-?, 4-?</code> 형식으로 보내면 채점합니다.

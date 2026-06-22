@@ -46,6 +46,10 @@
 | `@fe-03-mvvm`             | c   | b   | a   | b   |
 | `@fe-04-state-sideeffect` | b   | c   | b   | c   |
 | `@fe-05-vue-vs-react`     | b   | b   | c   | b   |
+| `@fe-06-communication`    | b   | c   | c   | b   |
+| `@fe-07-lifecycle`        | b   | c   | b   | b   |
+| `@fe-08-rendering`        | b   | c   | b   | b   |
+| `@fe-09-types-testing`    | b   | c   | b   | a   |
 
 ---
 

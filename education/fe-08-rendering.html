@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Runnable · FE강의 08 · 렌더링과 성능</title>
+    <style>
+      :root {
+        --bg: oklch(16% 0.02 85);
+        --bg-grid: oklch(21% 0.024 85);
+        --surface: oklch(22% 0.03 85);
+        --surface-2: oklch(26% 0.035 85);
+        --line: oklch(37% 0.04 85);
+        --text: oklch(95% 0.01 85);
+        --text-dim: oklch(73% 0.02 85);
+        --text-faint: oklch(58% 0.02 85);
+
+        --lec: oklch(80% 0.15 85);
+        --lec-2: oklch(80% 0.15 105);
+        --accent: var(--lec);
+
+        --radius: 16px;
+        --radius-sm: 9px;
+        --maxw: 1000px;
+        --space-section: clamp(3rem, 2rem + 4vw, 6rem);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+        --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(1100px 560px at 88% -6%, oklch(28% 0.07 85 / 0.5), transparent 60%),
+          linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--bg);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 2.5rem); }
+
+      .topbar { padding-top: 1.1rem; }
+      .back {
+        display: inline-flex; align-items: center; gap: .45rem;
+        font-family: var(--mono); font-size: .78rem; letter-spacing: .04em;
+        text-decoration: none; color: var(--text-dim);
+        border: 1px solid var(--line); border-radius: 999px;
+        padding: .45rem .95rem; background: var(--surface);
+      }
+
+      header.hero {
+        padding: clamp(3rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3.5rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--lec); margin: 0 0 1rem;
+      }
+      h1 {
+        font-size: clamp(2.3rem, 1.2rem + 5vw, 4.2rem);
+        line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 1rem; font-weight: 800;
+      }
+      h1 em { font-style: normal; color: var(--lec); }
+      .lede { max-width: 60ch; font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.22rem); color: var(--text-dim); margin: 0; }
+      .lede b { color: var(--text); font-weight: 600; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.8rem; }
+      .chip {
+        font-family: var(--mono); font-size: 0.78rem; padding: 0.4rem 0.8rem;
+        border: 1px solid var(--line); border-radius: 999px; color: var(--text-dim); background: var(--surface);
+      }
+
+      section { padding: var(--space-section) 0; border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent); }
+      section:last-of-type { border-bottom: none; }
+      .sec-head { margin-bottom: 2.2rem; }
+      .sec-num { font-family: var(--mono); font-size: 0.85rem; color: var(--text-faint); letter-spacing: 0.1em; }
+      h2 { font-size: clamp(1.55rem, 1.2rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; margin: 0.3rem 0 0.6rem; font-weight: 700; }
+      .sec-sub { color: var(--text-dim); max-width: 64ch; margin: 0; }
+      p.body { color: var(--text-dim); max-width: 68ch; }
+      p.body b { color: var(--text); }
+      code.inl { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 0.1rem 0.42rem; border-radius: 5px; color: var(--text); }
+
+      /* code block */
+      .code {
+        font-family: var(--mono); font-size: 0.84rem; line-height: 1.7;
+        background: oklch(13% 0.02 85); border: 1px solid var(--line);
+        border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+        padding: 1.1rem 1.3rem; overflow-x: auto; color: var(--text-dim); margin: 0;
+      }
+      .code .c { color: var(--text-faint); font-style: italic; }
+      .code .k { color: var(--lec); }
+      .code .s { color: oklch(80% 0.13 130); }
+
+      /* two-col compare */
+      .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; }
+      .pane { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; }
+      .pane.bad { border-left: 4px solid oklch(70% 0.16 25); }
+      .pane.good { border-left: 4px solid oklch(76% 0.15 150); }
+      .pane h3 { font-family: var(--mono); font-size: 0.95rem; margin: 0 0 0.8rem; }
+      .pane.bad h3 { color: oklch(76% 0.16 25); }
+      .pane.good h3 { color: oklch(80% 0.15 150); }
+      .pane p { color: var(--text-dim); font-size: 0.9rem; margin: 0.8rem 0 0; }
+
+      /* primitive cards */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
+      .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 1.4rem; position: relative; overflow: hidden; transition: transform var(--ease) 0.3s, border-color var(--ease) 0.3s; }
+      .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
+      .card:hover { transform: translateY(-4px); border-color: color-mix(in oklch, var(--accent) 50%, var(--line)); }
+      .card h3 { font-family: var(--mono); font-size: 1rem; margin: 0 0 0.3rem; color: var(--accent); }
+      .card p { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+      .card .when { display: block; margin-top: 0.7rem; font-family: var(--mono); font-size: 0.74rem; color: var(--text-faint); }
+
+      /* callout */
+      .callout { border: 1px solid var(--line); border-left: 4px solid var(--lec-2); border-radius: var(--radius); background: linear-gradient(120deg, color-mix(in oklch, var(--lec-2) 10%, var(--surface)), var(--surface) 60%); padding: clamp(1.3rem, 3vw, 1.9rem); }
+      .callout .q { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lec-2); margin: 0 0 0.7rem; }
+      .callout p { margin: 0; color: var(--text); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem); }
+      .callout p b { color: var(--lec); }
+
+      /* ── QUIZ (공통 컴포넌트 · 변수 fallback 포함) ── */
+      .quiz-sec { background: linear-gradient(160deg, var(--surface-2, #2a2e1a), var(--surface, #232318)); border-top: 1px solid var(--line, #3a4038); }
+      .quiz { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+      .quiz > li { counter-increment: q; border: 1px solid var(--line, #3a4038); border-radius: var(--radius-sm, 9px); background: var(--surface, #232318); padding: 1.3rem 1.4rem; }
+      .quiz > li::before { content: "Q" counter(q); font-family: var(--mono, monospace); font-weight: 700; font-size: 0.8rem; color: var(--accent, #d4b84a); letter-spacing: 0.05em; }
+      .quiz .q { font-weight: 600; margin: 0.4rem 0 1rem; color: var(--text, #f2f0e8); }
+      .quiz .opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .quiz .opts li { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.92rem; color: var(--text-dim, #b3b098); }
+      .quiz .opts b { font-family: var(--mono, monospace); color: var(--accent, #d4b84a); flex-shrink: 0; }
+      .submit-note { margin-top: 1.6rem; font-family: var(--mono, monospace); font-size: 0.82rem; color: var(--text-dim, #b3b098); border: 1px dashed var(--line, #3a4038); border-radius: var(--radius-sm, 9px); padding: 1rem 1.2rem; background: color-mix(in oklch, var(--accent, #d4b84a) 7%, transparent); }
+      .submit-note b { color: var(--text, #f2f0e8); }
+
+      footer { padding: 2.4rem 0 4rem; color: var(--text-faint); font-size: 0.85rem; }
+      footer code { font-family: var(--mono); color: var(--text-dim); }
+      a { color: var(--lec-2); }
+      .pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+      .pager a { font-family: var(--mono); font-size: 0.82rem; text-decoration: none; color: var(--text-dim); border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 1rem; background: var(--surface); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap topbar"><a class="back" href="HOME.html">← 홈으로</a></div>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Runnable · Frontend Lecture · 08</p>
+        <h1>반응형은 <em>공짜가 아니다</em><br />— 렌더링과 성능</h1>
+        <p class="lede">
+          Vue 의 반응형은 <b>데이터가 바뀌면 화면이 알아서 따라온다</b>는 강점을 줍니다.
+          하지만 '알아서'에는 비용이 숨어 있습니다. 이 챕터는 그 비용이 어디서 생기고,
+          <code class="inl">key · computed · 동적 import</code> 로 어떻게 다스리는지를 다룹니다.
+        </p>
+        <div class="meta-row">
+          <span class="chip">난이도 ★★★</span>
+          <span class="chip">선행: 07 생명주기</span>
+          <span class="chip">키워드 rendering · performance</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 WHY -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">01 / WHY</span>
+          <h2>편한 만큼 비용이 숨어 있다</h2>
+          <p class="sec-sub">반응형의 강점은 '알아서 다시 그림'이지만, 잘못 쓰면 '쓸데없이 자주 다시 그림'이 됩니다.</p>
+        </div>
+
+        <p class="body">
+          Vue 가 <code class="inl">ref</code> 나 <code class="inl">reactive</code> 로 관리하는 값이 바뀌면,
+          그 값에 의존하는 컴포넌트의 가상 DOM(Virtual DOM)을 다시 계산하고, 변경된 부분만 실제 DOM 에 반영합니다.
+          이 과정을 <b>렌더 사이클</b>이라고 부릅니다.
+        </p>
+        <p class="body" style="margin-top:1rem;">
+          렌더 사이클은 빠릅니다 — 그러나 공짜는 아닙니다.
+          <b>불필요한 재렌더</b>가 쌓이면 버벅임이 생기고, 특히 <b>지도처럼 무거운 캔버스와 함께하는 앱</b>에서는
+          그 영향이 바로 체감됩니다. 이 챕터는 "안 해도 될 렌더를 안 하는" 세 가지 도구를 소개합니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 KEYS -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">02 / KEYS</span>
+          <h2>v-for 의 key 는 신원증명서</h2>
+          <p class="sec-sub">key 가 없거나 index 면, 리스트가 바뀔 때 Vue 가 엉뚱한 DOM 을 재사용합니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>나쁜 예 — key 없음 / index 사용</h3>
+            <pre class="code"><span class="c">&lt;!-- index 는 '몇 번째'이지 '누구'가 아님 --&gt;</span>
+&lt;li
+  <span class="k">v-for</span>=<span class="s">"(route, i) in routes"</span>
+  <span class="k">:key</span>=<span class="s">"i"</span>
+&gt;
+  {{ route.name }}
+&lt;/li&gt;</pre>
+            <p>앞에 항목이 추가·삭제되면 index 가 밀린다. Vue 는 '1번 항목이 같은 것'이라 착각하고 DOM 을 잘못 재사용한다.</p>
+          </div>
+          <div class="pane good">
+            <h3>좋은 예 — 안정적인 고유 id</h3>
+            <pre class="code"><span class="c">&lt;!-- routeId 는 항목의 신원 --&gt;</span>
+&lt;li
+  <span class="k">v-for</span>=<span class="s">"route in routes"</span>
+  <span class="k">:key</span>=<span class="s">"route.routeId"</span>
+&gt;
+  {{ route.name }}
+&lt;/li&gt;</pre>
+            <p>Runnable 의 <code class="inl">ExplorePanel.vue</code> 와 <code class="inl">RouteListPanel.vue</code> 는 실제로 <code class="inl">:key="route.routeId"</code> 를 씁니다.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          key 는 Vue 에게 "<b>이 항목이 그 항목과 같은 것</b>"임을 알려주는 신원입니다.
+          key 가 안정적이어야 Vue 가 DOM 을 올바르게 재사용(패치)하거나, 진짜 새 항목만 새로 그릴 수 있습니다.
+          배열 순서가 절대 안 바뀐다는 보장이 없다면 <code class="inl">index</code> 를 key 로 쓰지 마세요.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 COMPUTED vs METHOD -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">03 / COMPUTED vs METHOD</span>
+          <h2>캐싱되는 값 vs 매번 도는 함수</h2>
+          <p class="sec-sub">computed 는 의존 값이 바뀌지 않으면 재계산하지 않습니다. 메서드는 매 렌더마다 실행됩니다.</p>
+        </div>
+
+        <div class="compare">
+          <div class="pane bad">
+            <h3>나쁜 예 — 템플릿에서 메서드 호출</h3>
+            <pre class="code"><span class="c">// 매 렌더마다 filteredRoutes() 가 다시 실행된다</span>
+<span class="k">function</span> filteredRoutes() {
+  <span class="k">return</span> routes.value
+    .filter(r => r.distance &gt; minDist.value)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+<span class="c">&lt;!-- 템플릿 --&gt;</span>
+&lt;li <span class="k">v-for</span>=<span class="s">"r in filteredRoutes()"</span>&gt;</pre>
+            <p>무관한 상태가 바뀌어 컴포넌트가 재렌더될 때마다 filter·sort 가 다시 돈다.</p>
+          </div>
+          <div class="pane good">
+            <h3>좋은 예 — computed 로 캐싱</h3>
+            <pre class="code"><span class="c">// routes 나 minDist 가 바뀔 때만 재계산</span>
+<span class="k">const</span> filteredRoutes = computed(() =>
+  routes.value
+    .filter(r => r.distance &gt; minDist.value)
+    .sort((a, b) => a.name.localeCompare(b.name))
+)
+
+<span class="c">&lt;!-- 템플릿 --&gt;</span>
+&lt;li <span class="k">v-for</span>=<span class="s">"r in filteredRoutes"</span>&gt;</pre>
+            <p>의존하는 값(<code class="inl">routes</code>, <code class="inl">minDist</code>)이 바뀔 때만 재계산하고, 나머지 렌더에선 캐시를 돌려준다.</p>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          판단 기준: <b>파생값이면 computed, 이벤트 동작이면 method</b>.
+          "클릭했을 때 무언가를 한다"는 method, "이 목록의 필터 결과를 보여준다"는 computed 입니다.
+          computed 를 method 처럼 호출하지 마세요 — 괄호가 없어야 캐시가 살아납니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 AVOID WORK -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">04 / AVOID WORK</span>
+          <h2>안 그려도 될 땐 안 그리게</h2>
+          <p class="sec-sub">핵심 기법들을 한 눈에 — 언제 무엇을 쓰는지.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>안정적 key</h3>
+            <p><code class="inl">v-for</code> 의 key 에 서버가 부여한 고유 id 를 사용한다. DOM 패치 오류와 불필요한 재생성을 막는다.</p>
+            <span class="when">언제: 리스트 렌더링 항상</span>
+          </div>
+          <div class="card">
+            <h3>computed 캐싱</h3>
+            <p>파생값은 반드시 <code class="inl">computed()</code> 로. 의존 값이 바뀔 때만 재계산한다. 템플릿에서 괄호 없이 접근한다.</p>
+            <span class="when">언제: 필터·정렬·포맷 등 파생값</span>
+          </div>
+          <div class="card">
+            <h3>동적 import</h3>
+            <p>무거운 컴포넌트나 라이브러리를 필요한 시점에야 로드한다(코드 스플리팅). 초기 번들이 작아지고 첫 화면이 빨라진다.</p>
+            <span class="when">언제: 무거운 서드파티·플러그인</span>
+          </div>
+          <div class="card">
+            <h3>v-once / v-memo</h3>
+            <p><code class="inl">v-once</code> — 딱 한 번만 렌더 후 고정. <code class="inl">v-memo</code> — 지정 배열이 바뀔 때만 갱신. 거의 안 바뀌는 정적 블록에 쓴다.</p>
+            <span class="when">언제: 정적 헤더·법적 고지 등</span>
+          </div>
+          <div class="card">
+            <h3>deep watch 절제</h3>
+            <p><code class="inl">{ deep: true }</code> 는 큰 객체 전체를 재귀적으로 비교한다. 꼭 필요한 경우에만 쓰고, 가능하면 특정 속성만 watch 한다.</p>
+            <span class="when">언제: 필요 최소한의 범위만</span>
+          </div>
+          <div class="card">
+            <h3>가상 스크롤</h3>
+            <p>수천 개의 항목을 한꺼번에 렌더하지 않는다. 화면에 보이는 항목만 DOM 에 올리는 가상화(windowing) 라이브러리를 쓴다.</p>
+            <span class="when">언제: 수백 개 이상의 리스트</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.8rem;">
+          동적 import 는 <a href="05-on-demand.html">05 온디맨드(플러그인 트랙)</a> 에서 다룬 코드 스플리팅과 같은 도구입니다.
+          "플러그인을 설치 시점에야 로드한다"는 개념이 렌더링 성능에도 그대로 적용됩니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 05 IN RUNNABLE -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">05 / IN RUNNABLE</span>
+          <h2>지도라는 무거운 화면</h2>
+          <p class="sec-sub">Cesium 지도는 GPU 를 점유하는 무거운 캔버스입니다 — 전체를 다시 그리는 대신 필요한 것만 갱신합니다.</p>
+        </div>
+
+        <p class="body">
+          Runnable 의 성능 전략은 두 가지 원칙으로 요약됩니다.
+          <b>① store 변경 → watch → 필요한 마커만 다시 그림</b>(전체 컴포넌트 재렌더가 아님),
+          <b>② 플러그인 컴포넌트는 열리는 순간 동적으로 로드</b>(초기 번들에서 제외).
+        </p>
+
+        <pre class="code" style="margin-top:1.4rem;"><span class="c">// app/features/route-info/api/useRouteInfoSideeffect.ts</span>
+<span class="c">// 경로정보 목록 또는 로컬 경로정보 변경 시 마커 재렌더링</span>
+watch(
+  [() => store.routeInfos.value, () => store.draftRouteInfos.value],
+  () => renderRouteInfoMarkers(),   <span class="c">// 변경된 마커만 Cesium 에 반영</span>
+  { deep: <span class="k">true</span> }               <span class="c">// 배열 내부까지 추적</span>
+)</pre>
+
+        <p class="body" style="margin-top:1.4rem;">
+          여기서 <code class="inl">deep: true</code> 는 경로정보 배열 내부의 객체까지 추적해야 하기 때문에 씁니다.
+          다만 이 비용을 알기 때문에 watch 대상을 전체 store 가 아니라
+          <code class="inl">routeInfos</code>·<code class="inl">draftRouteInfos</code> 두 값으로만 좁혀 두었습니다.
+        </p>
+
+        <pre class="code" style="margin-top:1.6rem;"><span class="c">// app/plugins-ext/PluginSurfaceHost.vue (요약)</span>
+<span class="c">// active 플러그인의 component 는 이미 manifest 에 markRaw 로 등록된 컴포넌트</span>
+<span class="c">// PluginLauncher 는 enabled 플러그인만 v-for 로 버튼을 그림</span>
+&lt;UButton
+  <span class="k">v-for</span>=<span class="s">"p in surfacePlugins"</span>
+  <span class="k">:key</span>=<span class="s">"p.id"</span>             <span class="c">&lt;!-- 안정적인 플러그인 id --&gt;</span>
+  @click=<span class="s">"open(p.id)"</span>
+/&gt;
+<span class="c">&lt;!-- 클릭 전까지 플러그인 컴포넌트 DOM 은 존재하지 않는다 --&gt;</span>
+&lt;component <span class="k">:is</span>=<span class="s">"active?.component"</span> /&gt;</pre>
+
+        <p class="body" style="margin-top:1.4rem;">
+          <code class="inl">PluginSurfaceHost</code> 는 <code class="inl">active</code> 가 <code class="inl">null</code> 이면 아무것도 그리지 않고,
+          열리는 순간에야 <code class="inl">&lt;component :is&gt;</code> 로 해당 컴포넌트를 마운트합니다.
+          지도 위 무거운 UI 를 "필요할 때만 존재하게" 하는 패턴입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- MENTAL MODEL -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">MENTAL MODEL</span>
+          <h2>성능 최적화의 본질</h2>
+        </div>
+        <div class="callout">
+          <p class="q">한 문장 멘탈 모델</p>
+          <p>
+            성능 최적화의 9할은 <b>"계산을 줄이는 것"이 아니라 "안 해도 될 계산을 안 하는 것"</b>이다 —
+            <b>안정적 key</b> 로 DOM 재생성을 막고,
+            <b>캐싱되는 computed</b> 로 불필요한 재계산을 막고,
+            <b>필요할 때만 부르는 동적 import</b> 로 초기 로드를 줄인다.
+            Vue 의 반응형은 이미 최소 업데이트를 한다 — 우리가 할 일은 "힌트"를 올바르게 주는 것뿐이다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="quiz-sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">QUIZ / 이해도 체크</span>
+          <h2>학습 완료 퀴즈</h2>
+          <p class="sec-sub">4문항 전부 맞히면 이 챕터가 <b>학습 완료</b>로 기록됩니다.</p>
+        </div>
+
+        <ol class="quiz">
+          <li>
+            <p class="q"><code class="inl">v-for</code> 에서 <code class="inl">:key="index"</code> 를 사용했을 때 발생할 수 있는 문제는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 브라우저가 key 속성을 지원하지 않아 렌더가 실패한다</li>
+              <li><b>b)</b> 리스트 앞에 항목이 추가·삭제되면 index 가 밀려, Vue 가 엉뚱한 DOM 을 재사용해 화면이 어긋날 수 있다</li>
+              <li><b>c)</b> index 는 서버와 동기화가 안 되어 네트워크 오류가 난다</li>
+              <li><b>d)</b> computed 가 캐시를 무효화한다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">같은 연산을 <code class="inl">computed</code> 와 <code class="inl">method</code> 로 각각 템플릿에서 사용할 때 차이는?</p>
+            <ul class="opts">
+              <li><b>a)</b> computed 는 매 렌더마다 재실행되지만, method 는 한 번만 실행된다</li>
+              <li><b>b)</b> 둘 다 매 렌더마다 재실행되므로 차이가 없다</li>
+              <li><b>c)</b> computed 는 의존 값이 바뀔 때만 재계산하고 결과를 캐싱하지만, method 는 컴포넌트가 렌더될 때마다 다시 실행된다</li>
+              <li><b>d)</b> method 는 reactive 에만 반응하고, computed 는 ref 에만 반응한다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q"><code class="inl">watch</code> 에 <code class="inl">{ deep: true }</code> 를 쓸 때 주의해야 하는 이유는?</p>
+            <ul class="opts">
+              <li><b>a)</b> deep watch 는 Vue 3 에서 지원이 중단됐다</li>
+              <li><b>b)</b> 배열·객체 내부까지 재귀적으로 비교하므로 큰 객체에 적용하면 비교 비용이 커진다</li>
+              <li><b>c)</b> deep: true 는 computed 를 무효화시킨다</li>
+              <li><b>d)</b> SSR 환경에서만 동작하므로 클라이언트 렌더링에서는 쓸 수 없다</li>
+            </ul>
+          </li>
+          <li>
+            <p class="q">Runnable 에서 플러그인 컴포넌트가 클릭 전까지 DOM 에 존재하지 않는 이유는?</p>
+            <ul class="opts">
+              <li><b>a)</b> 플러그인은 서버에서만 렌더되기 때문이다</li>
+              <li><b>b)</b> <code class="inl">PluginSurfaceHost</code> 가 <code class="inl">active</code> 값이 null 일 때 아무것도 마운트하지 않고, 클릭 시점에야 <code class="inl">&lt;component :is&gt;</code> 로 마운트하기 때문이다</li>
+              <li><b>c)</b> v-for 의 key 가 없어서 Vue 가 렌더를 건너뛰기 때문이다</li>
+              <li><b>d)</b> computed 가 null 을 반환해 렌더를 막기 때문이다</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="submit-note">
+          제출 방법 — 채팅에 <b>@fe-08-rendering 답: 1-?, 2-?, 3-?, 4-?</b> 형식으로 보내주세요.
+          만점이면 <b>HOME</b> 의 진도 표에 ✓ 완료로 표시해 드립니다.
+        </p>
+
+        <div class="pager">
+          <a href="HOME.html">← 홈</a>
+          <a href="fe-07-lifecycle.html">← 07 생명주기</a>
+          <a href="fe-09-types-testing.html">다음: 09 타입·테스트 →</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        Runnable Frontend Lecture · 08 / 09 — 렌더링과 성능. 마지막 챕터에서 타입과 테스트로 안전망을 칩니다.
+      </div>
+    </footer>
+  </body>
+</html>

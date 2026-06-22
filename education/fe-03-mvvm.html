@@ -318,6 +318,53 @@ count.value++
       </div>
     </section>
 
+    <!-- 06 DEEPER -->
+    <section>
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-num">06 / DEEPER</span>
+          <h2>Runnable store ↔ ViewModel 매핑</h2>
+          <p class="sec-sub">MVVM 의 세 계층이 Runnable 실제 파일에 어떻게 1:1 로 내려앉는지 확인합니다.</p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Model — 서버 응답 원형</h3>
+            <p>
+              서버가 내려주는 가공 전 데이터. <code class="inl">shared/types/route.ts</code> 의 타입 정의와
+              <code class="inl">server/services/route.service.ts</code> 의 DB 조회 결과가 여기에 해당합니다.
+              화면이 어떻게 생겼는지는 모릅니다.
+            </p>
+            <span class="when">파일: server/services · shared/types</span>
+          </div>
+          <div class="card">
+            <h3>ViewModel — useRouteInfoStore</h3>
+            <p>
+              <code class="inl">app/entities/route/model/useRouteInfoStore.ts</code>. 서버 응답을 담아 <b>화면이 바로 쓸 상태</b>
+              (<code class="inl">routeInfos · isLoading · isAddingRouteInfo</code>)와 <b>동기적 뮤테이션 함수</b>
+              (<code class="inl">toggleAddingMode · addDraftRouteInfo · clearRouteInfos</code>)를 한 상자에 묶습니다.
+            </p>
+            <span class="when">파일: entities/route/model/useRouteInfoStore.ts</span>
+          </div>
+          <div class="card">
+            <h3>View — *.vue 컴포넌트</h3>
+            <p>
+              <code class="inl">RouteInfoPanel.vue</code> 등. ViewModel 에서 <code class="inl">const { routeInfos, toggleAddingMode } = useRouteInfoStore()</code> 를
+              한 줄로 꺼내 쓰고, 바인딩(<code class="inl">v-for · @click</code>)으로 화면을 그립니다.
+              직접 서버를 부르거나 데이터를 가공하지 않습니다.
+            </p>
+            <span class="when">파일: widgets / pages / *.vue</span>
+          </div>
+        </div>
+
+        <p class="body" style="margin-top:1.6rem;">
+          패턴이 성립하는 이유는 <code class="inl">useRouteInfoStore</code> 가 <b>Cesium·$fetch 를 전혀 모른다</b>는 것입니다.
+          "지금 routeInfos 가 무엇인지"만 알고, "그걸로 무엇을 할지"는 다음 챕터의 sideeffect 가 담당합니다.
+          이 경계가 바로 MVVM 의 View 가 "요리하지 않는다"는 약속과 이어집니다.
+        </p>
+      </div>
+    </section>
+
     <!-- QUIZ -->
     <section class="quiz-sec">
       <div class="wrap">
@@ -380,7 +427,7 @@ count.value++
 
     <footer>
       <div class="wrap">
-        Runnable Frontend Lecture · 03 / 05 — MVVM. 다음 챕터에서 ViewModel 안의 <code>상태</code> 와 <code>부수효과</code> 를 갈라봅니다.
+        Runnable Frontend Lecture · 03 / 09 — MVVM. 다음 챕터에서 ViewModel 안의 <code>상태</code> 와 <code>부수효과</code> 를 갈라봅니다.
       </div>
     </footer>
   </body>
