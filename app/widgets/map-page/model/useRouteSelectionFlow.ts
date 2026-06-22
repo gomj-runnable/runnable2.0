@@ -8,7 +8,7 @@ import {
     calculateRangeDistance,
     formatTime
 } from '~/entities/route/lib/usePaceCalculator'
-import { NavKey } from '~/widgets/map-shell/model/nav-key'
+import { NavKey } from '~/widgets/map-page/model/nav-key'
 import type { useRouteInfoSideeffect } from '~/features/route-info/api/useRouteInfoSideeffect'
 
 interface UseRouteSelectionFlowOptions {

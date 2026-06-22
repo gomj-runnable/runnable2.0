@@ -14,7 +14,7 @@ app/
 │  ├─ explore/  graphic-quality/  route-compare/  route-info/
 │  ├─ route-social/  share-viewer/  view-mode/
 ├─ widgets/              # 화면 단위 (2종)
-│  ├─ facility-overlay/  map-shell/
+│  ├─ facility-overlay/  map-page/
 ├─ shared/               # 공통
 │  ├─ lib/               # composable utilities + map utilities
 │  ├─ model/             # 공유 model
@@ -89,10 +89,10 @@ app/
 
 | Widget             | 역할                                         |
 | ------------------ | -------------------------------------------- |
-| `map-shell`        | 메인 페이지 레이아웃 + Facade 오케스트레이션 |
+| `map-page`         | 메인 페이지 레이아웃 + Facade 오케스트레이션 |
 | `facility-overlay` | 편의시설 종류별 토글 칩 + "현재 위치 검색"   |
 
-`map-shell` 은 **Facade 패턴**으로 페이지가 `useRouteMapFacade` 하나만 import 하면 내부적으로 목록·드로잉·지형·고도·최적화 등 sub-facade 를 조합합니다. UI 는 `MapShell`/`MapSidebar`/`MapOverlays`/`MapFooter`/`SlideOverContent` 로 구성됩니다.
+`map-page` 은 **Facade 패턴**으로 페이지가 `useRouteMapFacade` 하나만 import 하면 내부적으로 목록·드로잉·지형·고도·최적화 등 sub-facade 를 조합합니다. UI 는 `MapCanvas`(지도 표면+슬롯)/`MapSidebar`(헤더)/`MapOverlays`/`MapFooter`/`slide-over/*` 탭으로 구성되며, 전체 화면 레이아웃과 좌측 슬라이드오버 셸은 page(`app/pages/index.vue`)가 소유합니다.
 
 ## 의존 흐름
 

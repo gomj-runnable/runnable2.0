@@ -23,7 +23,7 @@ Flat API 내부에서 Compound를 렌더한다. 확장 지점(slot)은 설계 �
 | shared | `app/shared/ui/` | 전역 공용 UI (BottomDrawer, Card, TextfieldCard) |
 | entities | `app/entities/{entity}/ui/` | 도메인별 독립 UI (GradientToggle, AuthModal, WeatherDatePicker) |
 | features | `app/features/{feature}/ui/` | 기능별 패널·모달 (DrawRoutePanel, ExplorePanel, SimulationDrawer) |
-| widgets | `app/widgets/{widget}/ui/` | 복합 레이아웃 (MapShell, MapSidebar, FacilityOverlay) |
+| widgets | `app/widgets/{widget}/ui/` | 복합 레이아웃 (MapCanvas, MapSidebar, FacilityOverlay) |
 
 ### 레퍼런스
 - `app/shared/ui/` — BottomDrawer, Card, TextfieldCard
@@ -32,13 +32,15 @@ Flat API 내부에서 Compound를 렌더한다. 확장 지점(slot)은 설계 �
 - `app/entities/gradient/ui/` — GradientToggle, GradientLegend
 - `app/features/draw-route/ui/` — DrawRoutePanel, RouteListPanel, RouteSaveModal
 - `app/features/simulation/ui/` — SimulationDrawer
-- `app/widgets/map-shell/ui/` — MapShell, MapSidebar, MapFooter, MapSidebarTabs
+- `app/widgets/map-page/ui/` — MapCanvas, MapSidebar, MapFooter, MapOverlays, slide-over/*
 
 ## Shell 슬롯 구조
 
 ```
-MapShell: #sidebar · #default(Viewer) · #overlay(부유 UI)
-MapSidebar: #header(로고+제어) · #subheader(탭) · #default(스크롤 영역) · #footer(프로필)
+page(app/pages/index.vue): 전체 화면 셸 (header · main · USlideover · modal · FAB)
+MapCanvas: #default(Cesium #map) · #footer · #overlay(부유 UI)
+MapSidebar: UHeader 기반 상단 헤더 (로고 + 우측 제어/드롭다운 nav)
+좌측 슬라이드오버: page USlideover + nested route(<NuxtPage>)로 탭 분기
 ```
 
 ## 사이드바 검색 패널 규칙

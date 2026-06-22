@@ -1,20 +1,20 @@
 <script setup lang="ts">
 /**
- * {Name}Overlay — MapShell #overlay 슬롯용 부유 컨트롤 패널
+ * {Name}Overlay — MapCanvas #overlay 슬롯용 부유 컨트롤 패널
  *
- * 사용처: app/pages/index.vue → MapShell #overlay
+ * 사용처: app/pages/index.vue → MapCanvas #overlay
  * CSS:    app/assets/css/components/templates/{Name}Overlay.css
  */
 
 // 1. props: store에서 전달받는 상태
 const props = defineProps<{
-    // activeMode: SomeMode
+    activeMode: string // 예시 — 실제 상태 prop으로 교체
     // selectedValue: string
 }>()
 
 // 2. emit: 상태 변경을 상위로 전달
 const emit = defineEmits<{
-    // 'update:activeMode': [mode: SomeMode]
+    'update:activeMode': [mode: string] // 예시 — 실제 이벤트로 교체
     // 'update:selectedValue': [value: string]
 }>()
 

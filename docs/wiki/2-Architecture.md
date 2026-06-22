@@ -9,7 +9,7 @@ runnable2.0/
 ├─ app/                  # 프론트엔드 (FSD 적용)
 │  ├─ entities/          # 도메인 단위 (route, user, boundary, facility, gradient, notification)
 │  ├─ features/          # 기능 단위 (draw-route, explore, camera, ...)
-│  ├─ widgets/           # 화면 단위 (map-shell, facility-overlay)
+│  ├─ widgets/           # 화면 단위 (map-page, facility-overlay)
 │  ├─ shared/            # 공통 ui / lib / model
 │  ├─ plugins-ext/       # 런타임 플러그인 슬롯 시스템 (chip/sidepanel/dashboard/popup)
 │  ├─ pages/             # Nuxt 라우팅 (index, settings, admin, share)
@@ -36,7 +36,7 @@ runnable2.0/
 | Layer                  | 책임                                               | 의존 방향                              |
 | ---------------------- | -------------------------------------------------- | -------------------------------------- |
 | `app/pages/`           | 라우팅 진입점 — 최상위 widget facade만 호출        | widgets → features → entities → shared |
-| `app/widgets/`         | 화면 단위 레이아웃 + Facade 조합 (map-shell 등)    | features → entities → shared           |
+| `app/widgets/`         | 화면 단위 레이아웃 + Facade 조합 (map-page 등)     | features → entities → shared           |
 | `app/features/`        | 기능 단위 UI + 로직 (draw-route, explore 등)       | entities → shared                      |
 | `app/entities/`        | 도메인 단위 (route, user, boundary 등)             | shared 만                              |
 | `app/shared/`          | UI primitives, composable utilities, map utilities | external libs 만 (자체 완결)           |
@@ -62,10 +62,10 @@ runnable2.0/
 
 ### 2.2.2 Widget Facade
 
-`widgets/map-shell` 은 화면 단위 레이아웃(`ui/`)과 여러 feature/entity를 단일 인터페이스로 묶는 Facade(`model/`)로 구성됩니다.
+`widgets/map-page` 은 화면 단위 레이아웃(`ui/`)과 여러 feature/entity를 단일 인터페이스로 묶는 Facade(`model/`)로 구성됩니다.
 
-- `widgets/map-shell/ui/`: 메인 페이지 레이아웃 (`MapShell.vue`, `MapSidebar.vue`, `MapOverlays.vue`, `MapFooter.vue`, `slide-over/*`)
-- `widgets/map-shell/model/`: `use*Facade.ts` 11개 (인증, 지도 레이어, 경로 그리기·저장·다운로드·고도·지형·최적화·목록 등)
+- `widgets/map-page/ui/`: 지도 표면·헤더·오버레이·푸터·슬라이드오버 탭 (`MapCanvas.vue`, `MapSidebar.vue`, `MapOverlays.vue`, `MapFooter.vue`, `slide-over/*`) — 전체 화면 레이아웃과 좌측 슬라이드오버 셸은 page(`app/pages/index.vue` + nested `pages/index/*`) 책임
+- `widgets/map-page/model/`: `use*Facade.ts` 11개 (인증, 지도 레이어, 경로 그리기·저장·다운로드·고도·지형·최적화·목록 등)
 - 페이지는 최상위 facade(`useRouteMapFacade`)만 호출하고, 그 안에서 sub-facade들을 조합합니다.
 - `widgets/facility-overlay` 는 지도 위 시설 오버레이(`FacilityOverlay.vue`) 단일 화면 단위입니다.
 
@@ -173,7 +173,7 @@ flowchart TD
 | `use*Sideeffect.ts`        | `useGradientSideeffect`                   |
 | `use*Facade.ts`            | `useRouteMapFacade`                       |
 | `use*Action.ts`            | `useGradientAction`                       |
-| `<Name>.vue`               | `MapShell.vue`, `DrawTab.vue`             |
+| `<Name>.vue`               | `MapCanvas.vue`, `DrawTab.vue`            |
 | `__tests__/<name>.test.ts` | `__tests__/useRouteSelectionFlow.test.ts` |
 
 세부 가이드 (준비 중):

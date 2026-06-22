@@ -17,8 +17,8 @@
 - `app/shared/` : FSD 공용 레이어
 - `app/shared/lib/` : 공용 composable (map/useCesiumRuntime, map/useMapInit, map/useTerrainSampler, useWindow, useFormatUtils 등)
 - `app/shared/ui/` : 최소 단위 재사용 UI (BottomDrawer, Card, TextfieldCard 등)
-- `app/widgets/` : 복합 위젯 (map-shell, facility-overlay)
-- `app/widgets/map-shell/` : 지도 셸 위젯 (MapShell, MapSidebar, MapFooter, MapSidebarTabs, useRouteMapFacade, useEntityCleanup)
+- `app/widgets/` : 복합 위젯 (map-page, facility-overlay)
+- `app/widgets/map-page/` : 지도 페이지 위젯군 (MapCanvas, MapSidebar, MapFooter, MapOverlays, slide-over/\*, useRouteMapFacade) — 전체 화면 셸·슬라이드오버는 page(`app/pages/index.vue`) 책임
 - `app/assets/css/` : 전역 CSS, 디자인 토큰, 지도 UI 스타일
 - `app/assets/images/` : 이미지 자산
 - `app/assets/icons/` : 아이콘 자산
@@ -123,7 +123,7 @@
 
 - `app/pages/`는 화면 조합과 초기 진입만 담당한다.
 - 브라우저 전용 지도 화면은 `definePageMeta({ ssr: false })` 형태를 기본으로 본다.
-- 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/widgets/map-shell/ui/MapShell.vue`, `app/assets/css/base/main.css` 같은 전용 경계에 둔다.
+- 지도 전용 스타일은 일반 전역 스타일과 섞지 않고 `app/widgets/map-page/ui/MapCanvas.vue`, `app/assets/css/base/main.css` 같은 전용 경계에 둔다.
 
 ### CSS 토큰과 스타일 경계
 
@@ -286,7 +286,7 @@
 - `create-bottom-drawer` : `BottomDrawer` 래퍼 컴포넌트를 감싸 하단 Drawer UI를 구현하기 위한 프로젝트 전용 스킬
 - `create-domain-type` : `shared/types` + `shared/schemas` + `shared/data` 3파일을 Base/DraftInput/Saved 계층으로 동시 생성하기 위한 프로젝트 전용 스킬
 - `create-map-layer-sideeffect` : Cesium Entity 생명주기(add/remove/clear) + Options DI + Init/Destroy 패턴으로 지도 레이어 sideeffect를 구현하기 위한 프로젝트 전용 스킬
-- `create-map-overlay` : MapShell `#overlay` 슬롯에 배치되는 부유 UI(지도 위 컨트롤 패널)의 공통 구조·CSS 패턴을 따르기 위한 프로젝트 전용 스킬
+- `create-map-overlay` : MapCanvas `#overlay` 슬롯(=MapOverlays)에 배치되는 부유 UI(지도 위 컨트롤 패널)의 공통 구조·CSS 패턴을 따르기 위한 프로젝트 전용 스킬
 - `create-popup-modal` : Vue 3 Chip Button + Modal Popup 구현 규칙을 따르기 위한 프로젝트 전용 스킬
 - `create-server-crud` : Nitro API 핸들러 4종(GET/POST/PUT/DELETE) + Repository 인터페이스/InMemory/Drizzle/팩토리 4파일 세트를 생성하기 위한 프로젝트 전용 스킬
 - `create-session-doc` : 현재 세션에서 수행한 작업을 `docs/session/` 하위에 날짜별 markdown으로 기록하기 위한 프로젝트 전용 스킬

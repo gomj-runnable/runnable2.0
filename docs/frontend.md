@@ -33,7 +33,7 @@ app/
 │
 ├── widgets/           # 복합 위젯 — shared + entities + features import 가능
 │   ├── facility-overlay/ # 시설물 오버레이
-│   ├── map-shell/     # 지도 Shell (MapShell, MapSidebar, useRouteMapFacade)
+│   ├── map-page/     # 지도 위젯군 (MapCanvas, MapSidebar, useRouteMapFacade)
 │
 ├── pages/             # 라우트 — 조합만 담당 (SSR: false)
 └── assets/css/        # 디자인 토큰 + 외부 CSS
@@ -94,10 +94,10 @@ primitive.css  →  semantic.css  →  컴포넌트 CSS
 
 ## 주요 파일
 
-| 파일                                               | 역할                             |
-| -------------------------------------------------- | -------------------------------- |
-| `app/shared/lib/map/useMapInit.ts`                 | Cesium 초기화                    |
-| `app/shared/lib/map/useCesiumRuntime.ts`           | Cesium 런타임 싱글턴             |
-| `app/shared/model/useCameraStore.ts`               | 카메라 상태 (위치, 고도, 방위각) |
-| `app/widgets/map-shell/model/useRouteMapFacade.ts` | 지도 기능 통합 Facade            |
-| `app/entities/route/lib/useRouteDrawDraft.ts`      | 경로 드로잉 초안 관리            |
+| 파일                                              | 역할                             |
+| ------------------------------------------------- | -------------------------------- |
+| `app/shared/lib/map/useMapInit.ts`                | Cesium 초기화                    |
+| `app/shared/lib/map/useCesiumRuntime.ts`          | Cesium 런타임 싱글턴             |
+| `app/shared/model/useCameraStore.ts`              | 카메라 상태 (위치, 고도, 방위각) |
+| `app/widgets/map-page/model/useRouteMapFacade.ts` | 지도 기능 통합 Facade            |
+| `app/entities/route/lib/useRouteDrawDraft.ts`     | 경로 드로잉 초안 관리            |

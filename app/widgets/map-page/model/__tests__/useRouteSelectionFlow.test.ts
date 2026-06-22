@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, nextTick } from 'vue'
 
-import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
+import { useRouteSelectionFlow } from '~/widgets/map-page/model/useRouteSelectionFlow'
 
 const sharedSectionInfo = vi.hoisted(() => ({
     isOpen: { value: false },

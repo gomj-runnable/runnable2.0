@@ -22,13 +22,13 @@ flowchart TB
 | 레이어          | 책임                                    | 대표 컴포넌트                            |
 | --------------- | --------------------------------------- | ---------------------------------------- |
 | **pages**       | 라우트 진입점, 레이아웃·네비 상태 관리  | `pages/index.vue`                        |
-| **widgets**     | 슬롯·탭을 조합하는 대규모 구조 컨테이너 | `MapShell`, `SlideOverContent`           |
+| **widgets**     | 슬롯·탭을 조합하는 대규모 구조 컨테이너 | `MapCanvas`, `MapSidebar`                |
 | **features**    | 사용자 상호작용 기능 단위               | `DrawRoutePanel`, `BaseMapButton`        |
 | **entities**    | 도메인 데이터의 표현 UI                 | `GradientLegend`, `RouteInfoMarkerPopup` |
 | **shared/ui**   | 도메인 비의존 범용 프리미티브           | `AppEmptyState`, `TextfieldCard`         |
 | **plugins-ext** | 동적 주입형 플러그인 화면               | `PluginLauncher`, `DemoDashboard`        |
 
-이 페이지는 **shared/ui 프리미티브**와 **map-shell 위젯군**을 중심으로 다룹니다. 나머지 레이어 전체 목록은 [D3-Components](D3-Components)(TODO: 미작성) 또는 개발자 위키 [5-Frontend](../wiki/5-Frontend) 를 참고하세요.
+이 페이지는 **shared/ui 프리미티브**와 **map-page 위젯군**을 중심으로 다룹니다. 나머지 레이어 전체 목록은 [D3-Components](D3-Components)(TODO: 미작성) 또는 개발자 위키 [5-Frontend](../wiki/5-Frontend) 를 참고하세요.
 
 ## 2. shared/ui — 범용 프리미티브
 
@@ -129,40 +129,41 @@ interface FloatingMenuItem {
 
 > 카드 모서리·패딩·그림자 토큰은 [D2-Design-Tokens](D2-Design-Tokens) 의 Map Surface Card / Map Form Field 토큰을 따릅니다.
 
-## 3. widgets/map-shell — 지도 셸 위젯군
+## 3. widgets/map-page — 지도 페이지 위젯군
 
-지도 페이지의 골격을 이루는 위젯 묶음입니다. 셸(`MapShell`)이 슬롯을 노출하고, 사이드바·오버레이·푸터·슬라이드오버가 그 슬롯을 채웁니다.
+지도 페이지의 골격을 이루는 위젯 묶음입니다. 전체 화면 레이아웃(헤더·슬라이드오버·모달·FAB)은 **page(`app/pages/index.vue`)** 가 소유하고, `MapCanvas` 가 지도 렌더 표면과 footer·overlay 슬롯을 제공하며, 사이드바(헤더)·오버레이·푸터·슬라이드오버 탭이 그 위/슬롯을 채웁니다.
 
 ```mermaid
 flowchart TB
-    MS["MapShell<br/>레이아웃 슬롯 셸"]
-    MS -->|#sidebar| SB[MapSidebar]
-    MS -->|#overlay| OV[MapOverlays]
-    MS -->|#footer| FT[MapFooter]
-    SOC["SlideOverContent<br/>USlideover + 탭 라우팅"]
-    SOC --> LT[ListTab]
-    SOC --> DT[DrawTab]
-    SOC --> AT[AuthTab]
+    PG["app/pages/index.vue<br/>페이지 셸 (header·main·slideover·modal·FAB)"]
+    PG --> SB[MapSidebar · 헤더]
+    PG --> MC["MapCanvas<br/>지도 렌더 표면 + 슬롯"]
+    MC -->|#overlay| OV[MapOverlays]
+    MC -->|#footer| FT[MapFooter]
+    PG -->|USlideover + NuxtPage| SO["슬라이드오버 (nested route)"]
+    SO --> LT["ListTab (pages/index/index.vue)"]
+    SO --> DT["DrawTab (pages/index/draw.vue)"]
+    SO --> AT["AuthTab (v-if)"]
     LT --> SIS["SectionInfoSlideContent<br/>→ SecondPanel"]
 ```
 
-| 컴포넌트         | 파일                                            | 용도                                      |
-| ---------------- | ----------------------------------------------- | ----------------------------------------- |
-| MapShell         | `app/widgets/map-shell/ui/MapShell.vue`         | 사이드바·오버레이·푸터 슬롯 조합 레이아웃 |
-| MapSidebar       | `app/widgets/map-shell/ui/MapSidebar.vue`       | 로고 + 우측 컨트롤·드롭다운 헤더          |
-| MapOverlays      | `app/widgets/map-shell/ui/MapOverlays.vue`      | 지도 위 모든 오버레이 UI 조합             |
-| MapFooter        | `app/widgets/map-shell/ui/MapFooter.vue`        | 하단 카메라·위치 정보 표시                |
-| SlideOverContent | `app/widgets/map-shell/ui/SlideOverContent.vue` | 좌측 슬라이드오버 셸 + 탭 라우팅          |
+| 컴포넌트    | 파일                                      | 용도                                                       |
+| ----------- | ----------------------------------------- | ---------------------------------------------------------- |
+| MapCanvas   | `app/widgets/map-page/ui/MapCanvas.vue`   | 지도 렌더 표면(Cesium `#map`) + footer·overlay 슬롯 호스트 |
+| MapSidebar  | `app/widgets/map-page/ui/MapSidebar.vue`  | 로고 + 우측 컨트롤·드롭다운 헤더                           |
+| MapOverlays | `app/widgets/map-page/ui/MapOverlays.vue` | 지도 위 모든 오버레이 UI 조합                              |
+| MapFooter   | `app/widgets/map-page/ui/MapFooter.vue`   | 하단 카메라·위치 정보 표시                                 |
 
-### 3.1 MapShell — 레이아웃 셸
+> 전체 화면 레이아웃과 좌측 슬라이드오버 셸은 위젯이 아니라 **page(`app/pages/index.vue` + nested `pages/index/*`)** 책임입니다 (구 `MapShell.vue`·`SlideOverContent.vue` 분리). 자세한 내용은 §3.1·§3.5 참고.
 
-`#sidebar` · `#footer` · `#overlay` 3개 슬롯과 기본 슬롯(지도 본체)을 조합하는 순수 레이아웃 컨테이너입니다. 로직 없이 배치만 담당합니다.
+### 3.1 MapCanvas — 지도 렌더 표면
+
+`#footer` · `#overlay` 2개 슬롯과 기본 본체(Cesium `#map`)를 담는 호스트입니다. 전체 화면 레이아웃(헤더·슬라이드오버·모달·FAB)은 page(`app/pages/index.vue`)가 소유하며, 이 컴포넌트는 지도 표면과 그 위 HUD 슬롯의 positioning 만 담당합니다.
 
 **주요 시각 요소**
 
-- 최상위 `flex flex-col h-screen` — 전체 화면 높이 점유
-- `hideSidebar` props 로 사이드바 슬롯 표시 제어 (공유 페이지 등에서 숨김)
-- 지도 본체: `relative flex-auto ... overflow-hidden`
+- 루트 `relative w-full h-full min-h-0 overflow-hidden`
+- 지도 본체: `#map` div (전역 CSS 가 `absolute inset-0` 으로 채움)
 - 푸터 슬롯: `absolute bottom-0 ... z-10 pointer-events-none` (지도 조작 방해 안 함)
 - 오버레이 슬롯: `absolute inset-0 pointer-events-none z-10` + `[&>*]:pointer-events-auto` — 컨테이너는 클릭 통과, 자식 요소만 클릭 수신
 
@@ -213,20 +214,24 @@ flowchart TB
 - 반투명 배경 + 블러: `bg-(--ui-bg-elevated)/75 backdrop-blur-[12px]`
 - 좌상단만 둥근 모서리: `rounded-[1rem_0_0_0]` (지도 우하단 코너에 붙는 형태)
 
-### 3.5 SlideOverContent — 슬라이드오버 셸
+### 3.5 슬라이드오버 셸 — page(`app/pages/index.vue`)
 
-좌측 `USlideover` 패널 셸로, `currentNav` 값에 따라 3개 탭 콘텐츠를 라우팅합니다. 탭 본문은 `slide-over/*` 컴포넌트에 위임합니다.
+좌측 `USlideover` 는 별도 위젯이 아니라 **page 가 직접 소유**합니다. 본문은 nested route(`<NuxtPage>`)로 탭을 분기하고, 탭 mode·상태의 단일 진실 소스는 route path(`useTabRoute`)입니다.
+
+- `pages/index/index.vue` (path `/`) → `ListTab`
+- `pages/index/draw.vue` (path `/draw`) → `DrawTab`
+- `AuthTab` 만 `current nav === AUTH` 일 때 `v-if` 로 노출 (path 가 아닌 SlideOver 토글)
 
 **주요 시각 요소**
 
 - `USlideover side="left"`, `:overlay="false"`, `:modal="false"`, `:dismissible="false"` — 지도 위에 비모달로 상주
 - `:ui` 로 헤더 높이만큼 띄우고(`top-(--ui-header-height)!`) 폭 제한(`max-w-[75vw] lg:max-w-sm`)
-- `#body` 에서 `NavKey` 값으로 `ListTab`·`DrawTab`·`AuthTab` 분기
-- `currentNav` 가 `AUTH` 로 바뀌면 `authTabRef.reset()` 호출 (watch)
+- `#body` 에서 `AuthTab`(v-if) / `<NuxtPage>`(else) 분기
+- current nav 가 `AUTH` 로 바뀌면 `authTabRef.reset()` 호출 (page 의 watch)
 
 ## 4. slide-over 탭 컴포넌트
 
-`SlideOverContent` 의 본문을 채우는 탭들입니다. 대부분 features/entities 패널을 얇게 래핑해 facade 와 연결하는 어댑터 역할을 합니다.
+슬라이드오버 본문을 채우는 탭들입니다. 대부분 features/entities 패널을 얇게 래핑해 facade 와 연결하는 어댑터 역할을 합니다.
 
 | 컴포넌트                | 파일                                         | 용도                                 |
 | ----------------------- | -------------------------------------------- | ------------------------------------ |
@@ -275,7 +280,7 @@ flowchart TB
 
 ## 5. 패턴 메모
 
-- **셸/슬롯 분리** — `MapShell` 은 배치만, 내용은 슬롯으로 주입. 로직과 레이아웃이 분리됩니다.
+- **셸/슬롯 분리** — page(`index.vue`)가 전체 레이아웃을, `MapCanvas` 가 지도 표면 + footer·overlay 슬롯을 담당. 내용은 슬롯으로 주입해 로직과 레이아웃이 분리됩니다.
 - **얇은 어댑터 탭** — `DrawTab`·`AuthTab` 처럼 슬라이드오버 탭은 features/entities 패널을 래핑해 facade 와만 연결합니다.
 - **facade 주입** — `MapOverlays` 는 다수의 composable facade 를 props 로 직접 받아 바인딩합니다. (TODO: facade 패턴 상세는 개발자 위키 참조)
 - **모바일 분기** — `FloatingActionMenu`, MapOverlays 의 완료 버튼은 `Teleport` + `max-lg` 분기로 모바일 전용 표면을 구성합니다.

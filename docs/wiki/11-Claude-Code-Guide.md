@@ -20,7 +20,7 @@ Claude Code(및 신규 개발자)가 이 저장소에서 **바로 작업에 착�
 ```
 app/                  # 프론트엔드 (FSD)
 ├─ pages/             # Nuxt 라우팅 진입점
-├─ widgets/           # 화면 단위 + Facade 오케스트레이션 (map-shell)
+├─ widgets/           # 화면 단위 + Facade 오케스트레이션 (map-page)
 ├─ features/          # 기능 단위 (draw-route, explore, camera, ...) 11종
 ├─ entities/          # 도메인 단위 (route, user, facility, ...)
 └─ shared/            # ui / lib / model (lib/map = Cesium 유틸)
@@ -52,8 +52,8 @@ tests/e2e/            # Playwright E2E
 | 프론트 공유 상태(store)               | `entities                                       | features/\*/model/`                 | `use*Store.ts`                | `create-store-composable` |
 | Cesium 레이어/토글(부수효과)          | `features/*/api/`                               | `use*Sideeffect.ts`                 | `create-map-layer-sideeffect` |
 | 지도 위 부유 UI(칩/패널/컨트롤)       | `widgets                                        | features/\*/ui/`                    | `<Name>.vue` (#overlay 슬롯)  | `create-map-overlay`      |
-| 여러 feature 조합(진입점)             | `widgets/map-shell/model/`                      | `use*Facade.ts`                     | —                             |
-| 경로 컨텍스트 연동 오버레이 가시성    | `widgets/map-shell/model/`                      | `useOverlayContext.ts` 등           | `sync-overlay-visibility`     |
+| 여러 feature 조합(진입점)             | `widgets/map-page/model/`                       | `use*Facade.ts`                     | —                             |
+| 경로 컨텍스트 연동 오버레이 가시성    | `widgets/map-page/model/`                       | `useOverlayContext.ts` 등           | `sync-overlay-visibility`     |
 | 단위 테스트                           | `**/__tests__/`                                 | `<name>.test.ts`                    | —                             |
 
 ### Import / Path Alias 규칙
@@ -93,7 +93,7 @@ tests/e2e/            # Playwright E2E
 ### D. 지도 위 오버레이 UI 추가
 
 1. `create-map-overlay` 스킬 호출
-2. `*/ui/<Name>.vue` 를 `MapShell` 의 `#overlay` 슬롯에 배치, z-index 티어(`app.config.ts`) 준수
+2. `*/ui/<Name>.vue` 를 `MapCanvas` 의 `#overlay` 슬롯(=`MapOverlays`)에 배치, z-index 티어(`app.config.ts`) 준수
 3. 경로 선택/그리기 컨텍스트에 따라 표시·숨김이 필요하면 → `sync-overlay-visibility` 스킬 (`MapOverlayContextEnum` 기반 일괄 동기화)
 
 ### E. 프론트 공유 상태(store) 추가
@@ -110,7 +110,7 @@ tests/e2e/            # Playwright E2E
 
 ### G. 여러 feature 를 한 화면에서 조합
 
-- 페이지는 `widgets/map-shell/model/useRouteMapFacade()` **하나만** import
+- 페이지는 `widgets/map-page/model/useRouteMapFacade()` **하나만** import
 - 신규 조합은 sub-facade(`use*Facade.ts`)를 추가하고 진입 facade 에서 묶음
 
 > Frontend composable 책임 분리 상세 → [5-Frontend](5-Frontend)

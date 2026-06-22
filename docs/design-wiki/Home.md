@@ -19,7 +19,7 @@ Runnable UI 의 디자인 시스템을 다루는 위키입니다. 디자이너�
 | [D1-Overview](D1-Overview)                             | 디자인 개요 — 제품 톤·5가지 원칙·기술 기반                                 |
 | [D2-Design-Tokens](D2-Design-Tokens)                   | 색상·타이포·포커스 토큰(`main.css` `@theme`) + 컴포넌트 토큰(`common.css`) |
 | [D3-Components](D3-Components)                         | Vue 컴포넌트 카탈로그 (FSD 계층별 46개)                                    |
-| [D4-Screens-and-Flows](D4-Screens-and-Flows)           | map-shell 레이아웃·slide-over 탭 흐름·화면 구조                            |
+| [D4-Screens-and-Flows](D4-Screens-and-Flows)           | map-page 레이아웃·slide-over 탭 흐름·화면 구조                             |
 | [D5-Iconography-and-Motion](D5-Iconography-and-Motion) | Iconify(lucide·simple-icons)·Custom SVG·이징 토큰·전환                     |
 | [D6-Accessibility](D6-Accessibility)                   | 포커스 표시·ARIA 라벨·키보드·시맨틱 HTML                                   |
 

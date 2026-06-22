@@ -193,7 +193,7 @@ Runnable/
 │   │
 │   ├── widgets/                            # 복합 위젯
 │   │   ├── facility-overlay/               #   시설물 오버레이
-│   │   ├── map-shell/                      #   지도 + 오버레이 컨테이너
+│   │   ├── map-page/                      #   지도 + 오버레이 컨테이너
 │   │   └── right-panel/                    #   우측 패널
 │   │
 │   ├── shared/                             # 앱 내 공용
@@ -279,7 +279,7 @@ Runnable/
 | Shared  | `app/shared/`   | 앱 전역 공용 유틸·UI                 | `map/` 헬퍼, 공용 컴포넌트                |
 | Entity  | `app/entities/` | 도메인 엔티티 (비즈니스 데이터 단위) | `route/`, `weather/`, `facility/`         |
 | Feature | `app/features/` | 사용자 시나리오 단위 기능            | `draw-route/`, `simulation/`, `discover/` |
-| Widget  | `app/widgets/`  | 여러 Entity·Feature를 조합한 복합 UI | `map-shell/`, `right-panel/`              |
+| Widget  | `app/widgets/`  | 여러 Entity·Feature를 조합한 복합 UI | `map-page/`, `right-panel/`               |
 
 각 슬라이스는 아래 세그먼트로 내부를 분리한다.
 
@@ -321,7 +321,7 @@ primitive.css  →  semantic.css  →  컴포넌트 CSS
 
 | 대상            | 규칙                                 | 예시                                           |
 | --------------- | ------------------------------------ | ---------------------------------------------- |
-| 컴포넌트        | PascalCase                           | `MapShell.vue`, `AuthModal.vue`                |
+| 컴포넌트        | PascalCase                           | `MapCanvas.vue`, `AuthModal.vue`               |
 | Composable      | `use` + PascalCase                   | `useAuthStore`, `useRouteMapFacade`            |
 | API 파일        | Nuxt 라우트 규칙                     | `index.get.ts`, `[routeId]/sections.get.ts`    |
 | CSS 클래스      | BEM 스타일                           | `.auth-modal__header`, `.weather-legend__item` |

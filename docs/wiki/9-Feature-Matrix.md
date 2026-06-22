@@ -17,18 +17,18 @@
 
 ### 9.1.1 경로 도메인
 
-| 영역      | 기능                                    | 위치                                                                                                   | 진입점                             | 비고                                                  |
-| --------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------- | ----------------------------------------------------- |
-| 경로 제작 | Cesium 3D 지도 위 폴리라인 직접 그리기  | `app/features/draw-route`                                                                              | 지도 페이지 FAB → "경로 그리기"    | 구간(section) 단위로 이름·설명 입력, 분할(split) 지원 |
-| 경로 제작 | 폐곡선(loop)·왕복(round-trip) 자동 연결 | `app/features/draw-route/api/useRouteClosingSideeffect`                                                | 그리기 중 토글                     | 코스 형태 자동 보정                                   |
-| 경로 제작 | 경로 최적화                             | `app/features/draw-route/api/useRouteOptimizationSideeffect`                                           | 그리기 중 최적화 액션              | `POST /api/routes/optimize`                           |
-| 경로 제작 | 고도 프로파일 시각화                    | `app/features/elevation-layer/lib/useElevationChartAction`, `app/widgets/map-shell` (elevation facade) | 경로 선택 / 작성 시 하단 SVG 차트  | 최고/최저 + 누적 상승/하강                            |
-| 경로 제작 | GPX 다운로드                            | `app/features/draw-route` 저장 모달                                                                    | 저장 모달 내 GPX 버튼              | —                                                     |
-| 경로 제작 | 경로 저장 모달                          | `app/features/draw-route/ui/RouteSaveModal.vue`                                                        | FAB → "저장"                       | 비로그인이면 로그인 유도 모달 자동 표시 (#5)          |
-| 경로 비교 | 두 경로 통계 비교                       | `app/features/route-compare`                                                                           | FAB → "비교" → `RouteCompareModal` | 첫 경로 선택 → 대기 → 두 번째 선택 시 비교 API 호출   |
-| 경로 정보 | 경로별 위치 메모(이름·설명) 등록·조회   | `app/features/route-info`, `app/entities/route/model/useRouteInfoStore`                                | FAB → "경로정보" 칩 → 지도 클릭    | 최대 500자, 핀 마커 + 클릭 팝업                       |
-| 경로 공유 | 공유 링크 생성 / 인증 없이 열람         | `app/features/share-viewer`, `app/pages/share/[routeId].vue`                                           | 공유 버튼 → URL 복사 → 누구나 접근 | route + sections + routeInfos 로드, 읽기 전용 렌더링  |
-| 경로 공유 | 경로 소셜(좋아요/공유 액션)             | `app/features/route-social`                                                                            | 경로 카드 / 상세                   | 좋아요는 낙관적 업데이트(실패 시 롤백)                |
+| 영역      | 기능                                    | 위치                                                                                                  | 진입점                             | 비고                                                  |
+| --------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| 경로 제작 | Cesium 3D 지도 위 폴리라인 직접 그리기  | `app/features/draw-route`                                                                             | 지도 페이지 FAB → "경로 그리기"    | 구간(section) 단위로 이름·설명 입력, 분할(split) 지원 |
+| 경로 제작 | 폐곡선(loop)·왕복(round-trip) 자동 연결 | `app/features/draw-route/api/useRouteClosingSideeffect`                                               | 그리기 중 토글                     | 코스 형태 자동 보정                                   |
+| 경로 제작 | 경로 최적화                             | `app/features/draw-route/api/useRouteOptimizationSideeffect`                                          | 그리기 중 최적화 액션              | `POST /api/routes/optimize`                           |
+| 경로 제작 | 고도 프로파일 시각화                    | `app/features/elevation-layer/lib/useElevationChartAction`, `app/widgets/map-page` (elevation facade) | 경로 선택 / 작성 시 하단 SVG 차트  | 최고/최저 + 누적 상승/하강                            |
+| 경로 제작 | GPX 다운로드                            | `app/features/draw-route` 저장 모달                                                                   | 저장 모달 내 GPX 버튼              | —                                                     |
+| 경로 제작 | 경로 저장 모달                          | `app/features/draw-route/ui/RouteSaveModal.vue`                                                       | FAB → "저장"                       | 비로그인이면 로그인 유도 모달 자동 표시 (#5)          |
+| 경로 비교 | 두 경로 통계 비교                       | `app/features/route-compare`                                                                          | FAB → "비교" → `RouteCompareModal` | 첫 경로 선택 → 대기 → 두 번째 선택 시 비교 API 호출   |
+| 경로 정보 | 경로별 위치 메모(이름·설명) 등록·조회   | `app/features/route-info`, `app/entities/route/model/useRouteInfoStore`                               | FAB → "경로정보" 칩 → 지도 클릭    | 최대 500자, 핀 마커 + 클릭 팝업                       |
+| 경로 공유 | 공유 링크 생성 / 인증 없이 열람         | `app/features/share-viewer`, `app/pages/share/[routeId].vue`                                          | 공유 버튼 → URL 복사 → 누구나 접근 | route + sections + routeInfos 로드, 읽기 전용 렌더링  |
+| 경로 공유 | 경로 소셜(좋아요/공유 액션)             | `app/features/route-social`                                                                           | 경로 카드 / 상세                   | 좋아요는 낙관적 업데이트(실패 시 롤백)                |
 
 ### 9.1.2 지도 표시·제어
 
@@ -52,17 +52,17 @@
 
 ### 9.1.4 인증·셸
 
-| 영역    | 기능                                                               | 위치                                        | 진입점               | 비고                                                         |
-| ------- | ------------------------------------------------------------------ | ------------------------------------------- | -------------------- | ------------------------------------------------------------ |
-| 인증    | better-auth 이메일/비번 + 30일 세션                                | `app/entities/user`, `server/security/auth` | AuthModal            | 미로그인 저장 시 모달 자동 표시 (#5)                         |
-| 인증    | 본인 경로 수정/삭제 권한                                           | `server/api/routes/{id}.put/delete`         | 경로 카드 액션       | 소유자 검증 (#6)                                             |
-| 지도 셸 | MapShell / MapSidebar / MapFooter / MapOverlays / SlideOverContent | `app/widgets/map-shell`                     | 메인 페이지 레이아웃 | 좌측 사이드바 + 우측 SlideOver + 하단 footer + chip 오버레이 |
+| 영역    | 기능                                                                 | 위치                                             | 진입점               | 비고                                                            |
+| ------- | -------------------------------------------------------------------- | ------------------------------------------------ | -------------------- | --------------------------------------------------------------- |
+| 인증    | better-auth 이메일/비번 + 30일 세션                                  | `app/entities/user`, `server/security/auth`      | AuthModal            | 미로그인 저장 시 모달 자동 표시 (#5)                            |
+| 인증    | 본인 경로 수정/삭제 권한                                             | `server/api/routes/{id}.put/delete`              | 경로 카드 액션       | 소유자 검증 (#6)                                                |
+| 지도 셸 | MapCanvas / MapSidebar / MapFooter / MapOverlays (+ page USlideover) | `app/widgets/map-page` (+ `app/pages/index.vue`) | 메인 페이지 레이아웃 | 헤더 + 좌측 SlideOver + 지도 표면 + 하단 footer + chip 오버레이 |
 
 > 탐색(explore) 은 검색·필터 store(`app/features/explore`)만 코어에 남아 오버레이 컨텍스트 판단에 쓰이고, UI(서울 25개 구 칩·공개 경로 목록)는 sidepanel 플러그인으로 분리되어 있다 (§9.2).
 
 ---
 
-## 9.1.5 map-shell 오케스트레이션 (facade)
+## 9.1.5 map-page 오케스트레이션 (facade)
 
 페이지는 `useRouteMapFacade` 하나만 import 하고, 내부적으로 sub-facade 들을 조합한다 (Facade 합성 패턴).
 
@@ -142,9 +142,9 @@ manifest schema: `{ id, label, description, slot: 'chip' | 'sidepanel' | 'dashbo
 | run-records         | 러닝 기록 (실주행 trace 저장/조회)                                             | #340 (Closes #332)    | —                                                                                                                  |
 | segments            | 경로 구간 분할 도메인 (그리기와 별도)                                          | #343 (Closes #335)    | 그리기 내부의 section 개념은 코어에 남음 — 별도                                                                    |
 | simulation          | 3D 경로 플라이스루(재생/일시정지/정지/탐색, 1x/2x/5x, 실시간 거리·고도·경사도) | #341 (Closes #333)    | SimulationDrawer + xstate 기반 머신 제거                                                                           |
-| curation            | 큐레이션(추천 셋트, 관리자 큐레이션 카드)                                      | #344 (Closes #336)    | map-shell ExploreTab/SlideOverContent/MapSidebar 결합도 함께 정리                                                  |
+| curation            | 큐레이션(추천 셋트, 관리자 큐레이션 카드)                                      | #344 (Closes #336)    | map-page ExploreTab/SlideOverContent/MapSidebar 결합도 함께 정리                                                   |
 | weather + recommend | 서울 25개 구 시간대별 날씨/기온/PM10 오버레이 + 날씨 적합도 기반 경로 추천     | #345 (Closes #337)    | 가장 광범위 — 274 개 테스트 제거. `useWeatherFacade`, 오버레이, 사이드바 weather 결합, explore 추천 로직 모두 제거 |
-| right-panel         | 우측 패널 widget                                                               | #342 (Closes #334)    | SectionInfoSlideContent 는 map-shell/slide-over 로 이동 (보존)                                                     |
+| right-panel         | 우측 패널 widget                                                               | #342 (Closes #334)    | SectionInfoSlideContent 는 map-page/slide-over 로 이동 (보존)                                                      |
 | admin/seed          | 관리자 시드 카드 / 페이지                                                      | #346 (Closes #338)    | AdminSeedCard 제거 + `/admin` 빈 카드 분기점 스켈레톤으로 재구성                                                   |
 | admin/uml           | UML 다이어그램 페이지 도메인                                                   | #339 (Closes #331)    | `/api/uml`, `vue-mermaid-string` UI 등                                                                             |
 | admin/curation      | 큐레이션 운영 도구                                                             | curation 와 함께 #344 | —                                                                                                                  |

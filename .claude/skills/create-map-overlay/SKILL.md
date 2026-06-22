@@ -1,16 +1,16 @@
 ---
 name: create-map-overlay
-description: This skill should be used when the user asks to "지도 위 오버레이 UI를 추가", "맵 오버레이 컨트롤을 만들어", "Overlay 컴포넌트를 구현", "지도 위에 떠 있는 패널/컨트롤을 추가"해야 할 때. MapShell의 #overlay 슬롯에 배치되는 부유 UI의 공통 구조와 CSS 패턴을 정의한다.
+description: This skill should be used when the user asks to "지도 위 오버레이 UI를 추가", "맵 오버레이 컨트롤을 만들어", "Overlay 컴포넌트를 구현", "지도 위에 떠 있는 패널/컨트롤을 추가"해야 할 때. MapCanvas의 #overlay 슬롯에 배치되는 부유 UI의 공통 구조와 CSS 패턴을 정의한다.
 ---
 
 # Create Map Overlay
 
-MapShell `#overlay` 슬롯에 배치되는 부유 UI 구현 규칙.
+MapCanvas `#overlay` 슬롯에 배치되는 부유 UI 구현 규칙.
 
 ## 구조
 
 ```
-MapShell #overlay
+MapCanvas #overlay
 └── .{name}-overlay              ← 전체 영역 (pointer-events: none)
     └── .{name}-overlay__topbar  ← 컨트롤 영역 (pointer-events: auto)
         └── .{name}-overlay__controls
@@ -76,7 +76,7 @@ Overlay 안에서 PopupModal을 사용할 수 있다 (예: 날짜 선택 달력)
 3. **외부 CSS 생성** — `app/assets/css/components/templates/{Name}Overlay.css`
 4. **하위 UI 분리** — 내부 컨트롤은 같은 슬라이스의 `ui/` 또는 관련 entity의 `ui/`에 배치
 5. **model 연결** — 상태는 같은 슬라이스의 `model/use{Name}Store.ts`
-6. **MapShell 연결** — `#overlay` 슬롯에 배치
+6. **MapCanvas 연결** — `#overlay` 슬롯에 배치
 
 → 코드: [examples/template.vue](examples/template.vue), [examples/css.md](examples/css.md)
 

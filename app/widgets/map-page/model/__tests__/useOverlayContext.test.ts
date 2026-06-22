@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, nextTick } from 'vue'
-import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
+import { useOverlayContext } from '~/widgets/map-page/model/useOverlayContext'
 import { MapOverlayContextEnum } from '#shared/types/map-overlay-context.enum'
 
 const makeRouteInfoStore = () => ({

@@ -6,11 +6,11 @@
  * 자식 panel 은 `provide`한 컨텍스트로 facade·flow·auth 에 접근한다.
  */
 import { useMapViewer } from '~/shared/lib/map/useMapViewer'
-import MapCanvas from '~/widgets/map-shell/ui/MapCanvas.vue'
-import MapSidebar from '~/widgets/map-shell/ui/MapSidebar.vue'
-import MapFooter from '~/widgets/map-shell/ui/MapFooter.vue'
-import MapOverlays from '~/widgets/map-shell/ui/MapOverlays.vue'
-import AuthTab from '~/widgets/map-shell/ui/slide-over/AuthTab.vue'
+import MapCanvas from '~/widgets/map-page/ui/MapCanvas.vue'
+import MapSidebar from '~/widgets/map-page/ui/MapSidebar.vue'
+import MapFooter from '~/widgets/map-page/ui/MapFooter.vue'
+import MapOverlays from '~/widgets/map-page/ui/MapOverlays.vue'
+import AuthTab from '~/widgets/map-page/ui/slide-over/AuthTab.vue'
 import RouteSaveModal from '~/features/draw-route/ui/RouteSaveModal.vue'
 import RouteCompareModal from '~/features/route-compare/ui/RouteCompareModal.vue'
 import { useRouteCompareSideeffect } from '~/features/route-compare/api/useRouteCompareSideeffect'
@@ -18,11 +18,11 @@ import { useViewModeSideeffect } from '~/features/view-mode/api/useViewModeSidee
 import { useGraphicQualitySideeffect } from '~/features/graphic-quality/api/useGraphicQualitySideeffect'
 import { useBaseMapSideeffect } from '~/features/base-map/api/useBaseMapSideeffect'
 import FloatingActionMenu from '~/shared/ui/FloatingActionMenu.vue'
-import { NavKey, type NavKeyValue } from '~/widgets/map-shell/model/nav-key'
-import { useSlideOverNav } from '~/widgets/map-shell/model/useSlideOverNav'
-import { useTabRoute } from '~/widgets/map-shell/model/useTabRoute'
-import { useRouteMapFacade } from '~/widgets/map-shell/model/useRouteMapFacade'
-import { MAP_PAGE_CONTEXT } from '~/widgets/map-shell/model/useMapPageContext'
+import { NavKey, type NavKeyValue } from '~/widgets/map-page/model/nav-key'
+import { useSlideOverNav } from '~/widgets/map-page/model/useSlideOverNav'
+import { useTabRoute } from '~/widgets/map-page/model/useTabRoute'
+import { useRouteMapFacade } from '~/widgets/map-page/model/useRouteMapFacade'
+import { MAP_PAGE_CONTEXT } from '~/widgets/map-page/model/useMapPageContext'
 import { useRouteDrawStore } from '~/entities/route/model/useRouteDrawStore'
 import { useNotificationStore } from '~/entities/notification/model/useNotificationStore'
 import { NotificationToneEnum } from '#shared/types/notification-tone.enum'
@@ -31,10 +31,10 @@ import { useRouteInfoStore } from '~/entities/route/model/useRouteInfoStore'
 import { useExploreRouteActions } from '~/features/explore/model/useExploreRouteActions'
 import { useExploreSearchSideeffect } from '~/features/explore/api/useExploreSearchSideeffect'
 import { useMapActions } from '~/shared/lib/map/useMapActions'
-import { useOverlayContext } from '~/widgets/map-shell/model/useOverlayContext'
-import { useFabGroups } from '~/widgets/map-shell/model/useFabGroups'
-import { useMapFeatureInit } from '~/widgets/map-shell/model/useMapFeatureInit'
-import { useRouteSelectionFlow } from '~/widgets/map-shell/model/useRouteSelectionFlow'
+import { useOverlayContext } from '~/widgets/map-page/model/useOverlayContext'
+import { useFabGroups } from '~/widgets/map-page/model/useFabGroups'
+import { useMapFeatureInit } from '~/widgets/map-page/model/useMapFeatureInit'
+import { useRouteSelectionFlow } from '~/widgets/map-page/model/useRouteSelectionFlow'
 
 definePageMeta({ ssr: false })
 useHead({ link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }] })
@@ -42,14 +42,24 @@ useHead({ link: [{ rel: 'stylesheet', href: '/lib/cesium/Widgets/widgets.css' }]
 // viewer 소유권은 CesiumController(useMapViewer)에 있다. useMapFeatureInit 이 onMounted 에서 등록한다.
 const { viewer } = useMapViewer()
 
-// NOTE 1. Store 선언
+// Phase 1. Store 선언
 const notification = useNotificationStore() // 알림
 const routeInfoStore = useRouteInfoStore() // 경로 정보
 const routeDrawStore = useRouteDrawStore() // 그리기
 
-// NOTE 2. Sideeffect 선언
-const routeInfoEffect = useRouteInfoSideeffect()
+// Phase 2. Sideeffect 선언
+const routeInfoEffect = useRouteInfoSideeffect() // facade onAfterSave 에서 사용
+const compareEffect = useRouteCompareSideeffect() // 경로 비교 모달
+// 헤더 버튼(베이스맵·2D/3D 토글·그래픽 품질)이 변경하는 store 상태를 viewer에 반영하는 공통 컨텍스트 sideeffect
+const runtimeConfig = useRuntimeConfig()
+useViewModeSideeffect()
+useGraphicQualitySideeffect()
+useBaseMapSideeffect({ vworldKey: runtimeConfig.public.vworldKey })
+// 탐색은 사이드패널 플러그인으로 분리됐지만, 선택 경로 ID는 store(useState) 기반 전역 상태라
+// 코어도 동일 인스턴스를 통해 오버레이 컨텍스트(EXPLORE_SELECTED)를 판별한다.
+const explore = useExploreSearchSideeffect()
 
+// Phase 3. Facade 선언
 // 경로 퍼싸드
 const facade = useRouteMapFacade({
     onAfterSave: async (routeId) => {
@@ -70,6 +80,7 @@ const {
     fetchRoutes
 } = facade
 
+// Phase 4. 지도 기능 초기화 (viewer 등록 · auth · 레이어)
 const features = useMapFeatureInit({
     drawing,
     routeDrawStore,
@@ -80,6 +91,7 @@ const features = useMapFeatureInit({
 const { authStore, authEffect } = features.auth
 const { facility, facilityEffect, elevation, gradient } = features.mapLayers
 
+// Phase 5. 네비게이션 (SlideOver · 탭 라우트)
 const slideOver = useSlideOverNav(activeNav)
 
 // nested route path(`/`·`/draw`·`/explore`)를 탭 mode·상태값의 단일 진실 소스로 삼는다.
@@ -92,19 +104,7 @@ const handleNavSelect = (nav: NavKeyValue) => {
     slideOver.select(nav)
 }
 
-const showDrawingHelpModal = ref(false)
-const compareEffect = useRouteCompareSideeffect()
-
-// 헤더 버튼(베이스맵·2D/3D 토글·그래픽 품질)이 변경하는 store 상태를 viewer에 반영하는 공통 컨텍스트 sideeffect
-const runtimeConfig = useRuntimeConfig()
-useViewModeSideeffect()
-useGraphicQualitySideeffect()
-useBaseMapSideeffect({ vworldKey: runtimeConfig.public.vworldKey })
-
-// 탐색은 사이드패널 플러그인으로 분리됐지만, 선택 경로 ID는 store(useState) 기반 전역 상태라
-// 코어도 동일 인스턴스를 통해 오버레이 컨텍스트(EXPLORE_SELECTED)를 판별한다.
-const explore = useExploreSearchSideeffect()
-
+// Phase 6. 오버레이 컨텍스트 (경로 의존 오버레이 UI 판별)
 const { overlayContext, showRouteInfoChip } = useOverlayContext({
     activeNav,
     sectionDraft: computed(() => drawing.sectionDraft),
@@ -114,6 +114,7 @@ const { overlayContext, showRouteInfoChip } = useOverlayContext({
     routeInfoEffect
 })
 
+// Phase 7. 경로 선택 플로우 (구간정보 · 단계 되돌리기)
 const flow = useRouteSelectionFlow({
     routeDrawStore,
     routeList,
@@ -125,6 +126,7 @@ const flow = useRouteSelectionFlow({
 const { sectionInfo, showStepBackConfirm, slideOverTitle, slideOverDescription, confirmStepBack } =
     flow
 
+// Phase 8. FAB 그룹 & 탐색 액션
 const { fabGroups, fabNearbyVisible } = useFabGroups({
     mapLayers: features.mapLayers,
     overlayContext,
@@ -149,6 +151,7 @@ useMapActions().registerExploreActions({
     importRoute: handleExploreImport
 })
 
+// Phase 9. 자식 panel context 주입
 // nested route 자식 panel(목록·그리기·탐색)에 facade·flow·auth·네비게이션 핸들을 내려준다.
 provide(MAP_PAGE_CONTEXT, {
     facade,
@@ -159,6 +162,7 @@ provide(MAP_PAGE_CONTEXT, {
     fetchRoutes
 })
 
+// Phase 10. 생명주기 & 이벤트 핸들러 (마운트 · 단축키 · watch)
 // 로그인 탭(AuthTab)은 path가 아닌 좌측 SlideOver 토글로 노출한다. 진입 시 폼을 초기화한다.
 const authTabRef = ref<InstanceType<typeof AuthTab> | null>(null)
 watch(
@@ -213,6 +217,8 @@ const handleRouteInfoSubmit = async (payload: { name: string; description: strin
     }
 }
 
+// 모바일에서 그리기 진입 시 그리기 안내 모달 노출
+const showDrawingHelpModal = ref(false)
 watch(
     () => drawing.isDrawingActive,
     (v) => {

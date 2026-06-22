@@ -1,49 +1,54 @@
 # D4. 화면·흐름
 
-Runnable 의 **화면 구조와 화면 간 이동**을 디자이너 관점에서 정리합니다. 거의 모든 화면이 하나의 `map-shell` 위에서 슬라이드오버·오버레이·푸터가 켜졌다 꺼지는 방식으로 동작하므로, "라우트가 바뀐다"기보다 "같은 지도 위 레이어가 바뀐다"로 이해하는 편이 정확합니다.
+Runnable 의 **화면 구조와 화면 간 이동**을 디자이너 관점에서 정리합니다. 거의 모든 화면이 하나의 `map-page` 위에서 슬라이드오버·오버레이·푸터가 켜졌다 꺼지는 방식으로 동작하므로, "라우트가 바뀐다"기보다 "같은 지도 위 레이어가 바뀐다"로 이해하는 편이 정확합니다.
 
 > 토큰·컴포넌트의 구체 값은 [D2-Design-Tokens](D2-Design-Tokens), [D3-Components](D3-Components) 를, 모션은 [D5-Iconography-and-Motion](D5-Iconography-and-Motion) 을 참고하세요. 이 페이지는 "어떤 화면이 언제 뜨고, 무엇과 동기화되는가"를 다룹니다.
 
-📷 TODO: 스크린샷 — map-shell 전체 레이아웃 (지도 + 사이드바 + 슬라이드오버 + 오버레이 + 푸터)
+📷 TODO: 스크린샷 — map-page 전체 레이아웃 (지도 + 사이드바 + 슬라이드오버 + 오버레이 + 푸터)
 
 ## D4.1 화면 지도 (Surface Map)
 
 Runnable 의 "화면"은 라우트 4개로 나뉘지만, 디자인상 의미 있는 표면은 **메인 지도 페이지** 하나와 **공유 뷰** 하나로 압축됩니다.
 
-| 라우트             | 파일                            | 성격                                                           |
-| ------------------ | ------------------------------- | -------------------------------------------------------------- |
-| `/`                | `app/pages/index.vue`           | 메인 제작 화면. map-shell + 슬라이드오버 4탭 + 오버레이 + 푸터 |
-| `/share/[routeId]` | `app/pages/share/[routeId].vue` | 인증 없는 공유 뷰. 지도 + 경로 메타 카드만                     |
-| `/admin`           | `app/pages/admin/index.vue`     | 관리자 대시보드 (본 페이지 범위 외)                            |
-| `/settings`        | `app/pages/settings.vue`        | 설정 (본 페이지 범위 외)                                       |
+| 라우트             | 파일                            | 성격                                                          |
+| ------------------ | ------------------------------- | ------------------------------------------------------------- |
+| `/`                | `app/pages/index.vue`           | 메인 제작 화면. map-page + 슬라이드오버 4탭 + 오버레이 + 푸터 |
+| `/share/[routeId]` | `app/pages/share/[routeId].vue` | 인증 없는 공유 뷰. 지도 + 경로 메타 카드만                    |
+| `/admin`           | `app/pages/admin/index.vue`     | 관리자 대시보드 (본 페이지 범위 외)                           |
+| `/settings`        | `app/pages/settings.vue`        | 설정 (본 페이지 범위 외)                                      |
 
 메인 화면의 거의 모든 상태 변화는 **라우트 이동 없이** 같은 페이지 안에서 일어납니다. 디자이너가 다뤄야 할 "흐름"은 곧 이 한 페이지 위에서 어떤 패널·오버레이가 켜지고 꺼지는가입니다.
 
-## D4.2 map-shell 레이아웃
+## D4.2 map-page 레이아웃
 
-`MapShell.vue`(`app/widgets/map-shell/ui/MapShell.vue`)는 화면 전체(`h-screen`)를 차지하는 단일 셸이며, **4개의 슬롯**으로 구성됩니다. 지도가 본문(`default`)이고 나머지는 그 위에 떠 있는 레이어입니다.
+화면 전체(`flex flex-col h-screen`)를 차지하는 셸은 **page(`app/pages/index.vue`)** 가 소유합니다. 상단 헤더(`MapSidebar`)·본문(`MapCanvas`)·좌측 슬라이드오버(`USlideover`)·모달·FAB 를 직접 배치하고, 지도 본문은 `MapCanvas` 가 담당하며 그 위에 footer·overlay 슬롯이 떠 있습니다.
 
 ```mermaid
 flowchart TB
-    subgraph Shell["MapShell (h-screen)"]
-        SB["#sidebar 슬롯<br/>MapSidebar (UHeader)"]
-        MAP["#default 슬롯<br/>Cesium 지도 (#map)"]
-        FT["#footer 슬롯<br/>MapFooter (좌표·카메라)"]
-        OV["#overlay 슬롯<br/>MapOverlays (chip·legend·popup)"]
+    subgraph Page["app/pages/index.vue (flex flex-col h-screen)"]
+        SB["MapSidebar (UHeader)<br/>상단 헤더"]
+        subgraph Canvas["main > MapCanvas"]
+            MAP["#map · Cesium 지도 (default 본체)"]
+            FT["#footer 슬롯<br/>MapFooter (좌표·카메라)"]
+            OV["#overlay 슬롯<br/>MapOverlays (chip·legend·popup)"]
+        end
+        SO["USlideover + NuxtPage<br/>좌측 비모달 패널"]
     end
-    SB --- MAP
+    SB --- Canvas
     MAP --- FT
     MAP --- OV
+    SB --- SO
 ```
 
-### D4.2.1 슬롯 책임
+### D4.2.1 구성 책임
 
-| 슬롯       | 컴포넌트                 | 위치·z-index                                        | 포인터 정책                 |
-| ---------- | ------------------------ | --------------------------------------------------- | --------------------------- |
-| `#sidebar` | `MapSidebar` (`UHeader`) | 상단 헤더, 자체 stacking context(`isolate`)         | 항상 클릭 가능              |
-| `#default` | Cesium `#map`            | 본문 전체                                           | 지도 인터랙션               |
-| `#footer`  | `MapFooter`              | 하단 절대 배치, `z-10`, `pointer-events-none`       | 정보 표시만 (클릭 통과)     |
-| `#overlay` | `MapOverlays`            | `absolute inset-0`, `z-10`, 부모는 통과·자식만 받음 | `[&>*]:pointer-events-auto` |
+| 구성            | 컴포넌트                        | 위치·z-index                                        | 포인터 정책                 |
+| --------------- | ------------------------------- | --------------------------------------------------- | --------------------------- |
+| 헤더            | `MapSidebar` (`UHeader`)        | 상단 헤더, 자체 stacking context(`isolate`)         | 항상 클릭 가능              |
+| 지도 본체       | `MapCanvas` 의 `#map` (default) | `main` 본문 전체                                    | 지도 인터랙션               |
+| `#footer` 슬롯  | `MapFooter`                     | 하단 절대 배치, `z-10`, `pointer-events-none`       | 정보 표시만 (클릭 통과)     |
+| `#overlay` 슬롯 | `MapOverlays`                   | `absolute inset-0`, `z-10`, 부모는 통과·자식만 받음 | `[&>*]:pointer-events-auto` |
+| 슬라이드오버    | `USlideover` + `<NuxtPage>`     | 좌측 비모달 패널 (page 소유)                        | 항상 클릭 가능              |
 
 > **포인터 통과 규칙** — 오버레이 컨테이너 자체는 `pointer-events-none` 으로 지도 조작을 가리지 않고, 그 안의 실제 UI 요소(`[&>*]`)만 `pointer-events-auto` 로 클릭을 받습니다. 디자인상 "오버레이는 지도를 덮지 않는다"는 원칙이 레이아웃 레벨에서 강제됩니다.
 
@@ -55,7 +60,7 @@ flowchart TB
 
 ## D4.3 슬라이드오버 — 4탭 흐름
 
-좌측 슬라이드오버(`SlideOverContent.vue`)는 `USlideover` 하나에 **탭별 콘텐츠를 라우팅**하는 셸입니다. 헤더 높이 아래(`top-(--ui-header-height)`)에서 열리고, 폭은 모바일 `75vw` / 데스크톱 `lg:max-w-sm` 입니다.
+좌측 슬라이드오버는 page(`app/pages/index.vue`)의 `USlideover` 하나가 **탭별 콘텐츠를 nested route(`<NuxtPage>`)로 라우팅**합니다 (`ListTab`·`DrawTab` 은 path, `AuthTab` 은 `v-if`). 헤더 높이 아래(`top-(--ui-header-height)`)에서 열리고, 폭은 모바일 `75vw` / 데스크톱 `lg:max-w-sm` 입니다.
 
 | `:modal` | `:overlay` | `:dismissible` |
 | -------- | ---------- | -------------- |
@@ -71,7 +76,7 @@ flowchart TB
 | `DRAW` ("그리기") | `DrawTab.vue`   | 구간 편집·GPX 임포트·구간 나누기                   |
 | `AUTH` ("로그인") | `AuthTab.vue`   | 로그인 / 내 계정                                   |
 
-`NavKey`(`app/widgets/map-shell/model/nav-key.ts`)는 라벨 자체를 키로 쓰는 한글 상수(`'목록' · '그리기' · '로그인'`)이며, Nav Rail 과 슬라이드오버가 같은 키를 공유합니다.
+`NavKey`(`app/widgets/map-page/model/nav-key.ts`)는 라벨 자체를 키로 쓰는 한글 상수(`'목록' · '그리기' · '로그인'`)이며, Nav Rail 과 슬라이드오버가 같은 키를 공유합니다.
 
 ### D4.3.2 탭 전환 규칙 — `useSlideOverNav`
 
@@ -211,7 +216,7 @@ flowchart LR
 
 ## D4.6 공유 화면 (`/share/[routeId]`)
 
-공유 뷰(`share/[routeId].vue`)는 메인과 **완전히 다른 표면**입니다 — map-shell·슬라이드오버·Nav Rail 없이, 어두운 배경(`bg-[#111]`) 위 전체 화면 지도에 경로만 렌더링합니다. 인증 없이 접근 가능한 읽기 전용 뷰입니다.
+공유 뷰(`share/[routeId].vue`)는 메인과 **완전히 다른 표면**입니다 — map-page·슬라이드오버·Nav Rail 없이, 어두운 배경(`bg-[#111]`) 위 전체 화면 지도에 경로만 렌더링합니다. 인증 없이 접근 가능한 읽기 전용 뷰입니다.
 
 | 상태 | 표시                                                           |
 | ---- | -------------------------------------------------------------- |
@@ -248,7 +253,7 @@ flowchart LR
 | 관리자 진입                  | 메뉴 "관리자"               |   ✓ `/admin`    | —                                                  |
 | 공유 뷰                      | 외부 링크                   | ✓ `/share/[id]` | 독립 표면 (동기화 없음)                            |
 
-핵심은 **거의 모든 흐름이 라우트 이동 없이 같은 map-shell 위에서 컨텍스트로 처리**된다는 점입니다. 디자이너는 "어떤 페이지로 가는가"보다 "어떤 컨텍스트가 켜지고, 그에 따라 어떤 오버레이가 동기화되는가"를 기준으로 화면을 설계해야 합니다.
+핵심은 **거의 모든 흐름이 라우트 이동 없이 같은 map-page 위에서 컨텍스트로 처리**된다는 점입니다. 디자이너는 "어떤 페이지로 가는가"보다 "어떤 컨텍스트가 켜지고, 그에 따라 어떤 오버레이가 동기화되는가"를 기준으로 화면을 설계해야 합니다.
 
 ## D4.9 관련 페이지
 

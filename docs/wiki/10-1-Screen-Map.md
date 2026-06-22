@@ -45,7 +45,7 @@
 
 - **상단 영역** — Cesium viewer 가 전체 viewport 를 차지
 - **좌측 MapSidebar** — 페이지 탭(그리기 / 탐색 / 인증 / 설정 진입)
-- **우측 SlideOver** — `useSlideOverNav(activeNav)` 로 활성 nav 에 따라 컨텐츠 스위치 (`SlideOverContent`)
+- **좌측 SlideOver** — page(`index.vue`)의 `USlideover` 가 nested route(`<NuxtPage>`)로 탭 분기, `useSlideOverNav(activeNav)` 로 노출 제어
 - **상단 오버레이 (chip)** — 플러그인 chip 8방향 슬롯 (sidewalk 등). manifest 의 `position` 으로 배치
 - **하단 FloatingActionMenu** — `useFabGroups`. 그리기/저장/비교/경로정보 등 컨텍스트별 칩 노출 (`useOverlayContext`)
 - **하단 Map Footer** — 거리·시간·구간 요약 + 경사도 토글 + 고도 차트(elevationChart)
@@ -53,18 +53,18 @@
 
 ## 4. 컴포넌트 구성
 
-| 컴포넌트                                          | 역할                                        |
-| ------------------------------------------------- | ------------------------------------------- |
-| `widgets/map-shell/ui/MapShell.vue`               | Cesium viewer 마운트 + viewer ref 제공      |
-| `widgets/map-shell/ui/MapSidebar.vue`             | 좌측 nav 탭                                 |
-| `widgets/map-shell/ui/MapFooter.vue`              | 하단 거리·구간·고도 차트                    |
-| `widgets/map-shell/ui/MapOverlays.vue`            | chip 슬롯 호스트 — `PluginChipLayer` 마운트 |
-| `widgets/map-shell/ui/SlideOverContent.vue`       | 우측 SlideOver 본문 — nav 별 컨텐츠 분기    |
-| `shared/ui/FloatingActionMenu.vue`                | 컨텍스트 의존 액션 칩 그룹                  |
-| `features/draw-route/ui/RouteSaveModal.vue`       | 저장 모달 (제목·설명·공개 여부 + GPX)       |
-| `features/route-compare/ui/RouteCompareModal.vue` | 두 경로 비교 모달                           |
-| `plugins-ext/PluginSurfaceHost.vue`               | sidepanel/dashboard/popup 표면 슬롯 호스트  |
-| `plugins-ext/PluginLauncher.vue`                  | sidepanel 등 표면 열기 트리거               |
+| 컴포넌트                                          | 역할                                                       |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| `widgets/map-page/ui/MapCanvas.vue`               | Cesium 지도 렌더 표면(`#map`) + footer·overlay 슬롯 호스트 |
+| `widgets/map-page/ui/MapSidebar.vue`              | 좌측 nav 탭                                                |
+| `widgets/map-page/ui/MapFooter.vue`               | 하단 거리·구간·고도 차트                                   |
+| `widgets/map-page/ui/MapOverlays.vue`             | chip 슬롯 호스트 — `PluginChipLayer` 마운트                |
+| `pages/index.vue` (`USlideover`)                  | 좌측 SlideOver 셸 — nested route(`<NuxtPage>`)로 탭 분기   |
+| `shared/ui/FloatingActionMenu.vue`                | 컨텍스트 의존 액션 칩 그룹                                 |
+| `features/draw-route/ui/RouteSaveModal.vue`       | 저장 모달 (제목·설명·공개 여부 + GPX)                      |
+| `features/route-compare/ui/RouteCompareModal.vue` | 두 경로 비교 모달                                          |
+| `plugins-ext/PluginSurfaceHost.vue`               | sidepanel/dashboard/popup 표면 슬롯 호스트                 |
+| `plugins-ext/PluginLauncher.vue`                  | sidepanel 등 표면 열기 트리거                              |
 
 ## 5. 인터랙션
 
@@ -134,7 +134,7 @@
 ## 8. 관련 코드
 
 - 페이지 진입: `app/pages/index.vue`
-- 셸: `app/widgets/map-shell/ui/*`, `app/widgets/map-shell/model/*`
+- 셸: `app/widgets/map-page/ui/*`, `app/widgets/map-page/model/*`
 - 그리기: `app/features/draw-route/**`
 - 비교: `app/features/route-compare/**`
 - 경로정보: `app/features/route-info/**`, `app/entities/route/model/useRouteInfoStore.ts`

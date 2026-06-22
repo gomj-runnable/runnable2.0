@@ -19,7 +19,7 @@ description: This skill should be used when the user asks to "러닝 경로 서�
 | 순수 계산 | 각 슬라이스의 `lib/` |
 | 부수 효과 (API·브라우저·지도) | 각 슬라이스의 `api/` |
 | 상태 관리 | 각 슬라이스의 `model/` |
-| Facade (다수 슬라이스 조합) | `app/widgets/map-shell/model/useRouteMapFacade.ts` |
+| Facade (다수 슬라이스 조합) | `app/widgets/map-page/model/useRouteMapFacade.ts` |
 | 지도 초기화·런타임 | `app/shared/lib/map/` |
 | CSS 토큰 | `app/assets/css/base/primitive.css` · `semantic.css` |
 | 컴포넌트 외부 CSS | `app/assets/css/components/**` |
