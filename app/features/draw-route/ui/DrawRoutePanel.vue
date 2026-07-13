@@ -74,7 +74,9 @@ const POI_ICON: Record<string, string> = {
 
 <template>
     <div class="flex flex-col gap-3 w-full">
-        <div class="map-section-label">경로 그리기</div>
+        <div class="px-1 text-xs font-semibold leading-[1.3] tracking-[0.06em] text-muted">
+            경로 그리기
+        </div>
 
         <div class="grid grid-cols-2 gap-2.5">
             <UButton
@@ -111,7 +113,9 @@ const POI_ICON: Record<string, string> = {
             @click="gpxFileInput?.click()"
         />
 
-        <div class="map-section-label">구간 목록</div>
+        <div class="px-1 text-xs font-semibold leading-[1.3] tracking-[0.06em] text-muted">
+            구간 목록
+        </div>
 
         <div class="flex flex-col gap-2.5">
             <div

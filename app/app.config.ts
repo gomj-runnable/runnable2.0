@@ -12,8 +12,8 @@
 export default defineAppConfig({
     ui: {
         colors: {
-            primary: 'green',
-            neutral: 'slate'
+            primary: 'zinc',
+            neutral: 'zinc'
         },
         slideover: {
             slots: {

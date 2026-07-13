@@ -87,7 +87,7 @@ const elevationRange = computed(() => {
         <!-- 로딩 -->
         <div
             v-if="isLoading"
-            class="absolute inset-0 flex items-center justify-center text-base text-[var(--color-text-muted,#888)] z-10"
+            class="absolute inset-0 flex items-center justify-center text-base text-muted z-10"
         >
             경로를 불러오는 중...
         </div>

@@ -42,9 +42,11 @@ function toggleExpand(routeId: string) {
 
 <template>
     <div class="flex flex-col gap-3 w-full">
-        <div class="map-section-label">저장된 경로</div>
+        <div class="px-1 text-xs font-semibold leading-[1.3] tracking-[0.06em] text-muted">
+            저장된 경로
+        </div>
 
-        <div v-if="routes.length === 0" class="py-4 text-sm text-text-muted text-center">
+        <div v-if="routes.length === 0" class="py-4 text-sm text-muted text-center">
             저장된 경로가 없습니다
         </div>
 

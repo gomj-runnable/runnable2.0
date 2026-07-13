@@ -33,8 +33,8 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
                 {{ difficultyLabel }}
             </span>
             <template #content>
-                <p class="text-xs font-semibold text-text-base mb-1.5">난이도 판정 기준</p>
-                <table class="border-collapse text-xs text-text-muted">
+                <p class="text-xs font-semibold text-highlighted mb-1.5">난이도 판정 기준</p>
+                <table class="border-collapse text-xs text-muted">
                     <thead>
                         <tr>
                             <th class="px-1.5 py-0.5 text-left" />
@@ -91,7 +91,7 @@ const difficultyColor = computed(() => props.difficulty?.color ?? null)
                         </tr>
                     </tbody>
                 </table>
-                <p class="text-xs text-meta mt-1.5 italic">세 기준 중 가장 높은 등급 적용</p>
+                <p class="text-xs text-dimmed mt-1.5 italic">세 기준 중 가장 높은 등급 적용</p>
             </template>
         </UTooltip>
     </div>

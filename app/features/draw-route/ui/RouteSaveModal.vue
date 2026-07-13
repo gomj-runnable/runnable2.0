@@ -38,43 +38,40 @@ defineEmits<{
         @update:open="$emit('update:open', $event)"
     >
         <template #body>
-            <div class="fields-root flex flex-col gap-3">
-                <label class="map-form-field">
-                    <span class="map-form-label">제목</span>
+            <div class="flex flex-col gap-3">
+                <UFormField label="제목">
                     <UInput
+                        class="w-full"
                         :model-value="title"
                         placeholder="경로 제목"
                         @update:model-value="$emit('update:title', $event)"
                     />
-                </label>
+                </UFormField>
 
-                <label class="map-form-field">
-                    <span class="map-form-label">설명</span>
-                    <textarea
-                        :value="description"
-                        rows="4"
-                        class="map-form-control"
+                <UFormField label="설명">
+                    <UTextarea
+                        class="w-full"
+                        :model-value="description"
+                        :rows="4"
                         placeholder="경로 설명"
-                        @input="
-                            $emit(
-                                'update:description',
-                                ($event.target as HTMLTextAreaElement).value
-                            )
-                        "
+                        @update:model-value="$emit('update:description', $event)"
                     />
-                </label>
+                </UFormField>
 
-                <label class="map-form-field">
-                    <span class="map-form-label">거리</span>
-                    <UInput :model-value="formatDistance(distance)" placeholder="0.00" disabled />
-                </label>
+                <UFormField label="거리">
+                    <UInput
+                        class="w-full"
+                        :model-value="formatDistance(distance)"
+                        placeholder="0.00"
+                        disabled
+                    />
+                </UFormField>
 
-                <div v-if="districts?.length" class="map-form-field">
-                    <span class="map-form-label">행정구역</span>
-                    <div class="text-sm text-(--ui-text-muted) leading-[1.5]">
+                <UFormField v-if="districts?.length" label="행정구역">
+                    <div class="text-sm text-muted leading-normal">
                         {{ districts.join(', ') }}
                     </div>
-                </div>
+                </UFormField>
             </div>
         </template>
 
@@ -89,20 +86,3 @@ defineEmits<{
         </template>
     </UModal>
 </template>
-
-<style scoped>
-.fields-root {
-    --map-form-label-color: var(--ui-text-muted);
-    --map-form-bg: var(--ui-bg-elevated);
-    --map-form-color: var(--ui-text-highlighted);
-    --map-form-font-size: 0.875rem;
-    --map-form-line-height: 1.5;
-    --map-form-padding: 0.75rem;
-    --map-form-resize: vertical;
-    --map-form-placeholder: var(--ui-text-dimmed);
-    --map-form-focus-border: var(--ui-border-accented);
-    --map-form-focus-bg: var(--ui-bg-elevated);
-    --map-form-disabled-color: var(--ui-text-dimmed);
-    --map-form-disabled-bg: var(--ui-bg-accented);
-}
-</style>

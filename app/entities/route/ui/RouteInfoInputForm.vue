@@ -29,7 +29,7 @@ const handleSubmit = () => {
     <UCard class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 min-w-[260px]">
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between items-center">
-                <span class="text-sm font-semibold text-text-base">경로정보 남기기</span>
+                <span class="text-sm font-semibold text-highlighted">경로정보 남기기</span>
                 <UButton
                     icon="i-lucide-x"
                     color="neutral"
@@ -38,7 +38,7 @@ const handleSubmit = () => {
                     @click="emit('cancel')"
                 />
             </div>
-            <div class="text-[0.6875rem] text-meta">
+            <div class="text-[0.6875rem] text-dimmed">
                 {{ props.lng.toFixed(5) }}, {{ props.lat.toFixed(5) }}
             </div>
             <UInput v-model="name" placeholder="장소명" :maxlength="100" size="sm" />
